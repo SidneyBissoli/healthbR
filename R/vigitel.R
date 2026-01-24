@@ -101,8 +101,9 @@ vigitel_parse_years <- function(year) {
   # check for unavailable years
   unavailable <- years[!years %in% available]
   if (length(unavailable) > 0) {
+    years_str <- toString(unavailable)
     cli::cli_warn(
-      "Year{?s} not available and will be skipped: {.val {unavailable}}"
+      "Year(s) not available and will be skipped: {years_str}"
     )
   }
 
