@@ -1,7 +1,7 @@
 # healthbR <img src="man/figures/logo.png" align="right" height="139" />
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/healthbR)](https://CRAN.R-project.org/package=healthbR)
-[![R-CMD-check](https://github.com/yourusername/healthbR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yourusername/healthbR/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/SidneyBissoli/healthbR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SidneyBissoli/healthbR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 ## Overview
@@ -14,7 +14,7 @@ You can install the development version of healthbR from GitHub:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("yourusername/healthbR")
+remotes::install_github("SidneyBissoli/healthbR")
 ```
 
 ## Available Data Sources
@@ -99,7 +99,7 @@ If you use healthbR in your research, please cite:
 @software{healthbR,
   author = {Silva, Sidney},
   title = {healthbR: Access Brazilian Public Health Data},
-  url = {https://github.com/yourusername/healthbR},
+  url = {https://github.com/SidneyBissoli/healthbR},
   year = {2026}
 }
 ```

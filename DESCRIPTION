@@ -28,6 +28,6 @@ Suggests:
     rmarkdown
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: https://github.com/yourusername/healthbR
-BugReports: https://github.com/yourusername/healthbR/issues
+URL: https://github.com/SidneyBissoli/healthbR
+BugReports: https://github.com/SidneyBissoli/healthbR/issues
 LazyData: true

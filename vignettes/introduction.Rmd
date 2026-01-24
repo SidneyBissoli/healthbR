@@ -23,7 +23,7 @@ The **healthbR** package provides easy access to Brazilian public health data fr
 ```{r}
 # Install from GitHub
 # install.packages("remotes")
-remotes::install_github("yourusername/healthbR")
+remotes::install_github("SidneyBissoli/healthbR")
 ```
 
 ## Quick Start
@@ -118,7 +118,7 @@ options(healthbR.cache = FALSE)
 If you encounter issues or have questions:
 
 1. Check the function documentation: `?vigitel_data`
-2. Open an issue on GitHub: https://github.com/yourusername/healthbR/issues
+2. Open an issue on GitHub: https://github.com/SidneyBissoli/healthbR/issues
 
 ## Citation
 
