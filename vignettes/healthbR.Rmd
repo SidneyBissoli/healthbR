@@ -1,0 +1,200 @@
+---
+title: "Introduction to healthbR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to healthbR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Overview
+
+The healthbR package provides easy access to Brazilian public health survey data directly from R. It downloads, caches, and processes data from official Ministry of Health sources, returning clean, analysis-ready tibbles that follow tidyverse conventions.
+
+Currently, healthbR supports **VIGITEL** (Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico), a telephone-based survey that monitors risk and protective factors for chronic diseases in Brazilian state capitals.
+
+## Getting started
+
+```{r setup}
+library(healthbR)
+library(dplyr)
+```
+
+### Check available data
+
+Before downloading data, you can check which years are available:
+
+```{r}
+vigitel_years()
+```
+
+### Download and load data
+
+The main function for accessing VIGITEL data is `vigitel_data()`:
+
+```{r}
+# load a single year
+df <- vigitel_data(2023)
+
+# load multiple years
+df <- vigitel_data(2021:2023)
+```
+
+Data is automatically cached locally, so subsequent calls for the same year load instantly without re-downloading.
+
+## Understanding the data
+
+### Variable dictionary
+
+VIGITEL uses coded variable names (q6, q8, etc.). Use the dictionary to understand what each variable represents:
+
+```{r}
+dict <- vigitel_dictionary()
+dict
+```
+
+
+You can search for specific variables:
+
+```{r}
+# find weight-related variables
+dict |>
+  filter(stringr::str_detect(variable_name, "peso"))
+
+# find diabetes-related variables
+dict |>
+  filter(stringr::str_detect(variable_name, "diab"))
+```
+
+### List variables for a specific year
+
+Variables may change between survey years. Check which variables are available:
+ 
+```{r}
+vigitel_variables(2023)
+```
+
+## Survey analysis
+
+VIGITEL uses complex survey sampling with post-stratification weights. For proper statistical inference, always use the `pesorake` weight variable.
+
+### Using srvyr for weighted analysis
+
+```{r}
+library(srvyr)
+
+# create survey design object
+vigitel_svy <- df |>
+  as_survey_design(weights = pesorake)
+
+# calculate weighted prevalence of diabetes by city
+vigitel_svy |>
+  group_by(cidade) |>
+  summarize(
+    prevalence = survey_mean(diab == 1, na.rm = TRUE),
+    n = unweighted(n())
+  )
+```
+
+### Key variables
+
+Some commonly used variables in VIGITEL:
+ 
+| Variable | Description |
+|----------|-------------|
+| `cidade` | City code (1-27 for state capitals) |
+| `q6` | Sex |
+| `q8_anos` | Age in years |
+| `pesorake` | Post-stratification weight |
+| `diab` | Diabetes diagnosis |
+| `hart` | Hypertension diagnosis |
+| `fumante` | Current smoker |
+| `imc` | Body Mass Index |
+| `obesid` | Obesity indicator |
+
+Consult `vigitel_dictionary()` for the complete list.
+
+## Performance optimization
+
+healthbR offers three strategies for working with large datasets efficiently.
+
+### 1
+. Parquet conversion
+
+Convert Excel files to Parquet format for dramatically faster loading (10-20x improvement):
+
+```{r}
+# one-time conversion
+vigitel_convert_to_parquet(2015:2023)
+
+# subsequent loads use parquet automatically
+df <- vigitel_data(2015:2023)
+```
+
+### 2. Parallel downloads
+
+When downloading multiple years, healthbR automatically uses parallel processing if the `furrr` package is available:
+
+```{r}
+# downloads happen in parallel (2-4 workers)
+df <- vigitel_data(2015:2023)
+```
+
+### 3. Lazy evaluation with Arrow
+
+For very large datasets, use lazy evaluation to filter and select data before loading into memory:
+
+```{r}
+# returns Arrow Dataset (not loaded into RAM)
+df_lazy <- vigitel_data(2015:2023, lazy = TRUE)
+
+# operations are executed lazily
+result <- df_lazy |>
+  filter(cidade == 1, q8_anos >= 18) |>
+  select(q6, q8_anos, pesorake, diab, hart, imc) |>
+  collect()  
+# only now data is loaded
+```
+
+This approach is especially useful when you only need a subset of the data.
+
+## Workflow example
+
+Here's a complete workflow for analyzing diabetes prevalence:
+
+```{r}
+library(healthbR)
+library(dplyr)
+library(srvyr)
+
+# 1. load data
+df <- vigitel_data(2023)
+
+# 2. create survey design
+svy <- df |>
+  as_survey_design(weights = pesorake)
+
+# 3. calculate prevalence by sex
+diabetes_by_sex <- svy |>
+  group_by(q6) |>
+  summarize(
+    prevalence = survey_mean(diab == 1, na.rm = TRUE, vartype = "ci"),
+    n = unweighted(n())
+  )
+
+diabetes_by_sex
+```
+
+## Additional resources
+
+- [VIGITEL official page](https://www.gov.br/saude/pt-br/composicao/svsa/vigilancia-de-doencas-cronicas-nao-transmissiveis/vigitel)
+- [VIGITEL methodology](https://svs.aids.gov.br/download/Vigitel/)
+- [srvyr package documentation](https://cran.r-project.org/package=srvyr)
