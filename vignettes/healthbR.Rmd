@@ -195,6 +195,6 @@ diabetes_by_sex
 
 ## Additional resources
 
-- [VIGITEL official page](https://www.gov.br/saude/pt-br/composicao/svsa/vigilancia-de-doencas-cronicas-nao-transmissiveis/vigitel)
+- [VIGITEL official page](https://www.gov.br/saude/pt-br/composicao/svsa/inqueritos-de-saude/vigitel)
 - [VIGITEL methodology](https://svs.aids.gov.br/download/Vigitel/)
 - [srvyr package documentation](https://cran.r-project.org/package=srvyr)
