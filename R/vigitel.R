@@ -317,9 +317,11 @@ vigitel_data_single <- function(year, vars = NULL, force_download = FALSE, lazy 
 #' converted to Parquet format. Subsequent loads read directly from the
 #' Parquet file, which is significantly faster.
 #'
-#' For parallel downloads, the function uses the \code{furrr} package with
-#' \code{future::multisession}. The number of workers is automatically set
-#' based on available CPU cores.
+#' For parallel downloads, the function uses the \code{furrr} and \code{future}
+#' packages if installed. Install them with \code{install.packages(c("furrr", "future"))}
+#' to enable parallel processing. The number of workers is automatically set
+#' based on available CPU cores. If these packages are not installed, processing
+#' falls back to sequential mode.
 #'
 #' When \code{lazy = TRUE}, the function returns an Arrow Dataset that supports
 #' dplyr operations (filter, select, mutate, etc.) without loading data into
@@ -419,14 +421,19 @@ vigitel_data <- function(year, vars = NULL, force_download = FALSE, parallel = T
   # multiple years - eager loading
   cli::cli_alert_info("Processing {length(years)} years: {.val {years}}")
 
-  # check if package is installed (parallel requires installed package)
-  pkg_installed <- requireNamespace("healthbR", quietly = TRUE)
 
-  # use parallel only if requested, package is installed, and multiple years
-  use_parallel <- parallel && pkg_installed && length(years) > 1
+  # check if parallel packages are available
 
-  if (parallel && !pkg_installed) {
-    cli::cli_alert_info("Using sequential processing (install package for parallel)")
+  has_parallel_pkgs <- requireNamespace("furrr", quietly = TRUE) &&
+    requireNamespace("future", quietly = TRUE)
+
+  # use parallel only if requested, packages available, and multiple years
+  use_parallel <- parallel && has_parallel_pkgs && length(years) > 1
+
+  if (parallel && !has_parallel_pkgs) {
+    cli::cli_alert_info(
+      "Install {.pkg furrr} and {.pkg future} for parallel processing"
+    )
   }
 
   if (use_parallel) {
@@ -440,8 +447,8 @@ vigitel_data <- function(year, vars = NULL, force_download = FALSE, parallel = T
     # process in parallel (year column already in parquet files)
     df_list <- furrr::future_map(
       years,
-      \(y) healthbR:::vigitel_data_single(y, vars = vars, force_download = FALSE),
-      .options = furrr::furrr_options(seed = TRUE, packages = "healthbR"),
+      \(y) vigitel_data_single(y, vars = vars, force_download = FALSE),
+      .options = furrr::furrr_options(seed = TRUE),
       .progress = TRUE
     )
   } else {
@@ -523,7 +530,7 @@ vigitel_dictionary <- function(force_download = FALSE) {
 
   # convert variable_name column to machine-readable format (matching the data)
   if ("variable_name" %in% names(df)) {
-    df <- dplyr::mutate(df, variable_name = janitor::make_clean_names(variable_name))
+    df <- dplyr::mutate(df, variable_name = janitor::make_clean_names(.data$variable_name))
   }
 
   tibble::as_tibble(df)

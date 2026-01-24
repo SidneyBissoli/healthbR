@@ -7,7 +7,5 @@
 #' @importFrom rlang .data
 #' @importFrom purrr map map_dfr
 #' @importFrom tibble tibble as_tibble
-#' @importFrom furrr future_map furrr_options
-#' @importFrom future plan multisession availableCores
 ## usethis namespace: end
 NULL

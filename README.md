@@ -105,10 +105,13 @@ df <- vigitel_data(2020:2023)
 
 ### 2. Parallel downloads
 
-Download multiple years simultaneously:
+Download multiple years simultaneously (requires optional packages):
 
 ```r
-# uses furrr for parallel processing (2-4 workers recommended)
+# install optional packages for parallel processing
+install.packages(c("furrr", "future"))
+
+# uses furrr for parallel processing (2-4 workers)
 df <- vigitel_data(2015:2023)
 ```
 

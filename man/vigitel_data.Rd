@@ -52,9 +52,11 @@ On first access, data is downloaded from the Ministry of Health and
 converted to Parquet format. Subsequent loads read directly from the
 Parquet file, which is significantly faster.
 
-For parallel downloads, the function uses the \code{furrr} package with
-\code{future::multisession}. The number of workers is automatically set
-based on available CPU cores.
+For parallel downloads, the function uses the \code{furrr} and \code{future}
+packages if installed. Install them with \code{install.packages(c("furrr", "future"))}
+to enable parallel processing. The number of workers is automatically set
+based on available CPU cores. If these packages are not installed, processing
+falls back to sequential mode.
 
 When \code{lazy = TRUE}, the function returns an Arrow Dataset that supports
 dplyr operations (filter, select, mutate, etc.) without loading data into
