@@ -1,285 +1,675 @@
-#' VIGITEL Data Functions
-#'
-#' Functions to access data from VIGITEL (Vigilância de Fatores de Risco e
-#' Proteção para Doenças Crônicas por Inquérito Telefônico).
-#'
-#' @name vigitel
-NULL
+# vigitel functions for healthbR package
+# functions to download and process VIGITEL survey data
 
-# Internal data: available years
-.vigitel_available_years <- function() {
-
-  2006:2023
-}
-
-#' List Available VIGITEL Years
+#' List available VIGITEL survey years
 #'
-#' Returns a vector of years for which VIGITEL data is available.
+#' Returns a vector of years for which VIGITEL microdata is available
+#' for download from the Ministry of Health website.
 #'
-#' @return An integer vector of available years.
+#' @return An integer vector of available years
 #'
 #' @export
 #'
 #' @examples
 #' vigitel_years()
 vigitel_years <- function() {
- .vigitel_available_years()
+  # years available at https://svs.aids.gov.br/download/Vigitel/
+  c(2006L:2021L, 2023L)
 }
 
-#' List VIGITEL Variables
+#' Get VIGITEL base URL
 #'
-#' Returns a tibble with available variables for a given year or all years.
+#' @return Character string with base URL
+#' @keywords internal
+vigitel_base_url <- function() {
+"https://svs.aids.gov.br/download/Vigitel/"
+}
+
+#' Build VIGITEL file URL for a specific year
 #'
-#' @param year Integer. The year to list variables for. If NULL (default),
-#'   returns variables available across all years.
+#' @param year Integer year
+#' @return Character string with file URL
+#' @keywords internal
+vigitel_file_url <- function(year) {
+  year <- as.integer(year)
+
+  if (!year %in% vigitel_years()) {
+    cli::cli_abort(
+      "Year {year} is not available. Use {.fn vigitel_years} to see available years."
+    )
+  }
+
+  # 2023 uses xlsx format, others use xls
+  ext <- if (year == 2023L) "xlsx" else "xls"
+  filename <- str_c("Vigitel-", year, "-peso-rake.", ext)
+
+  str_c(vigitel_base_url(), filename)
+}
+
+#' Get VIGITEL cache directory
 #'
-#' @return A tibble with columns:
-#'   \itemize{
-#'     \item \code{variable}: Variable code
-#'     \item \code{label}: Variable label in Portuguese
-#'     \item \code{label_en}: Variable label in English
-#'     \item \code{type}: Variable type (numeric, categorical, etc.)
-#'     \item \code{year_start}: First year variable appears
-#'     \item \code{year_end}: Last year variable appears
-#'   }
+#' @return Path to cache directory
+#' @keywords internal
+vigitel_cache_dir <- function() {
+  cache_dir <- tools::R_user_dir("healthbR", which = "cache")
+  vigitel_dir <- file.path(cache_dir, "vigitel")
+
+  if (!dir.exists(vigitel_dir)) {
+    dir.create(vigitel_dir, recursive = TRUE)
+  }
+
+  vigitel_dir
+}
+
+#' Get path to Parquet file for a specific year
+#'
+#' @param year Integer year
+#' @return Path to parquet file
+#' @keywords internal
+vigitel_parquet_path <- function(year) {
+  file.path(vigitel_cache_dir(), str_c("vigitel_", year, ".parquet"))
+}
+
+#' Get path to Excel file for a specific year
+#'
+#' @param year Integer year
+#' @return Path to excel file
+#' @keywords internal
+vigitel_excel_path <- function(year) {
+  ext <- if (year == 2023L) "xlsx" else "xls"
+  file.path(vigitel_cache_dir(), str_c("vigitel_", year, ".", ext))
+}
+
+#' Parse year argument
+#'
+#' Converts various year input formats to integer vector.
+#'
+#' @param year Year specification (integer, character, vector, or "all")
+#' @return Integer vector of years
+#' @keywords internal
+vigitel_parse_years <- function(year) {
+  available <- vigitel_years()
+
+  # handle "all"
+  if (length(year) == 1 && is.character(year) && tolower(year) == "all") {
+    return(available)
+  }
+
+  # convert to integer
+  years <- as.integer(year)
+
+  # check for unavailable years
+  unavailable <- years[!years %in% available]
+  if (length(unavailable) > 0) {
+    cli::cli_warn(
+      "Year{?s} not available and will be skipped: {.val {unavailable}}"
+    )
+  }
+
+  # keep only available years
+  years <- years[years %in% available]
+
+  if (length(years) == 0) {
+    cli::cli_abort(
+      "No valid years provided. Use {.fn vigitel_years} to see available years."
+    )
+  }
+
+  unique(years)
+}
+
+#' Download VIGITEL microdata for a specific year
+#'
+#' Downloads the VIGITEL survey microdata file from the Ministry of Health
+#' website. Files are cached locally to avoid repeated downloads.
+#'
+#' @param year Integer. Year of the survey (use \code{vigitel_years()} to see
+#'   available years).
+#' @param force Logical. If TRUE, re-download even if file exists in cache.
+#'   Default is FALSE.
+#'
+#' @return Path to the downloaded file (invisibly)
 #'
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # List all variables
-#' vigitel_variables()
+#' # download 2023 data
+#' vigitel_download(2023)
 #'
-#' # List variables for a specific year
-#' vigitel_variables(year = 2023)
+#' # force re-download
+#' vigitel_download(2023, force = TRUE)
 #' }
-vigitel_variables <- function(year = NULL) {
+vigitel_download <- function(year, force = FALSE) {
+  year <- as.integer(year)
+  url <- vigitel_file_url(year)
+  destfile <- vigitel_excel_path(year)
 
-  # Validate year if provided
-
-if (!is.null(year)) {
-    .validate_vigitel_year(year)
+  if (file.exists(destfile) && !force) {
+    cli::cli_alert_info("Using cached file: {.file {destfile}}")
+    return(invisible(destfile))
   }
 
-  # Get variables metadata
-  vars <- .get_vigitel_variables_metadata()
+  cli::cli_alert_info("Downloading VIGITEL {year} from {.url {url}}")
 
-  # Filter by year if specified
-  if (!is.null(year)) {
-    vars <- vars |>
-      dplyr::filter(
-        .data$year_start <= year,
-        .data$year_end >= year
+  tryCatch(
+    {
+      curl::curl_download(
+        url = url,
+        destfile = destfile,
+        quiet = FALSE
       )
-  }
 
-  vars
+      cli::cli_alert_success("Downloaded to {.file {destfile}}")
+      invisible(destfile)
+    },
+    error = function(e) {
+      if (file.exists(destfile)) file.remove(destfile)
+      cli::cli_abort("Download failed: {e$message}")
+    }
+  )
 }
 
-#' Get VIGITEL Dictionary
+#' Convert Excel file to Parquet format
 #'
-#' Returns the data dictionary for VIGITEL variables.
+#' @param year Integer year
+#' @param force Logical. If TRUE, reconvert even if parquet exists.
+#' @return Path to parquet file (invisibly)
+#' @keywords internal
+vigitel_convert_to_parquet <- function(year, force = FALSE) {
+  year <- as.integer(year)
+  parquet_path <- vigitel_parquet_path(year)
+  excel_path <- vigitel_excel_path(year)
+
+  # return if parquet already exists
+  if (file.exists(parquet_path) && !force) {
+    return(invisible(parquet_path))
+  }
+
+  # ensure excel file exists
+  if (!file.exists(excel_path)) {
+    vigitel_download(year)
+  }
+
+  cli::cli_alert_info("Converting {year} to Parquet format...")
+
+  # read excel
+  df <- readxl::read_excel(excel_path, col_types = "text")
+
+  # clean column names
+  df <- janitor::clean_names(df)
+
+  # convert numeric columns
+  df <- df |>
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::where(\(x) all(grepl("^-?\\d+\\.?\\d*$", x, perl = TRUE) | is.na(x))),
+        as.numeric
+      )
+    )
+
+  # add year column (enables filtering by year in lazy mode)
+  df <- df |>
+    dplyr::mutate(year = year) |>
+    dplyr::relocate(year)
+
+  # write parquet
+  arrow::write_parquet(df, parquet_path)
+
+  # report size reduction
+  excel_size <- file.size(excel_path) / 1024^2
+  parquet_size <- file.size(parquet_path) / 1024^2
+
+  cli::cli_alert_success(
+    "Converted {year}: {.file {basename(parquet_path)}} ({round(parquet_size, 1)}MB vs {round(excel_size, 1)}MB Excel)"
+  )
+
+  invisible(parquet_path)
+}
+
+#' Load single year of VIGITEL data
 #'
-#' @param year Integer. If NULL (default), lists all available dictionaries.
-#'   If specified, returns the dictionary for that year.
-#' @param variable Character. Optional. If specified along with year, returns
-#'   the dictionary entry for that specific variable.
+#' @param year Integer year
+#' @param vars Character vector of variables or NULL
+#' @param force_download Logical
+#' @param lazy Logical. If TRUE, return Arrow object for lazy evaluation.
+#' @return A tibble or Arrow Table (if lazy = TRUE)
+#' @keywords internal
+vigitel_data_single <- function(year, vars = NULL, force_download = FALSE, lazy = FALSE) {
+  year <- as.integer(year)
+
+  # ensure parquet exists (downloads and converts if needed)
+  if (force_download) {
+    vigitel_download(year, force = TRUE)
+  }
+
+  parquet_path <- vigitel_parquet_path(year)
+
+  if (!file.exists(parquet_path) || force_download) {
+    vigitel_convert_to_parquet(year, force = force_download)
+  }
+
+  # read from parquet (fast!)
+  if (!is.null(vars)) {
+    # select specific columns
+    vars_clean <- janitor::make_clean_names(vars)
+
+    # always include year column
+    if (!"year" %in% vars_clean) {
+      vars_clean <- c("year", vars_clean)
+    }
+
+    # get available columns
+    schema <- arrow::read_parquet(parquet_path, as_data_frame = FALSE)$schema
+    vars_available <- names(schema)
+    vars_missing <- setdiff(vars_clean, vars_available)
+
+    if (length(vars_missing) > 0) {
+      cli::cli_warn("Variable{?s} not found in {year}: {.var {vars_missing}}")
+    }
+
+    vars_select <- intersect(vars_clean, vars_available)
+    df <- arrow::read_parquet(parquet_path, col_select = dplyr::all_of(vars_select), as_data_frame = !lazy)
+  } else {
+    df <- arrow::read_parquet(parquet_path, as_data_frame = !lazy)
+  }
+
+  if (lazy) {
+    return(df)
+  }
+
+  tibble::as_tibble(df)
+}
+
+#' Load VIGITEL microdata
 #'
-#' @return A tibble. Content depends on arguments:
+#' Downloads (if necessary) and loads VIGITEL survey microdata into R.
+#' Data is automatically converted to Parquet format for faster subsequent
+#' loading. The data includes survey weights for proper statistical analysis.
+#'
+#' @param year Year(s) of the survey. Can be:
 #'   \itemize{
-#'     \item No arguments: list of available dictionaries by year
-#'     \item Year only: complete dictionary for that year
-#'     \item Year and variable: dictionary entry for that variable
+#'     \item Single year: \code{2023}
+#'     \item Range: \code{2021:2023}
+#'     \item Vector: \code{c(2021, 2023)}
+#'     \item Character: \code{c("2021", "2023")}
+#'     \item All years: \code{"all"}
 #'   }
+#' @param vars Character vector. Variable names to select, or NULL for all
+#'   variables. Default is NULL.
+#' @param force_download Logical. If TRUE, re-download and reconvert data.
+#'   Default is FALSE.
+#' @param parallel Logical. If TRUE, download and process multiple years in
+#'   parallel. Default is TRUE when multiple years are requested.
+#' @param lazy Logical. If TRUE, return an Arrow Dataset for lazy evaluation
+#'   instead of loading all data into memory. Useful for filtering large
+#'   datasets before collecting. Use \code{collect()} to retrieve results.
+#'   Default is FALSE.
+#'
+#' @return A tibble with the VIGITEL microdata. When multiple years are
+#'   requested, a \code{year} column is added to identify the source year.
+#'   If \code{lazy = TRUE}, returns an Arrow Dataset that can be queried
+#'   with dplyr verbs before calling \code{collect()}.
+#'
+#' @details
+#' On first access, data is downloaded from the Ministry of Health and
+#' converted to Parquet format. Subsequent loads read directly from the
+#' Parquet file, which is significantly faster.
+#'
+#' For parallel downloads, the function uses the \code{furrr} package with
+#' \code{future::multisession}. The number of workers is automatically set
+#' based on available CPU cores.
+#'
+#' When \code{lazy = TRUE}, the function returns an Arrow Dataset that supports
+#' dplyr operations (filter, select, mutate, etc.) without loading data into
+#' memory. This is useful for working with large datasets or when you only
+#' need a subset of the data. Call \code{collect()} to retrieve the results
+#' as a tibble.
+#'
+#' The VIGITEL survey uses complex sampling weights. For proper statistical
+#' analysis, use survey packages like \code{survey} or \code{srvyr}.
+#' The weight variable is named \code{pesorake}.
 #'
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # List available dictionaries
-#' vigitel_dictionary()
+#' # single year
+#' df <- vigitel_data(2023)
 #'
-#' # Get dictionary for 2023
-#' vigitel_dictionary(year = 2023)
+#' # multiple years
+#' df <- vigitel_data(2021:2023)
+#' df <- vigitel_data(c(2018, 2020, 2023))
 #'
-#' # Get specific variable
-#' vigitel_dictionary(year = 2023, variable = "q006")
+#' # all available years
+#' df <- vigitel_data("all")
+#'
+#' # specific variables
+#' df <- vigitel_data(2023, vars = c("cidade", "sexo", "idade", "pesorake"))
+#'
+#' # multiple years with specific variables
+#' df <- vigitel_data(2020:2023, vars = c("cidade", "sexo", "idade", "pesorake"))
+#'
+#' # lazy evaluation - filter before loading into memory
+#' vigitel_data(2023, lazy = TRUE) |>
+#'   filter(cidade == 1) |>   # filter on disk
+#'   select(sexo, idade, pesorake) |>
+#'   collect()                 # now load into memory
+#'
+#' # lazy with multiple years
+#' vigitel_data(2020:2023, lazy = TRUE) |>
+#'   filter(q6 == 1) |>       # filter smokers
+#'   collect()
 #' }
-vigitel_dictionary <- function(year = NULL, variable = NULL) {
+vigitel_data <- function(year, vars = NULL, force_download = FALSE, parallel = TRUE, lazy = FALSE) {
+  # parse years
+  years <- vigitel_parse_years(year)
 
-  # If no year, list available dictionaries
-  if (is.null(year)) {
-    return(.list_vigitel_dictionaries())
-  }
-
-  # Validate year
-  .validate_vigitel_year(year)
-
-  # Get dictionary for year
-  dict <- .get_vigitel_dictionary(year)
-
-  # Filter by variable if specified
-  if (!is.null(variable)) {
-    dict <- dict |>
-      dplyr::filter(.data$variable == !!variable)
-
-    if (nrow(dict) == 0) {
-      cli::cli_abort(
-        "Variable {.val {variable}} not found in VIGITEL {year}."
-      )
+  # ensure all parquet files exist before proceeding
+  for (y in years) {
+    parquet_path <- vigitel_parquet_path(y)
+    if (!file.exists(parquet_path) || force_download) {
+      if (force_download) {
+        vigitel_download(y, force = TRUE)
+      }
+      vigitel_convert_to_parquet(y, force = force_download)
     }
   }
 
-  dict
+  # lazy mode - return Arrow Dataset
+  if (lazy) {
+    parquet_files <- purrr::map_chr(years, vigitel_parquet_path)
+
+    # open dataset (supports multiple files, year column already in parquet)
+    ds <- arrow::open_dataset(parquet_files, unify_schemas = TRUE)
+
+    # select specific columns if requested
+    if (!is.null(vars)) {
+      vars_clean <- janitor::make_clean_names(vars)
+      # always include year for filtering
+      if (!"year" %in% vars_clean) {
+        vars_clean <- c("year", vars_clean)
+      }
+      available_cols <- names(ds$schema)
+      vars_select <- intersect(vars_clean, available_cols)
+
+      vars_missing <- setdiff(vars_clean, available_cols)
+      if (length(vars_missing) > 0) {
+        cli::cli_warn("Variable{?s} not found: {.var {vars_missing}}")
+      }
+
+      ds <- ds |> dplyr::select(dplyr::all_of(vars_select))
+    }
+
+    cli::cli_alert_success(
+      "Opened Arrow Dataset with {length(years)} year{?s} (use {.fn collect} to load into memory)"
+    )
+    return(ds)
+  }
+
+  # single year - simple case
+  if (length(years) == 1) {
+    cli::cli_alert_info("Reading VIGITEL {years} data...")
+    df <- vigitel_data_single(years, vars = vars, force_download = FALSE)
+    cli::cli_alert_success("Loaded {nrow(df)} observations and {ncol(df)} variables")
+    return(df)
+  }
+
+  # multiple years - eager loading
+  cli::cli_alert_info("Processing {length(years)} years: {.val {years}}")
+
+  # check if package is installed (parallel requires installed package)
+  pkg_installed <- requireNamespace("healthbR", quietly = TRUE)
+
+  # use parallel only if requested, package is installed, and multiple years
+  use_parallel <- parallel && pkg_installed && length(years) > 1
+
+  if (parallel && !pkg_installed) {
+    cli::cli_alert_info("Using sequential processing (install package for parallel)")
+  }
+
+  if (use_parallel) {
+    # setup parallel processing
+    n_workers <- min(length(years), future::availableCores() - 1, 4)
+    cli::cli_alert_info("Using {n_workers} parallel workers")
+
+    oplan <- future::plan(future::multisession, workers = n_workers)
+    on.exit(future::plan(oplan), add = TRUE)
+
+    # process in parallel (year column already in parquet files)
+    df_list <- furrr::future_map(
+      years,
+      \(y) healthbR:::vigitel_data_single(y, vars = vars, force_download = FALSE),
+      .options = furrr::furrr_options(seed = TRUE, packages = "healthbR"),
+      .progress = TRUE
+    )
+  } else {
+    # sequential processing
+    df_list <- purrr::map(
+      years,
+      \(y) {
+        cli::cli_alert_info("Processing {y}...")
+        vigitel_data_single(y, vars = vars, force_download = FALSE)
+      }
+    )
+  }
+
+  # combine all years (year column already present)
+  df <- dplyr::bind_rows(df_list)
+
+  cli::cli_alert_success(
+    "Loaded {nrow(df)} observations and {ncol(df)} variables from {length(years)} years"
+  )
+
+  df
 }
 
-#' Download VIGITEL Data
+#' Download VIGITEL data dictionary
 #'
-#' Downloads and returns VIGITEL microdata for specified years and variables.
+#' Downloads the official VIGITEL data dictionary from the Ministry of Health.
 #'
-#' @param years Integer vector. Years to download. Required.
-#' @param variables Character vector. Optional. Specific variables to select.
-#'   If NULL (default), returns all variables.
-#' @param cache Logical. If TRUE (default
-#' ), caches downloaded data locally.
+#' @param force Logical. If TRUE, re-download even if cached.
 #'
-#' @return A tibble in tidy format with VIGITEL microdata.
+#' @return Path to the downloaded file (invisibly)
+#'
+#' @keywords internal
+vigitel_download_dictionary <- function(force = FALSE) {
+  url <- str_c(vigitel_base_url(), "Dicionario-de-dados-Vigitel.xls")
+  destfile <- file.path(vigitel_cache_dir(), "vigitel_dictionary.xls")
+
+  if (file.exists(destfile) && !force) {
+    return(invisible(destfile))
+  }
+
+  cli::cli_alert_info("Downloading VIGITEL dictionary...")
+
+  tryCatch(
+    curl::curl_download(url = url, destfile = destfile, quiet = FALSE),
+    error = function(e) {
+      if (file.exists(destfile)) file.remove(destfile)
+      cli::cli_abort("Download failed: {e$message}")
+    }
+  )
+
+  invisible(destfile)
+}
+
+#' Get VIGITEL variable dictionary
+#'
+#' Returns the data dictionary with variable descriptions, labels, and
+#' coding information for VIGITEL surveys.
+#'
+#' @param force_download Logical. If TRUE, re-download the dictionary.
+#'
+#' @return A tibble with variable metadata
 #'
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # Download data for one year
-#' vigitel_data(years = 2023)
+#' # get the dictionary
+#' dict <- vigitel_dictionary()
 #'
-#' # Download multiple years
-#' vigitel_data(years = 2020:2023)
-#'
-#' # Download specific variables
-#' vigitel_data(years = 2023, variables = c("q006", "q007", "sexo", "idade"))
+#' # search for specific variables
+#' dict |> dplyr::filter(stringr::str_detect(variavel, "peso"))
 #' }
-vigitel_data <- function(years, variables = NULL, cache = TRUE) {
+vigitel_dictionary <- function(force_download = FALSE) {
+  filepath <- vigitel_download_dictionary(force = force_download)
 
-  # Validate years
-  for (y in years) {
-    .validate_vigitel_year(y)
+  # read dictionary, skipping first row (real headers are in row 2)
+  df <- readxl::read_excel(filepath, skip = 1)
+  df <- janitor::clean_names(df)
+
+  # convert variable_name column to machine-readable format (matching the data)
+  if ("variable_name" %in% names(df)) {
+    df <- dplyr::mutate(df, variable_name = janitor::make_clean_names(variable_name))
   }
 
-  # Download data for each year
-  cli::cli_progress_bar(
-    "Downloading VIGITEL data",
-    total = length(years)
-  )
+  tibble::as_tibble(df)
+}
 
-  data_list <- lapply(years, function(y) {
-    cli::cli_progress_update()
-    .download_vigitel_year(y, cache = cache)
+#' List VIGITEL variables
+#'
+#' Returns a character vector of variable names available in a VIGITEL
+#' survey year.
+#'
+#' @param year Integer. Year of the survey.
+#'
+#' @return A character vector of variable names
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # list variables for 2023
+#' vigitel_variables(2023)
+#' }
+vigitel_variables <- function(year) {
+  year <- as.integer(year)
+  parquet_path <- vigitel_parquet_path(year)
+
+  # if parquet exists, read schema (fast)
+  if (file.exists(parquet_path)) {
+    schema <- arrow::read_parquet(parquet_path, as_data_frame = FALSE)$schema
+    return(names(schema))
+  }
+
+  # otherwise download and read excel header
+  filepath <- vigitel_download(year, force = FALSE)
+  df <- readxl::read_excel(filepath, n_max = 0)
+  janitor::make_clean_names(names(df))
+}
+
+#' Get VIGITEL survey information
+#'
+#' Returns metadata about the VIGITEL survey.
+#'
+#' @return A list with survey information
+#'
+#' @export
+#'
+#' @examples
+#' vigitel_info()
+vigitel_info <- function() {
+  list(
+    name = "VIGITEL",
+    full_name = paste0(
+      "Vigilancia de Fatores de Risco e Protecao ",
+      "para Doencas Cronicas por Inquerito Telefonico"
+    ),
+    institution = "Ministerio da Saude",
+    description = paste0(
+      "Telephone survey monitoring risk and protective factors ",
+      "for chronic diseases in Brazilian state capitals."
+    ),
+    years_available = vigitel_years(),
+    url = "https://www.gov.br/saude/pt-br/composicao/svsa/inqueritos-de-saude/vigitel",
+    download_url = vigitel_base_url(),
+    weight_variable = "pesorake",
+    geographic_coverage = "26 state capitals + Federal District",
+    sample_size = "~54,000 adults per year (18+ years)",
+    topics = c(
+      "chronic diseases",
+      "risk factors",
+      "tobacco use",
+      "alcohol consumption",
+      "physical activity",
+      "diet and nutrition",
+      "obesity",
+      "diabetes",
+      "hypertension",
+      "preventive exams"
+    )
+  )
+}
+
+#' Clear VIGITEL cache
+#'
+#' Removes all cached VIGITEL data files (Excel and Parquet).
+#'
+#' @param keep_parquet Logical. If TRUE, keep Parquet files and only remove
+#'   Excel files. Default is FALSE (remove all).
+#'
+#' @return NULL (invisibly)
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # remove all cached files
+#' vigitel_clear_cache()
+#'
+#' # remove only Excel files, keep Parquet
+#' vigitel_clear_cache(keep_parquet = TRUE)
+#' }
+vigitel_clear_cache <- function(keep_parquet = FALSE) {
+  cache_dir <- vigitel_cache_dir()
+
+  if (keep_parquet) {
+    files <- list.files(cache_dir, pattern = "\\.(xls|xlsx)$", full.names = TRUE)
+  } else {
+    files <- list.files(cache_dir, full.names = TRUE)
+  }
+
+  if (length(files) == 0) {
+    cli::cli_alert_info("Cache is already empty")
+    return(invisible(NULL))
+  }
+
+  file.remove(files)
+  cli::cli_alert_success("Removed {length(files)} cached file{?s}")
+
+  invisible(NULL)
+}
+
+#' Get VIGITEL cache status
+#'
+#' Shows which years are cached and file sizes.
+#'
+#' @return A tibble with cache information
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' vigitel_cache_status()
+#' }
+vigitel_cache_status <- function() {
+  cache_dir <- vigitel_cache_dir()
+  years <- vigitel_years()
+
+  status <- purrr::map_dfr(years, function(year) {
+    excel_path <- vigitel_excel_path(year)
+    parquet_path <- vigitel_parquet_path(year)
+
+    tibble::tibble(
+      year = year,
+      excel_cached = file.exists(excel_path),
+      parquet_cached = file.exists(parquet_path),
+      excel_size_mb = if (file.exists(excel_path)) round(file.size(excel_path) / 1024^2, 1) else NA_real_,
+      parquet_size_mb = if (file.exists(parquet_path)) round(file.size(parquet_path) / 1024^2, 1) else NA_real_
+    )
   })
 
-  cli::cli_progress_done()
-
-  # Bind all years
-  data <- dplyr::bind_rows(data_list)
-
-  # Select variables if specified
-  if (!is.null(variables)) {
-    # Always include year and id
-    variables <- unique(c("year", "id", variables))
-
-    # Check if all variables exist
-    missing <- setdiff(variables, names(data))
-    if (length(missing) > 0) {
-      cli::cli_warn(
-        "Variables not found in data: {.val {missing}}"
-      )
-    }
-
-    # Select existing variables only
-    variables <- intersect(variables, names(data))
-    data <- data |> dplyr::select(dplyr::all_of(variables))
-  }
-
-  data
-}
-
-
-# -----------------------------------------------------------------------------
-# Internal helper functions
-# -----------------------------------------------------------------------------
-
-#' Validate VIGITEL year
-#' @noRd
-.validate_vigitel_year <- function(year) {
-  available <- .vigitel_available_years()
-
-  if (!year %in% available) {
-    cli::cli_abort(c(
-      "Year {.val {year}} is not available.",
-      "i" = "Available years: {.val {min(available)}} to {.val {max(available)}}"
-    ))
-  }
-
-  invisible(TRUE)
-}
-
-#' Get VIGITEL variables metadata
-#' @noRd
-.get_vigitel_variables_metadata <- function() {
-  # TODO: Load from internal data or fetch from source
-  # For now, return placeholder structure
-
-  tibble::tibble(
-    variable = character(),
-    label = character(),
-    label_en = character(),
-    type = character(),
-    year_start = integer(),
-    year_end = integer()
-  )
-}
-
-#' List available VIGITEL dictionaries
-#' @noRd
-.list_vigitel_dictionaries <- function() {
-  years <- .vigitel_available_years()
-
-  tibble::tibble(
-    year = years,
-    n_variables = NA_integer_,
-    available = TRUE
-  )
-}
-
-#' Get VIGITEL dictionary for a specific year
-#' @noRd
-.get_vigitel_dictionary <- function(year) {
-  # TODO: Load dictionary data for specific year
-  # For now, return placeholder structure
-
-  tibble::tibble(
-    variable = character(),
-    label = character(),
-    description = character(),
-    type = character(),
-    values = list(),
-    notes = character()
-  )
-}
-
-#' Download VIGITEL data for a specific year
-#' @noRd
-.download_vigitel_year <- function(year, cache = TRUE) {
-  # TODO: Implement actual download logic
-  # 1. Check cache if enabled
-  # 2. Download from source
-  # 3. Clean and standardize column names
-  # 4. Return tibble
-
-  cli::cli_inform("Downloading VIGITEL {year}...")
-
-  # Placeholder: return empty tibble with expected structure
-  tibble::tibble(
-    year = integer(),
-    id = character()
-  )
+  status
 }

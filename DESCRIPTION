@@ -2,8 +2,8 @@ Package: healthbR
 Title: Access Brazilian Public Health Data
 Version: 0.0.0.9000
 Authors@R: 
-    person("Sidney", "Silva", , "email@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person("Sidney", "Silva", , "sbissoli76@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0001-0442-3700"))
 Description: Provides easy access to Brazilian public health data from multiple 
     sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases 
     by Telephone Survey), PNS (National Health Survey), SIM (Mortality Information 
@@ -12,16 +12,23 @@ Description: Provides easy access to Brazilian public health data from multiple
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
 Depends: 
     R (>= 4.1.0)
 Imports: 
     tibble,
     dplyr,
     readr,
-    httr,
+    readxl,
+    curl,
     cli,
-    rlang
+    rlang,
+    stringr,
+    janitor,
+    arrow,
+    purrr,
+    furrr,
+    future
 Suggests: 
     testthat (>= 3.0.0),
     knitr,

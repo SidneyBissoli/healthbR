@@ -16,7 +16,8 @@ knitr::opts_chunk$set(
 ```
 
 ## Overview
-The **healthbR** package provides easy access to Brazilian public health data from multiple sources. All data is returned in tidy format following tidyverse conventions, making it easy to integrate with your existing data analysis workflows.
+
+`healthbR` provides easy access to Brazilian public health data from multiple sources. The package downloads data directly from official government sources and returns clean, tidy data frames ready for analysis.
 
 ## Installation
 
@@ -28,89 +29,106 @@ remotes::install_github("SidneyBissoli/healthbR")
 
 ## Quick Start
 
-```{r}
+```{r setup}
 library(healthbR)
 library(dplyr)
+```
 
-# See all available data sources
+### Check Available Data Sources
+
+```{r}
+# see all data sources
 list_sources()
 ```
 
-## Working with VIGITEL Data
+### VIGITEL - Risk Factor Surveillance
 
-VIGITEL (Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico) is a telephone survey conducted annually since 2006 that monitors risk factors for chronic diseases in Brazilian state capitals.
-
-### Exploring Available Data
+VIGITEL is a telephone survey monitoring risk and protective factors for chronic diseases in Brazilian state capitals.
 
 ```{r}
-# Check available years
+# check available years
 vigitel_years()
 
-# See variables available in 2023
-vigitel_variables(year = 2023)
+# get survey information
+vigitel_info()
 
-# Get the data dictionary
-vigitel_dictionary(year = 2023)
-
-# Get dictionary for a specific variable
-vigitel_dictionary(year = 2023, variable = "q006")
+# list variables for a specific year
+vigitel_variables(2023)
 ```
 
-### Downloading Data
+### Downloading and Loading Data
 
 ```{r}
-# Download data for a single year
-df_2023 <- vigitel_data(years = 2023)
+# download and load 2023 data
+df <- vigitel_data(2023)
 
-# Download multiple years
-df_recent <- vigitel_data(years = 2020:2023)
+# check dimensions
+dim(df)
 
-# Download specific variables only
-df_anthropometry <- vigitel_data(
-  years = 2023,
-  variables = c("sexo", "idade", "peso", "altura", "imc")
+# view first rows
+head(df)
+```
+
+### Selecting Specific Variables
+
+```{r}
+# load only specific variables
+df <- vigitel_data(
+  year = 2023,
+  vars = c("cidade", "sexo", "idade", "pesorake", "q6", "q7")
 )
 ```
 
-### Example Analysis
+### Variable Dictionary
 
 ```{r}
-# Calculate obesity prevalence by sex and state
-vigitel_data(years = 2023) |>
-  filter(!is.na(imc)) |>
-  mutate(obeso = imc >= 30) |>
-  group_by(uf, sexo) |>
-  summarise(
-    n = n(),
-    prevalencia_obesidade = mean(obeso, na.rm = TRUE) * 100,
-    .groups = "drop"
-  ) |>
-  arrange(desc(prevalencia_obesidade))
+# get the data dictionary
+dict <- vigitel_dictionary()
+
+# search for variables related to weight
+dict |> 
+  filter(stringr::str_detect(tolower(descricao), "peso"))
 ```
 
-## Function Naming Convention
+## Working with Survey Weights
 
-healthbR uses a consistent naming pattern for all data sources:
+VIGITEL uses complex sampling with post-stratification weights. For proper statistical analysis, use the `srvyr` or `survey` packages:
+package:
+```{r}
+library(srvyr)
 
-| Function Pattern | Description |
-|-----------------|-------------|
-| `[source]_years()` | List available years |
-| `[source]_variables()` | List available variables |
-| `[source]_dictionary()` | Get data dictionary |
-| `[source]_data()` | Download data |
+# create survey design
+vigitel_svy <- df |>
+  as_survey_design(weights = pesorake)
 
-This makes it easy to work with different data sources using the same workflow.
+# calculate weighted prevalence
+vigitel_svy |>
+  group_by(cidade) |>
+  summarise(
+    mean_age = survey_mean(idade, na.rm = TRUE),
+    n = unweighted(n())
+  )
+```
 
-## Caching
+## Data Sources Roadmap
 
-By default, healthbR caches downloaded data to avoid repeated downloads. You can control this behavior:
+| Source | Status | Description |
+|--------|--------|-------------|
+| VIGITEL | Available | Chronic disease risk factors |
+| PNS | Planned | National Health Survey |
+| SIM | Planned | Mortality data |
+| SINASC | Planned | Live births data |
+| SINAN | Planned | Notifiable diseases |
+| SIH | Planned | Hospital admissions |
+| CNES | Planned | Health facilities |
+
+## Cache Management
+
+Downloaded files are cached locally to avoid repeated downloads:
 
 ```{r}
-# Download without caching
-df <- vigitel_data(years = 2023, cache = FALSE)
-
-# Change default cache behavior
-options(healthbR.cache = FALSE)
+# clear cache if needed
+vigitel_clear_cache()
 ```
 
 ## Getting Help
@@ -124,6 +142,11 @@ If you encounter issues or have questions:
 
 If you use healthbR in your research, please cite it:
 
-```{r}
-citation("healthbR")
+```
+@software{healthbR,
+  author = {Silva, Sidney},
+  title = {healthbR: Access Brazilian Public Health Data},
+  url = {https://github.com/SidneyBissoli/healthbR},
+  year = {2026}
+}
 ```
