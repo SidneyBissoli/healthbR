@@ -1,0 +1,33 @@
+Package: healthbR
+Title: Access Brazilian Public Health Data
+Version: 0.0.0.9000
+Authors@R: 
+    person("Sidney", "Silva", , "email@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Provides easy access to Brazilian public health data from multiple 
+    sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases 
+    by Telephone Survey), PNS (National Health Survey), SIM (Mortality Information 
+    System), SINASC (Live Birth Information System), and other health information 
+    systems. Data is returned in tidy format following tidyverse conventions.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Depends: 
+    R (>= 4.1.0)
+Imports: 
+    tibble,
+    dplyr,
+    readr,
+    httr,
+    cli,
+    rlang
+Suggests: 
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+URL: https://github.com/yourusername/healthbR
+BugReports: https://github.com/yourusername/healthbR/issues
+LazyData: true

@@ -1,0 +1,129 @@
+---
+title: "Introduction to healthbR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to healthbR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Overview
+The **healthbR** package provides easy access to Brazilian public health data from multiple sources. All data is returned in tidy format following tidyverse conventions, making it easy to integrate with your existing data analysis workflows.
+
+## Installation
+
+```{r}
+# Install from GitHub
+# install.packages("remotes")
+remotes::install_github("yourusername/healthbR")
+```
+
+## Quick Start
+
+```{r}
+library(healthbR)
+library(dplyr)
+
+# See all available data sources
+list_sources()
+```
+
+## Working with VIGITEL Data
+
+VIGITEL (Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico) is a telephone survey conducted annually since 2006 that monitors risk factors for chronic diseases in Brazilian state capitals.
+
+### Exploring Available Data
+
+```{r}
+# Check available years
+vigitel_years()
+
+# See variables available in 2023
+vigitel_variables(year = 2023)
+
+# Get the data dictionary
+vigitel_dictionary(year = 2023)
+
+# Get dictionary for a specific variable
+vigitel_dictionary(year = 2023, variable = "q006")
+```
+
+### Downloading Data
+
+```{r}
+# Download data for a single year
+df_2023 <- vigitel_data(years = 2023)
+
+# Download multiple years
+df_recent <- vigitel_data(years = 2020:2023)
+
+# Download specific variables only
+df_anthropometry <- vigitel_data(
+  years = 2023,
+  variables = c("sexo", "idade", "peso", "altura", "imc")
+)
+```
+
+### Example Analysis
+
+```{r}
+# Calculate obesity prevalence by sex and state
+vigitel_data(years = 2023) |>
+  filter(!is.na(imc)) |>
+  mutate(obeso = imc >= 30) |>
+  group_by(uf, sexo) |>
+  summarise(
+    n = n(),
+    prevalencia_obesidade = mean(obeso, na.rm = TRUE) * 100,
+    .groups = "drop"
+  ) |>
+  arrange(desc(prevalencia_obesidade))
+```
+
+## Function Naming Convention
+
+healthbR uses a consistent naming pattern for all data sources:
+
+| Function Pattern | Description |
+|-----------------|-------------|
+| `[source]_years()` | List available years |
+| `[source]_variables()` | List available variables |
+| `[source]_dictionary()` | Get data dictionary |
+| `[source]_data()` | Download data |
+
+This makes it easy to work with different data sources using the same workflow.
+
+## Caching
+
+By default, healthbR caches downloaded data to avoid repeated downloads. You can control this behavior:
+
+```{r}
+# Download without caching
+df <- vigitel_data(years = 2023, cache = FALSE)
+
+# Change default cache behavior
+options(healthbR.cache = FALSE)
+```
+
+## Getting Help
+
+If you encounter issues or have questions:
+
+1. Check the function documentation: `?vigitel_data`
+2. Open an issue on GitHub: https://github.com/yourusername/healthbR/issues
+
+## Citation
+
+If you use healthbR in your research, please cite it:
+
+```{r}
+citation("healthbR")
+```
