@@ -1,4 +1,4 @@
-# healthbR (development version)
+# healthbR 0.1.0
 
 ## healthbR 0.0.0.9000
 
