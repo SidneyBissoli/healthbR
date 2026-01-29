@@ -2,7 +2,7 @@ Package: healthbR
 Title: Access Brazilian Public Health Data
 Version: 0.1.0
 Authors@R: 
-    person("Sidney", "Silva", , "sbissoli76@gmail.com", role = c("aut", "cre"),
+    person("Sidney", "Bissoli", , "sbissoli76@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-0442-3700"))
 Description: Provides easy access to Brazilian public health data from multiple
     sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases
