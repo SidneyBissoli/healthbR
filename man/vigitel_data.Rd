@@ -69,7 +69,7 @@ analysis, use survey packages like \code{survey} or \code{srvyr}.
 The weight variable is named \code{pesorake}.
 }
 \examples{
-\dontrun{
+\donttest{
 # single year
 df <- vigitel_data(2023)
 
@@ -88,13 +88,13 @@ df <- vigitel_data(2020:2023, vars = c("cidade", "sexo", "idade", "pesorake"))
 
 # lazy evaluation - filter before loading into memory
 vigitel_data(2023, lazy = TRUE) |>
-  filter(cidade == 1) |>   # filter on disk
-  select(sexo, idade, pesorake) |>
-  collect()                 # now load into memory
+  dplyr::filter(cidade == 1) |>
+  dplyr::select(pesorake) |>
+  dplyr::collect()
 
 # lazy with multiple years
 vigitel_data(2020:2023, lazy = TRUE) |>
-  filter(q6 == 1) |>       # filter smokers
-  collect()
+  dplyr::filter(q6 == 1) |>
+  dplyr::collect()
 }
 }

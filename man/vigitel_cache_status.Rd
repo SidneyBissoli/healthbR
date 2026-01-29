@@ -13,7 +13,7 @@ A tibble with cache information
 Shows which years are cached and file sizes.
 }
 \examples{
-\dontrun{
+\donttest{
 vigitel_cache_status()
 }
 }

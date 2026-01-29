@@ -21,7 +21,7 @@ Downloads the VIGITEL survey microdata file from the Ministry of Health
 website. Files are cached locally to avoid repeated downloads.
 }
 \examples{
-\dontrun{
+\donttest{
 # download 2023 data
 vigitel_download(2023)
 

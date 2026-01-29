@@ -134,7 +134,7 @@ vigitel_parse_years <- function(year) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # download 2023 data
 #' vigitel_download(2023)
 #'
@@ -266,7 +266,8 @@ vigitel_data_single <- function(year, vars = NULL, force_download = FALSE, lazy 
     vars_missing <- setdiff(vars_clean, vars_available)
 
     if (length(vars_missing) > 0) {
-      cli::cli_warn("Variable{?s} not found in {year}: {.var {vars_missing}}")
+      n_missing <- length(vars_missing)
+      cli::cli_warn("{cli::qty(n_missing)}Variable{?s} not found in {year}: {.var {vars_missing}}")
     }
 
     vars_select <- intersect(vars_clean, vars_available)
@@ -336,7 +337,7 @@ vigitel_data_single <- function(year, vars = NULL, force_download = FALSE, lazy 
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # single year
 #' df <- vigitel_data(2023)
 #'
@@ -355,14 +356,14 @@ vigitel_data_single <- function(year, vars = NULL, force_download = FALSE, lazy 
 #'
 #' # lazy evaluation - filter before loading into memory
 #' vigitel_data(2023, lazy = TRUE) |>
-#'   filter(cidade == 1) |>   # filter on disk
-#'   select(sexo, idade, pesorake) |>
-#'   collect()                 # now load into memory
+#'   dplyr::filter(cidade == 1) |>
+#'   dplyr::select(pesorake) |>
+#'   dplyr::collect()
 #'
 #' # lazy with multiple years
 #' vigitel_data(2020:2023, lazy = TRUE) |>
-#'   filter(q6 == 1) |>       # filter smokers
-#'   collect()
+#'   dplyr::filter(q6 == 1) |>
+#'   dplyr::collect()
 #' }
 vigitel_data <- function(year, vars = NULL, force_download = FALSE, parallel = TRUE, lazy = FALSE) {
   # parse years
@@ -398,7 +399,8 @@ vigitel_data <- function(year, vars = NULL, force_download = FALSE, parallel = T
 
       vars_missing <- setdiff(vars_clean, available_cols)
       if (length(vars_missing) > 0) {
-        cli::cli_warn("Variable{?s} not found: {.var {vars_missing}}")
+        n_missing <- length(vars_missing)
+        cli::cli_warn("{cli::qty(n_missing)}Variable{?s} not found: {.var {vars_missing}}")
       }
 
       ds <- ds |> dplyr::select(dplyr::all_of(vars_select))
@@ -514,12 +516,12 @@ vigitel_download_dictionary <- function(force = FALSE) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # get the dictionary
 #' dict <- vigitel_dictionary()
 #'
-#' # search for specific variables
-#' dict |> dplyr::filter(stringr::str_detect(variavel, "peso"))
+#' # view column names
+#' names(dict)
 #' }
 vigitel_dictionary <- function(force_download = FALSE) {
   filepath <- vigitel_download_dictionary(force = force_download)
@@ -548,7 +550,7 @@ vigitel_dictionary <- function(force_download = FALSE) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # list variables for 2023
 #' vigitel_variables(2023)
 #' }
@@ -623,7 +625,7 @@ vigitel_info <- function() {
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # remove all cached files
 #' vigitel_clear_cache()
 #'
@@ -659,7 +661,7 @@ vigitel_clear_cache <- function(keep_parquet = FALSE) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' vigitel_cache_status()
 #' }
 vigitel_cache_status <- function() {

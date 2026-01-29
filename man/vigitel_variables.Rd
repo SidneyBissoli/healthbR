@@ -17,7 +17,7 @@ Returns a character vector of variable names available in a VIGITEL
 survey year.
 }
 \examples{
-\dontrun{
+\donttest{
 # list variables for 2023
 vigitel_variables(2023)
 }

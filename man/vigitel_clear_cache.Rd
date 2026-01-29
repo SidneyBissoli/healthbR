@@ -17,7 +17,7 @@ NULL (invisibly)
 Removes all cached VIGITEL data files (Excel and Parquet).
 }
 \examples{
-\dontrun{
+\donttest{
 # remove all cached files
 vigitel_clear_cache()
 

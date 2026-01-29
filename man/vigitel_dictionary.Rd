@@ -17,11 +17,11 @@ Returns the data dictionary with variable descriptions, labels, and
 coding information for VIGITEL surveys.
 }
 \examples{
-\dontrun{
+\donttest{
 # get the dictionary
 dict <- vigitel_dictionary()
 
-# search for specific variables
-dict |> dplyr::filter(stringr::str_detect(variavel, "peso"))
+# view column names
+names(dict)
 }
 }
