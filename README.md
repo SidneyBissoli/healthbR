@@ -155,4 +155,4 @@ Please note
 
 ## License
 
-MIT © Sidney Silva
+MIT © Sidney da Silva Pereira Bissoli

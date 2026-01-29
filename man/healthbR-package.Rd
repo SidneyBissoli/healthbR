@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Sidney Silva \email{sbissoli76@gmail.com} (\href{https://orcid.org/0009-0001-0442-3700}{ORCID})
+\strong{Maintainer}: Sidney Bissoli \email{sbissoli76@gmail.com} (\href{https://orcid.org/0009-0001-0442-3700}{ORCID})
 
 }
 \keyword{internal}
