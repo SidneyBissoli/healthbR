@@ -4,7 +4,11 @@
 \alias{vigitel_cache_status}
 \title{Get VIGITEL cache status}
 \usage{
-vigitel_cache_status()
+vigitel_cache_status(cache_dir = NULL)
+}
+\arguments{
+\item{cache_dir}{Character. Optional custom cache directory. If NULL (default),
+uses the standard user cache directory.}
 }
 \value{
 A tibble with cache information
@@ -13,7 +17,6 @@ A tibble with cache information
 Shows which years are cached and file sizes.
 }
 \examples{
-\donttest{
+# check cache status
 vigitel_cache_status()
-}
 }

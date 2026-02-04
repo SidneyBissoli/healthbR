@@ -4,7 +4,13 @@
 \alias{vigitel_data_single}
 \title{Load single year of VIGITEL data}
 \usage{
-vigitel_data_single(year, vars = NULL, force_download = FALSE, lazy = FALSE)
+vigitel_data_single(
+  year,
+  vars = NULL,
+  force_download = FALSE,
+  lazy = FALSE,
+  cache_dir = NULL
+)
 }
 \arguments{
 \item{year}{Integer year}
@@ -14,6 +20,8 @@ vigitel_data_single(year, vars = NULL, force_download = FALSE, lazy = FALSE)
 \item{force_download}{Logical}
 
 \item{lazy}{Logical. If TRUE, return Arrow object for lazy evaluation.}
+
+\item{cache_dir}{Optional custom cache directory}
 }
 \value{
 A tibble or Arrow Table (if lazy = TRUE)

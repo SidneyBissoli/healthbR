@@ -14,3 +14,6 @@
 ^cran-comments\.md$
 ^\.claude$
 ^_ul-Sidney-desktop$
+^_ul$
+^cran-fixes$
+^briefing_healthbR_cran_fix\.md$

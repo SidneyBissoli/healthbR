@@ -4,10 +4,12 @@
 \alias{vigitel_parquet_path}
 \title{Get path to Parquet file for a specific year}
 \usage{
-vigitel_parquet_path(year)
+vigitel_parquet_path(year, cache_dir = NULL)
 }
 \arguments{
 \item{year}{Integer year}
+
+\item{cache_dir}{Optional custom cache directory}
 }
 \value{
 Path to parquet file

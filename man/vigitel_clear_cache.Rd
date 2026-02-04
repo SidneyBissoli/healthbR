@@ -4,11 +4,14 @@
 \alias{vigitel_clear_cache}
 \title{Clear VIGITEL cache}
 \usage{
-vigitel_clear_cache(keep_parquet = FALSE)
+vigitel_clear_cache(keep_parquet = FALSE, cache_dir = NULL)
 }
 \arguments{
 \item{keep_parquet}{Logical. If TRUE, keep Parquet files and only remove
 Excel files. Default is FALSE (remove all).}
+
+\item{cache_dir}{Character. Optional custom cache directory. If NULL (default),
+uses the standard user cache directory.}
 }
 \value{
 NULL (invisibly)
@@ -17,11 +20,6 @@ NULL (invisibly)
 Removes all cached VIGITEL data files (Excel and Parquet).
 }
 \examples{
-\donttest{
-# remove all cached files
+# remove all cached files from default cache
 vigitel_clear_cache()
-
-# remove only Excel files, keep Parquet
-vigitel_clear_cache(keep_parquet = TRUE)
-}
 }

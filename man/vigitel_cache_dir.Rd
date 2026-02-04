@@ -4,7 +4,11 @@
 \alias{vigitel_cache_dir}
 \title{Get VIGITEL cache directory}
 \usage{
-vigitel_cache_dir()
+vigitel_cache_dir(cache_dir = NULL)
+}
+\arguments{
+\item{cache_dir}{Optional custom cache directory. If NULL, uses default
+user cache directory.}
 }
 \value{
 Path to cache directory

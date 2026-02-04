@@ -1,3 +1,20 @@
+# healthbR 0.1.1
+
+## Changes
+
+* Moved `arrow` package from `Imports` to `Suggests` for better cross-platform
+  compatibility. The package now checks for `arrow` availability and provides
+  informative error messages with installation instructions when needed.
+
+* Added `cache_dir` parameter to all data fetching functions (`vigitel_data()`,
+
+  `vigitel_download()`, `vigitel_variables()`, `vigitel_dictionary()`,
+  `vigitel_cache_status()`, `vigitel_clear_cache()`). This allows using
+  `tempdir()` for temporary storage that doesn't persist after the R session.
+
+* Updated examples to use `cache_dir = tempdir()` to avoid leaving files on the
+  system during CRAN checks.
+
 # healthbR 0.1.0
 
 ## healthbR 0.0.0.9000

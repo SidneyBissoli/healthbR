@@ -9,7 +9,8 @@ vigitel_data(
   vars = NULL,
   force_download = FALSE,
   parallel = TRUE,
-  lazy = FALSE
+  lazy = FALSE,
+  cache_dir = NULL
 )
 }
 \arguments{
@@ -35,6 +36,10 @@ parallel. Default is TRUE when multiple years are requested.}
 instead of loading all data into memory. Useful for filtering large
 datasets before collecting. Use \code{collect()} to retrieve results.
 Default is FALSE.}
+
+\item{cache_dir}{Character. Optional custom cache directory. If NULL (default),
+uses the standard user cache directory. Use \code{tempdir()} for temporary
+storage that won't persist.}
 }
 \value{
 A tibble with the VIGITEL microdata. When multiple years are
@@ -51,6 +56,10 @@ loading. The data includes survey weights for proper statistical analysis.
 On first access, data is downloaded from the Ministry of Health and
 converted to Parquet format. Subsequent loads read directly from the
 Parquet file, which is significantly faster.
+
+The \code{arrow} package is required for Parquet file support. If not
+installed, an informative error message will be shown with installation
+instructions.
 
 For parallel downloads, the function uses the \code{furrr} and \code{future}
 packages if installed. Install them with \code{install.packages(c("furrr", "future"))}
@@ -70,31 +79,11 @@ The weight variable is named \code{pesorake}.
 }
 \examples{
 \donttest{
-# single year
-df <- vigitel_data(2023)
-
-# multiple years
-df <- vigitel_data(2021:2023)
-df <- vigitel_data(c(2018, 2020, 2023))
-
-# all available years
-df <- vigitel_data("all")
+# single year (uses tempdir to avoid leaving files on system)
+df <- vigitel_data(2023, cache_dir = tempdir())
 
 # specific variables
-df <- vigitel_data(2023, vars = c("cidade", "sexo", "idade", "pesorake"))
-
-# multiple years with specific variables
-df <- vigitel_data(2020:2023, vars = c("cidade", "sexo", "idade", "pesorake"))
-
-# lazy evaluation - filter before loading into memory
-vigitel_data(2023, lazy = TRUE) |>
-  dplyr::filter(cidade == 1) |>
-  dplyr::select(pesorake) |>
-  dplyr::collect()
-
-# lazy with multiple years
-vigitel_data(2020:2023, lazy = TRUE) |>
-  dplyr::filter(q6 == 1) |>
-  dplyr::collect()
+df <- vigitel_data(2023, vars = c("cidade", "sexo", "idade", "pesorake"),
+                   cache_dir = tempdir())
 }
 }

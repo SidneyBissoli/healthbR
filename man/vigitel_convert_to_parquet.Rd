@@ -4,12 +4,14 @@
 \alias{vigitel_convert_to_parquet}
 \title{Convert Excel file to Parquet format}
 \usage{
-vigitel_convert_to_parquet(year, force = FALSE)
+vigitel_convert_to_parquet(year, force = FALSE, cache_dir = NULL)
 }
 \arguments{
 \item{year}{Integer year}
 
 \item{force}{Logical. If TRUE, reconvert even if parquet exists.}
+
+\item{cache_dir}{Optional custom cache directory}
 }
 \value{
 Path to parquet file (invisibly)

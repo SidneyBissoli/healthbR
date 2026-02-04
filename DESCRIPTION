@@ -1,6 +1,6 @@
 Package: healthbR
 Title: Access Brazilian Public Health Data
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person("Sidney", "Bissoli", , "sbissoli76@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-0442-3700"))
@@ -17,7 +17,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Depends: 
     R (>= 4.2.0)
-Imports: 
+Imports:
     tibble,
     dplyr,
     readxl,
@@ -26,14 +26,14 @@ Imports:
     rlang,
     stringr,
     janitor,
-    arrow,
     purrr
-Suggests: 
+Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
     furrr,
-    future
+    future,
+    arrow
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://github.com/SidneyBissoli/healthbR

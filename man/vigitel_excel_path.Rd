@@ -4,10 +4,12 @@
 \alias{vigitel_excel_path}
 \title{Get path to Excel file for a specific year}
 \usage{
-vigitel_excel_path(year)
+vigitel_excel_path(year, cache_dir = NULL)
 }
 \arguments{
 \item{year}{Integer year}
+
+\item{cache_dir}{Optional custom cache directory}
 }
 \value{
 Path to excel file

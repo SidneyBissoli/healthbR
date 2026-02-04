@@ -4,10 +4,14 @@
 \alias{vigitel_variables}
 \title{List VIGITEL variables}
 \usage{
-vigitel_variables(year)
+vigitel_variables(year, cache_dir = NULL)
 }
 \arguments{
 \item{year}{Integer. Year of the survey.}
+
+\item{cache_dir}{Character. Optional custom cache directory. If NULL (default),
+uses the standard user cache directory. Use \code{tempdir()} for temporary
+storage that won't persist.}
 }
 \value{
 A character vector of variable names
@@ -18,7 +22,7 @@ survey year.
 }
 \examples{
 \donttest{
-# list variables for 2023
-vigitel_variables(2023)
+# list variables for 2023 (uses tempdir to avoid leaving files)
+vigitel_variables(2023, cache_dir = tempdir())
 }
 }

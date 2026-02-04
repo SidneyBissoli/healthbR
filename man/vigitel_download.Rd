@@ -4,7 +4,7 @@
 \alias{vigitel_download}
 \title{Download VIGITEL microdata for a specific year}
 \usage{
-vigitel_download(year, force = FALSE)
+vigitel_download(year, force = FALSE, cache_dir = NULL)
 }
 \arguments{
 \item{year}{Integer. Year of the survey (use \code{vigitel_years()} to see
@@ -12,6 +12,10 @@ available years).}
 
 \item{force}{Logical. If TRUE, re-download even if file exists in cache.
 Default is FALSE.}
+
+\item{cache_dir}{Character. Optional custom cache directory. If NULL (default),
+uses the standard user cache directory. Use \code{tempdir()} for temporary
+storage that won't persist.}
 }
 \value{
 Path to the downloaded file (invisibly)
@@ -22,10 +26,7 @@ website. Files are cached locally to avoid repeated downloads.
 }
 \examples{
 \donttest{
-# download 2023 data
-vigitel_download(2023)
-
-# force re-download
-vigitel_download(2023, force = TRUE)
+# download 2023 data (uses tempdir to avoid leaving files)
+vigitel_download(2023, cache_dir = tempdir())
 }
 }

@@ -4,10 +4,12 @@
 \alias{vigitel_download_dictionary}
 \title{Download VIGITEL data dictionary}
 \usage{
-vigitel_download_dictionary(force = FALSE)
+vigitel_download_dictionary(force = FALSE, cache_dir = NULL)
 }
 \arguments{
 \item{force}{Logical. If TRUE, re-download even if cached.}
+
+\item{cache_dir}{Optional custom cache directory}
 }
 \value{
 Path to the downloaded file (invisibly)
