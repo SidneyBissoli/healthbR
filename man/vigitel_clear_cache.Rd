@@ -7,8 +7,8 @@
 vigitel_clear_cache(keep_parquet = FALSE, cache_dir = NULL)
 }
 \arguments{
-\item{keep_parquet}{Logical. If TRUE, keep Parquet files and only remove
-Excel files. Default is FALSE (remove all).}
+\item{keep_parquet}{Logical. If TRUE, keep parquet cache and only remove
+source files (ZIP, DTA, CSV). Default is FALSE (remove all).}
 
 \item{cache_dir}{Character. Optional custom cache directory. If NULL (default),
 uses the standard user cache directory.}
@@ -17,7 +17,7 @@ uses the standard user cache directory.}
 NULL (invisibly)
 }
 \description{
-Removes all cached VIGITEL data files (Excel and Parquet).
+Removes all cached VIGITEL data files.
 }
 \examples{
 # remove all cached files from default cache

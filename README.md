@@ -7,10 +7,10 @@
 
 ## Overview
 healthbR provides easy access to Brazilian public health survey data directly from R. The package downloads, caches, and processes data from official sources, returning clean, analysis-ready tibbles following tidyverse conventions.
- 
+
 Currently supported data sources:
 
-- **VIGITEL** - Surveillance of Risk Factors for Chronic Diseases by Telephone Survey (Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico)
+- **VIGITEL** - Surveillance of Risk Factors for Chronic Diseases by Telephone Survey (Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico) - Years 2006-2024
 
 Planned for future releases:
 
@@ -39,37 +39,49 @@ library(healthbR)
 # list available VIGITEL survey years
 vigitel_years()
 #> [1] 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020
-#> [16] 2021 2022 2023
+#> [16] 2021 2022 2023 2024
 ```
 
 ### Download and load data
 
 ```r
 # load data for a single year
-df <- vigitel_data(2023)
+df <- vigitel_data(year = 2024)
 
 # load data for multiple years
-df <- vigitel_data(2021:2023)
+df <- vigitel_data(year = 2020:2024)
+
+# load all available years
+df <- vigitel_data()
+
+# choose data format (default is Stata .dta which preserves labels)
+df <- vigitel_data(year = 2024, format = "dta")
+df <- vigitel_data(year = 2024, format = "csv")
+
+# select specific variables
+df <- vigitel_data(
+  year = 2024,
+  vars = c("cidade", "sexo", "idade", "pesorake")
+)
 ```
 
 ### Explore variables
 
 ```r
-# list variables available in a specific year
-vigitel_variables(2023)
-
 # get the data dictionary with variable descriptions
 dict <- vigitel_dictionary()
 
-# search for specific variables
-dict |>
-  dplyr::filter(stringr::str_detect(variable_name, "peso"))
+# list variables (same as dictionary)
+vars <- vigitel_variables()
+
+# view the dictionary structure
+head(dict)
 ```
 
 ### Survey analysis with srvyr
 
 VIGITEL uses complex survey sampling. Use the `pesorake` weight variable for proper inference:
- 
+
 ```r
 library(dplyr)
 library(srvyr)
@@ -89,52 +101,46 @@ vigitel_svy |>
 
 ## Performance optimization
 
-healthbR offers three strategies for handling large datasets efficiently:
+healthbR automatically optimizes data loading using partitioned parquet caching when the `arrow` package is installed.
 
-### 1. Parquet conversion (recommended for repeated use)
+### Automatic parquet caching (recommended)
 
-Convert Excel files to Parquet format for 10-20x faster loading:
+Install the `arrow` package for significantly faster subsequent reads:
 
 ```r
-# convert downloaded files to parquet (one-time operation
-vigitel_convert_to_parquet(2020:2023)
+# install arrow for better performance
+install.packages("arrow")
 
-# subsequent loads are much faster
-df <- vigitel_data(2020:2023)
+# first load downloads and creates partitioned cache
+df <- vigitel_data(year = 2024)
+
+# subsequent loads are extremely fast (reads only requested year)
+df <- vigitel_data(year = 2024)  # instant!
 ```
 
-### 2. Parallel downloads
+When `arrow` is installed:
+- Data is automatically cached in partitioned parquet format
+- Reading a single year loads only that year's partition (~25MB instead of ~500MB)
+- Multiple years are combined efficiently
 
-Download multiple years simultaneously (requires optional packages):
-
-```r
-# install optional packages for parallel processing
-install.packages(c("furrr", "future"))
-
-# uses furrr for parallel processing (2-4 workers)
-df <- vigitel_data(2015:2023)
-```
-
-### 3. Lazy evaluation with Arrow
-
-For very large datasets, use lazy evaluation to process data without loading everything into memory:
+### Cache management
 
 ```r
-# returns an Arrow Dataset (not loaded into RAM)
-df_lazy <- vigitel_data(2020:2023, lazy = TRUE)
+# check cache status
+vigitel_cache_status()
 
-# filter and select before collecting
-result <- df_lazy |>
-  dplyr::filter(cidade == 1) |>
-  dplyr::select(q6, q8_anos, pesorake, diab, hart) |>
-  dplyr::collect()
+# clear cache (all files)
+vigitel_clear_cache()
+
+# clear only source files, keep parquet cache
+vigitel_clear_cache(keep_parquet = TRUE)
 ```
 
 ## Data sources
 
 All data is downloaded from official Brazilian Ministry of Health repositories:
 
-- VIGITEL: https://svs.aids.gov.br/download/Vigitel/
+- VIGITEL: https://svs.aids.gov.br/daent/cgdnt/vigitel/
 
 ## Citation
 
@@ -150,8 +156,7 @@ Contributions are welcome! Please open an issue to discuss proposed changes or s
 
 ## Code of Conduct
 
-Please note
- that the healthbR project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+Please note that the healthbR project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
 
 ## License
 

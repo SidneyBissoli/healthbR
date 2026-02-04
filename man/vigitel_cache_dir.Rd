@@ -14,6 +14,7 @@ user cache directory.}
 Path to cache directory
 }
 \description{
-Get VIGITEL cache directory
+Returns the path to the cache directory for VIGITEL data.
+Creates the directory if it doesn't exist.
 }
 \keyword{internal}

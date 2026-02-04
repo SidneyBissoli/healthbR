@@ -1,6 +1,6 @@
 Package: healthbR
 Title: Access Brazilian Public Health Data
-Version: 0.1.1
+Version: 0.2.0
 Authors@R: 
     person("Sidney", "Bissoli", , "sbissoli76@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-0442-3700"))
@@ -9,7 +9,7 @@ Description: Provides easy access to Brazilian public health data from multiple
     by Telephone Survey), PNS (National Health Survey), SIM (Mortality Information
     System), SINASC (Live Birth Information System), and other health information
     systems. Data is downloaded from the Brazilian Ministry of Health VIGITEL
-    repository <https://svs.aids.gov.br/download/Vigitel/>. Data is returned in
+    repository <https://svs.aids.gov.br/daent/cgdnt/vigitel/>. Data is returned in
     tidy format following tidyverse conventions.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -26,7 +26,9 @@ Imports:
     rlang,
     stringr,
     janitor,
-    purrr
+    purrr,
+    haven,
+    readr
 Suggests:
     testthat (>= 3.0.0),
     knitr,

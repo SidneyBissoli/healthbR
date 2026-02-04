@@ -4,28 +4,25 @@
 \alias{vigitel_dictionary}
 \title{Get VIGITEL variable dictionary}
 \usage{
-vigitel_dictionary(force_download = FALSE, cache_dir = NULL)
+vigitel_dictionary(cache_dir = NULL, force = FALSE)
 }
 \arguments{
-\item{force_download}{Logical. If TRUE, re-download the dictionary.}
+\item{cache_dir}{Character. Directory for caching downloaded files.
+Default uses \code{tools::R_user_dir("healthbR", "cache")}.}
 
-\item{cache_dir}{Character. Optional custom cache directory. If NULL (default),
-uses the standard user cache directory. Use \code{tempdir()} for temporary
-storage that won't persist.}
+\item{force}{Logical. If TRUE, re-download even if file exists in cache.
+Default is FALSE.}
 }
 \value{
-A tibble with variable metadata
+A tibble with variable dictionary.
 }
 \description{
-Returns the data dictionary with variable descriptions, labels, and
-coding information for VIGITEL surveys.
+Downloads and returns the VIGITEL data dictionary containing variable
+descriptions, codes, and categories.
 }
 \examples{
 \donttest{
-# get the dictionary (uses tempdir to avoid leaving files)
 dict <- vigitel_dictionary(cache_dir = tempdir())
-
-# view column names
-names(dict)
+head(dict)
 }
 }

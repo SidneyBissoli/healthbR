@@ -7,7 +7,7 @@
 vigitel_years()
 }
 \value{
-An integer vector of available years
+An integer vector of available years (2006-2024).
 }
 \description{
 Returns a vector of years for which VIGITEL microdata is available

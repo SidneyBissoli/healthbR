@@ -14,7 +14,7 @@ uses the standard user cache directory.}
 A tibble with cache information
 }
 \description{
-Shows which years are cached and file sizes.
+Shows cache status including downloaded files and their sizes.
 }
 \examples{
 # check cache status

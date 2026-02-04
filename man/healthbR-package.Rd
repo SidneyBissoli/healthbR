@@ -6,7 +6,7 @@
 \alias{healthbR-package}
 \title{healthbR: Access Brazilian Public Health Data}
 \description{
-Provides easy access to Brazilian public health data from multiple sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases by Telephone Survey), PNS (National Health Survey), SIM (Mortality Information System), SINASC (Live Birth Information System), and other health information systems. Data is downloaded from the Brazilian Ministry of Health VIGITEL repository \url{https://svs.aids.gov.br/download/Vigitel/}. Data is returned in tidy format following tidyverse conventions.
+Provides easy access to Brazilian public health data from multiple sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases by Telephone Survey), PNS (National Health Survey), SIM (Mortality Information System), SINASC (Live Birth Information System), and other health information systems. Data is downloaded from the Brazilian Ministry of Health VIGITEL repository \url{https://svs.aids.gov.br/daent/cgdnt/vigitel/}. Data is returned in tidy format following tidyverse conventions.
 }
 \seealso{
 Useful links:

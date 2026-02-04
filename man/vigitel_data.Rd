@@ -2,88 +2,89 @@
 % Please edit documentation in R/vigitel.R
 \name{vigitel_data}
 \alias{vigitel_data}
-\title{Load VIGITEL microdata}
+\title{Download VIGITEL microdata}
 \usage{
 vigitel_data(
-  year,
+  year = NULL,
+  format = c("dta", "csv"),
   vars = NULL,
-  force_download = FALSE,
-  parallel = TRUE,
-  lazy = FALSE,
-  cache_dir = NULL
+  cache_dir = NULL,
+  force = FALSE
 )
 }
 \arguments{
-\item{year}{Year(s) of the survey. Can be:
-\itemize{
-\item Single year: \code{2023}
-\item Range: \code{2021:2023}
-\item Vector: \code{c(2021, 2023)}
-\item Character: \code{c("2021", "2023")}
-\item All years: \code{"all"}
-}}
+\item{year}{Integer or vector of integers. Years to return (2006-2024).
+Use NULL to return all years. Default is NULL.}
 
-\item{vars}{Character vector. Variable names to select, or NULL for all
-variables. Default is NULL.}
+\item{format}{Character. File format to download: "dta" (Stata, default)
+or "csv". Stata format preserves variable labels.}
 
-\item{force_download}{Logical. If TRUE, re-download and reconvert data.
+\item{vars}{Character vector. Variables to select. Use NULL for all variables.
+Default is NULL.}
+
+\item{cache_dir}{Character. Directory for caching downloaded files.
+Default uses \code{tools::R_user_dir("healthbR", "cache")}.}
+
+\item{force}{Logical. If TRUE, re-download even if file exists in cache.
 Default is FALSE.}
-
-\item{parallel}{Logical. If TRUE, download and process multiple years in
-parallel. Default is TRUE when multiple years are requested.}
-
-\item{lazy}{Logical. If TRUE, return an Arrow Dataset for lazy evaluation
-instead of loading all data into memory. Useful for filtering large
-datasets before collecting. Use \code{collect()} to retrieve results.
-Default is FALSE.}
-
-\item{cache_dir}{Character. Optional custom cache directory. If NULL (default),
-uses the standard user cache directory. Use \code{tempdir()} for temporary
-storage that won't persist.}
 }
 \value{
-A tibble with the VIGITEL microdata. When multiple years are
-requested, a \code{year} column is added to identify the source year.
-If \code{lazy = TRUE}, returns an Arrow Dataset that can be queried
-with dplyr verbs before calling \code{collect()}.
+A tibble with VIGITEL microdata.
 }
 \description{
-Downloads (if necessary) and loads VIGITEL survey microdata into R.
-Data is automatically converted to Parquet format for faster subsequent
-loading. The data includes survey weights for proper statistical analysis.
+Downloads and returns VIGITEL survey microdata from the Ministry of Health.
+Data is cached locally to avoid repeated downloads. When the \code{arrow} package
+is installed, data is cached in partitioned parquet format for faster
+subsequent reads.
 }
 \details{
-On first access, data is downloaded from the Ministry of Health and
-converted to Parquet format. Subsequent loads read directly from the
-Parquet file, which is significantly faster.
+The VIGITEL survey (Vigilância de Fatores de Risco e Proteção para Doenças
+Crônicas por Inquérito Telefônico) is conducted annually by the Brazilian
+Ministry of Health in all state capitals and the Federal District.
 
-The \code{arrow} package is required for Parquet file support. If not
-installed, an informative error message will be shown with installation
-instructions.
-
-For parallel downloads, the function uses the \code{furrr} and \code{future}
-packages if installed. Install them with \code{install.packages(c("furrr", "future"))}
-to enable parallel processing. The number of workers is automatically set
-based on available CPU cores. If these packages are not installed, processing
-falls back to sequential mode.
-
-When \code{lazy = TRUE}, the function returns an Arrow Dataset that supports
-dplyr operations (filter, select, mutate, etc.) without loading data into
-memory. This is useful for working with large datasets or when you only
-need a subset of the data. Call \code{collect()} to retrieve the results
-as a tibble.
-
-The VIGITEL survey uses complex sampling weights. For proper statistical
-analysis, use survey packages like \code{survey} or \code{srvyr}.
-The weight variable is named \code{pesorake}.
+Data includes information on:
+\itemize{
+\item Demographics (age, sex, education, race)
+\item Health behaviors (smoking, alcohol, diet, physical activity)
+\item Health conditions (hypertension, diabetes, obesity)
+\item Healthcare utilization
 }
+
+The survey uses post-stratification weights (variable \code{pesorake}) to produce
+population estimates. Always use these weights for statistical inference.
+\subsection{Performance}{
+
+When the \code{arrow} package is installed, data is cached in partitioned parquet
+format. This allows the function to read only the requested years without
+loading the entire dataset into memory. If you frequently work with VIGITEL
+data, installing \code{arrow} is highly recommended:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{install.packages("arrow")
+}\if{html}{\out{</div>}}
+}
+}
+\section{Data source}{
+
+Data is downloaded from the Ministry of Health website:
+\url{https://svs.aids.gov.br/daent/cgdnt/vigitel/}
+}
+
 \examples{
 \donttest{
-# single year (uses tempdir to avoid leaving files on system)
-df <- vigitel_data(2023, cache_dir = tempdir())
+# download all years (uses tempdir to avoid leaving files)
+df <- vigitel_data(cache_dir = tempdir())
 
-# specific variables
-df <- vigitel_data(2023, vars = c("cidade", "sexo", "idade", "pesorake"),
-                   cache_dir = tempdir())
+# download specific year
+df_2024 <- vigitel_data(year = 2024, cache_dir = tempdir())
+
+# download multiple years
+df_recent <- vigitel_data(year = 2020:2024, cache_dir = tempdir())
+
+# select specific variables
+df_subset <- vigitel_data(
+  year = 2024,
+  vars = c("ano", "cidade", "sexo", "idade", "pesorake"),
+  cache_dir = tempdir()
+)
 }
 }

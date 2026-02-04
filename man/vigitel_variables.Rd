@@ -4,25 +4,25 @@
 \alias{vigitel_variables}
 \title{List VIGITEL variables}
 \usage{
-vigitel_variables(year, cache_dir = NULL)
+vigitel_variables(cache_dir = NULL, force = FALSE)
 }
 \arguments{
-\item{year}{Integer. Year of the survey.}
+\item{cache_dir}{Character. Directory for caching downloaded files.
+Default uses \code{tools::R_user_dir("healthbR", "cache")}.}
 
-\item{cache_dir}{Character. Optional custom cache directory. If NULL (default),
-uses the standard user cache directory. Use \code{tempdir()} for temporary
-storage that won't persist.}
+\item{force}{Logical. If TRUE, re-download even if file exists in cache.
+Default is FALSE.}
 }
 \value{
-A character vector of variable names
+A tibble with variable information from the dictionary.
 }
 \description{
-Returns a character vector of variable names available in a VIGITEL
-survey year.
+Returns a tibble with information about available variables in the
+VIGITEL dataset.
 }
 \examples{
 \donttest{
-# list variables for 2023 (uses tempdir to avoid leaving files)
-vigitel_variables(2023, cache_dir = tempdir())
+vars <- vigitel_variables(cache_dir = tempdir())
+head(vars)
 }
 }
