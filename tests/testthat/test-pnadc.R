@@ -98,45 +98,54 @@ test_that("validate_pnadc_year validates correctly for habitacao module", {
   # valid years
   expect_equal(validate_pnadc_year(2016, "habitacao"), 2016L)
   expect_equal(validate_pnadc_year(2024, "habitacao"), 2024L)
-  expect_equal(validate_pnadc_year(c(2020, 2021), "habitacao"), c(2020L, 2021L))
+  expect_equal(validate_pnadc_year(2015, "habitacao"), 2015L)
+  expect_equal(validate_pnadc_year(c(2018, 2019), "habitacao"), c(2018L, 2019L))
 
   # NULL returns all available
   all_years <- validate_pnadc_year(NULL, "habitacao")
   expect_true(2016L %in% all_years)
   expect_true(2024L %in% all_years)
+  expect_true(2015L %in% all_years)
 
-  # invalid year
-  expect_error(validate_pnadc_year(2015, "habitacao"), "Invalid year")
+  # invalid year (2020, 2021 not available in FTP)
+  expect_error(validate_pnadc_year(2020, "habitacao"), "Invalid year")
+  expect_error(validate_pnadc_year(2021, "habitacao"), "Invalid year")
 })
 
 # ============================================================================
 # URL building functions
 # ============================================================================
 
-test_that("pnadc_build_url builds correct URLs for trimestre modules", {
+test_that("pnadc_find_data_url builds correct URLs for trimestre modules", {
+  skip_on_cran()
+  skip_if_offline()
+
   # deficiencia is trimestre 3
-  url_info <- pnadc_build_url("deficiencia", 2022)
+  url_info <- pnadc_find_data_url("deficiencia", 2022)
 
   expect_type(url_info, "list")
   expect_true("data_url" %in% names(url_info))
-  expect_true("filename" %in% names(url_info))
+  expect_true("data_filename" %in% names(url_info))
 
   expect_match(url_info$data_url, "Trimestre_3")
   expect_match(url_info$data_url, "2022")
-  expect_match(url_info$filename, "trimestre3")
+  expect_match(url_info$data_filename, "trimestre3")
 
   # aps is trimestre 2
-  url_info_aps <- pnadc_build_url("aps", 2022)
+  url_info_aps <- pnadc_find_data_url("aps", 2022)
   expect_match(url_info_aps$data_url, "Trimestre_2")
 })
 
-test_that("pnadc_build_url builds correct URLs for visita modules", {
+test_that("pnadc_find_data_url builds correct URLs for visita modules", {
+  skip_on_cran()
+  skip_if_offline()
+
   # habitacao and moradores are visita 1
-  url_info <- pnadc_build_url("habitacao", 2022)
+  url_info <- pnadc_find_data_url("habitacao", 2022)
 
   expect_match(url_info$data_url, "Visita_1")
   expect_match(url_info$data_url, "2022")
-  expect_match(url_info$filename, "visita1")
+  expect_match(url_info$data_filename, "visita1")
 })
 
 # ============================================================================
@@ -248,8 +257,9 @@ test_that("pnadc_data validates year parameter", {
     pnadc_data(module = "deficiencia", year = 2021, cache_dir = tempdir()),
     "Invalid year"
   )
+  # 2020 and 2021 are not available for habitacao
   expect_error(
-    pnadc_data(module = "habitacao", year = 2015, cache_dir = tempdir()),
+    pnadc_data(module = "habitacao", year = 2020, cache_dir = tempdir()),
     "Invalid year"
   )
 })

@@ -166,7 +166,7 @@ validate_pnadc_year <- function(year, module) {
 
 #' List files in IBGE FTP directory
 #' @noRd
-pnadc_list_ftp_files <- function(url) {
+pnadc_list_ftp_files <- function(url, extension = "zip") {
   # fetch directory listing
   response <- tryCatch(
     {
@@ -186,11 +186,9 @@ pnadc_list_ftp_files <- function(url) {
   content <- rawToChar(response$content)
   Encoding(content) <- "UTF-8"
 
-  # extract href links that end in .zip
-  matches <- stringr::str_extract_all(
-    content,
-    'href="([^"]+\\.zip)"'
-  )[[1]]
+  # extract href links that match the extension
+  pattern <- paste0('href="([^"]+\\.', extension, ')"')
+  matches <- stringr::str_extract_all(content, pattern)[[1]]
 
   # extract just the filename
   filenames <- stringr::str_replace(matches, 'href="([^"]+)"', "\\1")
@@ -214,7 +212,13 @@ pnadc_find_data_url <- function(module, year) {
       "Anual/Microdados/Visita/Visita_1/Documentacao/"
     )
     data_pattern <- stringr::str_c("PNADC_", year, "_visita1")
-    input_pattern <- "input_PNADC_visita1"
+    # Visita input files are year-specific (e.g., input_PNADC_2022_visita1_*.txt)
+    # For years 2012-2014, there's a combined file: input_PNADC_2012_a_2014_visita1_*.txt
+    if (year %in% 2012:2014) {
+      input_pattern <- "input_PNADC_2012_a_2014_visita1"
+    } else {
+      input_pattern <- stringr::str_c("input_PNADC_", year, "_visita1")
+    }
   } else if (module_info$path_type == "trimestre") {
     quarter <- module_info$quarter
     data_dir_url <- stringr::str_c(
@@ -256,12 +260,11 @@ pnadc_find_data_url <- function(module, year) {
   # use the most recent data file
   data_filename <- matching_data[length(matching_data)]
 
-  # list files in documentation directory
-  doc_files <- pnadc_list_ftp_files(doc_dir_url)
+  # list files in documentation directory (txt files for input specs)
+  doc_files <- pnadc_list_ftp_files(doc_dir_url, extension = "txt")
 
   # find matching input file
   matching_input <- doc_files[stringr::str_detect(doc_files, input_pattern)]
-  matching_input <- matching_input[grepl("\\.txt$", matching_input, ignore.case = TRUE)]
 
   input_url <- NULL
   input_filename <- NULL
