@@ -316,8 +316,11 @@ pnadc_download_file <- function(url, destfile, refresh = FALSE) {
 #' Parse IBGE input file for fixed-width format
 #' @noRd
 pnadc_parse_input_file <- function(input_file) {
-  # read input file
-  input_lines <- readr::read_lines(input_file)
+  # read input file (IBGE files use LATIN1 encoding)
+  input_lines <- readr::read_lines(
+    input_file,
+    locale = readr::locale(encoding = "LATIN1")
+  )
 
   # IBGE input file format:
   # @position variable $format.
@@ -337,8 +340,9 @@ pnadc_parse_input_file <- function(input_file) {
     line <- stringr::str_trim(line)
 
     # extract @position variable format
-    # handles: @1 UF $2. or @1 UF 2.
-    parts <- stringr::str_match(line, "@(\\d+)\\s+(\\S+)\\s+\\$?(\\d+)")
+    # handles: @1 UF $2. (character) or @1 UF 2. (numeric)
+    # The $ indicates character type
+    parts <- stringr::str_match(line, "@(\\d+)\\s+(\\S+)\\s+(\\$?)(\\d+)")
 
     if (is.na(parts[1, 1])) {
       return(NULL)
@@ -347,7 +351,8 @@ pnadc_parse_input_file <- function(input_file) {
     list(
       start = as.integer(parts[1, 2]),
       name = parts[1, 3],
-      width = as.integer(parts[1, 4])
+      is_char = parts[1, 4] == "$",
+      width = as.integer(parts[1, 5])
     )
   })
 
@@ -375,10 +380,17 @@ pnadc_read_fwf <- function(data_file, input_file) {
     col_names = purrr::map_chr(col_specs, "name")
   )
 
+  # create column types: c = character, d = double (numeric)
+  col_types <- paste0(
+    purrr::map_chr(col_specs, ~ if (.x$is_char) "c" else "d"),
+    collapse = ""
+  )
+
   readr::read_fwf(
     data_file,
     col_positions = positions,
-    show_col_types = FALSE,
+    col_types = col_types,
+    locale = readr::locale(encoding = "LATIN1"),
     progress = TRUE
   )
 }
