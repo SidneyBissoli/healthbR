@@ -6,11 +6,11 @@ Authors@R:
            comment = c(ORCID = "0009-0001-0442-3700"))
 Description: Provides easy access to Brazilian public health data from multiple
     sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases
-    by Telephone Survey), PNS (National Health Survey), SIM (Mortality Information
-    System), SINASC (Live Birth Information System), and other health information
-    systems. Data is downloaded from the Brazilian Ministry of Health VIGITEL
-    repository <https://svs.aids.gov.br/daent/cgdnt/vigitel/>. Data is returned in
-    tidy format following tidyverse conventions.
+    by Telephone Survey), PNS (National Health Survey), PNAD Continua (Continuous
+    National Household Sample Survey), SIM (Mortality Information System), SINASC
+    (Live Birth Information System), and other health information systems. Data is
+    downloaded from the Brazilian Ministry of Health and IBGE repositories. Data is
+    returned in tidy format following tidyverse conventions.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -36,7 +36,8 @@ Suggests:
     rmarkdown,
     furrr,
     future,
-    arrow
+    arrow,
+    srvyr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://github.com/SidneyBissoli/healthbR
