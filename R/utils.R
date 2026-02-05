@@ -77,7 +77,7 @@ list_sources <- function() {
     ),
     status = c(
       "available",
-      "planned",
+      "available",
       "planned",
       "planned",
       "planned",

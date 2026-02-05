@@ -28,7 +28,8 @@ Imports:
     janitor,
     purrr,
     haven,
-    readr
+    readr,
+    jsonlite
 Suggests:
     testthat (>= 3.0.0),
     knitr,
