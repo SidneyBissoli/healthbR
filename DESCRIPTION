@@ -7,7 +7,8 @@ Authors@R:
 Description: Provides easy access to Brazilian public health data from multiple
     sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases
     by Telephone Survey), PNS (National Health Survey), PNAD Continua (Continuous
-    National Household Sample Survey), SIM (Mortality Information System), SINASC
+    National Household Sample Survey), POF (Household Budget Survey with food
+    security and consumption data), SIM (Mortality Information System), SINASC
     (Live Birth Information System), and other health information systems. Data is
     downloaded from the Brazilian Ministry of Health and IBGE repositories. Data is
     returned in tidy format following tidyverse conventions.
@@ -37,6 +38,7 @@ Suggests:
     furrr,
     future,
     arrow,
+    survey,
     srvyr
 Config/testthat/edition: 3
 VignetteBuilder: knitr

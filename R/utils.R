@@ -63,10 +63,10 @@ list_sources <- function() {
       "Health facilities registry"
     ),
     years = c(
-      "2006-2023",
+      "2006-2024",
       "2013, 2019",
-      "2012-2023",
-      "2008-2009, 2017-2018",
+      "2012-2024",
+      "2002-2003, 2008-2009, 2017-2018",
       "1991, 2000, 2010, 2022",
       "1979-2023",
       "1994-2023",
@@ -78,8 +78,8 @@ list_sources <- function() {
     status = c(
       "available",
       "available",
-      "planned",
-      "planned",
+      "available",
+      "available",
       "planned",
       "planned",
       "planned",
