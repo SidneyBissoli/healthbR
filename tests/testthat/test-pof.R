@@ -218,7 +218,7 @@ test_that("pof_dictionary validates register parameter", {
 
 test_that("pof_dictionary downloads and returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   dict <- pof_dictionary(year = "2017-2018", cache_dir = tempdir())
 
@@ -230,7 +230,7 @@ test_that("pof_dictionary downloads and returns tibble", {
 
 test_that("pof_dictionary filters by register", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   dict_all <- pof_dictionary(year = "2017-2018", cache_dir = tempdir())
   dict_morador <- pof_dictionary(year = "2017-2018", register = "morador", cache_dir = tempdir())
@@ -241,7 +241,7 @@ test_that("pof_dictionary filters by register", {
 
 test_that("pof_dictionary uses cache on second call", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pof_dict_cache")
   unlink(test_cache, recursive = TRUE)
@@ -266,7 +266,7 @@ test_that("pof_dictionary uses cache on second call", {
 
 test_that("pof_variables returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   vars <- pof_variables(year = "2017-2018", cache_dir = tempdir())
 
@@ -277,7 +277,7 @@ test_that("pof_variables returns tibble", {
 
 test_that("pof_variables filters by register", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   vars <- pof_variables(year = "2017-2018", register = "morador", cache_dir = tempdir())
 
@@ -287,7 +287,7 @@ test_that("pof_variables filters by register", {
 
 test_that("pof_variables filters by search term", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   vars <- pof_variables(year = "2017-2018", search = "uf", cache_dir = tempdir())
 
@@ -329,7 +329,7 @@ test_that("pof_data requires srvyr for as_survey = TRUE", {
 
 test_that("pof_data downloads and returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pof_download")
   unlink(test_cache, recursive = TRUE)
@@ -346,7 +346,7 @@ test_that("pof_data downloads and returns tibble", {
 
 test_that("pof_data handles variable selection", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pof_vars")
   unlink(test_cache, recursive = TRUE)
@@ -367,7 +367,7 @@ test_that("pof_data handles variable selection", {
 
 test_that("pof_data uses cache on second call", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pof_cache_reuse")
   unlink(test_cache, recursive = TRUE)
@@ -389,7 +389,7 @@ test_that("pof_data uses cache on second call", {
 
 test_that("pof_data with as_survey returns survey design", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
   skip_if_not_installed("srvyr")
 
   test_cache <- file.path(tempdir(), "test_pof_survey")
@@ -408,7 +408,7 @@ test_that("pof_data with as_survey returns survey design", {
 
 test_that("pof_data can download domicilio register", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pof_domicilio")
   unlink(test_cache, recursive = TRUE)

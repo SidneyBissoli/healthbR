@@ -118,7 +118,7 @@ test_that("validate_pnadc_year validates correctly for habitacao module", {
 
 test_that("pnadc_find_data_url builds correct URLs for trimestre modules", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   # deficiencia is trimestre 3
   url_info <- pnadc_find_data_url("deficiencia", 2022)
@@ -138,7 +138,7 @@ test_that("pnadc_find_data_url builds correct URLs for trimestre modules", {
 
 test_that("pnadc_find_data_url builds correct URLs for visita modules", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   # habitacao and moradores are visita 1
   url_info <- pnadc_find_data_url("habitacao", 2022)
@@ -270,7 +270,7 @@ test_that("pnadc_data validates year parameter", {
 
 test_that("pnadc_dictionaries downloads and returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pnadc_dict")
   on.exit(unlink(test_cache, recursive = TRUE), add = TRUE)
@@ -292,7 +292,7 @@ test_that("pnadc_dictionaries downloads and returns tibble", {
 
 test_that("pnadc_dictionaries uses cache on second call", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pnadc_dict_cache")
   unlink(test_cache, recursive = TRUE)
@@ -324,7 +324,7 @@ test_that("pnadc_dictionaries uses cache on second call", {
 
 test_that("pnadc_variables returns character vector", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pnadc_vars")
   on.exit(unlink(test_cache, recursive = TRUE), add = TRUE)
@@ -341,7 +341,7 @@ test_that("pnadc_variables returns character vector", {
 
 test_that("pnadc_data downloads and returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pnadc_download")
   unlink(test_cache, recursive = TRUE)
@@ -370,7 +370,7 @@ test_that("pnadc_data downloads and returns tibble", {
 
 test_that("pnadc_data handles variable selection", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pnadc_vars_select")
   on.exit(unlink(test_cache, recursive = TRUE), add = TRUE)
@@ -394,7 +394,7 @@ test_that("pnadc_data handles variable selection", {
 
 test_that("pnadc_data uses cache on second call", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pnadc_cache_reuse")
   unlink(test_cache, recursive = TRUE)
@@ -427,7 +427,7 @@ test_that("pnadc_data uses cache on second call", {
 
 test_that("pnadc_data returns survey design when as_survey = TRUE", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
   skip_if_not_installed("srvyr")
 
   test_cache <- file.path(tempdir(), "test_pnadc_survey")
@@ -445,7 +445,7 @@ test_that("pnadc_data returns survey design when as_survey = TRUE", {
 
 test_that("pnadc_data errors when as_survey = TRUE and srvyr not installed", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   # temporarily unload srvyr if it exists
   if (requireNamespace("srvyr", quietly = TRUE)) {
@@ -472,7 +472,7 @@ test_that("pnadc_data errors when as_survey = TRUE and srvyr not installed", {
 
 test_that("pnadc_cache_status shows cached files", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pnadc_status")
   unlink(test_cache, recursive = TRUE)
@@ -496,7 +496,7 @@ test_that("pnadc_cache_status shows cached files", {
 
 test_that("pnadc_clear_cache removes specific module", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pnadc_clear_module")
   unlink(test_cache, recursive = TRUE)

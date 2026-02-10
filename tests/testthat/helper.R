@@ -12,3 +12,14 @@ skip_if_offline <- function() {
     }
   )
 }
+
+# skip integration tests that download large files
+# Set HEALTHBR_INTEGRATION=true to run these tests:
+#   Sys.setenv(HEALTHBR_INTEGRATION = "true")
+#   devtools::check()
+skip_if_no_integration <- function() {
+  if (!identical(Sys.getenv("HEALTHBR_INTEGRATION"), "true")) {
+    skip("Integration tests skipped. Set HEALTHBR_INTEGRATION=true to run.")
+  }
+  skip_if_offline()
+}

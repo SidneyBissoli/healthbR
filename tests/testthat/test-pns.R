@@ -75,7 +75,7 @@ test_that("pns_dictionary validates year parameter", {
 
 test_that("pns_dictionary downloads and returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   dict <- pns_dictionary(year = 2019, cache_dir = tempdir())
 
@@ -86,7 +86,7 @@ test_that("pns_dictionary downloads and returns tibble", {
 
 test_that("pns_dictionary uses cache on second call", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pns_dict_cache")
   unlink(test_cache, recursive = TRUE)
@@ -107,7 +107,7 @@ test_that("pns_dictionary uses cache on second call", {
 
 test_that("pns_variables returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   vars <- pns_variables(year = 2019, cache_dir = tempdir())
 
@@ -268,7 +268,7 @@ test_that("pns_sidra_data validates territorial_level", {
 
 test_that("pns_sidra_data returns tibble from API", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   result <- pns_sidra_data(
     table = 4751,
@@ -282,7 +282,7 @@ test_that("pns_sidra_data returns tibble from API", {
 
 test_that("pns_sidra_data returns data by state", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   result <- pns_sidra_data(
     table = 4751,
@@ -298,7 +298,7 @@ test_that("pns_sidra_data returns data by state", {
 
 test_that("pns_sidra_data raw parameter works", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   result_raw <- pns_sidra_data(
     table = 4751,
@@ -319,7 +319,7 @@ test_that("pns_sidra_data raw parameter works", {
 
 test_that("pns_sidra_data handles multiple years", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   result <- pns_sidra_data(
     table = 4751,
@@ -333,7 +333,7 @@ test_that("pns_sidra_data handles multiple years", {
 
 test_that("pns_sidra_data warns for unknown table", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   # table 99999 should not exist in catalog - expect warning about catalog
   # and then an error from the API (invalid table)
@@ -352,7 +352,7 @@ test_that("pns_sidra_data warns for unknown table", {
 
 test_that("pns_data downloads and returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pns_download")
   unlink(test_cache, recursive = TRUE)
@@ -369,7 +369,7 @@ test_that("pns_data downloads and returns tibble", {
 
 test_that("pns_data handles variable selection", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pns_vars")
   unlink(test_cache, recursive = TRUE)
@@ -396,7 +396,7 @@ test_that("pns_data handles variable selection", {
 
 test_that("pns_data uses cache on second call", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_pns_cache_reuse")
   unlink(test_cache, recursive = TRUE)

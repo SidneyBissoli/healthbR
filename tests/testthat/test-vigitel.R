@@ -67,7 +67,7 @@ test_that("vigitel_data validates year parameter", {
 test_that("vigitel_data accepts various year formats", {
   # these should not error on validation (they may fail on download if offline)
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   # use dedicated cache
   test_cache <- file.path(tempdir(), "test_year_formats")
@@ -97,7 +97,7 @@ test_that("vigitel_clear_cache handles empty cache", {
 # integration tests - skip on CRAN due to downloads
 test_that("vigitel_dictionary downloads and parses correctly", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_dictionary")
   unlink(test_cache, recursive = TRUE)
@@ -111,7 +111,7 @@ test_that("vigitel_dictionary downloads and parses correctly", {
 
 test_that("vigitel_variables returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_variables")
   unlink(test_cache, recursive = TRUE)
@@ -125,7 +125,7 @@ test_that("vigitel_variables returns tibble", {
 
 test_that("vigitel_data downloads and returns tibble", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   # use dedicated cache to avoid interference
   test_cache <- file.path(tempdir(), "test_download_single")
@@ -145,7 +145,7 @@ test_that("vigitel_data downloads and returns tibble", {
 
 test_that("vigitel_data handles multiple years", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   # use fresh cache to avoid interference from other tests
   fresh_cache <- file.path(tempdir(), "test_multiple_years")
@@ -163,7 +163,7 @@ test_that("vigitel_data handles multiple years", {
 
 test_that("vigitel_data handles year range", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   # use fresh cache to avoid interference from other tests
   fresh_cache <- file.path(tempdir(), "test_year_range")
@@ -186,7 +186,7 @@ test_that("vigitel_data handles year range", {
 
 test_that("vigitel_data selects specific variables", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   # use fresh cache to avoid interference from other tests
   fresh_cache <- file.path(tempdir(), "test_select_vars")
@@ -221,7 +221,7 @@ test_that("vigitel_data selects specific variables", {
 
 test_that("vigitel_data format parameter works", {
   skip_on_cran()
-  skip_if_offline()
+  skip_if_no_integration()
 
   test_cache <- file.path(tempdir(), "test_csv_format")
   unlink(test_cache, recursive = TRUE)
