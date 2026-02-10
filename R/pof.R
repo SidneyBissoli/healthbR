@@ -568,10 +568,11 @@ pof_cache_dir <- function(cache_dir = NULL) {
   utils::unzip(zip_path, files = matching_files[1], exdir = temp_dir, overwrite = TRUE)
   txt_path <- file.path(temp_dir, matching_files[1])
 
-  # filter dictionary for this register
-  dict_filtered <- dictionary |>
-    dplyr::filter(tolower(.data$register) == tolower(!!register)) |>
-    dplyr::filter(!is.na(.data$position), !is.na(.data$length), !is.na(.data$variable))
+  # filter dictionary for this register (use base R to avoid dplyr data masking)
+  dict_filtered <- dictionary[tolower(dictionary$register) == tolower(register), ]
+  dict_filtered <- dict_filtered[
+    !is.na(dict_filtered$position) & !is.na(dict_filtered$length) & !is.na(dict_filtered$variable),
+  ]
 
   if (nrow(dict_filtered) == 0) {
     # cleanup
@@ -1063,12 +1064,10 @@ pof_dictionary <- function(year = "2017-2018",
     cli::cli_alert_success("Dictionary cached: {.file {cache_file}}")
   }
 
-  # filter by register if specified
+  # filter by register if specified (use base R to avoid dplyr data masking)
   if (!is.null(register)) {
     .pof_validate_register(register, year)
-    register_name <- register
-    dict <- dict |>
-      dplyr::filter(tolower(.data$register) == tolower(!!register_name))
+    dict <- dict[tolower(dict$register) == tolower(register), ]
   }
 
   dict
