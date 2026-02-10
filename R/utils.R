@@ -80,7 +80,7 @@ list_sources <- function() {
       "available",
       "available",
       "available",
-      "planned",
+      "available",
       "planned",
       "planned",
       "planned",

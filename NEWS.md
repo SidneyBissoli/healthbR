@@ -2,6 +2,17 @@
 
 ## New modules
 
+* **Censo Demografico**: Added module for accessing population denominators
+  from the IBGE SIDRA API, covering Census years 1970-2022 and intercensitary
+  estimates 2001-2021.
+  - `censo_years()`, `censo_info()` for Census metadata
+  - `censo_populacao()` for population by sex, age, race, urban/rural
+  - `censo_estimativa()` for intercensitary population estimates
+  - `censo_sidra_tables()`, `censo_sidra_search()` for table discovery
+  - `censo_sidra_data()` for querying any Census SIDRA table
+  - Shared SIDRA utilities extracted to `utils-sidra.R` (used by PNS and Census)
+  - Added vignette: "Population Denominators from the Census with healthbR"
+
 * **POF (Pesquisa de Orçamentos Familiares)**: Added complete module for
   accessing POF microdata from IBGE FTP, covering editions 2002-2003,
   2008-2009, and 2017-2018.

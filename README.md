@@ -10,12 +10,14 @@ healthbR provides easy access to Brazilian public health survey data directly fr
 
 Currently supported data sources:
 
-- **VIGITEL** - Surveillance of Risk Factors for Chronic Diseases by Telephone Survey (Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico) - Years 2006-2024
+- **VIGITEL** - Surveillance of Risk Factors for Chronic Diseases by Telephone Survey - Years 2006-2024
+- **PNS** - National Health Survey (microdata + SIDRA API) - Years 2013, 2019
+- **PNAD Continua** - Continuous National Household Sample Survey - Years 2012-2024
+- **POF** - Household Budget Survey (food security, consumption, anthropometry) - Years 2002-2018
+- **Censo Demografico** - Population denominators via SIDRA API - Census 1970-2022, estimates 2001-2021
 
 Planned for future releases:
 
-- PNS (National Health Survey)
-- PNAD (National Household Sample Survey)
 - SIM (Mortality Information System)
 - SINASC (Live Birth Information System)
 - SIH (Hospital Information System)

@@ -8,10 +8,11 @@ Description: Provides easy access to Brazilian public health data from multiple
     sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases
     by Telephone Survey), PNS (National Health Survey), PNAD Continua (Continuous
     National Household Sample Survey), POF (Household Budget Survey with food
-    security and consumption data), SIM (Mortality Information System), SINASC
-    (Live Birth Information System), and other health information systems. Data is
-    downloaded from the Brazilian Ministry of Health and IBGE repositories. Data is
-    returned in tidy format following tidyverse conventions.
+    security and consumption data), Censo Demografico (population denominators
+    via SIDRA API), SIM (Mortality Information System), SINASC (Live Birth
+    Information System), and other health information systems. Data is downloaded
+    from the Brazilian Ministry of Health and IBGE repositories. Data is returned
+    in tidy format following tidyverse conventions.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
