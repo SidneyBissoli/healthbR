@@ -1,5 +1,26 @@
 # healthbR 0.2.0
 
+## New modules
+
+* **POF (Pesquisa de Orçamentos Familiares)**: Added complete module for
+  accessing POF microdata from IBGE FTP, covering editions 2002-2003,
+  2008-2009, and 2017-2018.
+  - `pof_years()`, `pof_info()`, `pof_registers()` for survey metadata
+  - `pof_dictionary()`, `pof_variables()` for variable exploration
+  - `pof_data()` for downloading and importing microdata
+  - `pof_cache_status()`, `pof_clear_cache()` for cache management
+  - Survey design support via `as_survey = TRUE` (requires `srvyr`)
+  - Health-focused data: food security (EBIA), food consumption,
+    anthropometry, and health expenses
+  - Parquet caching when `arrow` is installed
+  - Added vignette: "Analyzing Health Data from POF with healthbR"
+
+* **PNADC (PNAD Contínua)**: Added module for health-related supplementary
+  modules from PNAD Contínua (deficiência, habitação, moradores, APS).
+
+* **PNS (Pesquisa Nacional de Saúde)**: Added module for PNS microdata and
+  SIDRA tabulated data access (2013, 2019).
+
 ## Breaking changes
 
 * Complete refactoring of VIGITEL functions due to Ministry of Health website
@@ -35,6 +56,8 @@
   fast as only that year's partition is loaded.
 
 * Added `haven` and `readr` to Imports for reading Stata and CSV files.
+
+* Added `survey` to Suggests for complex survey analysis support.
 
 ## Bug fixes
 
