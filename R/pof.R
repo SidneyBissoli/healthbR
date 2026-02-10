@@ -272,13 +272,18 @@ pof_cache_dir <- function(cache_dir = NULL) {
     }
   }
 
-  # approach 3: look for files with "variav" in ASCII-transliterated name
+  # approach 3: look for files with "variav" in accent-stripped name
+  accent_from <- paste0(
+    "\u00e1\u00e9\u00ed\u00f3\u00fa\u00e0\u00e8\u00ec\u00f2\u00f9",
+    "\u00e2\u00ea\u00ee\u00f4\u00fb\u00e3\u00f5\u00e7",
+    "\u00c1\u00c9\u00cd\u00d3\u00da\u00c0\u00c8\u00cc\u00d2\u00d9",
+    "\u00c2\u00ca\u00ce\u00d4\u00db\u00c3\u00d5\u00c7",
+    "\u00fc\u00dc\u00f1\u00d1"
+  )
+  accent_to <- "aeiouaeiouaeiouaocAEIOUAEIOUAEIOUAOCuUnN"
   for (f in xls_files) {
-    bn_ascii <- tryCatch(
-      iconv(basename(f), to = "ASCII//TRANSLIT"),
-      error = function(e) basename(f)
-    )
-    if (!is.na(bn_ascii) && grepl("dicion|variav", bn_ascii, ignore.case = TRUE)) {
+    bn_ascii <- chartr(accent_from, accent_to, basename(f))
+    if (grepl("dicion|variav", bn_ascii, ignore.case = TRUE)) {
       return(f)
     }
   }
@@ -292,6 +297,16 @@ pof_cache_dir <- function(cache_dir = NULL) {
   # read all sheets from Excel file
   sheets <- readxl::excel_sheets(dict_path)
 
+  # helper to remove accents using chartr (iconv can segfault on Windows)
+  accent_from <- paste0(
+    "\u00e1\u00e9\u00ed\u00f3\u00fa\u00e0\u00e8\u00ec\u00f2\u00f9",
+    "\u00e2\u00ea\u00ee\u00f4\u00fb\u00e3\u00f5\u00e7",
+    "\u00c1\u00c9\u00cd\u00d3\u00da\u00c0\u00c8\u00cc\u00d2\u00d9",
+    "\u00c2\u00ca\u00ce\u00d4\u00db\u00c3\u00d5\u00c7",
+    "\u00fc\u00dc\u00f1\u00d1"
+  )
+  accent_to <- "aeiouaeiouaeiouaocAEIOUAEIOUAEIOUAOCuUnN"
+
   # filter to relevant sheets (register names)
   register_patterns <- c(
     "domicilio", "morador", "caderneta", "despesa",
@@ -299,9 +314,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
   )
 
   all_dicts <- purrr::map(sheets, function(sheet) {
-    # skip non-register sheets
-    sheet_lower <- tolower(sheet)
-    is_register <- any(purrr::map_lgl(register_patterns, ~ grepl(.x, sheet_lower)))
+    # strip accents and lowercase for matching
+    sheet_ascii <- tolower(chartr(accent_from, accent_to, sheet))
+    is_register <- any(purrr::map_lgl(register_patterns, ~ grepl(.x, sheet_ascii)))
 
     if (!is_register) {
       return(NULL)
@@ -309,14 +324,37 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
     tryCatch(
       {
-        df <- readxl::read_excel(dict_path, sheet = sheet)
+        # the POF dictionary Excel has a specific structure:
+        # row 1: register title (e.g. "REGISTRO - DOMICILIO")
+        # row 2: blank
+        # row 3: column headers (Posicao Inicial, Tamanho, Decimais, Codigo, Descricao, Categorias)
+        # row 4+: data
 
-        # standardize column names
-        df <- df |>
-          janitor::clean_names()
+        # first detect the header row by scanning for "Posi" pattern
+        raw_df <- readxl::read_excel(dict_path, sheet = sheet, col_names = FALSE)
+        header_row <- NULL
+        for (i in seq_len(min(10, nrow(raw_df)))) {
+          row_vals <- as.character(raw_df[i, ])
+          if (any(grepl("Posi", row_vals, ignore.case = TRUE), na.rm = TRUE)) {
+            header_row <- i
+            break
+          }
+        }
 
-        # identify and rename key columns
-        # common patterns: posicao_inicial, tamanho, codigo_da_variavel, descricao
+        if (is.null(header_row)) {
+          # fallback: try reading with default headers
+          df <- readxl::read_excel(dict_path, sheet = sheet)
+          df <- df |> janitor::clean_names()
+        } else {
+          # read skipping rows before the header so the header row becomes col names
+          df <- readxl::read_excel(dict_path, sheet = sheet, skip = header_row - 1)
+          df <- df |> janitor::clean_names()
+        }
+
+        # remove completely empty rows
+        df <- df |> dplyr::filter(!dplyr::if_all(dplyr::everything(), is.na))
+
+        # standardize column names to expected format
         col_names <- names(df)
 
         # position column
@@ -349,9 +387,53 @@ pof_cache_dir <- function(cache_dir = NULL) {
           names(df)[names(df) == dec_col[1]] <- "decimals"
         }
 
-        # add register name
+        # categories column
+        cat_col <- col_names[grepl("categor|categ", col_names, ignore.case = TRUE)]
+        if (length(cat_col) > 0) {
+          names(df)[names(df) == cat_col[1]] <- "categories"
+        }
+
+        # map sheet name to standard register name
+        # sheet_ascii already computed above (accent-stripped, lowercase)
+
+        # more specific patterns first to avoid partial matches
+        register_map <- list(
+          "outros rendimentos" = "outros_rendimentos",
+          "rendimento" = "rendimento",
+          "consumo alimentar" = "consumo_alimentar",
+          "consumo" = "consumo_alimentar",
+          "despesa individual" = "despesa_individual",
+          "despesa coletiva" = "despesa_coletiva",
+          "aluguel estimado" = "aluguel_estimado",
+          "caderneta" = "caderneta_coletiva",
+          "inventario" = "inventario",
+          "domicilio" = "domicilio",
+          "morador" = "morador"
+        )
+
+        matched_register <- NULL
+        for (pattern in names(register_map)) {
+          if (grepl(pattern, sheet_ascii, ignore.case = TRUE)) {
+            matched_register <- register_map[[pattern]]
+            break
+          }
+        }
+
+        # skip sheets that don't match any known register
+        if (is.null(matched_register)) {
+          return(NULL)
+        }
+
         df <- df |>
-          dplyr::mutate(register = sheet)
+          dplyr::mutate(register = matched_register)
+
+        # select only standard columns and convert to character for safe binding
+        standard_cols <- c("position", "length", "decimals", "variable",
+                           "description", "categories", "register")
+        available_cols <- intersect(standard_cols, names(df))
+        df <- df |>
+          dplyr::select(dplyr::all_of(available_cols)) |>
+          dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
 
         df
       },
@@ -369,9 +451,21 @@ pof_cache_dir <- function(cache_dir = NULL) {
     cli::cli_abort("Could not parse any sheets from dictionary file.")
   }
 
-  dplyr::bind_rows(all_dicts) |>
+  result <- dplyr::bind_rows(all_dicts) |>
     dplyr::mutate(year = year, .before = 1) |>
     tibble::as_tibble()
+
+  # convert position and length back to numeric
+  if ("position" %in% names(result)) {
+    result <- result |>
+      dplyr::mutate(position = as.integer(.data$position))
+  }
+  if ("length" %in% names(result)) {
+    result <- result |>
+      dplyr::mutate(length = as.integer(.data$length))
+  }
+
+  result
 }
 
 #' Download and parse POF dictionary
@@ -488,14 +582,15 @@ pof_cache_dir <- function(cache_dir = NULL) {
     ))
   }
 
-  # get unique column specifications
+  # get unique column specifications (deduplicate by variable name,
+  # keeping first occurrence to avoid duplicate columns from merged sheets)
   dict_unique <- dict_filtered |>
-    dplyr::distinct(.data$variable, .data$position, .data$length) |>
     dplyr::mutate(
       position = as.integer(.data$position),
       length = as.integer(.data$length)
     ) |>
     dplyr::filter(!is.na(.data$position), !is.na(.data$length)) |>
+    dplyr::distinct(.data$variable, .keep_all = TRUE) |>
     dplyr::arrange(.data$position)
 
   # create fwf_positions
@@ -971,8 +1066,9 @@ pof_dictionary <- function(year = "2017-2018",
   # filter by register if specified
   if (!is.null(register)) {
     .pof_validate_register(register, year)
+    register_name <- register
     dict <- dict |>
-      dplyr::filter(tolower(.data$register) == tolower(register))
+      dplyr::filter(tolower(.data$register) == tolower(!!register_name))
   }
 
   dict
@@ -1197,8 +1293,10 @@ pof_data <- function(year = "2017-2018",
   # 7. select specific variables if requested
   if (!is.null(vars)) {
     # always include design variables and year
-    design_vars <- c("year", "COD_UPA", "ESTRATO_POF", "PESO_FINAL", "UF")
+    design_vars <- c("COD_UPA", "ESTRATO_POF", "PESO_FINAL", "UF")
     all_vars <- unique(c(design_vars, toupper(vars)))
+    # also include year column if present (lowercase)
+    year_col <- if ("year" %in% names(df)) "year" else NULL
 
     # find matching columns (case-insensitive)
     col_names_upper <- toupper(names(df))
@@ -1209,6 +1307,7 @@ pof_data <- function(year = "2017-2018",
       cli::cli_warn("Variables not found: {.val {missing}}")
     }
 
+    available_vars <- unique(c(year_col, available_vars))
     df <- df |>
       dplyr::select(dplyr::all_of(available_vars))
   }
