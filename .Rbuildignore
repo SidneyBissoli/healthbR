@@ -18,3 +18,6 @@
 ^cran-fixes$
 ^briefing_healthbR_cran_fix\.md$
 ^improvements$
+^_tmp_.*\.R$
+^_ul-Sidney-desktop-\d+$
+^prompts$

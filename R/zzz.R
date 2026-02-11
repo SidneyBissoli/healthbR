@@ -1,3 +1,4 @@
+#' @useDynLib healthbR, healthbR_dbc2dbf
 #' @importFrom rlang .data
 #' @importFrom dplyr filter select bind_rows
 #' @importFrom tibble tibble
