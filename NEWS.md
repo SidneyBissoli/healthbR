@@ -1,3 +1,16 @@
+# healthbR 0.4.0
+
+## New modules
+
+* **SINASC (Sistema de Informacoes sobre Nascidos Vivos)**: Added module for
+  accessing live birth microdata from DATASUS FTP as .dbc files (1996-2024).
+  - `sinasc_years()`, `sinasc_info()` for module metadata
+  - `sinasc_variables()`, `sinasc_dictionary()` for variable exploration
+  - `sinasc_data()` for downloading live birth microdata per state (UF)
+  - `sinasc_cache_status()`, `sinasc_clear_cache()` for cache management
+  - Congenital anomaly filtering by CID-10 code (`anomaly` parameter)
+  - Reuses shared DBC infrastructure (`.dbc2dbf()`, `.read_dbc()`, `.datasus_download()`)
+
 # healthbR 0.3.0
 
 ## New modules
