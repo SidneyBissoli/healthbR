@@ -1,3 +1,19 @@
+# healthbR 0.5.0
+
+## New modules
+
+* **SIH (Sistema de Informacoes Hospitalares)**: Added module for accessing
+  hospital admission microdata from DATASUS FTP as .dbc files (2008-2024).
+  - `sih_years()`, `sih_info()` for module metadata
+  - `sih_variables()`, `sih_dictionary()` for variable exploration
+  - `sih_data()` for downloading hospital admission microdata per state (UF)
+  - `sih_cache_status()`, `sih_clear_cache()` for cache management
+  - **Monthly data**: SIH data is organized per month (one .dbc file per
+    UF per month). Use `month` parameter to select specific months.
+  - Principal diagnosis filtering by CID-10 code (`diagnosis` parameter)
+  - Output includes `year`, `month`, and `uf_source` columns
+  - Reuses shared DBC infrastructure (`.dbc2dbf()`, `.read_dbc()`, `.datasus_download()`)
+
 # healthbR 0.4.0
 
 ## New modules

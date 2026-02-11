@@ -1,6 +1,6 @@
 Package: healthbR
 Title: Access Brazilian Public Health Data
-Version: 0.4.0
+Version: 0.5.0
 Authors@R: 
     person("Sidney", "Bissoli", , "sbissoli76@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-0442-3700"))
@@ -10,7 +10,8 @@ Description: Provides easy access to Brazilian public health data from multiple
     National Household Sample Survey), POF (Household Budget Survey with food
     security and consumption data), Censo Demografico (population denominators
     via SIDRA API), SIM (Mortality Information System), SINASC (Live Birth
-    Information System), and other health information systems. Data is downloaded
+    Information System), SIH (Hospital Information System),
+    and other health information systems. Data is downloaded
     from the Brazilian Ministry of Health and IBGE repositories. Data is returned
     in tidy format following tidyverse conventions.
 License: MIT + file LICENSE
