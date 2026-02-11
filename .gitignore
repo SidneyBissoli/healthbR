@@ -16,6 +16,9 @@ src/*.dll
 # Package archive
 *.tar.gz
 
+# Project status (internal reference only)
+STATUS.md
+
 # OS files
 .DS_Store
 Thumbs.db
