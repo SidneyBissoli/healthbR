@@ -1,3 +1,32 @@
+# healthbR 0.3.0
+
+## New modules
+
+* **SIM (Sistema de Informacoes sobre Mortalidade)**: Added module for
+  accessing mortality microdata from DATASUS FTP as .dbc files (CID-10,
+  1996-2024).
+  - `sim_years()`, `sim_info()` for module metadata
+  - `sim_variables()`, `sim_dictionary()` for variable exploration
+  - `sim_data()` for downloading mortality microdata per state (UF)
+  - `sim_cache_status()`, `sim_clear_cache()` for cache management
+  - Automatic age decoding from the IDADE variable (`decode_age = TRUE`)
+  - Cause-of-death filtering by CID-10 code (`cause` parameter)
+  - Efficient per-state downloads (e.g., ~1 MB for Acre vs ~150 MB for all)
+  - Parquet caching when `arrow` is installed, .rds fallback otherwise
+
+## New infrastructure
+
+* **DBC decompression**: Added shared C infrastructure for reading DATASUS
+  .dbc files (PKWare DCL compressed DBF). This enables future modules for
+  SIH, SINASC, CNES, SIA, and SINAN.
+  - Vendored `blast.c`/`blast.h` from Mark Adler (zlib license)
+  - `dbc2dbf.c` written from scratch (MIT license)
+  - Internal functions: `.dbc2dbf()`, `.read_dbc()`, `.datasus_download()`
+
+## Dependencies
+
+* Added `foreign` to Imports (for reading .dbf files after decompression).
+
 # healthbR 0.2.0
 
 ## New modules
