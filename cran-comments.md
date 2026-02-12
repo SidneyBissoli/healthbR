@@ -6,18 +6,37 @@
 
 ## Test environments
 
-* Local: Windows 11, R 4.5.2
-* win-builder: R-devel (2026-01-23 r89325)
-* GitHub Actions (rhub): 
-  - Ubuntu Linux, R release
-  - macOS ARM64, R release
-  - Windows, R release
+* Local: Windows 11 Pro, R 4.5.2
+* GitHub Actions:
+  - Ubuntu Linux 22.04, R release
+  - Ubuntu Linux 22.04, R devel
+  - Ubuntu Linux 22.04, R oldrel-1
+  - Windows Server 2022, R release
+  - macOS (ARM64), R release
 
 ## Notes
 
-The NOTE on win-builder mentions "possibly misspelled words": PNS, SINASC, VIGITEL, tidyverse.
-These are correct acronyms/names:
-- VIGITEL: Brazilian health surveillance system (Vigilância de Fatores de Risco)
-- PNS: Pesquisa Nacional de Saúde (National Health Survey)
-- SINASC: Sistema de Informações sobre Nascidos Vivos
-- tidyverse: R package collection name
+The package includes compiled C code (`src/blast.c`, `src/dbc2dbf.c`) for
+decompressing DATASUS .dbc files (PKWare DCL compressed DBF). The vendored
+`blast.c`/`blast.h` are from Mark Adler (zlib license); `dbc2dbf.c` is
+original code (MIT license). Both are documented in `inst/COPYRIGHTS`.
+
+The NOTE about "possibly misspelled words" refers to Brazilian health system
+acronyms used in the DESCRIPTION:
+- DATASUS: Departamento de Informatica do SUS
+- VIGITEL: Vigilancia de Fatores de Risco e Protecao para Doencas Cronicas
+- PNS: Pesquisa Nacional de Saude
+- PNADC / PNAD: Pesquisa Nacional por Amostra de Domicilios
+- POF: Pesquisa de Orcamentos Familiares
+- SINASC: Sistema de Informacoes sobre Nascidos Vivos
+- SIM: Sistema de Informacoes sobre Mortalidade
+- SIH: Sistema de Informacoes Hospitalares
+- SIA: Sistema de Informacoes Ambulatoriais
+- SIDRA: Sistema IBGE de Recuperacao Automatica
+- IBGE: Instituto Brasileiro de Geografia e Estatistica
+
+All examples that download data are wrapped in `@examplesIf interactive()`
+to avoid network access during R CMD check.
+
+FTP URLs (`ftp://ftp.datasus.gov.br/...`) are intentional -- DATASUS
+distributes public health microdata exclusively via FTP.

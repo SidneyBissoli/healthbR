@@ -26,3 +26,5 @@
 ^STATUS\.html$
 ^STATUS\.md$
 ^healthbR\.Rcheck$
+^screenshot.*\.png$
+^healthbR_.*\.tar\.gz$

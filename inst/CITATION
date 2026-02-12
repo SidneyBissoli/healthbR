@@ -1,8 +1,9 @@
 bibentry(
   bibtype  = "Manual",
   title    = "healthbR: Access Brazilian Public Health Data",
-  author   = person("Sidney", "Silva"),
+  author   = person("Sidney", "Bissoli",
+                     comment = c(ORCID = "0009-0001-0442-3700")),
   year     = "2025",
-  note     = "R package version 0.0.0.9000",
+  note     = sprintf("R package version %s", meta$Version),
   url      = "https://github.com/SidneyBissoli/healthbR"
 )
