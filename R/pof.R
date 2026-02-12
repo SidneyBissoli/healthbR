@@ -254,7 +254,7 @@ pof_cache_dir <- function(cache_dir = NULL) {
   dict_patterns <- c("dicion", "variav", "variaveis")
   for (pattern in dict_patterns) {
     for (f in xls_files) {
-      if (grepl(pattern, f, ignore.case = TRUE)) {
+      if (grepl(pattern, f, ignore.case = TRUE, useBytes = TRUE)) {
         return(f)
       }
     }
@@ -264,7 +264,7 @@ pof_cache_dir <- function(cache_dir = NULL) {
   dicion_raw <- charToRaw("Dicion")
   for (f in xls_files) {
     bn <- basename(f)
-    if (nchar(bn) >= 6) {
+    if (nchar(bn, type = "bytes") >= 6) {
       first_bytes <- charToRaw(substr(bn, 1, 6))
       if (length(first_bytes) >= 6 && all(first_bytes == dicion_raw)) {
         return(f)
@@ -283,7 +283,7 @@ pof_cache_dir <- function(cache_dir = NULL) {
   accent_to <- "aeiouaeiouaeiouaocAEIOUAEIOUAEIOUAOCuUnN"
   for (f in xls_files) {
     bn_ascii <- chartr(accent_from, accent_to, basename(f))
-    if (grepl("dicion|variav", bn_ascii, ignore.case = TRUE)) {
+    if (grepl("dicion|variav", bn_ascii, ignore.case = TRUE, useBytes = TRUE)) {
       return(f)
     }
   }
@@ -1045,6 +1045,11 @@ pof_dictionary <- function(year = "2017-2018",
   # validate year
   .pof_validate_year(year)
 
+  # validate register early (before download)
+  if (!is.null(register)) {
+    .pof_validate_register(register, year)
+  }
+
   # set cache directory
   cache_dir <- pof_cache_dir(cache_dir)
 
@@ -1066,7 +1071,6 @@ pof_dictionary <- function(year = "2017-2018",
 
   # filter by register if specified (use base R to avoid dplyr data masking)
   if (!is.null(register)) {
-    .pof_validate_register(register, year)
     dict <- dict[tolower(dict$register) == tolower(register), ]
   }
 
