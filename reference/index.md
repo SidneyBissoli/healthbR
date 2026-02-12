@@ -124,6 +124,25 @@ National health facility registry from CNES (DATASUS FTP, 2005–2024)
 - [`cnes_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/cnes_clear_cache.md)
   : Clear CNES Cache
 
+## SI-PNI – Vaccination
+
+Vaccination doses and coverage from SI-PNI (DATASUS FTP, 1994–2019)
+
+- [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
+  : Download SI-PNI Vaccination Data
+- [`sipni_years()`](https://sidneybissoli.github.io/healthbR/reference/sipni_years.md)
+  : List Available SI-PNI Years
+- [`sipni_info()`](https://sidneybissoli.github.io/healthbR/reference/sipni_info.md)
+  : SI-PNI Module Information
+- [`sipni_variables()`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md)
+  : List SI-PNI Variables
+- [`sipni_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md)
+  : SI-PNI Data Dictionary
+- [`sipni_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_cache_status.md)
+  : Show SI-PNI Cache Status
+- [`sipni_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sipni_clear_cache.md)
+  : Clear SI-PNI Cache
+
 ## VIGITEL – Telephone survey
 
 Surveillance of Risk Factors for Chronic Diseases (2006–2024)

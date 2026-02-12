@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/censo-denominadores.html">Population Denominators from the Census with healthbR</a></li>
-    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, and CNES</a></li>
+    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, and SI-PNI</a></li>
     <li><a class="dropdown-item" href="../articles/pof-health-data.html">Analyzing Health Data from POF with healthbR</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -39,6 +39,32 @@
       <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.9.0" id="healthbr-090">healthbR 0.9.0<a class="anchor" aria-label="anchor" href="#healthbr-090"></a></h2>
+<div class="section level3">
+<h3 id="new-modules-0-9-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-9-0"></a></h3>
+<ul><li>
+<strong>SI-PNI (Sistema de Informacao do Programa Nacional de Imunizacoes)</strong>: Added module for accessing aggregated vaccination data from DATASUS FTP as plain .DBF files (1994-2019).
+<ul><li>
+<code><a href="../reference/sipni_years.html">sipni_years()</a></code>, <code><a href="../reference/sipni_info.html">sipni_info()</a></code> for module metadata</li>
+<li>
+<code><a href="../reference/sipni_variables.html">sipni_variables()</a></code>, <code><a href="../reference/sipni_dictionary.html">sipni_dictionary()</a></code> for variable exploration</li>
+<li>
+<code><a href="../reference/sipni_data.html">sipni_data()</a></code> for downloading vaccination data per state (UF)</li>
+<li>
+<code><a href="../reference/sipni_cache_status.html">sipni_cache_status()</a></code>, <code><a href="../reference/sipni_clear_cache.html">sipni_clear_cache()</a></code> for cache management</li>
+<li>
+<strong>2 file types</strong>: DPNI (doses applied, default) and CPNI (vaccination coverage). Use <code>type</code> parameter to select.</li>
+<li>
+<strong>Aggregated data</strong>: Unlike other DATASUS modules, SI-PNI contains dose counts and coverage rates per municipality/vaccine/age group, not individual-level microdata.</li>
+<li>
+<strong>Plain .DBF files</strong>: No DBC decompression needed (files are uncompressed).</li>
+<li>Output includes <code>year</code> and <code>uf_source</code> columns</li>
+<li>CPNI coverage field (<code>COBERT</code>) decimal separator automatically converted from comma to dot</li>
+<li>Data on DATASUS FTP frozen at 2019; post-2019 requires SI-PNI web API (future work)</li>
+</ul></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.8.0" id="healthbr-080">healthbR 0.8.0<a class="anchor" aria-label="anchor" href="#healthbr-080"></a></h2>
 <div class="section level3">

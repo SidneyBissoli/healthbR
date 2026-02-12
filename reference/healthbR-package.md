@@ -9,7 +9,8 @@ Demografico (population denominators via SIDRA API), SIM (Mortality
 Information System), SINASC (Live Birth Information System), SIH
 (Hospital Information System), SIA (Outpatient Information System),
 SINAN (Notifiable Diseases Surveillance), CNES (National Health Facility
-Registry), and other health information systems. Data is downloaded from
+Registry), SI-PNI (National Immunization Program - vaccination doses and
+coverage), and other health information systems. Data is downloaded from
 the Brazilian Ministry of Health and IBGE repositories. Data is returned
 in tidy format following tidyverse conventions.
 
