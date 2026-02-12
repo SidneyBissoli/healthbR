@@ -21,3 +21,5 @@
 ^_tmp_.*\.R$
 ^_ul-Sidney-desktop-\d+$
 ^prompts$
+^doc$
+^Meta$

@@ -1,3 +1,22 @@
+# healthbR 0.6.0
+
+## New modules
+
+* **SIA (Sistema de Informacoes Ambulatoriais)**: Added module for accessing
+  outpatient production microdata from DATASUS FTP as .dbc files (2008-2024).
+  - `sia_years()`, `sia_info()` for module metadata
+  - `sia_variables()`, `sia_dictionary()` for variable exploration
+  - `sia_data()` for downloading outpatient production microdata per state (UF)
+  - `sia_cache_status()`, `sia_clear_cache()` for cache management
+  - **13 file types**: PA (default), BI, AD, AM, AN, AQ, AR, AB, ACF, ATD,
+    AMP, SAD, PS. Use `type` parameter to select.
+  - **Monthly data**: SIA data is organized per month (one .dbc file per
+    type/UF/month). Use `month` parameter to select specific months.
+  - Procedure filtering by SIGTAP code (`procedure` parameter)
+  - Diagnosis filtering by CID-10 code (`diagnosis` parameter)
+  - Output includes `year`, `month`, and `uf_source` columns
+  - Reuses shared DBC infrastructure (`.dbc2dbf()`, `.read_dbc()`, `.datasus_download()`)
+
 # healthbR 0.5.0
 
 ## New modules
