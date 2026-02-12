@@ -1,8 +1,8 @@
 ---
-title: "DATASUS Modules: SIM, SINASC, SIH, and SIA"
+title: "DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, and CNES"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{DATASUS Modules: SIM, SINASC, SIH, and SIA}
+  %\VignetteIndexEntry{DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, and CNES}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-The `healthbR` package provides access to four DATASUS information systems via FTP, covering mortality, live births, hospital admissions, and outpatient production:
+The `healthbR` package provides access to six DATASUS information systems via FTP, covering mortality, live births, hospital admissions, outpatient production, notifiable diseases, and the health facility registry:
 
 | Module | Function | Source document | Granularity | Years |
 |--------|----------|-----------------|-------------|-------|
@@ -25,8 +25,10 @@ The `healthbR` package provides access to four DATASUS information systems via F
 | SINASC | `sinasc_data()` | Declaracao de Nascido Vivo (DN) | Annual/UF | 1996--2024 |
 | SIH | `sih_data()` | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF | 2008--2024 |
 | SIA | `sia_data()` | BPA / APAC | Monthly/type/UF | 2008--2024 |
+| SINAN | `sinan_data()` | Ficha de Notificacao | Annual/National | 2007--2024 |
+| CNES | `cnes_data()` | Cadastro de Estabelecimentos | Monthly/type/UF | 2005--2024 |
 
-All four modules share the same infrastructure:
+All six modules share the same infrastructure:
 
 - **DBC decompression**: .dbc files (compressed DBF) are decompressed internally using vendored C code -- no external dependencies required.
 - **FTP download**: files are fetched from `ftp.datasus.gov.br` with automatic retry and exponential backoff.
@@ -62,7 +64,7 @@ sim_variables(search = "causa")
 sim_dictionary("SEXO")
 ```
 
-The same pattern works for `sinasc_*()`, `sih_*()`, and `sia_*()`.
+The same pattern works for `sinasc_*()`, `sih_*()`, `sia_*()`, `sinan_*()`, and `cnes_*()`.
 
 ## SIM -- Mortality
 
@@ -281,6 +283,142 @@ ambul |>
   count(proc_group, sort = TRUE)
 ```
 
+## SINAN -- Notifiable diseases
+
+The SINAN (Sistema de Informacao de Agravos de Notificacao) contains individual notification records for 31 compulsorily notifiable diseases. Unlike other DATASUS modules, SINAN files are **national** (one file per disease per year, covering all of Brazil).
+
+### Available diseases
+
+SINAN covers 31 diseases. Use `sinan_diseases()` to see all available codes:
+
+```{r}
+sinan_diseases()
+#> # A tibble: 31 x 3
+#>    code  name                      description
+#>    <chr> <chr>                     <chr>
+#>  1 DENG  Dengue                    Dengue
+#>  2 CHIK  Chikungunya               Febre de Chikungunya
+#>  3 ZIKA  Zika                      Zika virus
+#>  4 TUBE  Tuberculose               Tuberculose
+#>  ...
+
+# search for a specific disease
+sinan_diseases(search = "sifilis")
+```
+
+### Basic download
+
+```{r}
+# dengue notifications, 2022 (default disease)
+dengue <- sinan_data(year = 2022)
+
+# tuberculosis notifications, 2020-2022
+tb <- sinan_data(year = 2020:2022, disease = "TUBE")
+
+# select specific variables
+sinan_data(year = 2022, disease = "DENG",
+           vars = c("DT_NOTIFIC", "CS_SEXO", "NU_IDADE_N",
+                    "ID_MUNICIP", "CLASSI_FIN"))
+```
+
+### Filtering by state
+
+Since files are national, filter by UF after download:
+
+```{r}
+dengue <- sinan_data(year = 2022)
+
+# filter by state of notification
+dengue_sp <- dengue |>
+  filter(SG_UF_NOT == "35")  # Sao Paulo (IBGE code)
+
+# or by municipality
+dengue_rio <- dengue |>
+  filter(substr(ID_MUNICIP, 1, 2) == "33")  # Rio de Janeiro state
+```
+
+### Key variables
+
+| Variable | Description |
+|----------|-------------|
+| `DT_NOTIFIC` | Notification date |
+| `ID_AGRAVO` | Disease code (CID-10) |
+| `CS_SEXO` | Sex (M = Male, F = Female, I = Unknown) |
+| `NU_IDADE_N` | Age (encoded: 1st digit = unit, digits 2-4 = value) |
+| `ID_MUNICIP` | Municipality of notification (IBGE code) |
+| `CLASSI_FIN` | Final classification (1 = Confirmed, 2 = Discarded) |
+| `EVOLUCAO` | Outcome (1 = Cure, 2 = Death from disease) |
+
+### Example: confirmed dengue by month
+
+```{r}
+dengue <- sinan_data(year = 2022, disease = "DENG")
+
+dengue |>
+  filter(CLASSI_FIN %in% c("1", "5")) |>  # confirmed cases
+  mutate(month = substr(DT_NOTIFIC, 4, 5)) |>
+  count(month, sort = TRUE)
+```
+
+## CNES -- Health facility registry
+
+The CNES (Cadastro Nacional de Estabelecimentos de Saude) is the national registry of all health facilities in Brazil. Like SIH and SIA, data is organized **monthly** (one file per type/UF/month), and there are **13 file types** covering different aspects of the registry.
+
+### File types
+
+| Code | Name | Description |
+|------|------|-------------|
+| ST | Estabelecimentos | Facility registry (default) |
+| LT | Leitos | Hospital beds |
+| PF | Profissional | Health professionals |
+| DC | Dados Complementares | Complementary facility data |
+| EQ | Equipamentos | Health equipment |
+| SR | Servico Especializado | Specialized services |
+| HB | Habilitacao | Facility certifications |
+| EP | Equipes | Health teams |
+| RC | Regra Contratual | Contractual rules |
+| IN | Incentivos | Financial incentives |
+| EE | Estab. de Ensino | Teaching facilities |
+| EF | Estab. Filantropico | Philanthropic facilities |
+| GM | Gestao e Metas | Management and targets |
+
+### Basic download
+
+```{r}
+# establishments in Acre, January 2023
+estab <- cnes_data(year = 2023, month = 1, uf = "AC")
+
+# hospital beds
+leitos <- cnes_data(year = 2023, month = 1, uf = "AC", type = "LT")
+
+# health professionals
+prof <- cnes_data(year = 2023, month = 1, uf = "AC", type = "PF")
+```
+
+### Key variables (ST type)
+
+| Variable | Description |
+|----------|-------------|
+| `CNES` | Facility CNES code |
+| `CODUFMUN` | Municipality (UF + IBGE 6-digit code) |
+| `TP_UNID` | Facility type (22 categories) |
+| `VINC_SUS` | SUS-linked (0 = No, 1 = Yes) |
+| `TP_GESTAO` | Management type (M = Municipal, E = State, D = Dual) |
+| `ESFERA_A` | Administrative sphere (1-4) |
+
+### Example: facility types in a state
+
+```{r}
+estab <- cnes_data(year = 2023, month = 1, uf = "AC")
+
+estab |>
+  count(TP_UNID, sort = TRUE) |>
+  left_join(
+    cnes_dictionary("TP_UNID") |> select(code, label),
+    by = c("TP_UNID" = "code")
+  )
+```
+
 ## Cross-module analyses
 
 A key strength of `healthbR` is the ability to combine data from different DATASUS modules and Census denominators in a single workflow. Below are three practical examples.
@@ -370,11 +508,12 @@ sim_clear_cache()
 
 ### Tips for managing downloads
 
-- **Use `uf`** to download only the states you need instead of all 27.
-- **Use `month`** (SIH and SIA) to limit monthly downloads. Downloading a full year for all states requires 324 files per module (27 UFs x 12 months).
+- **Use `uf`** to download only the states you need instead of all 27 (SIM, SINASC, SIH, SIA, CNES).
+- **Use `month`** (SIH, SIA, CNES) to limit monthly downloads. Downloading a full year for all states requires 324 files per module (27 UFs x 12 months).
 - **Use `vars`** to keep only the variables you need, reducing memory usage.
 - SIM and SINASC are annual (one file per UF per year), so a full-year download is 27 files.
-- SIH and SIA are monthly, so a full-year download is 324 files per type. SIA has 13 file types, so downloading everything for one year would be 4,212 files -- always filter by `type`, `uf`, and `month`.
+- SINAN files are national (one file per disease per year), so downloads are fast but files can be large.
+- SIH, SIA, and CNES are monthly, so a full-year download is 324 files per type. SIA and CNES each have 13 file types -- always filter by `type`, `uf`, and `month`.
 
 ## Additional resources
 
