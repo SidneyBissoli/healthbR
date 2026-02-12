@@ -1,3 +1,26 @@
+# healthbR 0.9.0
+
+## New modules
+
+* **SI-PNI (Sistema de Informacao do Programa Nacional de Imunizacoes)**: Added
+  module for accessing aggregated vaccination data from DATASUS FTP as plain
+  .DBF files (1994-2019).
+  - `sipni_years()`, `sipni_info()` for module metadata
+  - `sipni_variables()`, `sipni_dictionary()` for variable exploration
+  - `sipni_data()` for downloading vaccination data per state (UF)
+  - `sipni_cache_status()`, `sipni_clear_cache()` for cache management
+  - **2 file types**: DPNI (doses applied, default) and CPNI (vaccination
+    coverage). Use `type` parameter to select.
+  - **Aggregated data**: Unlike other DATASUS modules, SI-PNI contains
+    dose counts and coverage rates per municipality/vaccine/age group,
+    not individual-level microdata.
+  - **Plain .DBF files**: No DBC decompression needed (files are uncompressed).
+  - Output includes `year` and `uf_source` columns
+  - CPNI coverage field (`COBERT`) decimal separator automatically converted
+    from comma to dot
+  - Data on DATASUS FTP frozen at 2019; post-2019 requires SI-PNI web API
+    (future work)
+
 # healthbR 0.8.0
 
 ## New modules

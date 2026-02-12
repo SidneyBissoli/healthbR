@@ -22,7 +22,7 @@ The package downloads, caches, and processes data from official sources
 (Ministry of Health, IBGE, DATASUS), returning clean, analysis-ready tibbles
 following tidyverse conventions.
 
-The package currently supports **11 data sources** organized in two groups:
+The package currently supports **12 data sources** organized in two groups:
 
 **Surveys (IBGE / Ministry of Health)**
 
@@ -44,6 +44,7 @@ The package currently supports **11 data sources** organized in two groups:
 | SIA | Outpatient procedures (13 file types) | Monthly/UF | 2008--2024 |
 | SINAN | Notifiable diseases (31 diseases) | Annual/National | 2007--2024 |
 | CNES | Health facility registry (13 file types) | Monthly/UF | 2005--2024 |
+| SI-PNI | Vaccination doses and coverage (aggregated) | Annual/UF | 1994--2019 |
 
 ## Getting started
 
@@ -56,7 +57,7 @@ To see all available data sources at a glance:
 
 ```{r}
 list_sources()
-#> # A tibble: 11 x 5
+#> # A tibble: 12 x 5
 #>    source  name                         description                    years       status
 #>    <chr>   <chr>                        <chr>                          <chr>       <chr>
 #>  1 vigitel VIGITEL                      Telephone survey on chronic... 2006-2024   available
@@ -303,6 +304,27 @@ cnes_dictionary("TP_UNID")
 ```
 
 See `vignette("datasus-modules")` for cross-module analysis examples.
+
+## SI-PNI -- Vaccination data
+
+The SI-PNI contains aggregated vaccination data: dose counts (DPNI) and
+coverage rates (CPNI) per municipality, vaccine, and age group. Unlike other
+DATASUS modules, data is in plain .DBF format and covers 1994--2019.
+
+```{r}
+# module overview
+sipni_info()
+
+# doses applied in Acre, 2019
+doses <- sipni_data(year = 2019, uf = "AC")
+
+# vaccination coverage
+cobertura <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
+
+# explore vaccines and categories
+sipni_dictionary("IMUNO")
+sipni_variables()
+```
 
 ## Caching
 

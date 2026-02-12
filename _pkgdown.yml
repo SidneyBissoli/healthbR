@@ -74,6 +74,17 @@ reference:
       - cnes_cache_status
       - cnes_clear_cache
 
+  - title: "SI-PNI -- Vaccination"
+    desc: "Vaccination doses and coverage from SI-PNI (DATASUS FTP, 1994--2019)"
+    contents:
+      - sipni_data
+      - sipni_years
+      - sipni_info
+      - sipni_variables
+      - sipni_dictionary
+      - sipni_cache_status
+      - sipni_clear_cache
+
   - title: "VIGITEL -- Telephone survey"
     desc: "Surveillance of Risk Factors for Chronic Diseases (2006--2024)"
     contents:
