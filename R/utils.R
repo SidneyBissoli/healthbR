@@ -1,6 +1,7 @@
 #' Utility Functions for healthbR
 #'
 #' @name utils
+#' @keywords internal
 NULL
 
 #' List Available Data Sources

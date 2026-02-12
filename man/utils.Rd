@@ -6,3 +6,4 @@
 \description{
 Utility Functions for healthbR
 }
+\keyword{internal}
