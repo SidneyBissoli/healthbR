@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,19 @@
       <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.1" id="healthbr-061">healthbR 0.6.1<a class="anchor" aria-label="anchor" href="#healthbr-061"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-6-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-6-1"></a></h3>
+<ul><li><p>Fixed POF dictionary parsing failure on Linux/Ubuntu. <code><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">utils::unzip()</a></code> creates filenames with invalid UTF-8 bytes on non-Windows systems, which caused <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl()</a></code> and <code><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar()</a></code> to silently fail. Dictionary file lookup now uses byte-level matching (<code>useBytes = TRUE</code>, <code>nchar(type = "bytes")</code>) and renames extracted files to ASCII-safe names to prevent downstream encoding errors.</p></li>
+<li><p>Moved POF register validation before download in <code><a href="../reference/pof_dictionary.html">pof_dictionary()</a></code>, so invalid register names are caught immediately without triggering a download.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-6-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-6-1"></a></h3>
+<ul><li><p>Replaced <code>\donttest{}</code> with <code>@examplesIf interactive()</code> across all 9 modules (VIGITEL, PNS, PNADC, POF, Censo, SIM, SINASC, SIH, SIA). Examples that download data now only run in interactive sessions, following current CRAN guidelines.</p></li>
+<li><p>Marked internal <code>utils</code> topic with <code>@keywords internal</code> to fix pkgdown reference index build.</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.0" id="healthbr-060">healthbR 0.6.0<a class="anchor" aria-label="anchor" href="#healthbr-060"></a></h2>
 <div class="section level3">
