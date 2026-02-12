@@ -93,12 +93,12 @@ df <- vigitel_data(cache_dir = tempdir())
 #> URL:
 #> <https://svs.aids.gov.br/daent/cgdnt/vigitel/vigitel-2006-2024-peso-rake-dta.zip>
 #> This may take a few minutes...
-#> ✔ Download complete: /tmp/RtmpmPcNsW/vigitel/vigitel-2006-2024-peso-rake-dta.zip
+#> ✔ Download complete: /tmp/RtmpJ1hFKo/vigitel/vigitel-2006-2024-peso-rake-dta.zip
 #> Extracting ZIP file...
-#> ✔ Extracted: /tmp/RtmpmPcNsW/vigitel/vigitel-2006-2024-peso-rake.dta
+#> ✔ Extracted: /tmp/RtmpJ1hFKo/vigitel/vigitel-2006-2024-peso-rake.dta
 #> Reading dta file (this may take a moment)...
 #> Creating partitioned parquet cache for faster future reads...
-#> ✔ Partitioned cache created at /tmp/RtmpmPcNsW/vigitel/vigitel_data
+#> ✔ Partitioned cache created at /tmp/RtmpJ1hFKo/vigitel/vigitel_data
 #> ✔ Loaded 833217 observations from 18 years: 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2023, and 2024
 
 # download specific year

@@ -63,26 +63,95 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>healthbR provides easy access to Brazilian public health survey data directly from R. The package downloads, caches, and processes data from official sources, returning clean, analysis-ready tibbles following tidyverse conventions.</p>
-<p>Currently supported data sources:</p>
-<ul>
-<li>
-<strong>VIGITEL</strong> - Surveillance of Risk Factors for Chronic Diseases by Telephone Survey - Years 2006-2024</li>
-<li>
-<strong>PNS</strong> - National Health Survey (microdata + SIDRA API) - Years 2013, 2019</li>
-<li>
-<strong>PNAD Continua</strong> - Continuous National Household Sample Survey - Years 2012-2024</li>
-<li>
-<strong>POF</strong> - Household Budget Survey (food security, consumption, anthropometry) - Years 2002-2018</li>
-<li>
-<strong>Censo Demografico</strong> - Population denominators via SIDRA API - Census 1970-2022, estimates 2001-2021</li>
-</ul>
-<p>Planned for future releases:</p>
-<ul>
-<li>SIM (Mortality Information System)</li>
-<li>SINASC (Live Birth Information System)</li>
-<li>SIH (Hospital Information System)</li>
-</ul>
+<p>healthbR provides easy access to Brazilian public health data directly from R. The package downloads, caches, and processes data from official sources, returning clean, analysis-ready tibbles following tidyverse conventions.</p>
+<div class="section level3">
+<h3 id="surveys-ibge--ministry-of-health">Surveys (IBGE / Ministry of Health)<a class="anchor" aria-label="anchor" href="#surveys-ibge--ministry-of-health"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="28%">
+<col width="46%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Module</th>
+<th>Description</th>
+<th>Years</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>VIGITEL</strong></td>
+<td>Surveillance of Risk Factors for Chronic Diseases by Telephone Survey</td>
+<td>2006–2024</td>
+</tr>
+<tr class="even">
+<td><strong>PNS</strong></td>
+<td>National Health Survey (microdata + SIDRA API)</td>
+<td>2013, 2019</td>
+</tr>
+<tr class="odd">
+<td><strong>PNAD Continua</strong></td>
+<td>Continuous National Household Sample Survey</td>
+<td>2012–2024</td>
+</tr>
+<tr class="even">
+<td><strong>POF</strong></td>
+<td>Household Budget Survey (food security, consumption, anthropometry)</td>
+<td>2002–2018</td>
+</tr>
+<tr class="odd">
+<td><strong>Censo</strong></td>
+<td>Population denominators via SIDRA API</td>
+<td>1970–2022</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="datasus-ministry-of-health-ftp">DATASUS (Ministry of Health FTP)<a class="anchor" aria-label="anchor" href="#datasus-ministry-of-health-ftp"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="19%">
+<col width="31%">
+<col width="31%">
+<col width="17%">
+</colgroup>
+<thead><tr class="header">
+<th>Module</th>
+<th>Description</th>
+<th>Granularity</th>
+<th>Years</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>SIM</strong></td>
+<td>Mortality Information System (deaths)</td>
+<td>Annual/UF</td>
+<td>1996–2024</td>
+</tr>
+<tr class="even">
+<td><strong>SINASC</strong></td>
+<td>Live Birth Information System</td>
+<td>Annual/UF</td>
+<td>1996–2024</td>
+</tr>
+<tr class="odd">
+<td><strong>SIH</strong></td>
+<td>Hospital Information System (admissions)</td>
+<td>Monthly/UF</td>
+<td>2008–2024</td>
+</tr>
+<tr class="even">
+<td><strong>SIA</strong></td>
+<td>Outpatient Information System (13 file types)</td>
+<td>Monthly/type/UF</td>
+<td>2008–2024</td>
+</tr>
+</tbody>
+</table>
+<p>DATASUS modules download <code>.dbc</code> files (compressed DBF) and decompress them internally using vendored C code – no external dependencies required.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -93,116 +162,102 @@
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"SidneyBissoli/healthbR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="section level3">
-<h3 id="check-available-years">Check available years<a class="anchor" aria-label="anchor" href="#check-available-years"></a>
-</h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">healthbR</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># list available VIGITEL survey years</span></span>
-<span><span class="fu"><a href="reference/vigitel_years.html">vigitel_years</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020</span></span>
-<span><span class="co">#&gt; [16] 2021 2022 2023 2024</span></span></code></pre></div>
-</div>
+<span><span class="co"># see all available data sources</span></span>
+<span><span class="fu"><a href="reference/list_sources.html">list_sources</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="download-and-load-data">Download and load data<a class="anchor" aria-label="anchor" href="#download-and-load-data"></a>
+<h3 id="datasus-modules">DATASUS modules<a class="anchor" aria-label="anchor" href="#datasus-modules"></a>
 </h3>
+<p>All DATASUS modules follow a consistent API: <code>*_years()</code>, <code>*_info()</code>, <code>*_variables()</code>, <code>*_dictionary()</code>, <code>*_data()</code>, <code>*_cache_status()</code>, <code>*_clear_cache()</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># load data for a single year</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># mortality data -- deaths in Acre, 2022</span></span>
+<span><span class="va">obitos</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># load data for multiple years</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2020</span><span class="op">:</span><span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="co"># filter by cause of death (CID-10 prefix)</span></span>
+<span><span class="va">obitos_cardio</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, cause <span class="op">=</span> <span class="st">"I"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># load all available years</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># live births in Acre, 2022</span></span>
+<span><span class="va">nascimentos</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sinasc_data.html">sinasc_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># choose data format (default is Stata .dta which preserves labels)</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, format <span class="op">=</span> <span class="st">"dta"</span><span class="op">)</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, format <span class="op">=</span> <span class="st">"csv"</span><span class="op">)</span></span>
+<span><span class="co"># hospital admissions in Acre, January 2022</span></span>
+<span><span class="va">internacoes</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># select specific variables</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span></span>
-<span>  year <span class="op">=</span> <span class="fl">2024</span>,</span>
-<span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cidade"</span>, <span class="st">"sexo"</span>, <span class="st">"idade"</span>, <span class="st">"pesorake"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># filter by diagnosis (CID-10 prefix)</span></span>
+<span><span class="va">intern_resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, diagnosis <span class="op">=</span> <span class="st">"J"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># outpatient production in Acre, January 2022</span></span>
+<span><span class="va">ambulatorial</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># different file type (e.g., high-cost medications)</span></span>
+<span><span class="va">medicamentos</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, type <span class="op">=</span> <span class="st">"AM"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="explore-variables">Explore variables<a class="anchor" aria-label="anchor" href="#explore-variables"></a>
+<h3 id="survey-modules">Survey modules<a class="anchor" aria-label="anchor" href="#survey-modules"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># get the data dictionary with variable descriptions</span></span>
-<span><span class="va">dict</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_dictionary.html">vigitel_dictionary</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># VIGITEL telephone survey</span></span>
+<span><span class="va">vigitel</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># list variables (same as dictionary)</span></span>
-<span><span class="va">vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_variables.html">vigitel_variables</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># PNS national health survey</span></span>
+<span><span class="va">pns</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pns_data.html">pns_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># view the dictionary structure</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dict</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># PNAD Continua</span></span>
+<span><span class="va">pnadc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pnadc_data.html">pnadc_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, quarter <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># POF household budget survey</span></span>
+<span><span class="va">pof</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pof_data.html">pof_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2018</span>, register <span class="op">=</span> <span class="st">"morador"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Census population</span></span>
+<span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/censo_populacao.html">censo_populacao</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, territorial_level <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="survey-analysis-with-srvyr">Survey analysis with srvyr<a class="anchor" aria-label="anchor" href="#survey-analysis-with-srvyr"></a>
+<h3 id="explore-variables-and-dictionaries">Explore variables and dictionaries<a class="anchor" aria-label="anchor" href="#explore-variables-and-dictionaries"></a>
 </h3>
-<p>VIGITEL uses complex survey sampling. Use the <code>pesorake</code> weight variable for proper inference:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://gdfe.co/srvyr/" class="external-link">srvyr</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># list variables for any module</span></span>
+<span><span class="fu"><a href="reference/sim_variables.html">sim_variables</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/sia_variables.html">sia_variables</a></span><span class="op">(</span>search <span class="op">=</span> <span class="st">"sexo"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># create survey design</span></span>
-<span><span class="va">vigitel_svy</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="http://gdfe.co/srvyr/reference/as_survey_design.html" class="external-link">as_survey_design</a></span><span class="op">(</span>weights <span class="op">=</span> <span class="va">pesorake</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># calculate weighted prevalence</span></span>
-<span><span class="va">vigitel_svy</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">cidade</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span></span>
-<span>    prevalence <span class="op">=</span> <span class="fu"><a href="http://gdfe.co/srvyr/reference/survey_mean.html" class="external-link">survey_mean</a></span><span class="op">(</span><span class="va">diab</span> <span class="op">==</span> <span class="fl">1</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>    n <span class="op">=</span> <span class="fu"><a href="http://gdfe.co/srvyr/reference/unweighted.html" class="external-link">unweighted</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<span><span class="co"># data dictionary with category labels</span></span>
+<span><span class="fu"><a href="reference/sim_dictionary.html">sim_dictionary</a></span><span class="op">(</span><span class="st">"SEXO"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/sia_dictionary.html">sia_dictionary</a></span><span class="op">(</span><span class="st">"PA_RACACOR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="performance-optimization">Performance optimization<a class="anchor" aria-label="anchor" href="#performance-optimization"></a>
+<h2 id="caching">Caching<a class="anchor" aria-label="anchor" href="#caching"></a>
 </h2>
-<p>healthbR automatically optimizes data loading using partitioned parquet caching when the <code>arrow</code> package is installed.</p>
-<div class="section level3">
-<h3 id="automatic-parquet-caching-recommended">Automatic parquet caching (recommended)<a class="anchor" aria-label="anchor" href="#automatic-parquet-caching-recommended"></a>
-</h3>
-<p>Install the <code>arrow</code> package for significantly faster subsequent reads:</p>
+<p>All modules cache downloaded data automatically. Install <code>arrow</code> for optimized Parquet caching:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install arrow for better performance</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># first load downloads and creates partitioned cache</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># subsequent loads are extremely fast (reads only requested year)</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span>  <span class="co"># instant!</span></span></code></pre></div>
-<p>When <code>arrow</code> is installed: - Data is automatically cached in partitioned parquet format - Reading a single year loads only that year’s partition (~25MB instead of ~500MB) - Multiple years are combined efficiently</p>
-</div>
-<div class="section level3">
-<h3 id="cache-management">Cache management<a class="anchor" aria-label="anchor" href="#cache-management"></a>
-</h3>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
+<p>Each module provides cache management functions:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># check cache status</span></span>
-<span><span class="fu"><a href="reference/vigitel_cache_status.html">vigitel_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># check what is cached</span></span>
+<span><span class="fu"><a href="reference/sim_cache_status.html">sim_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/sih_cache_status.html">sih_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/sia_cache_status.html">sia_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># clear cache (all files)</span></span>
-<span><span class="fu"><a href="reference/vigitel_clear_cache.html">vigitel_clear_cache</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># clear only source files, keep parquet cache</span></span>
-<span><span class="fu"><a href="reference/vigitel_clear_cache.html">vigitel_clear_cache</a></span><span class="op">(</span>keep_parquet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-</div>
+<span><span class="co"># clear cache for a module</span></span>
+<span><span class="fu"><a href="reference/sim_clear_cache.html">sim_clear_cache</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="data-sources">Data sources<a class="anchor" aria-label="anchor" href="#data-sources"></a>
 </h2>
-<p>All data is downloaded from official Brazilian Ministry of Health repositories:</p>
+<p>All data is downloaded from official Brazilian government repositories:</p>
 <ul>
-<li>VIGITEL: <a href="https://svs.aids.gov.br/daent/cgdnt/vigitel/" class="external-link uri">https://svs.aids.gov.br/daent/cgdnt/vigitel/</a>
+<li>
+<strong>VIGITEL</strong>: <a href="https://svs.aids.gov.br/daent/cgdnt/vigitel/" class="external-link uri">https://svs.aids.gov.br/daent/cgdnt/vigitel/</a>
 </li>
+<li>
+<strong>PNS / PNAD Continua / POF</strong>: <a href="https://www.ibge.gov.br/" class="external-link uri">https://www.ibge.gov.br/</a>
+</li>
+<li>
+<strong>Censo</strong>: SIDRA API (<a href="https://apisidra.ibge.gov.br/" class="external-link uri">https://apisidra.ibge.gov.br/</a>)</li>
+<li>
+<strong>SIM / SINASC / SIH / SIA</strong>: DATASUS FTP (<code>ftp://ftp.datasus.gov.br/dissemin/publicos/</code>)</li>
 </ul>
 </div>
 <div class="section level2">

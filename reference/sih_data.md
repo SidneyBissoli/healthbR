@@ -94,36 +94,80 @@ Other sih:
 # all admissions in Acre, January 2022
 ac_jan <- sih_data(year = 2022, month = 1, uf = "AC")
 #> ℹ Downloading SIH data: AC 2022/01...
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> Warning: ! Failed to download/read SIH data for AC 2022/01.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
+#> Error in sih_data(year = 2022, month = 1, uf = "AC"): No data could be downloaded for the requested year(s)/month(s)/UF(s).
 
 # heart attacks in Sao Paulo, first semester 2022
 infarct_sp <- sih_data(year = 2022, month = 1:6, uf = "SP",
                         diagnosis = "I21")
 #> ℹ Downloading 6 file(s) (1 UF(s) x 1 year(s) x 6 month(s))...
 #> ℹ Downloading SIH data: SP 2022/01...
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30000 ms: Timeout was reached
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached
+#> Warning: ! Failed to download/read SIH data for SP 2022/01.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
 #> ℹ Downloading SIH data: SP 2022/02...
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached
+#> Warning: ! Failed to download/read SIH data for SP 2022/02.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
 #> ℹ Downloading SIH data: SP 2022/03...
 #> ℹ Downloading SIH data: SP 2022/04...
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached
+#> Warning: ! Failed to download/read SIH data for SP 2022/04.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
 #> ℹ Downloading SIH data: SP 2022/05...
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> Warning: ! Failed to download/read SIH data for SP 2022/05.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
 #> ℹ Downloading SIH data: SP 2022/06...
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> Warning: ! Failed to download/read SIH data for SP 2022/06.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
 
 # only key variables, Rio de Janeiro, March 2022
 sih_data(year = 2022, month = 3, uf = "RJ",
          vars = c("DIAG_PRINC", "DT_INTER", "SEXO",
                   "IDADE", "MORTE", "VAL_TOT"))
 #> ℹ Downloading SIH data: RJ 2022/03...
-#> # A tibble: 66,933 × 9
-#>     year month uf_source DIAG_PRINC DT_INTER SEXO  IDADE MORTE VAL_TOT
-#>    <int> <int> <chr>     <chr>      <chr>    <chr> <chr> <chr> <chr>  
-#>  1  2022     3 RJ        I219       20220125 1     66    0     910.68 
-#>  2  2022     3 RJ        I219       20220208 1     62    0     736.56 
-#>  3  2022     3 RJ        I219       20220208 1     51    0     794.5  
-#>  4  2022     3 RJ        I219       20220208 1     52    0     740.89 
-#>  5  2022     3 RJ        I219       20220217 1     65    0     715.78 
-#>  6  2022     3 RJ        I219       20220119 1     68    0     960.29 
-#>  7  2022     3 RJ        I219       20220224 1     64    0     607.46 
-#>  8  2022     3 RJ        S822       20211218 1     18    0     906.54 
-#>  9  2022     3 RJ        S820       20220317 1     48    0     344.06 
-#> 10  2022     3 RJ        I611       20220317 3     71    1     967.29 
-#> # ℹ 66,923 more rows
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30001 ms: Couldn't connect to server
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> Warning: ! Failed to download/read SIH data for RJ 2022/03.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
+#> Error in sih_data(year = 2022, month = 3, uf = "RJ", vars = c("DIAG_PRINC",     "DT_INTER", "SEXO", "IDADE", "MORTE", "VAL_TOT")): No data could be downloaded for the requested year(s)/month(s)/UF(s).
 # }
 ```

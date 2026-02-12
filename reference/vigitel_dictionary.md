@@ -31,7 +31,7 @@ A tibble with variable dictionary.
 # \donttest{
 dict <- vigitel_dictionary(cache_dir = tempdir())
 #> Downloading VIGITEL dictionary...
-#> ✔ Dictionary downloaded: /tmp/RtmpmPcNsW/vigitel/dicionario-vigitel-2006-2024.xlsx
+#> ✔ Dictionary downloaded: /tmp/RtmpJ1hFKo/vigitel/dicionario-vigitel-2006-2024.xlsx
 #> New names:
 #> • `` -> `...2`
 #> • `` -> `...3`

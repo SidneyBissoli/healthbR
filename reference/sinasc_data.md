@@ -88,12 +88,37 @@ Other sinasc:
 # all births in Acre, 2022
 ac_2022 <- sinasc_data(year = 2022, uf = "AC")
 #> ℹ Downloading SINASC data: AC 2022...
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> Warning: ! Failed to download/read SINASC data for AC 2022.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
+#> Error in sinasc_data(year = 2022, uf = "AC"): No data could be downloaded for the requested year(s)/UF(s).
 
 # births with anomalies in Sao Paulo, 2020-2022
 anomalies_sp <- sinasc_data(year = 2020:2022, uf = "SP", anomaly = "Q")
 #> ℹ Downloading 3 file(s) (1 UF(s) x 3 year(s))...
 #> ℹ Downloading SINASC data: SP 2020...
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30001 ms: Couldn't connect to server
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached
+#> Warning: ! Failed to download/read SINASC data for SP 2020.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
 #> ℹ Downloading SINASC data: SP 2021...
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30001 ms: Couldn't connect to server
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached
+#> Warning: ! Failed to download/read SINASC data for SP 2021.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
 #> ℹ Downloading SINASC data: SP 2022...
 
 # only key variables, Rio de Janeiro, 2022
@@ -101,19 +126,14 @@ sinasc_data(year = 2022, uf = "RJ",
             vars = c("DTNASC", "SEXO", "PESO",
                      "IDADEMAE", "PARTO", "CONSULTAS"))
 #> ℹ Downloading SINASC data: RJ 2022...
-#> # A tibble: 180,369 × 8
-#>     year uf_source DTNASC   SEXO  PESO  IDADEMAE PARTO CONSULTAS
-#>    <int> <chr>     <chr>    <chr> <chr> <chr>    <chr> <chr>    
-#>  1  2022 RJ        21042022 1     2800  20       1     4        
-#>  2  2022 RJ        02042022 1     4035  28       2     4        
-#>  3  2022 RJ        04052022 2     3800  31       2     4        
-#>  4  2022 RJ        28062022 2     3055  26       2     4        
-#>  5  2022 RJ        17012022 1     3055  27       1     4        
-#>  6  2022 RJ        17012022 2     3450  21       1     4        
-#>  7  2022 RJ        20022022 1     2695  34       2     1        
-#>  8  2022 RJ        23042022 2     2965  29       1     4        
-#>  9  2022 RJ        13022022 2     3800  26       2     4        
-#> 10  2022 RJ        30032022 1     3250  29       1     3        
-#> # ℹ 180,359 more rows
+#> ℹ Download attempt 1/3 failed. Retrying in 2s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> ℹ Download attempt 2/3 failed. Retrying in 4s...
+#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
+#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
+#> Warning: ! Failed to download/read SINASC data for RJ 2022.
+#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
+#> Error in sinasc_data(year = 2022, uf = "RJ", vars = c("DTNASC", "SEXO",     "PESO", "IDADEMAE", "PARTO", "CONSULTAS")): No data could be downloaded for the requested year(s)/UF(s).
 # }
 ```
