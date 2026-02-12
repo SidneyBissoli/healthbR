@@ -1,3 +1,27 @@
+# healthbR 0.6.1
+
+## Bug fixes
+
+* Fixed POF dictionary parsing failure on Linux/Ubuntu. `utils::unzip()`
+  creates filenames with invalid UTF-8 bytes on non-Windows systems, which
+  caused `grepl()` and `nchar()` to silently fail. Dictionary file lookup now
+  uses byte-level matching (`useBytes = TRUE`, `nchar(type = "bytes")`) and
+  renames extracted files to ASCII-safe names to prevent downstream encoding
+  errors.
+
+* Moved POF register validation before download in `pof_dictionary()`, so
+  invalid register names are caught immediately without triggering a download.
+
+## Documentation
+
+* Replaced `\donttest{}` with `@examplesIf interactive()` across all 9 modules
+  (VIGITEL, PNS, PNADC, POF, Censo, SIM, SINASC, SIH, SIA). Examples that
+  download data now only run in interactive sessions, following current CRAN
+  guidelines.
+
+* Marked internal `utils` topic with `@keywords internal` to fix pkgdown
+  reference index build.
+
 # healthbR 0.6.0
 
 ## New modules
