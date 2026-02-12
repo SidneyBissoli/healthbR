@@ -18,6 +18,18 @@ src/*.dll
 
 # Project status (internal reference only)
 STATUS.md
+STATUS.html
+
+# R CMD check output
+healthbR.Rcheck/
+
+# Temporary / working files
+_ul
+_ul-Sidney-desktop*
+CRAN-SUBMISSION
+.claude/
+improvements/
+prompts/
 
 # OS files
 .DS_Store
