@@ -51,6 +51,29 @@ reference:
       - sia_cache_status
       - sia_clear_cache
 
+  - title: "SINAN -- Notifiable diseases"
+    desc: "Notifiable diseases surveillance from SINAN (DATASUS FTP, 2007--2024)"
+    contents:
+      - sinan_data
+      - sinan_years
+      - sinan_info
+      - sinan_diseases
+      - sinan_variables
+      - sinan_dictionary
+      - sinan_cache_status
+      - sinan_clear_cache
+
+  - title: "CNES -- Health facility registry"
+    desc: "National health facility registry from CNES (DATASUS FTP, 2005--2024)"
+    contents:
+      - cnes_data
+      - cnes_years
+      - cnes_info
+      - cnes_variables
+      - cnes_dictionary
+      - cnes_cache_status
+      - cnes_clear_cache
+
   - title: "VIGITEL -- Telephone survey"
     desc: "Surveillance of Risk Factors for Chronic Diseases (2006--2024)"
     contents:
