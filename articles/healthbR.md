@@ -2,15 +2,32 @@
 
 ## Overview
 
-The healthbR package provides easy access to Brazilian public health
-survey data directly from R. It downloads, caches, and processes data
-from official Ministry of Health sources, returning clean,
-analysis-ready tibbles that follow tidyverse conventions.
+healthbR provides easy access to Brazilian public health data directly
+from R. The package downloads, caches, and processes data from official
+sources (Ministry of Health, IBGE, DATASUS), returning clean,
+analysis-ready tibbles following tidyverse conventions.
 
-Currently, healthbR supports **VIGITEL** (Vigilância de Fatores de Risco
-e Proteção para Doenças Crônicas por Inquérito Telefônico), a
-telephone-based survey that monitors risk and protective factors for
-chronic diseases in Brazilian state capitals.
+The package currently supports **9 data sources** organized in two
+groups:
+
+**Surveys (IBGE / Ministry of Health)**
+
+| Module        | Source                                             | Years      |
+|---------------|----------------------------------------------------|------------|
+| VIGITEL       | Telephone survey on chronic disease risk factors   | 2006–2024  |
+| PNS           | National Health Survey (microdata + SIDRA API)     | 2013, 2019 |
+| PNAD Continua | Continuous household survey (health supplements)   | 2012–2024  |
+| POF           | Household budget survey (food security, nutrition) | 2002–2018  |
+| Censo         | Population denominators via SIDRA API              | 1970–2022  |
+
+**DATASUS (Ministry of Health FTP)**
+
+| Module | Source                                | Granularity | Years     |
+|--------|---------------------------------------|-------------|-----------|
+| SIM    | Mortality (death certificates)        | Annual/UF   | 1996–2024 |
+| SINASC | Live births                           | Annual/UF   | 1996–2024 |
+| SIH    | Hospital admissions (AIH)             | Monthly/UF  | 2008–2024 |
+| SIA    | Outpatient procedures (13 file types) | Monthly/UF  | 2008–2024 |
 
 ## Getting started
 
@@ -19,80 +36,55 @@ library(healthbR)
 library(dplyr)
 ```
 
-### Check available data
-
-Before downloading data, you can check which years are available:
+To see all available data sources at a glance:
 
 ``` r
+list_sources()
+#> # A tibble: 11 x 5
+#>    source  name                         description                    years       status
+#>    <chr>   <chr>                        <chr>                          <chr>       <chr>
+#>  1 vigitel VIGITEL                      Telephone survey on chronic... 2006-2024   available
+#>  2 pns     PNS - Pesquisa Nacional ...  National health survey (IBGE) 2013, 2019  available
+#>  ...
+```
+
+All modules follow a consistent API pattern:
+
+- `*_years()` / `*_info()` – metadata and available years
+- `*_variables()` / `*_dictionary()` – variable names and category
+  labels
+- `*_data()` – download and load data
+- `*_cache_status()` / `*_clear_cache()` – cache management
+
+## VIGITEL – Chronic disease risk factors
+
+VIGITEL is a telephone survey conducted annually in all 27 state
+capitals, monitoring risk and protective factors for chronic
+non-communicable diseases.
+
+``` r
+# check available years
 vigitel_years()
-```
 
-### Download and load data
+# download data for a single year
+df <- vigitel_data(year = 2024)
 
-The main function for accessing VIGITEL data is
-[`vigitel_data()`](https://sidneybissoli.github.io/healthbR/reference/vigitel_data.md):
-
-``` r
-# load a single year
-df <- vigitel_data(2023)
-
-# load multiple years
-df <- vigitel_data(2021:2023)
-```
-
-Data is automatically cached locally, so subsequent calls for the same
-year load instantly without re-downloading.
-
-## Understanding the data
-
-### Variable dictionary
-
-VIGITEL uses coded variable names (q6, q8, etc.). Use the dictionary to
-understand what each variable represents:
-
-``` r
+# explore the data dictionary
 dict <- vigitel_dictionary()
-dict
+
+# list variables
+vigitel_variables()
 ```
 
-You can search for specific variables:
+Key variables include `pesorake` (survey weight), `diab` (diabetes),
+`hart` (hypertension), `fumante` (smoker), and `imc` (BMI).
 
 ``` r
-# find weight-related variables
-dict |>
-  filter(stringr::str_detect(variable_name, "peso"))
-
-# find diabetes-related variables
-dict |>
-  filter(stringr::str_detect(variable_name, "diab"))
-```
-
-### List variables for a specific year
-
-Variables may change between survey years. Check which variables are
-available:
-
-``` r
-vigitel_variables(2023)
-```
-
-## Survey analysis
-
-VIGITEL uses complex survey sampling with post-stratification weights.
-For proper statistical inference, always use the `pesorake` weight
-variable.
-
-### Using srvyr for weighted analysis
-
-``` r
+# weighted prevalence of diabetes by city using srvyr
 library(srvyr)
 
-# create survey design object
-vigitel_svy <- df |>
-  as_survey_design(weights = pesorake)
-
-# calculate weighted prevalence of diabetes by city
-vigitel_svy |>
+df |>
+  as_survey_design(weights = pesorake) |>
   group_by(cidade) |>
   summarize(
     prevalence = survey_mean(diab == 1, na.rm = TRUE),
@@ -100,107 +92,207 @@ vigitel_svy |>
   )
 ```
 
-### Key variables
+## PNS – National Health Survey
 
-Some commonly used variables in VIGITEL:
-
-| Variable   | Description                         |
-|------------|-------------------------------------|
-| `cidade`   | City code (1-27 for state capitals) |
-| `q6`       | Sex                                 |
-| `q8_anos`  | Age in years                        |
-| `pesorake` | Post-stratification weight          |
-| `diab`     | Diabetes diagnosis                  |
-| `hart`     | Hypertension diagnosis              |
-| `fumante`  | Current smoker                      |
-| `imc`      | Body Mass Index                     |
-| `obesid`   | Obesity indicator                   |
-
-Consult
-[`vigitel_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/vigitel_dictionary.md)
-for the complete list.
-
-## Performance optimization
-
-healthbR offers three strategies for working with large datasets
-efficiently.
-
-### 1
-
-. Parquet conversion
-
-Convert Excel files to Parquet format for dramatically faster loading
-(10-20x improvement):
+The PNS provides comprehensive data on health conditions, lifestyle, and
+healthcare access from ~100,000 households.
 
 ``` r
-# one-time conversion
-vigitel_convert_to_parquet(2015:2023)
+# microdata
+pns <- pns_data(year = 2019)
 
-# subsequent loads use parquet automatically
-df <- vigitel_data(2015:2023)
+# explore modules and variables
+pns_modules(year = 2019)
+pns_dictionary(year = 2019)
+
+# tabulated indicators from SIDRA API (no download needed)
+pns_sidra_search("diabetes")
+pns_sidra_data(table = 4487, territorial_level = "state", year = 2019)
 ```
 
-### 2. Parallel downloads
+## PNAD Continua – Household survey supplements
 
-When downloading multiple years, healthbR automatically uses parallel
-processing if the `furrr` package is available:
+PNAD Continua includes health-related supplementary modules on
+disability, housing conditions, primary health care (APS), and household
+characteristics.
 
 ``` r
-# downloads happen in parallel (2-4 workers)
-df <- vigitel_data(2015:2023)
+# list available modules
+pnadc_modules()
+
+# download disability supplement
+defic <- pnadc_data(module = "deficiencia", year = 2019, quarter = 1)
+
+# explore variables
+pnadc_variables(module = "deficiencia")
 ```
 
-### 3. Lazy evaluation with Arrow
+## POF – Food security and nutrition
 
-For very large datasets, use lazy evaluation to filter and select data
-before loading into memory:
+The POF (Household Budget Survey) contains data on food insecurity
+(EBIA), individual food consumption, anthropometry, and health expenses.
 
 ``` r
-# returns Arrow Dataset (not loaded into RAM)
-df_lazy <- vigitel_data(2015:2023, lazy = TRUE)
+# list available registers
+pof_registers(year = 2018)
 
-# operations are executed lazily
-result <- df_lazy |>
-  filter(cidade == 1, q8_anos >= 18) |>
-  select(q6, q8_anos, pesorake, diab, hart, imc) |>
-  collect()  
-# only now data is loaded
+# food consumption microdata
+consumo <- pof_data(year = 2018, register = "consumo_alimentar")
+
+# food insecurity scale (EBIA)
+morador <- pof_data(year = 2018, register = "morador")
+
+# variable dictionary for a specific register
+pof_dictionary(year = 2018, register = "morador")
 ```
 
-This approach is especially useful when you only need a subset of the
-data.
+See
+[`vignette("pof-health-data")`](https://sidneybissoli.github.io/healthbR/articles/pof-health-data.md)
+for a detailed walkthrough.
 
-## Workflow example
+## Censo – Population denominators
 
-Here’s a complete workflow for analyzing diabetes prevalence:
+The Census module queries the IBGE SIDRA API for population
+denominators, essential for calculating mortality rates, incidence, and
+other epidemiological indicators.
 
 ``` r
-library(healthbR)
+# population by state, sex, and age group (2022 Census)
+pop <- censo_populacao(year = 2022, territorial_level = "state")
+
+# intercensitary population estimates (for years between censuses)
+est <- censo_estimativa(year = 2020, territorial_level = "state")
+
+# query any Census SIDRA table directly
+censo_sidra_search("populacao")
+censo_sidra_data(table = 9514, territorial_level = "brazil", year = 2022)
+```
+
+See
+[`vignette("censo-denominadores")`](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)
+for epidemiological examples.
+
+## SIM – Mortality data
+
+SIM contains individual death records from death certificates (CID-10,
+1996+).
+
+``` r
+# deaths in Acre, 2022
+obitos <- sim_data(year = 2022, uf = "AC")
+
+# filter by cause of death (CID-10 prefix)
+obitos_cardio <- sim_data(year = 2022, uf = "AC", cause = "I")
+
+# explore variables and categories
+sim_variables()
+sim_dictionary("CAUSABAS")
+```
+
+## SINASC – Live births
+
+SINASC contains individual birth records including birth weight,
+gestational age, prenatal care, and congenital anomalies.
+
+``` r
+# births in Acre, 2022
+nascimentos <- sinasc_data(year = 2022, uf = "AC")
+
+# filter by congenital anomaly (CID-10 prefix)
+anomalias <- sinasc_data(year = 2022, uf = "AC", anomaly = "Q")
+
+sinasc_variables()
+sinasc_dictionary("PARTO")
+```
+
+## SIH – Hospital admissions
+
+SIH contains hospital admission records (AIH) with diagnosis,
+procedures, length of stay, and costs. Data is organized monthly.
+
+``` r
+# admissions in Acre, January 2022
+internacoes <- sih_data(year = 2022, month = 1, uf = "AC")
+
+# filter by principal diagnosis (CID-10 prefix)
+intern_resp <- sih_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
+
+sih_variables()
+sih_dictionary("DIAG_PRINC")
+```
+
+## SIA – Outpatient procedures
+
+SIA covers outpatient production data with 13 file types (BPA, APAC,
+RAAS).
+
+``` r
+# outpatient production in Acre, January 2022 (default type: PA)
+ambulatorial <- sia_data(year = 2022, month = 1, uf = "AC")
+
+# high-cost medications (APAC)
+medicamentos <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
+
+# filter by procedure or diagnosis
+sia_data(year = 2022, month = 1, uf = "AC", procedure = "0301")
+sia_data(year = 2022, month = 1, uf = "AC", diagnosis = "E11")
+```
+
+See
+[`vignette("datasus-modules")`](https://sidneybissoli.github.io/healthbR/articles/datasus-modules.md)
+for cross-module analysis examples.
+
+## Caching
+
+All modules cache downloaded data automatically to avoid repeated
+downloads. Install `arrow` for optimized Parquet caching (recommended):
+
+``` r
+install.packages("arrow")
+```
+
+Cache management works the same across all modules:
+
+``` r
+# check what is cached
+sim_cache_status()
+vigitel_cache_status()
+
+# clear a module's cache
+sim_clear_cache()
+
+# use a custom cache directory (e.g., for temporary use)
+sim_data(year = 2022, uf = "AC", cache_dir = tempdir())
+```
+
+## Combining modules
+
+healthbR’s real power comes from combining data across modules. For
+example, calculating mortality rates requires deaths (SIM) and
+population (Censo):
+
+``` r
 library(dplyr)
-library(srvyr)
 
-# 1. load data
-df <- vigitel_data(2023)
+# deaths by state
+deaths <- sim_data(year = 2022, uf = "AC") |>
+  count(name = "deaths")
 
-# 2. create survey design
-svy <- df |>
-  as_survey_design(weights = pesorake)
+# population by state
+pop <- censo_populacao(year = 2022, territorial_level = "state") |>
+  filter(nivel_territorial_codigo == "12")  # Acre
 
-# 3. calculate prevalence by sex
-diabetes_by_sex <- svy |>
-  group_by(q6) |>
-  summarize(
-    prevalence = survey_mean(diab == 1, na.rm = TRUE, vartype = "ci"),
-    n = unweighted(n())
-  )
-
-diabetes_by_sex
+# crude mortality rate
+deaths$deaths / pop$valor * 100000
 ```
 
 ## Additional resources
 
-- [VIGITEL official
-  page](https://www.gov.br/saude/pt-br/composicao/svsa/inqueritos-de-saude/vigitel)
-- [VIGITEL methodology](https://svs.aids.gov.br/download/Vigitel/)
-- [srvyr package
-  documentation](https://cran.r-project.org/package=srvyr)
+- [`vignette("pof-health-data")`](https://sidneybissoli.github.io/healthbR/articles/pof-health-data.md)
+  – Analyzing food security and nutrition from POF
+- [`vignette("censo-denominadores")`](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)
+  – Population denominators for epidemiology
+- [`vignette("datasus-modules")`](https://sidneybissoli.github.io/healthbR/articles/datasus-modules.md)
+  – SIM, SINASC, SIH, and SIA in depth
+- [Package website](https://sidneybissoli.github.io/healthbR/)
+- [GitHub repository](https://github.com/SidneyBissoli/healthbR)

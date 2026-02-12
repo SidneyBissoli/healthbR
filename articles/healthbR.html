@@ -71,14 +71,93 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The healthbR package provides easy access to Brazilian public health
-survey data directly from R. It downloads, caches, and processes data
-from official Ministry of Health sources, returning clean,
-analysis-ready tibbles that follow tidyverse conventions.</p>
-<p>Currently, healthbR supports <strong>VIGITEL</strong> (Vigilância de
-Fatores de Risco e Proteção para Doenças Crônicas por Inquérito
-Telefônico), a telephone-based survey that monitors risk and protective
-factors for chronic diseases in Brazilian state capitals.</p>
+<p>healthbR provides easy access to Brazilian public health data
+directly from R. The package downloads, caches, and processes data from
+official sources (Ministry of Health, IBGE, DATASUS), returning clean,
+analysis-ready tibbles following tidyverse conventions.</p>
+<p>The package currently supports <strong>9 data sources</strong>
+organized in two groups:</p>
+<p><strong>Surveys (IBGE / Ministry of Health)</strong></p>
+<table class="table">
+<colgroup>
+<col width="34%">
+<col width="34%">
+<col width="30%">
+</colgroup>
+<thead><tr class="header">
+<th>Module</th>
+<th>Source</th>
+<th>Years</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>VIGITEL</td>
+<td>Telephone survey on chronic disease risk factors</td>
+<td>2006–2024</td>
+</tr>
+<tr class="even">
+<td>PNS</td>
+<td>National Health Survey (microdata + SIDRA API)</td>
+<td>2013, 2019</td>
+</tr>
+<tr class="odd">
+<td>PNAD Continua</td>
+<td>Continuous household survey (health supplements)</td>
+<td>2012–2024</td>
+</tr>
+<tr class="even">
+<td>POF</td>
+<td>Household budget survey (food security, nutrition)</td>
+<td>2002–2018</td>
+</tr>
+<tr class="odd">
+<td>Censo</td>
+<td>Population denominators via SIDRA API</td>
+<td>1970–2022</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DATASUS (Ministry of Health FTP)</strong></p>
+<table class="table">
+<colgroup>
+<col width="22%">
+<col width="22%">
+<col width="36%">
+<col width="19%">
+</colgroup>
+<thead><tr class="header">
+<th>Module</th>
+<th>Source</th>
+<th>Granularity</th>
+<th>Years</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>SIM</td>
+<td>Mortality (death certificates)</td>
+<td>Annual/UF</td>
+<td>1996–2024</td>
+</tr>
+<tr class="even">
+<td>SINASC</td>
+<td>Live births</td>
+<td>Annual/UF</td>
+<td>1996–2024</td>
+</tr>
+<tr class="odd">
+<td>SIH</td>
+<td>Hospital admissions (AIH)</td>
+<td>Monthly/UF</td>
+<td>2008–2024</td>
+</tr>
+<tr class="even">
+<td>SIA</td>
+<td>Outpatient procedures (13 file types)</td>
+<td>Monthly/UF</td>
+<td>2008–2024</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level2">
 <h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
@@ -86,215 +165,257 @@ factors for chronic diseases in Brazilian state capitals.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">healthbR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="check-available-data">Check available data<a class="anchor" aria-label="anchor" href="#check-available-data"></a>
-</h3>
-<p>Before downloading data, you can check which years are available:</p>
+<p>To see all available data sources at a glance:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/vigitel_years.html">vigitel_years</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/list_sources.html">list_sources</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 11 x 5</span></span>
+<span><span class="co">#&gt;    source  name                         description                    years       status</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;                        &lt;chr&gt;                          &lt;chr&gt;       &lt;chr&gt;</span></span>
+<span><span class="co">#&gt;  1 vigitel VIGITEL                      Telephone survey on chronic... 2006-2024   available</span></span>
+<span><span class="co">#&gt;  2 pns     PNS - Pesquisa Nacional ...  National health survey (IBGE) 2013, 2019  available</span></span>
+<span><span class="co">#&gt;  ...</span></span></code></pre></div>
+<p>All modules follow a consistent API pattern:</p>
+<ul>
+<li>
+<code>*_years()</code> / <code>*_info()</code> – metadata and
+available years</li>
+<li>
+<code>*_variables()</code> / <code>*_dictionary()</code> – variable
+names and category labels</li>
+<li>
+<code>*_data()</code> – download and load data</li>
+<li>
+<code>*_cache_status()</code> / <code>*_clear_cache()</code> – cache
+management</li>
+</ul>
 </div>
-<div class="section level3">
-<h3 id="download-and-load-data">Download and load data<a class="anchor" aria-label="anchor" href="#download-and-load-data"></a>
-</h3>
-<p>The main function for accessing VIGITEL data is
-<code><a href="../reference/vigitel_data.html">vigitel_data()</a></code>:</p>
+<div class="section level2">
+<h2 id="vigitel-chronic-disease-risk-factors">VIGITEL – Chronic disease risk factors<a class="anchor" aria-label="anchor" href="#vigitel-chronic-disease-risk-factors"></a>
+</h2>
+<p>VIGITEL is a telephone survey conducted annually in all 27 state
+capitals, monitoring risk and protective factors for chronic
+non-communicable diseases.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># load a single year</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span><span class="fl">2023</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># check available years</span></span>
+<span><span class="fu"><a href="../reference/vigitel_years.html">vigitel_years</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># load multiple years</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span><span class="fl">2021</span><span class="op">:</span><span class="fl">2023</span><span class="op">)</span></span></code></pre></div>
-<p>Data is automatically cached locally, so subsequent calls for the
-same year load instantly without re-downloading.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="understanding-the-data">Understanding the data<a class="anchor" aria-label="anchor" href="#understanding-the-data"></a>
-</h2>
-<div class="section level3">
-<h3 id="variable-dictionary">Variable dictionary<a class="anchor" aria-label="anchor" href="#variable-dictionary"></a>
-</h3>
-<p>VIGITEL uses coded variable names (q6, q8, etc.). Use the dictionary
-to understand what each variable represents:</p>
+<span><span class="co"># download data for a single year</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># explore the data dictionary</span></span>
+<span><span class="va">dict</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vigitel_dictionary.html">vigitel_dictionary</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># list variables</span></span>
+<span><span class="fu"><a href="../reference/vigitel_variables.html">vigitel_variables</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Key variables include <code>pesorake</code> (survey weight),
+<code>diab</code> (diabetes), <code>hart</code> (hypertension),
+<code>fumante</code> (smoker), and <code>imc</code> (BMI).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dict</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vigitel_dictionary.html">vigitel_dictionary</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">dict</span></span></code></pre></div>
-<p>You can search for specific variables:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># find weight-related variables</span></span>
-<span><span class="va">dict</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">variable_name</span>, <span class="st">"peso"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># weighted prevalence of diabetes by city using srvyr</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://gdfe.co/srvyr/" class="external-link">srvyr</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># find diabetes-related variables</span></span>
-<span><span class="va">dict</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">variable_name</span>, <span class="st">"diab"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="list-variables-for-a-specific-year">List variables for a specific year<a class="anchor" aria-label="anchor" href="#list-variables-for-a-specific-year"></a>
-</h3>
-<p>Variables may change between survey years. Check which variables are
-available:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/vigitel_variables.html">vigitel_variables</a></span><span class="op">(</span><span class="fl">2023</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="survey-analysis">Survey analysis<a class="anchor" aria-label="anchor" href="#survey-analysis"></a>
-</h2>
-<p>VIGITEL uses complex survey sampling with post-stratification
-weights. For proper statistical inference, always use the
-<code>pesorake</code> weight variable.</p>
-<div class="section level3">
-<h3 id="using-srvyr-for-weighted-analysis">Using srvyr for weighted analysis<a class="anchor" aria-label="anchor" href="#using-srvyr-for-weighted-analysis"></a>
-</h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://gdfe.co/srvyr/" class="external-link">srvyr</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># create survey design object</span></span>
-<span><span class="va">vigitel_svy</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="http://gdfe.co/srvyr/reference/as_survey_design.html" class="external-link">as_survey_design</a></span><span class="op">(</span>weights <span class="op">=</span> <span class="va">pesorake</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># calculate weighted prevalence of diabetes by city</span></span>
-<span><span class="va">vigitel_svy</span> <span class="op">|&gt;</span></span>
+<span><span class="va">df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="http://gdfe.co/srvyr/reference/as_survey_design.html" class="external-link">as_survey_design</a></span><span class="op">(</span>weights <span class="op">=</span> <span class="va">pesorake</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">cidade</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span></span>
 <span>    prevalence <span class="op">=</span> <span class="fu"><a href="http://gdfe.co/srvyr/reference/survey_mean.html" class="external-link">survey_mean</a></span><span class="op">(</span><span class="va">diab</span> <span class="op">==</span> <span class="fl">1</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>    n <span class="op">=</span> <span class="fu"><a href="http://gdfe.co/srvyr/reference/unweighted.html" class="external-link">unweighted</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="key-variables">Key variables<a class="anchor" aria-label="anchor" href="#key-variables"></a>
-</h3>
-<p>Some commonly used variables in VIGITEL:</p>
-<table class="table">
-<thead><tr class="header">
-<th>Variable</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td><code>cidade</code></td>
-<td>City code (1-27 for state capitals)</td>
-</tr>
-<tr class="even">
-<td><code>q6</code></td>
-<td>Sex</td>
-</tr>
-<tr class="odd">
-<td><code>q8_anos</code></td>
-<td>Age in years</td>
-</tr>
-<tr class="even">
-<td><code>pesorake</code></td>
-<td>Post-stratification weight</td>
-</tr>
-<tr class="odd">
-<td><code>diab</code></td>
-<td>Diabetes diagnosis</td>
-</tr>
-<tr class="even">
-<td><code>hart</code></td>
-<td>Hypertension diagnosis</td>
-</tr>
-<tr class="odd">
-<td><code>fumante</code></td>
-<td>Current smoker</td>
-</tr>
-<tr class="even">
-<td><code>imc</code></td>
-<td>Body Mass Index</td>
-</tr>
-<tr class="odd">
-<td><code>obesid</code></td>
-<td>Obesity indicator</td>
-</tr>
-</tbody>
-</table>
-<p>Consult <code><a href="../reference/vigitel_dictionary.html">vigitel_dictionary()</a></code> for the complete list.</p>
-</div>
+<div class="section level2">
+<h2 id="pns-national-health-survey">PNS – National Health Survey<a class="anchor" aria-label="anchor" href="#pns-national-health-survey"></a>
+</h2>
+<p>The PNS provides comprehensive data on health conditions, lifestyle,
+and healthcare access from ~100,000 households.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># microdata</span></span>
+<span><span class="va">pns</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pns_data.html">pns_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># explore modules and variables</span></span>
+<span><span class="fu"><a href="../reference/pns_modules.html">pns_modules</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/pns_dictionary.html">pns_dictionary</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># tabulated indicators from SIDRA API (no download needed)</span></span>
+<span><span class="fu"><a href="../reference/pns_sidra_search.html">pns_sidra_search</a></span><span class="op">(</span><span class="st">"diabetes"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/pns_sidra_data.html">pns_sidra_data</a></span><span class="op">(</span>table <span class="op">=</span> <span class="fl">4487</span>, territorial_level <span class="op">=</span> <span class="st">"state"</span>, year <span class="op">=</span> <span class="fl">2019</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="performance-optimization">Performance optimization<a class="anchor" aria-label="anchor" href="#performance-optimization"></a>
+<h2 id="pnad-continua-household-survey-supplements">PNAD Continua – Household survey supplements<a class="anchor" aria-label="anchor" href="#pnad-continua-household-survey-supplements"></a>
 </h2>
-<p>healthbR offers three strategies for working with large datasets
-efficiently.</p>
-<div class="section level3">
-<h3 id="section">1<a class="anchor" aria-label="anchor" href="#section"></a>
-</h3>
-<p>. Parquet conversion</p>
-<p>Convert Excel files to Parquet format for dramatically faster loading
-(10-20x improvement):</p>
+<p>PNAD Continua includes health-related supplementary modules on
+disability, housing conditions, primary health care (APS), and household
+characteristics.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># list available modules</span></span>
+<span><span class="fu"><a href="../reference/pnadc_modules.html">pnadc_modules</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># download disability supplement</span></span>
+<span><span class="va">defic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pnadc_data.html">pnadc_data</a></span><span class="op">(</span>module <span class="op">=</span> <span class="st">"deficiencia"</span>, year <span class="op">=</span> <span class="fl">2019</span>, quarter <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># explore variables</span></span>
+<span><span class="fu"><a href="../reference/pnadc_variables.html">pnadc_variables</a></span><span class="op">(</span>module <span class="op">=</span> <span class="st">"deficiencia"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="pof-food-security-and-nutrition">POF – Food security and nutrition<a class="anchor" aria-label="anchor" href="#pof-food-security-and-nutrition"></a>
+</h2>
+<p>The POF (Household Budget Survey) contains data on food insecurity
+(EBIA), individual food consumption, anthropometry, and health
+expenses.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># list available registers</span></span>
+<span><span class="fu"><a href="../reference/pof_registers.html">pof_registers</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2018</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># food consumption microdata</span></span>
+<span><span class="va">consumo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pof_data.html">pof_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2018</span>, register <span class="op">=</span> <span class="st">"consumo_alimentar"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># food insecurity scale (EBIA)</span></span>
+<span><span class="va">morador</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pof_data.html">pof_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2018</span>, register <span class="op">=</span> <span class="st">"morador"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># variable dictionary for a specific register</span></span>
+<span><span class="fu"><a href="../reference/pof_dictionary.html">pof_dictionary</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2018</span>, register <span class="op">=</span> <span class="st">"morador"</span><span class="op">)</span></span></code></pre></div>
+<p>See <code><a href="../articles/pof-health-data.html">vignette("pof-health-data")</a></code> for a detailed
+walkthrough.</p>
+</div>
+<div class="section level2">
+<h2 id="censo-population-denominators">Censo – Population denominators<a class="anchor" aria-label="anchor" href="#censo-population-denominators"></a>
+</h2>
+<p>The Census module queries the IBGE SIDRA API for population
+denominators, essential for calculating mortality rates, incidence, and
+other epidemiological indicators.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># one-time conversion</span></span>
-<span><span class="fu">vigitel_convert_to_parquet</span><span class="op">(</span><span class="fl">2015</span><span class="op">:</span><span class="fl">2023</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># population by state, sex, and age group (2022 Census)</span></span>
+<span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/censo_populacao.html">censo_populacao</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, territorial_level <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># subsequent loads use parquet automatically</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span><span class="fl">2015</span><span class="op">:</span><span class="fl">2023</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="parallel-downloads">2. Parallel downloads<a class="anchor" aria-label="anchor" href="#parallel-downloads"></a>
-</h3>
-<p>When downloading multiple years, healthbR automatically uses parallel
-processing if the <code>furrr</code> package is available:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># downloads happen in parallel (2-4 workers)</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span><span class="fl">2015</span><span class="op">:</span><span class="fl">2023</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="lazy-evaluation-with-arrow">3. Lazy evaluation with Arrow<a class="anchor" aria-label="anchor" href="#lazy-evaluation-with-arrow"></a>
-</h3>
-<p>For very large datasets, use lazy evaluation to filter and select
-data before loading into memory:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># returns Arrow Dataset (not loaded into RAM)</span></span>
-<span><span class="va">df_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span><span class="fl">2015</span><span class="op">:</span><span class="fl">2023</span>, lazy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co"># intercensitary population estimates (for years between censuses)</span></span>
+<span><span class="va">est</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/censo_estimativa.html">censo_estimativa</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2020</span>, territorial_level <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># operations are executed lazily</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="va">df_lazy</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">cidade</span> <span class="op">==</span> <span class="fl">1</span>, <span class="va">q8_anos</span> <span class="op">&gt;=</span> <span class="fl">18</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">q6</span>, <span class="va">q8_anos</span>, <span class="va">pesorake</span>, <span class="va">diab</span>, <span class="va">hart</span>, <span class="va">imc</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span>  </span>
-<span><span class="co"># only now data is loaded</span></span></code></pre></div>
-<p>This approach is especially useful when you only need a subset of the
-data.</p>
-</div>
+<span><span class="co"># query any Census SIDRA table directly</span></span>
+<span><span class="fu"><a href="../reference/censo_sidra_search.html">censo_sidra_search</a></span><span class="op">(</span><span class="st">"populacao"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/censo_sidra_data.html">censo_sidra_data</a></span><span class="op">(</span>table <span class="op">=</span> <span class="fl">9514</span>, territorial_level <span class="op">=</span> <span class="st">"brazil"</span>, year <span class="op">=</span> <span class="fl">2022</span><span class="op">)</span></span></code></pre></div>
+<p>See <code><a href="../articles/censo-denominadores.html">vignette("censo-denominadores")</a></code> for epidemiological
+examples.</p>
 </div>
 <div class="section level2">
-<h2 id="workflow-example">Workflow example<a class="anchor" aria-label="anchor" href="#workflow-example"></a>
+<h2 id="sim-mortality-data">SIM – Mortality data<a class="anchor" aria-label="anchor" href="#sim-mortality-data"></a>
 </h2>
-<p>Here’s a complete workflow for analyzing diabetes prevalence:</p>
+<p>SIM contains individual death records from death certificates
+(CID-10, 1996+).</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># deaths in Acre, 2022</span></span>
+<span><span class="va">obitos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># filter by cause of death (CID-10 prefix)</span></span>
+<span><span class="va">obitos_cardio</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, cause <span class="op">=</span> <span class="st">"I"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># explore variables and categories</span></span>
+<span><span class="fu"><a href="../reference/sim_variables.html">sim_variables</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sim_dictionary.html">sim_dictionary</a></span><span class="op">(</span><span class="st">"CAUSABAS"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="sinasc-live-births">SINASC – Live births<a class="anchor" aria-label="anchor" href="#sinasc-live-births"></a>
+</h2>
+<p>SINASC contains individual birth records including birth weight,
+gestational age, prenatal care, and congenital anomalies.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># births in Acre, 2022</span></span>
+<span><span class="va">nascimentos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinasc_data.html">sinasc_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># filter by congenital anomaly (CID-10 prefix)</span></span>
+<span><span class="va">anomalias</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinasc_data.html">sinasc_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, anomaly <span class="op">=</span> <span class="st">"Q"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/sinasc_variables.html">sinasc_variables</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sinasc_dictionary.html">sinasc_dictionary</a></span><span class="op">(</span><span class="st">"PARTO"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="sih-hospital-admissions">SIH – Hospital admissions<a class="anchor" aria-label="anchor" href="#sih-hospital-admissions"></a>
+</h2>
+<p>SIH contains hospital admission records (AIH) with diagnosis,
+procedures, length of stay, and costs. Data is organized monthly.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">healthbR</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://gdfe.co/srvyr/" class="external-link">srvyr</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># admissions in Acre, January 2022</span></span>
+<span><span class="va">internacoes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 1. load data</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span><span class="fl">2023</span><span class="op">)</span></span>
+<span><span class="co"># filter by principal diagnosis (CID-10 prefix)</span></span>
+<span><span class="va">intern_resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, diagnosis <span class="op">=</span> <span class="st">"J"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 2. create survey design</span></span>
-<span><span class="va">svy</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="http://gdfe.co/srvyr/reference/as_survey_design.html" class="external-link">as_survey_design</a></span><span class="op">(</span>weights <span class="op">=</span> <span class="va">pesorake</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sih_variables.html">sih_variables</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sih_dictionary.html">sih_dictionary</a></span><span class="op">(</span><span class="st">"DIAG_PRINC"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="sia-outpatient-procedures">SIA – Outpatient procedures<a class="anchor" aria-label="anchor" href="#sia-outpatient-procedures"></a>
+</h2>
+<p>SIA covers outpatient production data with 13 file types (BPA, APAC,
+RAAS).</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># outpatient production in Acre, January 2022 (default type: PA)</span></span>
+<span><span class="va">ambulatorial</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 3. calculate prevalence by sex</span></span>
-<span><span class="va">diabetes_by_sex</span> <span class="op">&lt;-</span> <span class="va">svy</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">q6</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span></span>
-<span>    prevalence <span class="op">=</span> <span class="fu"><a href="http://gdfe.co/srvyr/reference/survey_mean.html" class="external-link">survey_mean</a></span><span class="op">(</span><span class="va">diab</span> <span class="op">==</span> <span class="fl">1</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span>, vartype <span class="op">=</span> <span class="st">"ci"</span><span class="op">)</span>,</span>
-<span>    n <span class="op">=</span> <span class="fu"><a href="http://gdfe.co/srvyr/reference/unweighted.html" class="external-link">unweighted</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
+<span><span class="co"># high-cost medications (APAC)</span></span>
+<span><span class="va">medicamentos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, type <span class="op">=</span> <span class="st">"AM"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">diabetes_by_sex</span></span></code></pre></div>
+<span><span class="co"># filter by procedure or diagnosis</span></span>
+<span><span class="fu"><a href="../reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, procedure <span class="op">=</span> <span class="st">"0301"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, diagnosis <span class="op">=</span> <span class="st">"E11"</span><span class="op">)</span></span></code></pre></div>
+<p>See <code><a href="../articles/datasus-modules.html">vignette("datasus-modules")</a></code> for cross-module
+analysis examples.</p>
+</div>
+<div class="section level2">
+<h2 id="caching">Caching<a class="anchor" aria-label="anchor" href="#caching"></a>
+</h2>
+<p>All modules cache downloaded data automatically to avoid repeated
+downloads. Install <code>arrow</code> for optimized Parquet caching
+(recommended):</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
+<p>Cache management works the same across all modules:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># check what is cached</span></span>
+<span><span class="fu"><a href="../reference/sim_cache_status.html">sim_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/vigitel_cache_status.html">vigitel_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># clear a module's cache</span></span>
+<span><span class="fu"><a href="../reference/sim_clear_cache.html">sim_clear_cache</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># use a custom cache directory (e.g., for temporary use)</span></span>
+<span><span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, cache_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="combining-modules">Combining modules<a class="anchor" aria-label="anchor" href="#combining-modules"></a>
+</h2>
+<p>healthbR’s real power comes from combining data across modules. For
+example, calculating mortality rates requires deaths (SIM) and
+population (Censo):</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># deaths by state</span></span>
+<span><span class="va">deaths</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"deaths"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># population by state</span></span>
+<span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/censo_populacao.html">censo_populacao</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, territorial_level <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">nivel_territorial_codigo</span> <span class="op">==</span> <span class="st">"12"</span><span class="op">)</span>  <span class="co"># Acre</span></span>
+<span></span>
+<span><span class="co"># crude mortality rate</span></span>
+<span><span class="va">deaths</span><span class="op">$</span><span class="va">deaths</span> <span class="op">/</span> <span class="va">pop</span><span class="op">$</span><span class="va">valor</span> <span class="op">*</span> <span class="fl">100000</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="additional-resources">Additional resources<a class="anchor" aria-label="anchor" href="#additional-resources"></a>
 </h2>
 <ul>
-<li><a href="https://www.gov.br/saude/pt-br/composicao/svsa/inqueritos-de-saude/vigitel" class="external-link">VIGITEL
-official page</a></li>
-<li><a href="https://svs.aids.gov.br/download/Vigitel/" class="external-link">VIGITEL
-methodology</a></li>
-<li><a href="https://cran.r-project.org/package=srvyr" class="external-link">srvyr package
-documentation</a></li>
+<li>
+<code><a href="../articles/pof-health-data.html">vignette("pof-health-data")</a></code> – Analyzing food security
+and nutrition from POF</li>
+<li>
+<code><a href="../articles/censo-denominadores.html">vignette("censo-denominadores")</a></code> – Population
+denominators for epidemiology</li>
+<li>
+<code><a href="../articles/datasus-modules.html">vignette("datasus-modules")</a></code> – SIM, SINASC, SIH, and SIA
+in depth</li>
+<li><a href="https://sidneybissoli.github.io/healthbR/">Package
+website</a></li>
+<li><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">GitHub
+repository</a></li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
