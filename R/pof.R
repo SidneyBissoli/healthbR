@@ -526,6 +526,14 @@ pof_cache_dir <- function(cache_dir = NULL) {
     ))
   }
 
+  # rename to ASCII-safe name to avoid invalid UTF-8 issues downstream
+  # (cli, readxl, etc. can choke on Latin-1 encoded filenames from unzip on Linux)
+  safe_name <- file.path(dirname(dict_file),
+                         paste0("dictionary_", year, ".", tools::file_ext(dict_file)))
+  if (file.rename(dict_file, safe_name)) {
+    dict_file <- safe_name
+  }
+
   cli::cli_inform("Parsing dictionary from {.file {basename(dict_file)}}...")
 
   # parse dictionary
