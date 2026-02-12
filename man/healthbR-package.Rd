@@ -12,6 +12,7 @@ Provides easy access to Brazilian public health data from multiple sources inclu
 Useful links:
 \itemize{
   \item \url{https://github.com/SidneyBissoli/healthbR}
+  \item \url{https://sidneybissoli.github.io/healthbR/}
   \item Report bugs at \url{https://github.com/SidneyBissoli/healthbR/issues}
 }
 
