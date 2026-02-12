@@ -248,7 +248,7 @@ pof_cache_dir <- function(cache_dir = NULL) {
 .pof_find_dictionary_file <- function(extracted_files, year) {
   # look for dictionary Excel file
   # use flexible patterns to handle encoding issues with Portuguese characters
-  xls_files <- extracted_files[grepl("\\.xls", extracted_files, ignore.case = TRUE)]
+  xls_files <- extracted_files[grepl("\\.xls", extracted_files, ignore.case = TRUE, useBytes = TRUE)]
 
   # approach 1: direct pattern matching
   dict_patterns <- c("dicion", "variav", "variaveis")
