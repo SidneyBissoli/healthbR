@@ -1,3 +1,43 @@
+# healthbR 0.8.0
+
+## New modules
+
+* **SINAN (Sistema de Informacao de Agravos de Notificacao)**: Added module for
+  accessing notifiable diseases surveillance microdata from DATASUS FTP as .dbc
+  files (2007-2024).
+  - `sinan_years()`, `sinan_info()` for module metadata
+  - `sinan_diseases()` for listing available diseases (agravos)
+  - `sinan_variables()`, `sinan_dictionary()` for variable exploration
+  - `sinan_data()` for downloading disease notification microdata
+  - `sinan_cache_status()`, `sinan_clear_cache()` for cache management
+  - **31 diseases**: DENG (Dengue, default), CHIK, ZIKA, TUBE, HANS, HEPA,
+    MALA, SIFA, SIFC, SIFG, LEIV, LEIT, LEPT, MENI, and more.
+    Use `disease` parameter to select.
+  - **National files**: SINAN files are national (not per-state). Filter by UF
+    using `SG_UF_NOT` or `ID_MUNICIP` columns after download.
+  - Output includes `year` and `disease` columns
+  - Reuses shared DBC infrastructure (`.dbc2dbf()`, `.read_dbc()`,
+    `.datasus_download()`)
+
+# healthbR 0.7.0
+
+## New modules
+
+* **CNES (Cadastro Nacional de Estabelecimentos de Saude)**: Added module for
+  accessing the national health facility registry from DATASUS FTP as .dbc
+  files (2005-2024).
+  - `cnes_years()`, `cnes_info()` for module metadata
+  - `cnes_variables()`, `cnes_dictionary()` for variable exploration
+  - `cnes_data()` for downloading health facility data per state (UF)
+  - `cnes_cache_status()`, `cnes_clear_cache()` for cache management
+  - **13 file types**: ST (default), LT, PF, DC, EQ, SR, HB, EP, RC, IN, EE,
+    EF, GM. Use `type` parameter to select.
+  - **Monthly data**: CNES data is organized per month (one .dbc file per
+    type/UF/month). Use `month` parameter to select specific months.
+  - Output includes `year`, `month`, and `uf_source` columns
+  - Reuses shared DBC infrastructure (`.dbc2dbf()`, `.read_dbc()`,
+    `.datasus_download()`)
+
 # healthbR 0.6.1
 
 ## Bug fixes

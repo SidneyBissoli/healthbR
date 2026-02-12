@@ -73,7 +73,7 @@ list_sources <- function() {
       "1996-2024",
       "2008-2024",
       "1994-2023",
-      "2001-2023",
+      "2007-2024",
       "2005-2023"
     ),
     status = c(
@@ -85,9 +85,9 @@ list_sources <- function() {
       "available",
       "available",
       "available",
-      "planned",
-      "planned",
-      "planned"
+      "available",
+      "available",
+      "available"
     )
   )
 }
