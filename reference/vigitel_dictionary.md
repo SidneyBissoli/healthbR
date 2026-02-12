@@ -28,26 +28,8 @@ A tibble with variable dictionary.
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 dict <- vigitel_dictionary(cache_dir = tempdir())
-#> Downloading VIGITEL dictionary...
-#> ✔ Dictionary downloaded: /tmp/RtmpJ1hFKo/vigitel/dicionario-vigitel-2006-2024.xlsx
-#> New names:
-#> • `` -> `...2`
-#> • `` -> `...3`
-#> • `` -> `...4`
-#> • `` -> `...5`
-#> • `` -> `...6`
-#> • `` -> `...7`
 head(dict)
-#> # A tibble: 6 × 7
-#>   variaveis_vigitel x2           x3             x4           x5      x6    x7   
-#>   <chr>             <chr>        <chr>          <chr>        <chr>   <chr> <chr>
-#> 1 NA                NA           NA             NA           NA      NA    NA   
-#> 2 Variable name     storage type display format value  label Variab… Códi… Label
-#> 3 chave             str11        %11s           NA           chave   NA    NA   
-#> 4 ano               int          %8.0g          NA           ano     NA    NA   
-#> 5 cidade            byte         %8.0g          cidade       cidade  1     arac…
-#> 6 NA                NA           NA             NA           NA      2     belem
-# }
+}
 ```

@@ -32,8 +32,7 @@ Other sih:
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 sih_clear_cache()
-#> No cached SIH files to clear.
-# }
+}
 ```

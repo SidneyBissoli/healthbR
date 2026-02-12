@@ -32,8 +32,7 @@ Other sia:
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 sia_clear_cache()
-#> No cached SIA files to clear.
-# }
+}
 ```

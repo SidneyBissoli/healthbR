@@ -112,65 +112,24 @@ Other sia:
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 # all outpatient production in Acre, January 2022
 ac_jan <- sia_data(year = 2022, month = 1, uf = "AC")
-#> ℹ Downloading SIA data: PA AC 2022/01...
-#> ℹ Download attempt 1/3 failed. Retrying in 2s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> ℹ Download attempt 2/3 failed. Retrying in 4s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> Warning: ! Failed to download/read SIA data for PA AC 2022/01.
-#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
-#> Error in sia_data(year = 2022, month = 1, uf = "AC"): No data could be downloaded for the requested year(s)/month(s)/UF(s).
 
 # filter by procedure code
 consult <- sia_data(year = 2022, month = 1, uf = "AC",
                     procedure = "0301")
-#> ℹ Downloading SIA data: PA AC 2022/01...
-#> ℹ Download attempt 1/3 failed. Retrying in 2s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Couldn't connect to server
-#> ℹ Download attempt 2/3 failed. Retrying in 4s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> Warning: ! Failed to download/read SIA data for PA AC 2022/01.
-#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
-#> Error in sia_data(year = 2022, month = 1, uf = "AC", procedure = "0301"): No data could be downloaded for the requested year(s)/month(s)/UF(s).
 
 # filter by diagnosis (CID-10)
 resp <- sia_data(year = 2022, month = 1, uf = "AC",
                  diagnosis = "J")
-#> ℹ Downloading SIA data: PA AC 2022/01...
-#> ℹ Download attempt 1/3 failed. Retrying in 2s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30000 ms: Couldn't connect to server
-#> ℹ Download attempt 2/3 failed. Retrying in 4s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> Warning: ! Failed to download/read SIA data for PA AC 2022/01.
-#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
-#> Error in sia_data(year = 2022, month = 1, uf = "AC", diagnosis = "J"): No data could be downloaded for the requested year(s)/month(s)/UF(s).
 
 # only key variables
 sia_data(year = 2022, month = 1, uf = "AC",
          vars = c("PA_PROC_ID", "PA_CIDPRI", "PA_SEXO",
                   "PA_IDADE", "PA_VALAPR"))
-#> ℹ Downloading SIA data: PA AC 2022/01...
-#> ℹ Download attempt 1/3 failed. Retrying in 2s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Couldn't connect to server
-#> ℹ Download attempt 2/3 failed. Retrying in 4s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> Warning: ! Failed to download/read SIA data for PA AC 2022/01.
-#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
-#> Error in sia_data(year = 2022, month = 1, uf = "AC", vars = c("PA_PROC_ID",     "PA_CIDPRI", "PA_SEXO", "PA_IDADE", "PA_VALAPR")): No data could be downloaded for the requested year(s)/month(s)/UF(s).
 
 # different file type (APAC Medicamentos)
 med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
-#> ℹ Downloading SIA data: AM AC 2022/01...
-# }
+}
 ```

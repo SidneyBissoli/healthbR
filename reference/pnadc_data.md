@@ -96,24 +96,9 @@ Data is downloaded from the IBGE FTP server:
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 # download deficiencia module for 2022
 df <- pnadc_data(module = "deficiencia", year = 2022, cache_dir = tempdir())
-#> Downloading from IBGE FTP...
-#> URL:
-#> <https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Anual/Microdados/Trimestre/Trimestre_3/Dados/PNADC_2022_trimestre3_20251017.zip>
-#> This may take a few minutes...
-#> ✔ Download complete: PNADC_2022_trimestre3_20251017.zip
-#> Downloading from IBGE FTP...
-#> URL:
-#> <https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Anual/Microdados/Trimestre/Trimestre_3/Documentacao/input_PNADC_trimestre3_20251017.txt>
-#> This may take a few minutes...
-#> ✔ Download complete: input_PNADC_trimestre3_20251017.txt
-#> Extracting and reading PNADC deficiencia 2022 data...
-#> Parsing input file for column specifications...
-#> Reading fixed-width data (614 columns)...
-#> Saving to cache...
-#> ✔ Loaded 487786 observations from PNADC deficiencia (1 year(s))
 
 # download with survey design
 svy <- pnadc_data(
@@ -122,9 +107,6 @@ svy <- pnadc_data(
   as_survey = TRUE,
   cache_dir = tempdir()
 )
-#> Loading PNADC deficiencia 2022 from cache...
-#> ✔ Loaded 487786 observations from PNADC deficiencia (1 year(s))
-#> Applying survey design (PSU: UPA, Strata: Estrato, Weight: V1028)...
 
 # select specific variables
 df_subset <- pnadc_data(
@@ -133,7 +115,5 @@ df_subset <- pnadc_data(
   vars = c("S11001", "S11002"),
   cache_dir = tempdir()
 )
-#> Loading PNADC deficiencia 2022 from cache...
-#> ✔ Loaded 487786 observations from PNADC deficiencia (1 year(s))
-# }
+}
 ```

@@ -67,29 +67,12 @@ Data is downloaded from the IBGE FTP server:
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 # download PNS 2019 data
 df <- pns_data(year = 2019, cache_dir = tempdir())
-#> Downloading PNS 2019 data from IBGE...
-#> URL: <https://ftp.ibge.gov.br/PNS/2019/Microdados/Dados/PNS_2019_20220525.zip>
-#> This may take a few minutes...
-#> ✔ Download complete: /tmp/RtmpJ1hFKo/pns/PNS_2019_20220525.zip
-#> Extracting and reading PNS 2019 data...
-#> Attempting to read as delimited text...
-#> Saving to cache...
-#> ✔ Loaded 293725 observations from 1 year: "2019"
 
 # download all years
 df_all <- pns_data(cache_dir = tempdir())
-#> Downloading PNS 2013 data from IBGE...
-#> URL: <https://ftp.ibge.gov.br/PNS/2013/Microdados/Dados/PNS_2013.zip>
-#> This may take a few minutes...
-#> ✔ Download complete: /tmp/RtmpJ1hFKo/pns/PNS_2013.zip
-#> Extracting and reading PNS 2013 data...
-#> Attempting to read as delimited text...
-#> Saving to cache...
-#> Loading PNS 2019 from cache...
-#> ✔ Loaded 516109 observations from 2 years: "2013" and "2019"
 
 # select specific variables
 df_subset <- pns_data(
@@ -97,8 +80,5 @@ df_subset <- pns_data(
   vars = c("V0001", "C006", "C008", "V0028"),
   cache_dir = tempdir()
 )
-#> Loading PNS 2019 from cache...
-#> Warning: Variables not found: "V0001", "C006", "C008", and "V0028"
-#> ✔ Loaded 293725 observations from 1 year: "2019"
-# }
+}
 ```

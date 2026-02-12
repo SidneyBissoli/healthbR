@@ -141,24 +141,9 @@ for analysis with the <code>srvyr</code> package.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># interactive()</span></span></span>
 <span class="r-in"><span><span class="co"># download deficiencia module for 2022</span></span></span>
 <span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">pnadc_data</span><span class="op">(</span>module <span class="op">=</span> <span class="st">"deficiencia"</span>, year <span class="op">=</span> <span class="fl">2022</span>, cache_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Downloading from IBGE FTP...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> URL:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-style: italic;">&lt;https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Anual/Microdados/Trimestre/Trimestre_3/Dados/PNADC_2022_trimestre3_20251017.zip&gt;</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This may take a few minutes...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Download complete: <span style="color: #0000BB;">PNADC_2022_trimestre3_20251017.zip</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Downloading from IBGE FTP...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> URL:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-style: italic;">&lt;https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Anual/Microdados/Trimestre/Trimestre_3/Documentacao/input_PNADC_trimestre3_20251017.txt&gt;</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This may take a few minutes...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Download complete: <span style="color: #0000BB;">input_PNADC_trimestre3_20251017.txt</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Extracting and reading PNADC deficiencia 2022 data...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Parsing input file for column specifications...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading fixed-width data (614 columns)...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Saving to cache...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loaded 487786 observations from PNADC deficiencia (1 year(s))</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># download with survey design</span></span></span>
 <span class="r-in"><span><span class="va">svy</span> <span class="op">&lt;-</span> <span class="fu">pnadc_data</span><span class="op">(</span></span></span>
@@ -167,9 +152,6 @@ for analysis with the <code>srvyr</code> package.</p>
 <span class="r-in"><span>  as_survey <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  cache_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading PNADC deficiencia 2022 from cache...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loaded 487786 observations from PNADC deficiencia (1 year(s))</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Applying survey design (PSU: UPA, Strata: Estrato, Weight: V1028)...</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># select specific variables</span></span></span>
 <span class="r-in"><span><span class="va">df_subset</span> <span class="op">&lt;-</span> <span class="fu">pnadc_data</span><span class="op">(</span></span></span>
@@ -178,9 +160,7 @@ for analysis with the <code>srvyr</code> package.</p>
 <span class="r-in"><span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"S11001"</span>, <span class="st">"S11002"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  cache_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading PNADC deficiencia 2022 from cache...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loaded 487786 observations from PNADC deficiencia (1 year(s))</span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -32,8 +32,7 @@ Other sinasc:
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 sinasc_clear_cache()
-#> No cached SINASC files to clear.
-# }
+}
 ```

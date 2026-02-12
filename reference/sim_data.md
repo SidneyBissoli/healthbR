@@ -89,56 +89,16 @@ Other sim:
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 # all deaths in Acre, 2022
 ac_2022 <- sim_data(year = 2022, uf = "AC")
-#> ℹ Downloading SIM data: AC 2022...
-#> ℹ Download attempt 1/3 failed. Retrying in 2s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> ℹ Download attempt 2/3 failed. Retrying in 4s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached
-#> Warning: ! Failed to download/read SIM data for AC 2022.
-#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
-#> Error in sim_data(year = 2022, uf = "AC"): No data could be downloaded for the requested year(s)/UF(s).
 
 # deaths by infarct in Sao Paulo, 2020-2022
 infarct_sp <- sim_data(year = 2020:2022, uf = "SP", cause = "I21")
-#> ℹ Downloading 3 file(s) (1 UF(s) x 3 year(s))...
-#> ℹ Downloading SIM data: SP 2020...
-#> ℹ Downloading SIM data: SP 2021...
-#> ℹ Download attempt 1/3 failed. Retrying in 2s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached
-#> ℹ Download attempt 2/3 failed. Retrying in 4s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached
-#> Warning: ! Failed to download/read SIM data for SP 2021.
-#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
-#> ℹ Downloading SIM data: SP 2022...
-#> ℹ Download attempt 1/3 failed. Retrying in 2s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> ℹ Download attempt 2/3 failed. Retrying in 4s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> Warning: ! Failed to download/read SIM data for SP 2022.
-#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
 
 # only key variables, Rio de Janeiro, 2022
 sim_data(year = 2022, uf = "RJ",
          vars = c("DTOBITO", "SEXO", "IDADE",
                   "RACACOR", "CODMUNRES", "CAUSABAS"))
-#> ℹ Downloading SIM data: RJ 2022...
-#> ℹ Download attempt 1/3 failed. Retrying in 2s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> ℹ Download attempt 2/3 failed. Retrying in 4s...
-#> ✖ Timeout was reached [ftp.datasus.gov.br]: Failed to connect to
-#>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached
-#> Warning: ! Failed to download/read SIM data for RJ 2022.
-#> ✖ Failed to download file from DATASUS FTP after 3 attempts.
-#> Error in sim_data(year = 2022, uf = "RJ", vars = c("DTOBITO", "SEXO",     "IDADE", "RACACOR", "CODMUNRES", "CAUSABAS")): No data could be downloaded for the requested year(s)/UF(s).
-# }
+}
 ```

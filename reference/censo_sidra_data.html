@@ -110,7 +110,7 @@ Default FALSE.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># interactive()</span></span></span>
 <span class="r-in"><span><span class="co"># population by state from 2022 Census</span></span></span>
 <span class="r-in"><span><span class="fu">censo_sidra_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  table <span class="op">=</span> <span class="fl">9514</span>,</span></span>
@@ -118,23 +118,6 @@ Default FALSE.</p></dd>
 <span class="r-in"><span>  year <span class="op">=</span> <span class="fl">2022</span>,</span></span>
 <span class="r-in"><span>  variable <span class="op">=</span> <span class="fl">93</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Querying SIDRA API for table <span style="color: #0000BB;">"9514"</span>...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Retrieved <span style="color: #0000BB;">27</span> rows from SIDRA table <span style="color: #0000BB;">"9514"</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 27 × 17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    nc    nn         mc    mn         v d1c   d1n   d2c   d2n   d3c   d3n   d4c  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 3     Unidade d… 45    Pess… 1.58<span style="color: #949494;">e</span>6 11    Rond… 93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 3     Unidade d… 45    Pess… 8.30<span style="color: #949494;">e</span>5 12    Acre  93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 3     Unidade d… 45    Pess… 3.94<span style="color: #949494;">e</span>6 13    Amaz… 93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 3     Unidade d… 45    Pess… 6.37<span style="color: #949494;">e</span>5 14    Rora… 93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 3     Unidade d… 45    Pess… 8.12<span style="color: #949494;">e</span>6 15    Pará  93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 3     Unidade d… 45    Pess… 7.34<span style="color: #949494;">e</span>5 16    Amapá 93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 3     Unidade d… 45    Pess… 1.51<span style="color: #949494;">e</span>6 17    Toca… 93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 3     Unidade d… 45    Pess… 6.78<span style="color: #949494;">e</span>6 21    Mara… 93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 3     Unidade d… 45    Pess… 3.27<span style="color: #949494;">e</span>6 22    Piauí 93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 3     Unidade d… 45    Pess… 8.79<span style="color: #949494;">e</span>6 23    Ceará 93    Popu… 2022  2022  6794 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 17 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 5 more variables: d4n &lt;chr&gt;, d5c &lt;chr&gt;, d5n &lt;chr&gt;, d6c &lt;chr&gt;, d6n &lt;chr&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># population by race, Brazil level</span></span></span>
 <span class="r-in"><span><span class="fu">censo_sidra_data</span><span class="op">(</span></span></span>
@@ -144,17 +127,7 @@ Default FALSE.</p></dd>
 <span class="r-in"><span>  variable <span class="op">=</span> <span class="fl">93</span>,</span></span>
 <span class="r-in"><span>  classifications <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"86"</span> <span class="op">=</span> <span class="st">"allxt"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Querying SIDRA API for table <span style="color: #0000BB;">"9605"</span>...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Retrieved <span style="color: #0000BB;">5</span> rows from SIDRA table <span style="color: #0000BB;">"9605"</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 13</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   nc    nn    mc    mn         v d1c   d1n   d2c   d2n   d3c   d3n   d4c   d4n  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1     Bras… 45    Pess… 8.83<span style="color: #949494;">e</span>7 1     Bras… 93    Popu… 2022  2022  2776  Bran…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 1     Bras… 45    Pess… 2.07<span style="color: #949494;">e</span>7 1     Bras… 93    Popu… 2022  2022  2777  Preta</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 1     Bras… 45    Pess… 8.50<span style="color: #949494;">e</span>5 1     Bras… 93    Popu… 2022  2022  2778  Amar…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 1     Bras… 45    Pess… 9.21<span style="color: #949494;">e</span>7 1     Bras… 93    Popu… 2022  2022  2779  Parda</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 1     Bras… 45    Pess… 1.23<span style="color: #949494;">e</span>6 1     Bras… 93    Popu… 2022  2022  2780  Indí…</span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

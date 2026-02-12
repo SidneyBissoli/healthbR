@@ -134,86 +134,19 @@ hospitalization rates.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># interactive()</span></span></span>
 <span class="r-in"><span><span class="co"># all admissions in Acre, January 2022</span></span></span>
 <span class="r-in"><span><span class="va">ac_jan</span> <span class="op">&lt;-</span> <span class="fu">sih_data</span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Downloading SIH data: AC 2022/01...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 1/3 failed. Retrying in 2s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 2/3 failed. Retrying in 4s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Failed to download/read SIH data for AC 2022/01.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Failed to download file from DATASUS FTP after 3 attempts.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in sih_data(year = 2022, month = 1, uf = "AC"):</span> No data could be downloaded for the requested year(s)/month(s)/UF(s).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># heart attacks in Sao Paulo, first semester 2022</span></span></span>
 <span class="r-in"><span><span class="va">infarct_sp</span> <span class="op">&lt;-</span> <span class="fu">sih_data</span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, uf <span class="op">=</span> <span class="st">"SP"</span>,</span></span>
 <span class="r-in"><span>                        diagnosis <span class="op">=</span> <span class="st">"I21"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Downloading 6 file(s) (1 UF(s) x 1 year(s) x 6 month(s))...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Downloading SIH data: SP 2022/01...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 1/3 failed. Retrying in 2s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30000 ms: Timeout was reached</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 2/3 failed. Retrying in 4s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Failed to download/read SIH data for SP 2022/01.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Failed to download file from DATASUS FTP after 3 attempts.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Downloading SIH data: SP 2022/02...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 1/3 failed. Retrying in 2s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 2/3 failed. Retrying in 4s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Failed to download/read SIH data for SP 2022/02.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Failed to download file from DATASUS FTP after 3 attempts.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Downloading SIH data: SP 2022/03...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Downloading SIH data: SP 2022/04...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 1/3 failed. Retrying in 2s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 2/3 failed. Retrying in 4s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30001 ms: Timeout was reached</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Failed to download/read SIH data for SP 2022/04.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Failed to download file from DATASUS FTP after 3 attempts.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Downloading SIH data: SP 2022/05...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 1/3 failed. Retrying in 2s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 2/3 failed. Retrying in 4s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Failed to download/read SIH data for SP 2022/05.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Failed to download file from DATASUS FTP after 3 attempts.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Downloading SIH data: SP 2022/06...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 1/3 failed. Retrying in 2s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 2/3 failed. Retrying in 4s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Failed to download/read SIH data for SP 2022/06.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Failed to download file from DATASUS FTP after 3 attempts.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># only key variables, Rio de Janeiro, March 2022</span></span></span>
 <span class="r-in"><span><span class="fu">sih_data</span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">3</span>, uf <span class="op">=</span> <span class="st">"RJ"</span>,</span></span>
 <span class="r-in"><span>         vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DIAG_PRINC"</span>, <span class="st">"DT_INTER"</span>, <span class="st">"SEXO"</span>,</span></span>
 <span class="r-in"><span>                  <span class="st">"IDADE"</span>, <span class="st">"MORTE"</span>, <span class="st">"VAL_TOT"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Downloading SIH data: RJ 2022/03...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 1/3 failed. Retrying in 2s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30001 ms: Couldn't connect to server</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Download attempt 2/3 failed. Retrying in 4s...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Timeout was reached [ftp.datasus.gov.br]: Failed to connect to</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ftp.datasus.gov.br port 21 after 30002 ms: Timeout was reached</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Failed to download/read SIH data for RJ 2022/03.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Failed to download file from DATASUS FTP after 3 attempts.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in sih_data(year = 2022, month = 3, uf = "RJ", vars = c("DIAG_PRINC",     "DT_INTER", "SEXO", "IDADE", "MORTE", "VAL_TOT")):</span> No data could be downloaded for the requested year(s)/month(s)/UF(s).</span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

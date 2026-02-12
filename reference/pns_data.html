@@ -110,29 +110,12 @@ weight variables with the <code>srvyr</code> or <code>survey</code> packages:</p
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># interactive()</span></span></span>
 <span class="r-in"><span><span class="co"># download PNS 2019 data</span></span></span>
 <span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">pns_data</span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, cache_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Downloading PNS 2019 data from IBGE...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> URL: <span style="color: #0000BB; font-style: italic;">&lt;https://ftp.ibge.gov.br/PNS/2019/Microdados/Dados/PNS_2019_20220525.zip&gt;</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This may take a few minutes...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Download complete: <span style="color: #0000BB;">/tmp/RtmpJ1hFKo/pns/PNS_2019_20220525.zip</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Extracting and reading PNS 2019 data...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Attempting to read as delimited text...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Saving to cache...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loaded <span style="color: #0000BB;">293725</span> observations from <span style="color: #0000BB;">1</span> year: <span style="color: #0000BB;">"2019"</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># download all years</span></span></span>
 <span class="r-in"><span><span class="va">df_all</span> <span class="op">&lt;-</span> <span class="fu">pns_data</span><span class="op">(</span>cache_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Downloading PNS 2013 data from IBGE...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> URL: <span style="color: #0000BB; font-style: italic;">&lt;https://ftp.ibge.gov.br/PNS/2013/Microdados/Dados/PNS_2013.zip&gt;</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This may take a few minutes...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Download complete: <span style="color: #0000BB;">/tmp/RtmpJ1hFKo/pns/PNS_2013.zip</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Extracting and reading PNS 2013 data...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Attempting to read as delimited text...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Saving to cache...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading PNS 2019 from cache...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loaded <span style="color: #0000BB;">516109</span> observations from <span style="color: #0000BB;">2</span> years: <span style="color: #0000BB;">"2013"</span> and <span style="color: #0000BB;">"2019"</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># select specific variables</span></span></span>
 <span class="r-in"><span><span class="va">df_subset</span> <span class="op">&lt;-</span> <span class="fu">pns_data</span><span class="op">(</span></span></span>
@@ -140,10 +123,7 @@ weight variables with the <code>srvyr</code> or <code>survey</code> packages:</p
 <span class="r-in"><span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"V0001"</span>, <span class="st">"C006"</span>, <span class="st">"C008"</span>, <span class="st">"V0028"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  cache_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading PNS 2019 from cache...</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variables not found: <span style="color: #0000BB;">"V0001"</span>, <span style="color: #0000BB;">"C006"</span>, <span style="color: #0000BB;">"C008"</span>, and <span style="color: #0000BB;">"V0028"</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loaded <span style="color: #0000BB;">293725</span> observations from <span style="color: #0000BB;">1</span> year: <span style="color: #0000BB;">"2019"</span></span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

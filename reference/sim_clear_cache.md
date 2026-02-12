@@ -32,8 +32,7 @@ Other sim:
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 sim_clear_cache()
-#> No cached SIM files to clear.
-# }
+}
 ```

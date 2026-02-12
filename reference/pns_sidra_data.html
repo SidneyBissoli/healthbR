@@ -110,30 +110,13 @@ Default FALSE.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># interactive()</span></span></span>
 <span class="r-in"><span><span class="co"># self-rated health by state, 2019</span></span></span>
 <span class="r-in"><span><span class="fu">pns_sidra_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  table <span class="op">=</span> <span class="fl">4751</span>,</span></span>
 <span class="r-in"><span>  territorial_level <span class="op">=</span> <span class="st">"state"</span>,</span></span>
 <span class="r-in"><span>  year <span class="op">=</span> <span class="fl">2019</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Querying SIDRA API for table <span style="color: #0000BB;">"4751"</span>...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Retrieved <span style="color: #0000BB;">216</span> rows from SIDRA table <span style="color: #0000BB;">"4751"</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 216 × 15</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    nc    nn         mc    mn         v d1c   d1n   d2c   d2n   d3c   d3n   d4c  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 3     Unidade d… 1572  Mil … <span style="text-decoration: underline;">771</span>228 11    Rond… 4735  Pess… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 3     Unidade d… 1572  Mil … <span style="text-decoration: underline;">737</span>062 11    Rond… 4736  Pess… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 3     Unidade d… 1572  Mil … <span style="text-decoration: underline;">805</span>394 11    Rond… 4737  Pess… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 3     Unidade d… 2     %         23 11    Rond… 4974  Coef… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 3     Unidade d… 2     %        614 11    Rond… 4738  Perc… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 3     Unidade d… 2     %        587 11    Rond… 4739  Perc… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 3     Unidade d… 2     %        641 11    Rond… 4740  Perc… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 3     Unidade d… 2     %         23 11    Rond… 4975  Coef… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 3     Unidade d… 1572  Mil … <span style="text-decoration: underline;">354</span>679 12    Acre  4735  Pess… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 3     Unidade d… 1572  Mil … <span style="text-decoration: underline;">338</span>804 12    Acre  4736  Pess… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 206 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 3 more variables: d4n &lt;chr&gt;, d5c &lt;chr&gt;, d5n &lt;chr&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># same table, Brazil-level, both years</span></span></span>
 <span class="r-in"><span><span class="fu">pns_sidra_data</span><span class="op">(</span></span></span>
@@ -141,49 +124,13 @@ Default FALSE.</p></dd>
 <span class="r-in"><span>  territorial_level <span class="op">=</span> <span class="st">"brazil"</span>,</span></span>
 <span class="r-in"><span>  year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2013</span>, <span class="fl">2019</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Querying SIDRA API for table <span style="color: #0000BB;">"4751"</span>...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Retrieved <span style="color: #0000BB;">16</span> rows from SIDRA table <span style="color: #0000BB;">"4751"</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 16 × 15</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    nc    nn     mc    mn             v d1c   d1n   d2c   d2n   d3c   d3n   d4c  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1     Brasil 1572  Mil pess… 9.64<span style="color: #949494;">e</span>7 1     Bras… 4735  Pess… 2013  2013  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 1     Brasil 1572  Mil pess… 1.05<span style="color: #949494;">e</span>8 1     Bras… 4735  Pess… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 1     Brasil 1572  Mil pess… 9.54<span style="color: #949494;">e</span>7 1     Bras… 4736  Pess… 2013  2013  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1     Brasil 1572  Mil pess… 1.04<span style="color: #949494;">e</span>8 1     Bras… 4736  Pess… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 1     Brasil 1572  Mil pess… 9.74<span style="color: #949494;">e</span>7 1     Bras… 4737  Pess… 2013  2013  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 1     Brasil 1572  Mil pess… 1.06<span style="color: #949494;">e</span>8 1     Bras… 4737  Pess… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 1     Brasil 2     %         5   <span style="color: #949494;">e</span>0 1     Bras… 4974  Coef… 2013  2013  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 1     Brasil 2     %         5   <span style="color: #949494;">e</span>0 1     Bras… 4974  Coef… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 1     Brasil 2     %         6.62<span style="color: #949494;">e</span>2 1     Bras… 4738  Perc… 2013  2013  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 1     Brasil 2     %         6.61<span style="color: #949494;">e</span>2 1     Bras… 4738  Perc… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 1     Brasil 2     %         6.55<span style="color: #949494;">e</span>2 1     Bras… 4739  Perc… 2013  2013  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> 1     Brasil 2     %         6.55<span style="color: #949494;">e</span>2 1     Bras… 4739  Perc… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> 1     Brasil 2     %         6.69<span style="color: #949494;">e</span>2 1     Bras… 4740  Perc… 2013  2013  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> 1     Brasil 2     %         6.67<span style="color: #949494;">e</span>2 1     Bras… 4740  Perc… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> 1     Brasil 2     %         5   <span style="color: #949494;">e</span>0 1     Bras… 4975  Coef… 2013  2013  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span> 1     Brasil 2     %         5   <span style="color: #949494;">e</span>0 1     Bras… 4975  Coef… 2019  2019  6795 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 3 more variables: d4n &lt;chr&gt;, d5c &lt;chr&gt;, d5n &lt;chr&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># hypertension data</span></span></span>
 <span class="r-in"><span><span class="fu">pns_sidra_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  table <span class="op">=</span> <span class="fl">4416</span>,</span></span>
 <span class="r-in"><span>  territorial_level <span class="op">=</span> <span class="st">"brazil"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Querying SIDRA API for table <span style="color: #0000BB;">"4416"</span>...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Retrieved <span style="color: #0000BB;">8</span> rows from SIDRA table <span style="color: #0000BB;">"4416"</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 13</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   nc    nn     mc    mn              v d1c   d1n   d2c   d2n   d3c   d3n   d4c  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1     Brasil 1572  Mil pess…  2.77<span style="color: #949494;">e</span>7 1     Bras… 4396  Pess… 2013  2013  33065</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 1     Brasil 1572  Mil pess…  2.69<span style="color: #949494;">e</span>7 1     Bras… 4397  Pess… 2013  2013  33065</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 1     Brasil 1572  Mil pess…  2.84<span style="color: #949494;">e</span>7 1     Bras… 4398  Pess… 2013  2013  33065</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 1     Brasil 2     %          1.4 <span style="color: #949494;">e</span>1 1     Bras… 4861  Coef… 2013  2013  33065</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 1     Brasil 2     %          1   <span style="color: #949494;">e</span>3 1     Bras… 4399  Perc… 2013  2013  33065</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 1     Brasil 2     %         <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>  1     Bras… 4400  Perc… 2013  2013  33065</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> 1     Brasil 2     %         <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>  1     Bras… 4401  Perc… 2013  2013  33065</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> 1     Brasil 2     %         <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>  1     Bras… 4862  Coef… 2013  2013  33065</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1 more variable: d4n &lt;chr&gt;</span></span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

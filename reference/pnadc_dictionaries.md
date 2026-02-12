@@ -47,11 +47,8 @@ Dictionaries are downloaded from the IBGE FTP server.
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 # get dictionary for deficiencia module
 dict <- pnadc_dictionaries(module = "deficiencia", cache_dir = tempdir())
-#> Using year 2024 for dictionary (only one year at a time).
-#> ℹ Using cached file: input_PNADC_trimestre3_20251017.txt
-#> ✔ Dictionary cached: pnadc_dict_deficiencia_2024.rds
-# }
+}
 ```

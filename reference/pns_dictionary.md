@@ -44,39 +44,11 @@ Dictionaries are downloaded from the IBGE FTP server:
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 # get dictionary for 2019
 dict <- pns_dictionary(year = 2019, cache_dir = tempdir())
-#> Downloading PNS 2019 dictionary from IBGE...
-#> URL:
-#> <https://ftp.ibge.gov.br/PNS/2019/Microdados/Documentacao/Dicionario_e_input_20220530.zip>
-#> ✔ Download complete: /tmp/RtmpJ1hFKo/pns/Dicionario_e_input_20220530.zip
-#> Extracting dictionary...
-#> Reading Excel dictionary...
-#> New names:
-#> • `` -> `...2`
-#> • `` -> `...3`
-#> • `` -> `...4`
-#> • `` -> `...5`
-#> • `` -> `...6`
-#> • `` -> `...7`
-#> ✔ Dictionary cached: /tmp/RtmpJ1hFKo/pns/pns_dictionary_2019.rds
 
 # get dictionary for 2013
 dict_2013 <- pns_dictionary(year = 2013, cache_dir = tempdir())
-#> Downloading PNS 2013 dictionary from IBGE...
-#> URL:
-#> <https://ftp.ibge.gov.br/PNS/2013/Microdados/Documentacao/Dicionario_e_input_20200930.zip>
-#> ✔ Download complete: /tmp/RtmpJ1hFKo/pns/Dicionario_e_input_20200930.zip
-#> Extracting dictionary...
-#> Reading Excel dictionary...
-#> New names:
-#> • `` -> `...2`
-#> • `` -> `...3`
-#> • `` -> `...4`
-#> • `` -> `...5`
-#> • `` -> `...6`
-#> • `` -> `...7`
-#> ✔ Dictionary cached: /tmp/RtmpJ1hFKo/pns/pns_dictionary_2013.rds
-# }
+}
 ```
