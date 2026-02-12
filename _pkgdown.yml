@@ -2,3 +2,112 @@ url: https://sidneybissoli.github.io/healthbR/
 template:
   bootstrap: 5
 
+reference:
+  - title: "Package overview"
+    contents:
+      - list_sources
+
+  - title: "SIM -- Mortality"
+    desc: "Deaths from the Mortality Information System (DATASUS FTP, 1996--2024)"
+    contents:
+      - sim_data
+      - sim_years
+      - sim_info
+      - sim_variables
+      - sim_dictionary
+      - sim_cache_status
+      - sim_clear_cache
+
+  - title: "SINASC -- Live births"
+    desc: "Live births from the Live Birth Information System (DATASUS FTP, 1996--2024)"
+    contents:
+      - sinasc_data
+      - sinasc_years
+      - sinasc_info
+      - sinasc_variables
+      - sinasc_dictionary
+      - sinasc_cache_status
+      - sinasc_clear_cache
+
+  - title: "SIH -- Hospital admissions"
+    desc: "Hospital admissions from the Hospital Information System (DATASUS FTP, 2008--2024)"
+    contents:
+      - sih_data
+      - sih_years
+      - sih_info
+      - sih_variables
+      - sih_dictionary
+      - sih_cache_status
+      - sih_clear_cache
+
+  - title: "SIA -- Outpatient production"
+    desc: "Outpatient production from the Outpatient Information System (DATASUS FTP, 2008--2024)"
+    contents:
+      - sia_data
+      - sia_years
+      - sia_info
+      - sia_variables
+      - sia_dictionary
+      - sia_cache_status
+      - sia_clear_cache
+
+  - title: "VIGITEL -- Telephone survey"
+    desc: "Surveillance of Risk Factors for Chronic Diseases (2006--2024)"
+    contents:
+      - vigitel_data
+      - vigitel_years
+      - vigitel_info
+      - vigitel_variables
+      - vigitel_dictionary
+      - vigitel_cache_status
+      - vigitel_clear_cache
+
+  - title: "PNS -- National Health Survey"
+    desc: "National Health Survey microdata and SIDRA API (2013, 2019)"
+    contents:
+      - pns_data
+      - pns_years
+      - pns_info
+      - pns_modules
+      - pns_variables
+      - pns_dictionary
+      - pns_sidra_data
+      - pns_sidra_tables
+      - pns_sidra_search
+      - pns_cache_status
+      - pns_clear_cache
+
+  - title: "PNAD Continua"
+    desc: "Continuous National Household Sample Survey (2012--2024)"
+    contents:
+      - pnadc_data
+      - pnadc_years
+      - pnadc_info
+      - pnadc_modules
+      - pnadc_variables
+      - pnadc_dictionaries
+      - pnadc_cache_status
+      - pnadc_clear_cache
+
+  - title: "POF -- Household Budget Survey"
+    desc: "Food security, consumption, and anthropometry (2002--2018)"
+    contents:
+      - pof_data
+      - pof_years
+      - pof_info
+      - pof_registers
+      - pof_variables
+      - pof_dictionary
+      - pof_cache_status
+      - pof_clear_cache
+
+  - title: "Censo -- Population denominators"
+    desc: "Census data and population estimates via SIDRA API (1970--2022)"
+    contents:
+      - censo_populacao
+      - censo_estimativa
+      - censo_years
+      - censo_info
+      - censo_sidra_data
+      - censo_sidra_tables
+      - censo_sidra_search
