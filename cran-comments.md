@@ -2,7 +2,14 @@
 
 0 errors | 0 warnings | 1 note
 
-* This is a new submission.
+* Update from 0.1.1 to 0.6.1 (major feature release: 8 new data modules).
+
+## Existing CRAN NOTE (r-oldrel-macos-x86_64)
+
+The NOTE "Package suggested but not available for checking: 'arrow'" on
+r-oldrel-macos-x86_64 is expected. `arrow` is in Suggests and all code
+checks its availability with `requireNamespace()` before use, falling
+back to .rds caching when unavailable.
 
 ## Test environments
 
