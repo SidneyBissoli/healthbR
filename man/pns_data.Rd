@@ -51,7 +51,7 @@ Data is downloaded from the IBGE FTP server:
 }
 
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # download PNS 2019 data
 df <- pns_data(year = 2019, cache_dir = tempdir())
 
@@ -64,5 +64,5 @@ df_subset <- pns_data(
   vars = c("V0001", "C006", "C008", "V0028"),
   cache_dir = tempdir()
 )
-}
+\dontshow{\}) # examplesIf}
 }

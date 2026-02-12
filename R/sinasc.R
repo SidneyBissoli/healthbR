@@ -372,8 +372,7 @@ sinasc_dictionary <- function(variable = NULL) {
 #' @seealso [censo_populacao()] for population denominators to calculate
 #'   birth rates.
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # all births in Acre, 2022
 #' ac_2022 <- sinasc_data(year = 2022, uf = "AC")
 #'
@@ -384,7 +383,6 @@ sinasc_dictionary <- function(variable = NULL) {
 #' sinasc_data(year = 2022, uf = "RJ",
 #'             vars = c("DTNASC", "SEXO", "PESO",
 #'                      "IDADEMAE", "PARTO", "CONSULTAS"))
-#' }
 sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
                         cache = TRUE, cache_dir = NULL) {
 
@@ -516,10 +514,8 @@ sinasc_cache_status <- function(cache_dir = NULL) {
 #' @export
 #' @family sinasc
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' sinasc_clear_cache()
-#' }
 sinasc_clear_cache <- function(cache_dir = NULL) {
   cache_dir <- .sinasc_cache_dir(cache_dir)
 

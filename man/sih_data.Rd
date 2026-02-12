@@ -58,7 +58,7 @@ SIH data is monthly, so downloading an entire year for all states requires
 324 files (27 UFs x 12 months). Use \code{uf} and \code{month} to limit downloads.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # all admissions in Acre, January 2022
 ac_jan <- sih_data(year = 2022, month = 1, uf = "AC")
 
@@ -70,7 +70,7 @@ infarct_sp <- sih_data(year = 2022, month = 1:6, uf = "SP",
 sih_data(year = 2022, month = 3, uf = "RJ",
          vars = c("DIAG_PRINC", "DT_INTER", "SEXO",
                   "IDADE", "MORTE", "VAL_TOT"))
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=censo_populacao]{censo_populacao()}} for population denominators to calculate

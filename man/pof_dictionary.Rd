@@ -32,9 +32,9 @@ Downloads and returns the variable dictionary for POF microdata.
 The dictionary is cached locally to avoid repeated downloads.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 pof_dictionary("2017-2018", "morador", cache_dir = tempdir())
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link{pof_variables}}, \code{\link{pof_data}}

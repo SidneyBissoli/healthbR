@@ -21,8 +21,8 @@ Downloads and returns the VIGITEL data dictionary containing variable
 descriptions, codes, and categories.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 dict <- vigitel_dictionary(cache_dir = tempdir())
 head(dict)
-}
+\dontshow{\}) # examplesIf}
 }

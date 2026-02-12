@@ -35,11 +35,11 @@ Dictionaries are downloaded from the IBGE FTP server:
 }
 
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # get dictionary for 2019
 dict <- pns_dictionary(year = 2019, cache_dir = tempdir())
 
 # get dictionary for 2013
 dict_2013 <- pns_dictionary(year = 2013, cache_dir = tempdir())
-}
+\dontshow{\}) # examplesIf}
 }

@@ -46,7 +46,7 @@ Returns pre-aggregated data (prevalences, means, proportions) with
 confidence intervals and coefficients of variation.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # self-rated health by state, 2019
 pns_sidra_data(
   table = 4751,
@@ -66,5 +66,5 @@ pns_sidra_data(
   table = 4416,
   territorial_level = "brazil"
 )
-}
+\dontshow{\}) # examplesIf}
 }

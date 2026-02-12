@@ -436,8 +436,7 @@ sia_dictionary <- function(variable = NULL) {
 #' @seealso \code{\link{sia_info}()} for file type descriptions,
 #'   \code{\link{censo_populacao}()} for population denominators.
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # all outpatient production in Acre, January 2022
 #' ac_jan <- sia_data(year = 2022, month = 1, uf = "AC")
 #'
@@ -456,7 +455,6 @@ sia_dictionary <- function(variable = NULL) {
 #'
 #' # different file type (APAC Medicamentos)
 #' med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
-#' }
 sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
                      procedure = NULL, diagnosis = NULL,
                      cache = TRUE, cache_dir = NULL) {
@@ -615,10 +613,8 @@ sia_cache_status <- function(cache_dir = NULL) {
 #' @export
 #' @family sia
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' sia_clear_cache()
-#' }
 sia_clear_cache <- function(cache_dir = NULL) {
   cache_dir <- .sia_cache_dir(cache_dir)
 

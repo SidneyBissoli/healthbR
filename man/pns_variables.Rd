@@ -28,11 +28,11 @@ This is a convenience wrapper around \code{\link{pns_dictionary}} that
 returns only unique variable names and labels.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # list all variables for 2019
 pns_variables(year = 2019, cache_dir = tempdir())
 
 # list variables for a specific module
 pns_variables(year = 2019, module = "J", cache_dir = tempdir())
-}
+\dontshow{\}) # examplesIf}
 }

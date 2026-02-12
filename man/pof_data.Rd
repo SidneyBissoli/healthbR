@@ -75,7 +75,7 @@ Data is downloaded from the IBGE FTP server:
 }
 
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # basic usage - download morador register
 morador <- pof_data("2017-2018", "morador", cache_dir = tempdir())
 
@@ -92,7 +92,7 @@ df <- pof_data(
 # with survey design (requires srvyr package)
 morador_svy <- pof_data("2017-2018", "morador", as_survey = TRUE,
                          cache_dir = tempdir())
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link{pof_years}}, \code{\link{pof_info}},

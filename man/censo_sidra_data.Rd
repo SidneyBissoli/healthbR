@@ -48,7 +48,7 @@ Queries the IBGE SIDRA API to retrieve any Census table. This is the
 most flexible function, allowing full control over SIDRA query parameters.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # population by state from 2022 Census
 censo_sidra_data(
   table = 9514,
@@ -65,5 +65,5 @@ censo_sidra_data(
   variable = 93,
   classifications = list("86" = "allxt")
 )
-}
+\dontshow{\}) # examplesIf}
 }

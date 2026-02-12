@@ -25,8 +25,8 @@ Returns a list of available variables in the PNADC microdata for a given module.
 This is a convenience wrapper around \code{\link{pnadc_dictionaries}}.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # list variables for deficiencia module
 pnadc_variables(module = "deficiencia", cache_dir = tempdir())
-}
+\dontshow{\}) # examplesIf}
 }

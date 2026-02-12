@@ -1042,10 +1042,8 @@ pof_registers <- function(year = "2017-2018", health_only = FALSE) {
 #'
 #' @seealso \code{\link{pof_variables}}, \code{\link{pof_data}}
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' pof_dictionary("2017-2018", "morador", cache_dir = tempdir())
-#' }
 pof_dictionary <- function(year = "2017-2018",
                            register = NULL,
                            cache_dir = NULL,
@@ -1109,11 +1107,9 @@ pof_dictionary <- function(year = "2017-2018",
 #'
 #' @seealso \code{\link{pof_dictionary}}, \code{\link{pof_data}}
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' pof_variables("2017-2018", "morador", cache_dir = tempdir())
 #' pof_variables("2017-2018", "domicilio", search = "ebia", cache_dir = tempdir())
-#' }
 pof_variables <- function(year = "2017-2018",
                           register = NULL,
                           search = NULL,
@@ -1214,8 +1210,7 @@ pof_variables <- function(year = "2017-2018",
 #' @seealso \code{\link{pof_years}}, \code{\link{pof_info}},
 #'   \code{\link{pof_registers}}, \code{\link{pof_variables}}
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # basic usage - download morador register
 #' morador <- pof_data("2017-2018", "morador", cache_dir = tempdir())
 #'
@@ -1232,7 +1227,6 @@ pof_variables <- function(year = "2017-2018",
 #' # with survey design (requires srvyr package)
 #' morador_svy <- pof_data("2017-2018", "morador", as_survey = TRUE,
 #'                          cache_dir = tempdir())
-#' }
 pof_data <- function(year = "2017-2018",
                      register = "morador",
                      vars = NULL,

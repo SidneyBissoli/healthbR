@@ -59,7 +59,7 @@ When \code{uf} is specified, only the requested state(s) are downloaded,
 making the operation much faster than downloading the entire country.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # all deaths in Acre, 2022
 ac_2022 <- sim_data(year = 2022, uf = "AC")
 
@@ -70,7 +70,7 @@ infarct_sp <- sim_data(year = 2020:2022, uf = "SP", cause = "I21")
 sim_data(year = 2022, uf = "RJ",
          vars = c("DTOBITO", "SEXO", "IDADE",
                   "RACACOR", "CODMUNRES", "CAUSABAS"))
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=censo_populacao]{censo_populacao()}} for population denominators to calculate

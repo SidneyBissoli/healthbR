@@ -17,9 +17,9 @@ Invisible NULL.
 Deletes cached SIM data files.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 sim_clear_cache()
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other sim: 

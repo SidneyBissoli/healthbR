@@ -47,7 +47,7 @@ Data is retrieved from IBGE SIDRA API, table 6579:
 }
 
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # estimates for 2020 by state
 censo_estimativa(year = 2020)
 
@@ -56,5 +56,5 @@ censo_estimativa(year = 2015:2020, territorial_level = "brazil")
 
 # estimates by municipality
 censo_estimativa(year = 2021, territorial_level = "municipality")
-}
+\dontshow{\}) # examplesIf}
 }

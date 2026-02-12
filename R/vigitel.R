@@ -297,8 +297,7 @@ vigitel_years <- function() {
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # download all years (uses tempdir to avoid leaving files)
 #' df <- vigitel_data(cache_dir = tempdir())
 #'
@@ -314,7 +313,6 @@ vigitel_years <- function() {
 #'   vars = c("ano", "cidade", "sexo", "idade", "pesorake"),
 #'   cache_dir = tempdir()
 #' )
-#' }
 vigitel_data <- function(year = NULL,
                          format = c("dta", "csv"),
                          vars = NULL,
@@ -461,11 +459,9 @@ vigitel_data <- function(year = NULL,
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' dict <- vigitel_dictionary(cache_dir = tempdir())
 #' head(dict)
-#' }
 vigitel_dictionary <- function(cache_dir = NULL,
                                force = FALSE) {
 
@@ -508,11 +504,9 @@ vigitel_dictionary <- function(cache_dir = NULL,
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' vars <- vigitel_variables(cache_dir = tempdir())
 #' head(vars)
-#' }
 vigitel_variables <- function(cache_dir = NULL,
                               force = FALSE) {
 

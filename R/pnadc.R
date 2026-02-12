@@ -617,11 +617,9 @@ pnadc_info <- function() {
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # get dictionary for deficiencia module
 #' dict <- pnadc_dictionaries(module = "deficiencia", cache_dir = tempdir())
-#' }
 pnadc_dictionaries <- function(module,
                                 year = NULL,
                                 cache_dir = NULL,
@@ -696,11 +694,9 @@ pnadc_dictionaries <- function(module,
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # list variables for deficiencia module
 #' pnadc_variables(module = "deficiencia", cache_dir = tempdir())
-#' }
 pnadc_variables <- function(module,
                              year = NULL,
                              cache_dir = NULL,
@@ -772,8 +768,7 @@ pnadc_variables <- function(module,
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # download deficiencia module for 2022
 #' df <- pnadc_data(module = "deficiencia", year = 2022, cache_dir = tempdir())
 #'
@@ -792,7 +787,6 @@ pnadc_variables <- function(module,
 #'   vars = c("S11001", "S11002"),
 #'   cache_dir = tempdir()
 #' )
-#' }
 pnadc_data <- function(module,
                        year = NULL,
                        vars = NULL,

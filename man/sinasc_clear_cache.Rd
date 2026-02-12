@@ -17,9 +17,9 @@ Invisible NULL.
 Deletes cached SINASC data files.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 sinasc_clear_cache()
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other sinasc: 

@@ -35,8 +35,8 @@ Dictionaries are downloaded from the IBGE FTP server.
 }
 
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # get dictionary for deficiencia module
 dict <- pnadc_dictionaries(module = "deficiencia", cache_dir = tempdir())
-}
+\dontshow{\}) # examplesIf}
 }

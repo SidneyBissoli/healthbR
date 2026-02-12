@@ -17,9 +17,9 @@ Invisible NULL.
 Deletes cached SIH data files.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 sih_clear_cache()
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other sih: 

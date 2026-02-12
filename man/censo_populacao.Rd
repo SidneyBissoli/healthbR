@@ -65,7 +65,7 @@ Data is retrieved from IBGE SIDRA API:
 }
 
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # total population by state, 2022
 censo_populacao(year = 2022)
 
@@ -77,5 +77,5 @@ censo_populacao(year = 2010, variables = "age_sex")
 
 # population by race, 2022
 censo_populacao(year = 2022, variables = "race")
-}
+\dontshow{\}) # examplesIf}
 }

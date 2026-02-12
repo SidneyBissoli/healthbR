@@ -663,14 +663,12 @@ pns_modules <- function(year = NULL) {
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # get dictionary for 2019
 #' dict <- pns_dictionary(year = 2019, cache_dir = tempdir())
 #'
 #' # get dictionary for 2013
 #' dict_2013 <- pns_dictionary(year = 2013, cache_dir = tempdir())
-#' }
 pns_dictionary <- function(year = 2019,
                            cache_dir = NULL,
                            refresh = FALSE) {
@@ -814,14 +812,12 @@ pns_dictionary <- function(year = 2019,
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # list all variables for 2019
 #' pns_variables(year = 2019, cache_dir = tempdir())
 #'
 #' # list variables for a specific module
 #' pns_variables(year = 2019, module = "J", cache_dir = tempdir())
-#' }
 pns_variables <- function(year = 2019,
                           module = NULL,
                           cache_dir = NULL,
@@ -927,8 +923,7 @@ pns_variables <- function(year = 2019,
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # download PNS 2019 data
 #' df <- pns_data(year = 2019, cache_dir = tempdir())
 #'
@@ -941,7 +936,6 @@ pns_variables <- function(year = 2019,
 #'   vars = c("V0001", "C006", "C008", "V0028"),
 #'   cache_dir = tempdir()
 #' )
-#' }
 pns_data <- function(year = NULL,
                      vars = NULL,
                      cache_dir = NULL,
@@ -1163,8 +1157,7 @@ pns_sidra_search <- function(keyword, year = NULL) {
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # self-rated health by state, 2019
 #' pns_sidra_data(
 #'   table = 4751,
@@ -1184,7 +1177,6 @@ pns_sidra_search <- function(keyword, year = NULL) {
 #'   table = 4416,
 #'   territorial_level = "brazil"
 #' )
-#' }
 pns_sidra_data <- function(table,
                            territorial_level = "brazil",
                            geo_code = "all",

@@ -36,10 +36,10 @@ This is a convenience wrapper around \code{\link{pof_dictionary}} that
 returns a simplified view.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 pof_variables("2017-2018", "morador", cache_dir = tempdir())
 pof_variables("2017-2018", "domicilio", search = "ebia", cache_dir = tempdir())
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link{pof_dictionary}}, \code{\link{pof_data}}

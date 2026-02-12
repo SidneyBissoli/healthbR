@@ -70,7 +70,7 @@ Data is downloaded from the Ministry of Health website:
 }
 
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # download all years (uses tempdir to avoid leaving files)
 df <- vigitel_data(cache_dir = tempdir())
 
@@ -86,5 +86,5 @@ df_subset <- vigitel_data(
   vars = c("ano", "cidade", "sexo", "idade", "pesorake"),
   cache_dir = tempdir()
 )
-}
+\dontshow{\}) # examplesIf}
 }

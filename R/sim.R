@@ -421,8 +421,7 @@ sim_dictionary <- function(variable = NULL) {
 #' @seealso [censo_populacao()] for population denominators to calculate
 #'   mortality rates.
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # all deaths in Acre, 2022
 #' ac_2022 <- sim_data(year = 2022, uf = "AC")
 #'
@@ -433,7 +432,6 @@ sim_dictionary <- function(variable = NULL) {
 #' sim_data(year = 2022, uf = "RJ",
 #'          vars = c("DTOBITO", "SEXO", "IDADE",
 #'                   "RACACOR", "CODMUNRES", "CAUSABAS"))
-#' }
 sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
                      decode_age = TRUE, cache = TRUE,
                      cache_dir = NULL) {
@@ -582,10 +580,8 @@ sim_cache_status <- function(cache_dir = NULL) {
 #' @export
 #' @family sim
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' sim_clear_cache()
-#' }
 sim_clear_cache <- function(cache_dir = NULL) {
   cache_dir <- .sim_cache_dir(cache_dir)
 

@@ -395,8 +395,7 @@ sih_dictionary <- function(variable = NULL) {
 #' @seealso [censo_populacao()] for population denominators to calculate
 #'   hospitalization rates.
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # all admissions in Acre, January 2022
 #' ac_jan <- sih_data(year = 2022, month = 1, uf = "AC")
 #'
@@ -408,7 +407,6 @@ sih_dictionary <- function(variable = NULL) {
 #' sih_data(year = 2022, month = 3, uf = "RJ",
 #'          vars = c("DIAG_PRINC", "DT_INTER", "SEXO",
 #'                   "IDADE", "MORTE", "VAL_TOT"))
-#' }
 sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
                      diagnosis = NULL, cache = TRUE, cache_dir = NULL) {
 
@@ -549,10 +547,8 @@ sih_cache_status <- function(cache_dir = NULL) {
 #' @export
 #' @family sih
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' sih_clear_cache()
-#' }
 sih_clear_cache <- function(cache_dir = NULL) {
   cache_dir <- .sih_cache_dir(cache_dir)
 

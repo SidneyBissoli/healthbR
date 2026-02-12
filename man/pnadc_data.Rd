@@ -77,7 +77,7 @@ Data is downloaded from the IBGE FTP server:
 }
 
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # download deficiencia module for 2022
 df <- pnadc_data(module = "deficiencia", year = 2022, cache_dir = tempdir())
 
@@ -96,5 +96,5 @@ df_subset <- pnadc_data(
   vars = c("S11001", "S11002"),
   cache_dir = tempdir()
 )
-}
+\dontshow{\}) # examplesIf}
 }

@@ -73,7 +73,7 @@ The SIA has 13 file types. The default \code{"PA"} (outpatient production)
 is the most commonly used. Use \code{\link{sia_info}()} to see all types.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # all outpatient production in Acre, January 2022
 ac_jan <- sia_data(year = 2022, month = 1, uf = "AC")
 
@@ -92,7 +92,7 @@ sia_data(year = 2022, month = 1, uf = "AC",
 
 # different file type (APAC Medicamentos)
 med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link{sia_info}()} for file type descriptions,

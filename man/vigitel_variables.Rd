@@ -21,8 +21,8 @@ Returns a tibble with information about available variables in the
 VIGITEL dataset.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 vars <- vigitel_variables(cache_dir = tempdir())
 head(vars)
-}
+\dontshow{\}) # examplesIf}
 }

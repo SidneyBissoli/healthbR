@@ -55,7 +55,7 @@ When \code{uf} is specified, only the requested state(s) are downloaded,
 making the operation much faster than downloading the entire country.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # all births in Acre, 2022
 ac_2022 <- sinasc_data(year = 2022, uf = "AC")
 
@@ -66,7 +66,7 @@ anomalies_sp <- sinasc_data(year = 2020:2022, uf = "SP", anomaly = "Q")
 sinasc_data(year = 2022, uf = "RJ",
             vars = c("DTNASC", "SEXO", "PESO",
                      "IDADEMAE", "PARTO", "CONSULTAS"))
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=censo_populacao]{censo_populacao()}} for population denominators to calculate

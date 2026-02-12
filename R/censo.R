@@ -524,8 +524,7 @@ censo_info <- function(year = NULL) {
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # total population by state, 2022
 #' censo_populacao(year = 2022)
 #'
@@ -537,7 +536,6 @@ censo_info <- function(year = NULL) {
 #'
 #' # population by race, 2022
 #' censo_populacao(year = 2022, variables = "race")
-#' }
 censo_populacao <- function(year,
                             variables = "total",
                             territorial_level = "state",
@@ -624,8 +622,7 @@ censo_populacao <- function(year,
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # estimates for 2020 by state
 #' censo_estimativa(year = 2020)
 #'
@@ -634,7 +631,6 @@ censo_populacao <- function(year,
 #'
 #' # estimates by municipality
 #' censo_estimativa(year = 2021, territorial_level = "municipality")
-#' }
 censo_estimativa <- function(year,
                              territorial_level = "state",
                              geo_code = "all",
@@ -819,8 +815,7 @@ censo_sidra_search <- function(keyword, year = NULL) {
 #'
 #' @export
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # population by state from 2022 Census
 #' censo_sidra_data(
 #'   table = 9514,
@@ -837,7 +832,6 @@ censo_sidra_search <- function(keyword, year = NULL) {
 #'   variable = 93,
 #'   classifications = list("86" = "allxt")
 #' )
-#' }
 censo_sidra_data <- function(table,
                              territorial_level = "brazil",
                              geo_code = "all",

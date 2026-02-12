@@ -17,9 +17,9 @@ Invisible NULL.
 Deletes cached SIA data files.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 sia_clear_cache()
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other sia: 
