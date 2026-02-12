@@ -7,10 +7,11 @@ Continua (Continuous National Household Sample Survey), POF (Household
 Budget Survey with food security and consumption data), Censo
 Demografico (population denominators via SIDRA API), SIM (Mortality
 Information System), SINASC (Live Birth Information System), SIH
-(Hospital Information System), SIA (Outpatient Information System), and
-other health information systems. Data is downloaded from the Brazilian
-Ministry of Health and IBGE repositories. Data is returned in tidy
-format following tidyverse conventions.
+(Hospital Information System), SIA (Outpatient Information System),
+SINAN (Notifiable Diseases Surveillance), CNES (National Health Facility
+Registry), and other health information systems. Data is downloaded from
+the Brazilian Ministry of Health and IBGE repositories. Data is returned
+in tidy format following tidyverse conventions.
 
 ## See also
 

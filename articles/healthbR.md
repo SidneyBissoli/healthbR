@@ -7,7 +7,7 @@ from R. The package downloads, caches, and processes data from official
 sources (Ministry of Health, IBGE, DATASUS), returning clean,
 analysis-ready tibbles following tidyverse conventions.
 
-The package currently supports **9 data sources** organized in two
+The package currently supports **11 data sources** organized in two
 groups:
 
 **Surveys (IBGE / Ministry of Health)**
@@ -22,12 +22,14 @@ groups:
 
 **DATASUS (Ministry of Health FTP)**
 
-| Module | Source                                | Granularity | Years     |
-|--------|---------------------------------------|-------------|-----------|
-| SIM    | Mortality (death certificates)        | Annual/UF   | 1996–2024 |
-| SINASC | Live births                           | Annual/UF   | 1996–2024 |
-| SIH    | Hospital admissions (AIH)             | Monthly/UF  | 2008–2024 |
-| SIA    | Outpatient procedures (13 file types) | Monthly/UF  | 2008–2024 |
+| Module | Source                                   | Granularity     | Years     |
+|--------|------------------------------------------|-----------------|-----------|
+| SIM    | Mortality (death certificates)           | Annual/UF       | 1996–2024 |
+| SINASC | Live births                              | Annual/UF       | 1996–2024 |
+| SIH    | Hospital admissions (AIH)                | Monthly/UF      | 2008–2024 |
+| SIA    | Outpatient procedures (13 file types)    | Monthly/UF      | 2008–2024 |
+| SINAN  | Notifiable diseases (31 diseases)        | Annual/National | 2007–2024 |
+| CNES   | Health facility registry (13 file types) | Monthly/UF      | 2005–2024 |
 
 ## Getting started
 
@@ -238,6 +240,63 @@ sia_data(year = 2022, month = 1, uf = "AC", procedure = "0301")
 sia_data(year = 2022, month = 1, uf = "AC", diagnosis = "E11")
 ```
 
+## SINAN – Notifiable diseases
+
+SINAN contains individual notification records for 31 notifiable
+diseases including dengue, tuberculosis, chikungunya, zika, hepatitis,
+syphilis, and others. Files are **national** (not per-state), so each
+download covers all of Brazil for a given disease and year.
+
+``` r
+# list available diseases
+sinan_diseases()
+
+# search for a specific disease
+sinan_diseases(search = "dengue")
+
+# dengue notifications, 2022
+dengue <- sinan_data(year = 2022, disease = "DENG")
+
+# tuberculosis, 2020-2022
+tb <- sinan_data(year = 2020:2022, disease = "TUBE")
+
+# explore variables and categories
+sinan_variables()
+sinan_dictionary("EVOLUCAO")
+```
+
+Since SINAN files are national, filter by state after download using
+`SG_UF_NOT` (UF of notification) or `ID_MUNICIP` (municipality code):
+
+``` r
+dengue |>
+  filter(SG_UF_NOT == "35")  # Sao Paulo
+```
+
+## CNES – Health facility registry
+
+CNES is the national registry of health facilities, covering hospitals,
+clinics, primary care units, and all other health establishments. Data
+is organized monthly with 13 file types.
+
+``` r
+# see all file types
+cnes_info()
+
+# establishments in Acre, January 2023
+estab <- cnes_data(year = 2023, month = 1, uf = "AC")
+
+# hospital beds
+leitos <- cnes_data(year = 2023, month = 1, uf = "AC", type = "LT")
+
+# health professionals
+prof <- cnes_data(year = 2023, month = 1, uf = "AC", type = "PF")
+
+# explore variables and categories
+cnes_variables()
+cnes_dictionary("TP_UNID")
+```
+
 See
 [`vignette("datasus-modules")`](https://sidneybissoli.github.io/healthbR/articles/datasus-modules.md)
 for cross-module analysis examples.
@@ -293,6 +352,6 @@ deaths$deaths / pop$valor * 100000
 - [`vignette("censo-denominadores")`](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)
   – Population denominators for epidemiology
 - [`vignette("datasus-modules")`](https://sidneybissoli.github.io/healthbR/articles/datasus-modules.md)
-  – SIM, SINASC, SIH, and SIA in depth
+  – SIM, SINASC, SIH, SIA, SINAN, and CNES in depth
 - [Package website](https://sidneybissoli.github.io/healthbR/)
 - [GitHub repository](https://github.com/SidneyBissoli/healthbR)

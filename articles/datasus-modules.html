@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>DATASUS Modules: SIM, SINASC, SIH, and SIA • healthbR</title>
+<title>DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, and CNES • healthbR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="DATASUS Modules: SIM, SINASC, SIH, and SIA">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, and CNES">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/censo-denominadores.html">Population Denominators from the Census with healthbR</a></li>
-    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, and SIA</a></li>
+    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, and CNES</a></li>
     <li><a class="dropdown-item" href="../articles/pof-health-data.html">Analyzing Health Data from POF with healthbR</a></li>
   </ul>
 </li>
@@ -59,7 +59,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>DATASUS Modules: SIM, SINASC, SIH, and SIA</h1>
+      <h1>DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, and CNES</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/vignettes/datasus-modules.Rmd" class="external-link"><code>vignettes/datasus-modules.Rmd</code></a></small>
@@ -71,9 +71,10 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The <code>healthbR</code> package provides access to four DATASUS
+<p>The <code>healthbR</code> package provides access to six DATASUS
 information systems via FTP, covering mortality, live births, hospital
-admissions, and outpatient production:</p>
+admissions, outpatient production, notifiable diseases, and the health
+facility registry:</p>
 <table class="table">
 <colgroup>
 <col width="14%">
@@ -118,9 +119,23 @@ admissions, and outpatient production:</p>
 <td>Monthly/type/UF</td>
 <td>2008–2024</td>
 </tr>
+<tr class="odd">
+<td>SINAN</td>
+<td><code><a href="../reference/sinan_data.html">sinan_data()</a></code></td>
+<td>Ficha de Notificacao</td>
+<td>Annual/National</td>
+<td>2007–2024</td>
+</tr>
+<tr class="even">
+<td>CNES</td>
+<td><code><a href="../reference/cnes_data.html">cnes_data()</a></code></td>
+<td>Cadastro de Estabelecimentos</td>
+<td>Monthly/type/UF</td>
+<td>2005–2024</td>
+</tr>
 </tbody>
 </table>
-<p>All four modules share the same infrastructure:</p>
+<p>All six modules share the same infrastructure:</p>
 <ul>
 <li>
 <strong>DBC decompression</strong>: .dbc files (compressed DBF) are
@@ -169,7 +184,8 @@ quick tour using SIM as an example:</p>
 <span><span class="co"># data dictionary with category labels</span></span>
 <span><span class="fu"><a href="../reference/sim_dictionary.html">sim_dictionary</a></span><span class="op">(</span><span class="st">"SEXO"</span><span class="op">)</span></span></code></pre></div>
 <p>The same pattern works for <code>sinasc_*()</code>,
-<code>sih_*()</code>, and <code>sia_*()</code>.</p>
+<code>sih_*()</code>, <code>sia_*()</code>, <code>sinan_*()</code>, and
+<code>cnes_*()</code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -565,6 +581,263 @@ outpatient care.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="sinan-notifiable-diseases">SINAN – Notifiable diseases<a class="anchor" aria-label="anchor" href="#sinan-notifiable-diseases"></a>
+</h2>
+<p>The SINAN (Sistema de Informacao de Agravos de Notificacao) contains
+individual notification records for 31 compulsorily notifiable diseases.
+Unlike other DATASUS modules, SINAN files are <strong>national</strong>
+(one file per disease per year, covering all of Brazil).</p>
+<div class="section level3">
+<h3 id="available-diseases">Available diseases<a class="anchor" aria-label="anchor" href="#available-diseases"></a>
+</h3>
+<p>SINAN covers 31 diseases. Use <code><a href="../reference/sinan_diseases.html">sinan_diseases()</a></code> to see
+all available codes:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sinan_diseases.html">sinan_diseases</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 31 x 3</span></span>
+<span><span class="co">#&gt;    code  name                      description</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt; &lt;chr&gt;                     &lt;chr&gt;</span></span>
+<span><span class="co">#&gt;  1 DENG  Dengue                    Dengue</span></span>
+<span><span class="co">#&gt;  2 CHIK  Chikungunya               Febre de Chikungunya</span></span>
+<span><span class="co">#&gt;  3 ZIKA  Zika                      Zika virus</span></span>
+<span><span class="co">#&gt;  4 TUBE  Tuberculose               Tuberculose</span></span>
+<span><span class="co">#&gt;  ...</span></span>
+<span></span>
+<span><span class="co"># search for a specific disease</span></span>
+<span><span class="fu"><a href="../reference/sinan_diseases.html">sinan_diseases</a></span><span class="op">(</span>search <span class="op">=</span> <span class="st">"sifilis"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="basic-download-4">Basic download<a class="anchor" aria-label="anchor" href="#basic-download-4"></a>
+</h3>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># dengue notifications, 2022 (default disease)</span></span>
+<span><span class="va">dengue</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinan_data.html">sinan_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># tuberculosis notifications, 2020-2022</span></span>
+<span><span class="va">tb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinan_data.html">sinan_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2020</span><span class="op">:</span><span class="fl">2022</span>, disease <span class="op">=</span> <span class="st">"TUBE"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># select specific variables</span></span>
+<span><span class="fu"><a href="../reference/sinan_data.html">sinan_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, disease <span class="op">=</span> <span class="st">"DENG"</span>,</span>
+<span>           vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DT_NOTIFIC"</span>, <span class="st">"CS_SEXO"</span>, <span class="st">"NU_IDADE_N"</span>,</span>
+<span>                    <span class="st">"ID_MUNICIP"</span>, <span class="st">"CLASSI_FIN"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="filtering-by-state">Filtering by state<a class="anchor" aria-label="anchor" href="#filtering-by-state"></a>
+</h3>
+<p>Since files are national, filter by UF after download:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dengue</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinan_data.html">sinan_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># filter by state of notification</span></span>
+<span><span class="va">dengue_sp</span> <span class="op">&lt;-</span> <span class="va">dengue</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">SG_UF_NOT</span> <span class="op">==</span> <span class="st">"35"</span><span class="op">)</span>  <span class="co"># Sao Paulo (IBGE code)</span></span>
+<span></span>
+<span><span class="co"># or by municipality</span></span>
+<span><span class="va">dengue_rio</span> <span class="op">&lt;-</span> <span class="va">dengue</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">ID_MUNICIP</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">==</span> <span class="st">"33"</span><span class="op">)</span>  <span class="co"># Rio de Janeiro state</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="key-variables-3">Key variables<a class="anchor" aria-label="anchor" href="#key-variables-3"></a>
+</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>DT_NOTIFIC</code></td>
+<td>Notification date</td>
+</tr>
+<tr class="even">
+<td><code>ID_AGRAVO</code></td>
+<td>Disease code (CID-10)</td>
+</tr>
+<tr class="odd">
+<td><code>CS_SEXO</code></td>
+<td>Sex (M = Male, F = Female, I = Unknown)</td>
+</tr>
+<tr class="even">
+<td><code>NU_IDADE_N</code></td>
+<td>Age (encoded: 1st digit = unit, digits 2-4 = value)</td>
+</tr>
+<tr class="odd">
+<td><code>ID_MUNICIP</code></td>
+<td>Municipality of notification (IBGE code)</td>
+</tr>
+<tr class="even">
+<td><code>CLASSI_FIN</code></td>
+<td>Final classification (1 = Confirmed, 2 = Discarded)</td>
+</tr>
+<tr class="odd">
+<td><code>EVOLUCAO</code></td>
+<td>Outcome (1 = Cure, 2 = Death from disease)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="example-confirmed-dengue-by-month">Example: confirmed dengue by month<a class="anchor" aria-label="anchor" href="#example-confirmed-dengue-by-month"></a>
+</h3>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dengue</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinan_data.html">sinan_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, disease <span class="op">=</span> <span class="st">"DENG"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dengue</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">CLASSI_FIN</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"5"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span>  <span class="co"># confirmed cases</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>month <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">DT_NOTIFIC</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">month</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="cnes-health-facility-registry">CNES – Health facility registry<a class="anchor" aria-label="anchor" href="#cnes-health-facility-registry"></a>
+</h2>
+<p>The CNES (Cadastro Nacional de Estabelecimentos de Saude) is the
+national registry of all health facilities in Brazil. Like SIH and SIA,
+data is organized <strong>monthly</strong> (one file per type/UF/month),
+and there are <strong>13 file types</strong> covering different aspects
+of the registry.</p>
+<div class="section level3">
+<h3 id="file-types-1">File types<a class="anchor" aria-label="anchor" href="#file-types-1"></a>
+</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Code</th>
+<th>Name</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>ST</td>
+<td>Estabelecimentos</td>
+<td>Facility registry (default)</td>
+</tr>
+<tr class="even">
+<td>LT</td>
+<td>Leitos</td>
+<td>Hospital beds</td>
+</tr>
+<tr class="odd">
+<td>PF</td>
+<td>Profissional</td>
+<td>Health professionals</td>
+</tr>
+<tr class="even">
+<td>DC</td>
+<td>Dados Complementares</td>
+<td>Complementary facility data</td>
+</tr>
+<tr class="odd">
+<td>EQ</td>
+<td>Equipamentos</td>
+<td>Health equipment</td>
+</tr>
+<tr class="even">
+<td>SR</td>
+<td>Servico Especializado</td>
+<td>Specialized services</td>
+</tr>
+<tr class="odd">
+<td>HB</td>
+<td>Habilitacao</td>
+<td>Facility certifications</td>
+</tr>
+<tr class="even">
+<td>EP</td>
+<td>Equipes</td>
+<td>Health teams</td>
+</tr>
+<tr class="odd">
+<td>RC</td>
+<td>Regra Contratual</td>
+<td>Contractual rules</td>
+</tr>
+<tr class="even">
+<td>IN</td>
+<td>Incentivos</td>
+<td>Financial incentives</td>
+</tr>
+<tr class="odd">
+<td>EE</td>
+<td>Estab. de Ensino</td>
+<td>Teaching facilities</td>
+</tr>
+<tr class="even">
+<td>EF</td>
+<td>Estab. Filantropico</td>
+<td>Philanthropic facilities</td>
+</tr>
+<tr class="odd">
+<td>GM</td>
+<td>Gestao e Metas</td>
+<td>Management and targets</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="basic-download-5">Basic download<a class="anchor" aria-label="anchor" href="#basic-download-5"></a>
+</h3>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># establishments in Acre, January 2023</span></span>
+<span><span class="va">estab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cnes_data.html">cnes_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># hospital beds</span></span>
+<span><span class="va">leitos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cnes_data.html">cnes_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, type <span class="op">=</span> <span class="st">"LT"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># health professionals</span></span>
+<span><span class="va">prof</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cnes_data.html">cnes_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, type <span class="op">=</span> <span class="st">"PF"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="key-variables-st-type">Key variables (ST type)<a class="anchor" aria-label="anchor" href="#key-variables-st-type"></a>
+</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>CNES</code></td>
+<td>Facility CNES code</td>
+</tr>
+<tr class="even">
+<td><code>CODUFMUN</code></td>
+<td>Municipality (UF + IBGE 6-digit code)</td>
+</tr>
+<tr class="odd">
+<td><code>TP_UNID</code></td>
+<td>Facility type (22 categories)</td>
+</tr>
+<tr class="even">
+<td><code>VINC_SUS</code></td>
+<td>SUS-linked (0 = No, 1 = Yes)</td>
+</tr>
+<tr class="odd">
+<td><code>TP_GESTAO</code></td>
+<td>Management type (M = Municipal, E = State, D = Dual)</td>
+</tr>
+<tr class="even">
+<td><code>ESFERA_A</code></td>
+<td>Administrative sphere (1-4)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="example-facility-types-in-a-state">Example: facility types in a state<a class="anchor" aria-label="anchor" href="#example-facility-types-in-a-state"></a>
+</h3>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">estab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cnes_data.html">cnes_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">estab</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">TP_UNID</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="../reference/cnes_dictionary.html">cnes_dictionary</a></span><span class="op">(</span><span class="st">"TP_UNID"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">code</span>, <span class="va">label</span><span class="op">)</span>,</span>
+<span>    by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TP_UNID"</span> <span class="op">=</span> <span class="st">"code"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
 <h2 id="cross-module-analyses">Cross-module analyses<a class="anchor" aria-label="anchor" href="#cross-module-analyses"></a>
 </h2>
 <p>A key strength of <code>healthbR</code> is the ability to combine
@@ -575,7 +848,7 @@ workflow. Below are three practical examples.</p>
 </h3>
 <p>Calculate the crude cardiovascular mortality rate per 100,000
 population:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># step 1: count cardiovascular deaths in Sao Paulo, 2022</span></span>
 <span><span class="va">obitos_cardio</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"SP"</span>, cause <span class="op">=</span> <span class="st">"I"</span><span class="op">)</span></span>
 <span><span class="va">n_obitos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obitos_cardio</span><span class="op">)</span></span>
@@ -592,7 +865,7 @@ population:</p>
 <h3 id="live-births-to-deaths-ratio-sinasc-sim">Live births to deaths ratio (SINASC + SIM)<a class="anchor" aria-label="anchor" href="#live-births-to-deaths-ratio-sinasc-sim"></a>
 </h3>
 <p>Compare the number of live births and deaths in a state:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># births and deaths in Acre, 2022</span></span>
 <span><span class="va">nascimentos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinasc_data.html">sinasc_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span><span class="va">obitos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
@@ -606,7 +879,7 @@ population:</p>
 </h3>
 <p>Compare volumes and costs of respiratory care (CID-10 chapter J)
 between hospital and outpatient settings:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># hospital admissions for respiratory diseases, January 2022</span></span>
 <span><span class="va">intern_resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, diagnosis <span class="op">=</span> <span class="st">"J"</span><span class="op">)</span></span>
 <span></span>
@@ -637,7 +910,7 @@ between hospital and outpatient settings:</p>
 <p>All DATASUS modules cache downloaded data automatically. When the
 <code>arrow</code> package is installed, data is saved in Parquet format
 (fast and compact); otherwise, .rds is used as fallback.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install arrow for optimized caching (recommended)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -646,7 +919,7 @@ between hospital and outpatient settings:</p>
 </h3>
 <p>Each module provides <code>*_cache_status()</code> and
 <code>*_clear_cache()</code>:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check what is cached</span></span>
 <span><span class="fu"><a href="../reference/sim_cache_status.html">sim_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/sih_cache_status.html">sih_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -661,9 +934,9 @@ between hospital and outpatient settings:</p>
 <ul>
 <li>
 <strong>Use <code>uf</code></strong> to download only the states you
-need instead of all 27.</li>
+need instead of all 27 (SIM, SINASC, SIH, SIA, CNES).</li>
 <li>
-<strong>Use <code>month</code></strong> (SIH and SIA) to limit
+<strong>Use <code>month</code></strong> (SIH, SIA, CNES) to limit
 monthly downloads. Downloading a full year for all states requires 324
 files per module (27 UFs x 12 months).</li>
 <li>
@@ -671,10 +944,11 @@ files per module (27 UFs x 12 months).</li>
 you need, reducing memory usage.</li>
 <li>SIM and SINASC are annual (one file per UF per year), so a full-year
 download is 27 files.</li>
-<li>SIH and SIA are monthly, so a full-year download is 324 files per
-type. SIA has 13 file types, so downloading everything for one year
-would be 4,212 files – always filter by <code>type</code>,
-<code>uf</code>, and <code>month</code>.</li>
+<li>SINAN files are national (one file per disease per year), so
+downloads are fast but files can be large.</li>
+<li>SIH, SIA, and CNES are monthly, so a full-year download is 324 files
+per type. SIA and CNES each have 13 file types – always filter by
+<code>type</code>, <code>uf</code>, and <code>month</code>.</li>
 </ul>
 </div>
 </div>

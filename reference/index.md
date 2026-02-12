@@ -84,6 +84,46 @@ FTP, 2008–2024)
 - [`sia_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sia_clear_cache.md)
   : Clear SIA Cache
 
+## SINAN – Notifiable diseases
+
+Notifiable diseases surveillance from SINAN (DATASUS FTP, 2007–2024)
+
+- [`sinan_data()`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)
+  : Download SINAN Notifiable Disease Microdata
+- [`sinan_years()`](https://sidneybissoli.github.io/healthbR/reference/sinan_years.md)
+  : List Available SINAN Years
+- [`sinan_info()`](https://sidneybissoli.github.io/healthbR/reference/sinan_info.md)
+  : SINAN Module Information
+- [`sinan_diseases()`](https://sidneybissoli.github.io/healthbR/reference/sinan_diseases.md)
+  : List Available SINAN Diseases
+- [`sinan_variables()`](https://sidneybissoli.github.io/healthbR/reference/sinan_variables.md)
+  : List SINAN Variables
+- [`sinan_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/sinan_dictionary.md)
+  : SINAN Data Dictionary
+- [`sinan_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/sinan_cache_status.md)
+  : Show SINAN Cache Status
+- [`sinan_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sinan_clear_cache.md)
+  : Clear SINAN Cache
+
+## CNES – Health facility registry
+
+National health facility registry from CNES (DATASUS FTP, 2005–2024)
+
+- [`cnes_data()`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)
+  : Download CNES Health Facility Registry Data
+- [`cnes_years()`](https://sidneybissoli.github.io/healthbR/reference/cnes_years.md)
+  : List Available CNES Years
+- [`cnes_info()`](https://sidneybissoli.github.io/healthbR/reference/cnes_info.md)
+  : CNES Module Information
+- [`cnes_variables()`](https://sidneybissoli.github.io/healthbR/reference/cnes_variables.md)
+  : List CNES Variables
+- [`cnes_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/cnes_dictionary.md)
+  : CNES Data Dictionary
+- [`cnes_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/cnes_cache_status.md)
+  : Show CNES Cache Status
+- [`cnes_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/cnes_clear_cache.md)
+  : Clear CNES Cache
+
 ## VIGITEL – Telephone survey
 
 Surveillance of Risk Factors for Chronic Diseases (2006–2024)

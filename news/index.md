@@ -1,5 +1,60 @@
 # Changelog
 
+## healthbR 0.8.0
+
+### New modules
+
+- **SINAN (Sistema de Informacao de Agravos de Notificacao)**: Added
+  module for accessing notifiable diseases surveillance microdata from
+  DATASUS FTP as .dbc files (2007-2024).
+  - [`sinan_years()`](https://sidneybissoli.github.io/healthbR/reference/sinan_years.md),
+    [`sinan_info()`](https://sidneybissoli.github.io/healthbR/reference/sinan_info.md)
+    for module metadata
+  - [`sinan_diseases()`](https://sidneybissoli.github.io/healthbR/reference/sinan_diseases.md)
+    for listing available diseases (agravos)
+  - [`sinan_variables()`](https://sidneybissoli.github.io/healthbR/reference/sinan_variables.md),
+    [`sinan_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/sinan_dictionary.md)
+    for variable exploration
+  - [`sinan_data()`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)
+    for downloading disease notification microdata
+  - [`sinan_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/sinan_cache_status.md),
+    [`sinan_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sinan_clear_cache.md)
+    for cache management
+  - **31 diseases**: DENG (Dengue, default), CHIK, ZIKA, TUBE, HANS,
+    HEPA, MALA, SIFA, SIFC, SIFG, LEIV, LEIT, LEPT, MENI, and more. Use
+    `disease` parameter to select.
+  - **National files**: SINAN files are national (not per-state). Filter
+    by UF using `SG_UF_NOT` or `ID_MUNICIP` columns after download.
+  - Output includes `year` and `disease` columns
+  - Reuses shared DBC infrastructure (`.dbc2dbf()`, `.read_dbc()`,
+    `.datasus_download()`)
+
+## healthbR 0.7.0
+
+### New modules
+
+- **CNES (Cadastro Nacional de Estabelecimentos de Saude)**: Added
+  module for accessing the national health facility registry from
+  DATASUS FTP as .dbc files (2005-2024).
+  - [`cnes_years()`](https://sidneybissoli.github.io/healthbR/reference/cnes_years.md),
+    [`cnes_info()`](https://sidneybissoli.github.io/healthbR/reference/cnes_info.md)
+    for module metadata
+  - [`cnes_variables()`](https://sidneybissoli.github.io/healthbR/reference/cnes_variables.md),
+    [`cnes_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/cnes_dictionary.md)
+    for variable exploration
+  - [`cnes_data()`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)
+    for downloading health facility data per state (UF)
+  - [`cnes_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/cnes_cache_status.md),
+    [`cnes_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/cnes_clear_cache.md)
+    for cache management
+  - **13 file types**: ST (default), LT, PF, DC, EQ, SR, HB, EP, RC, IN,
+    EE, EF, GM. Use `type` parameter to select.
+  - **Monthly data**: CNES data is organized per month (one .dbc file
+    per type/UF/month). Use `month` parameter to select specific months.
+  - Output includes `year`, `month`, and `uf_source` columns
+  - Reuses shared DBC infrastructure (`.dbc2dbf()`, `.read_dbc()`,
+    `.datasus_download()`)
+
 ## healthbR 0.6.1
 
 ### Bug fixes

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/censo-denominadores.html">Population Denominators from the Census with healthbR</a></li>
-    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, and SIA</a></li>
+    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, and CNES</a></li>
     <li><a class="dropdown-item" href="../articles/pof-health-data.html">Analyzing Health Data from POF with healthbR</a></li>
   </ul>
 </li>
@@ -75,7 +75,7 @@
 directly from R. The package downloads, caches, and processes data from
 official sources (Ministry of Health, IBGE, DATASUS), returning clean,
 analysis-ready tibbles following tidyverse conventions.</p>
-<p>The package currently supports <strong>9 data sources</strong>
+<p>The package currently supports <strong>11 data sources</strong>
 organized in two groups:</p>
 <p><strong>Surveys (IBGE / Ministry of Health)</strong></p>
 <table class="table">
@@ -155,6 +155,18 @@ organized in two groups:</p>
 <td>Outpatient procedures (13 file types)</td>
 <td>Monthly/UF</td>
 <td>2008–2024</td>
+</tr>
+<tr class="odd">
+<td>SINAN</td>
+<td>Notifiable diseases (31 diseases)</td>
+<td>Annual/National</td>
+<td>2007–2024</td>
+</tr>
+<tr class="even">
+<td>CNES</td>
+<td>Health facility registry (13 file types)</td>
+<td>Monthly/UF</td>
+<td>2005–2024</td>
 </tr>
 </tbody>
 </table>
@@ -356,6 +368,60 @@ RAAS).</p>
 <span><span class="co"># filter by procedure or diagnosis</span></span>
 <span><span class="fu"><a href="../reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, procedure <span class="op">=</span> <span class="st">"0301"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, diagnosis <span class="op">=</span> <span class="st">"E11"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="sinan-notifiable-diseases">SINAN – Notifiable diseases<a class="anchor" aria-label="anchor" href="#sinan-notifiable-diseases"></a>
+</h2>
+<p>SINAN contains individual notification records for 31 notifiable
+diseases including dengue, tuberculosis, chikungunya, zika, hepatitis,
+syphilis, and others. Files are <strong>national</strong> (not
+per-state), so each download covers all of Brazil for a given disease
+and year.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># list available diseases</span></span>
+<span><span class="fu"><a href="../reference/sinan_diseases.html">sinan_diseases</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># search for a specific disease</span></span>
+<span><span class="fu"><a href="../reference/sinan_diseases.html">sinan_diseases</a></span><span class="op">(</span>search <span class="op">=</span> <span class="st">"dengue"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># dengue notifications, 2022</span></span>
+<span><span class="va">dengue</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinan_data.html">sinan_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, disease <span class="op">=</span> <span class="st">"DENG"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># tuberculosis, 2020-2022</span></span>
+<span><span class="va">tb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinan_data.html">sinan_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2020</span><span class="op">:</span><span class="fl">2022</span>, disease <span class="op">=</span> <span class="st">"TUBE"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># explore variables and categories</span></span>
+<span><span class="fu"><a href="../reference/sinan_variables.html">sinan_variables</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sinan_dictionary.html">sinan_dictionary</a></span><span class="op">(</span><span class="st">"EVOLUCAO"</span><span class="op">)</span></span></code></pre></div>
+<p>Since SINAN files are national, filter by state after download using
+<code>SG_UF_NOT</code> (UF of notification) or <code>ID_MUNICIP</code>
+(municipality code):</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dengue</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">SG_UF_NOT</span> <span class="op">==</span> <span class="st">"35"</span><span class="op">)</span>  <span class="co"># Sao Paulo</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="cnes-health-facility-registry">CNES – Health facility registry<a class="anchor" aria-label="anchor" href="#cnes-health-facility-registry"></a>
+</h2>
+<p>CNES is the national registry of health facilities, covering
+hospitals, clinics, primary care units, and all other health
+establishments. Data is organized monthly with 13 file types.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># see all file types</span></span>
+<span><span class="fu"><a href="../reference/cnes_info.html">cnes_info</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># establishments in Acre, January 2023</span></span>
+<span><span class="va">estab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cnes_data.html">cnes_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># hospital beds</span></span>
+<span><span class="va">leitos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cnes_data.html">cnes_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, type <span class="op">=</span> <span class="st">"LT"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># health professionals</span></span>
+<span><span class="va">prof</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cnes_data.html">cnes_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, type <span class="op">=</span> <span class="st">"PF"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># explore variables and categories</span></span>
+<span><span class="fu"><a href="../reference/cnes_variables.html">cnes_variables</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/cnes_dictionary.html">cnes_dictionary</a></span><span class="op">(</span><span class="st">"TP_UNID"</span><span class="op">)</span></span></code></pre></div>
 <p>See <code><a href="../articles/datasus-modules.html">vignette("datasus-modules")</a></code> for cross-module
 analysis examples.</p>
 </div>
@@ -365,10 +431,10 @@ analysis examples.</p>
 <p>All modules cache downloaded data automatically to avoid repeated
 downloads. Install <code>arrow</code> for optimized Parquet caching
 (recommended):</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
 <p>Cache management works the same across all modules:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check what is cached</span></span>
 <span><span class="fu"><a href="../reference/sim_cache_status.html">sim_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/vigitel_cache_status.html">vigitel_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -385,7 +451,7 @@ downloads. Install <code>arrow</code> for optimized Parquet caching
 <p>healthbR’s real power comes from combining data across modules. For
 example, calculating mortality rates requires deaths (SIM) and
 population (Censo):</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># deaths by state</span></span>
@@ -410,8 +476,8 @@ and nutrition from POF</li>
 <code><a href="../articles/censo-denominadores.html">vignette("censo-denominadores")</a></code> – Population
 denominators for epidemiology</li>
 <li>
-<code><a href="../articles/datasus-modules.html">vignette("datasus-modules")</a></code> – SIM, SINASC, SIH, and SIA
-in depth</li>
+<code><a href="../articles/datasus-modules.html">vignette("datasus-modules")</a></code> – SIM, SINASC, SIH, SIA,
+SINAN, and CNES in depth</li>
 <li><a href="https://sidneybissoli.github.io/healthbR/">Package
 website</a></li>
 <li><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">GitHub

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/censo-denominadores.html">Population Denominators from the Census with healthbR</a></li>
-    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, and SIA</a></li>
+    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, and CNES</a></li>
     <li><a class="dropdown-item" href="../articles/pof-health-data.html">Analyzing Health Data from POF with healthbR</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -39,6 +39,54 @@
       <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.8.0" id="healthbr-080">healthbR 0.8.0<a class="anchor" aria-label="anchor" href="#healthbr-080"></a></h2>
+<div class="section level3">
+<h3 id="new-modules-0-8-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-8-0"></a></h3>
+<ul><li>
+<strong>SINAN (Sistema de Informacao de Agravos de Notificacao)</strong>: Added module for accessing notifiable diseases surveillance microdata from DATASUS FTP as .dbc files (2007-2024).
+<ul><li>
+<code><a href="../reference/sinan_years.html">sinan_years()</a></code>, <code><a href="../reference/sinan_info.html">sinan_info()</a></code> for module metadata</li>
+<li>
+<code><a href="../reference/sinan_diseases.html">sinan_diseases()</a></code> for listing available diseases (agravos)</li>
+<li>
+<code><a href="../reference/sinan_variables.html">sinan_variables()</a></code>, <code><a href="../reference/sinan_dictionary.html">sinan_dictionary()</a></code> for variable exploration</li>
+<li>
+<code><a href="../reference/sinan_data.html">sinan_data()</a></code> for downloading disease notification microdata</li>
+<li>
+<code><a href="../reference/sinan_cache_status.html">sinan_cache_status()</a></code>, <code><a href="../reference/sinan_clear_cache.html">sinan_clear_cache()</a></code> for cache management</li>
+<li>
+<strong>31 diseases</strong>: DENG (Dengue, default), CHIK, ZIKA, TUBE, HANS, HEPA, MALA, SIFA, SIFC, SIFG, LEIV, LEIT, LEPT, MENI, and more. Use <code>disease</code> parameter to select.</li>
+<li>
+<strong>National files</strong>: SINAN files are national (not per-state). Filter by UF using <code>SG_UF_NOT</code> or <code>ID_MUNICIP</code> columns after download.</li>
+<li>Output includes <code>year</code> and <code>disease</code> columns</li>
+<li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
+</ul></li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.0" id="healthbr-070">healthbR 0.7.0<a class="anchor" aria-label="anchor" href="#healthbr-070"></a></h2>
+<div class="section level3">
+<h3 id="new-modules-0-7-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-7-0"></a></h3>
+<ul><li>
+<strong>CNES (Cadastro Nacional de Estabelecimentos de Saude)</strong>: Added module for accessing the national health facility registry from DATASUS FTP as .dbc files (2005-2024).
+<ul><li>
+<code><a href="../reference/cnes_years.html">cnes_years()</a></code>, <code><a href="../reference/cnes_info.html">cnes_info()</a></code> for module metadata</li>
+<li>
+<code><a href="../reference/cnes_variables.html">cnes_variables()</a></code>, <code><a href="../reference/cnes_dictionary.html">cnes_dictionary()</a></code> for variable exploration</li>
+<li>
+<code><a href="../reference/cnes_data.html">cnes_data()</a></code> for downloading health facility data per state (UF)</li>
+<li>
+<code><a href="../reference/cnes_cache_status.html">cnes_cache_status()</a></code>, <code><a href="../reference/cnes_clear_cache.html">cnes_clear_cache()</a></code> for cache management</li>
+<li>
+<strong>13 file types</strong>: ST (default), LT, PF, DC, EQ, SR, HB, EP, RC, IN, EE, EF, GM. Use <code>type</code> parameter to select.</li>
+<li>
+<strong>Monthly data</strong>: CNES data is organized per month (one .dbc file per type/UF/month). Use <code>month</code> parameter to select specific months.</li>
+<li>Output includes <code>year</code>, <code>month</code>, and <code>uf_source</code> columns</li>
+<li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
+</ul></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.1" id="healthbr-061">healthbR 0.6.1<a class="anchor" aria-label="anchor" href="#healthbr-061"></a></h2>
 <div class="section level3">
