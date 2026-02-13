@@ -1,21 +1,22 @@
-# DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, and SI-PNI
+# DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB
 
 ## Overview
 
-The `healthbR` package provides access to seven DATASUS information
-systems via FTP, covering mortality, live births, hospital admissions,
+The `healthbR` package provides access to eight DATASUS information
+systems, covering mortality, live births, hospital admissions,
 outpatient production, notifiable diseases, the health facility
-registry, and vaccination data:
+registry, vaccination data, and primary care coverage:
 
-| Module | Function                                                                             | Source document                            | Granularity     | Years     |
-|--------|--------------------------------------------------------------------------------------|--------------------------------------------|-----------------|-----------|
-| SIM    | [`sim_data()`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)       | Declaracao de Obito (DO)                   | Annual/UF       | 1996–2024 |
-| SINASC | [`sinasc_data()`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md) | Declaracao de Nascido Vivo (DN)            | Annual/UF       | 1996–2024 |
-| SIH    | [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)       | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF      | 2008–2024 |
-| SIA    | [`sia_data()`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)       | BPA / APAC                                 | Monthly/type/UF | 2008–2024 |
-| SINAN  | [`sinan_data()`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)   | Ficha de Notificacao                       | Annual/National | 2007–2024 |
-| CNES   | [`cnes_data()`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)     | Cadastro de Estabelecimentos               | Monthly/type/UF | 2005–2024 |
-| SI-PNI | [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)   | PNI (doses e cobertura)                    | Annual/UF       | 1994–2019 |
+| Module | Function                                                                             | Source document                            | Granularity     | Years        |
+|--------|--------------------------------------------------------------------------------------|--------------------------------------------|-----------------|--------------|
+| SIM    | [`sim_data()`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)       | Declaracao de Obito (DO)                   | Annual/UF       | 1996–2024    |
+| SINASC | [`sinasc_data()`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md) | Declaracao de Nascido Vivo (DN)            | Annual/UF       | 1996–2024    |
+| SIH    | [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)       | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF      | 2008–2024    |
+| SIA    | [`sia_data()`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)       | BPA / APAC                                 | Monthly/type/UF | 2008–2024    |
+| SINAN  | [`sinan_data()`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)   | Ficha de Notificacao                       | Annual/National | 2007–2024    |
+| CNES   | [`cnes_data()`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)     | Cadastro de Estabelecimentos               | Monthly/type/UF | 2005–2024    |
+| SI-PNI | [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)   | PNI (doses e cobertura)                    | Annual/UF       | 1994–2019    |
+| SISAB  | [`sisab_data()`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)   | Cobertura da Atencao Primaria              | Monthly         | 2007–present |
 
 All seven modules share the same infrastructure:
 

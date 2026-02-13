@@ -7,7 +7,7 @@ from R. The package downloads, caches, and processes data from official
 sources (Ministry of Health, IBGE, DATASUS), returning clean,
 analysis-ready tibbles following tidyverse conventions.
 
-The package currently supports **12 data sources** organized in two
+The package currently supports **13 data sources** organized in two
 groups:
 
 **Surveys (IBGE / Ministry of Health)**
@@ -22,15 +22,16 @@ groups:
 
 **DATASUS (Ministry of Health FTP)**
 
-| Module | Source                                      | Granularity     | Years     |
-|--------|---------------------------------------------|-----------------|-----------|
-| SIM    | Mortality (death certificates)              | Annual/UF       | 1996–2024 |
-| SINASC | Live births                                 | Annual/UF       | 1996–2024 |
-| SIH    | Hospital admissions (AIH)                   | Monthly/UF      | 2008–2024 |
-| SIA    | Outpatient procedures (13 file types)       | Monthly/UF      | 2008–2024 |
-| SINAN  | Notifiable diseases (31 diseases)           | Annual/National | 2007–2024 |
-| CNES   | Health facility registry (13 file types)    | Monthly/UF      | 2005–2024 |
-| SI-PNI | Vaccination doses and coverage (aggregated) | Annual/UF       | 1994–2019 |
+| Module | Source                                      | Granularity     | Years        |
+|--------|---------------------------------------------|-----------------|--------------|
+| SIM    | Mortality (death certificates)              | Annual/UF       | 1996–2024    |
+| SINASC | Live births                                 | Annual/UF       | 1996–2024    |
+| SIH    | Hospital admissions (AIH)                   | Monthly/UF      | 2008–2024    |
+| SIA    | Outpatient procedures (13 file types)       | Monthly/UF      | 2008–2024    |
+| SINAN  | Notifiable diseases (31 diseases)           | Annual/National | 2007–2024    |
+| CNES   | Health facility registry (13 file types)    | Monthly/UF      | 2005–2024    |
+| SI-PNI | Vaccination doses and coverage (aggregated) | Annual/UF       | 1994–2019    |
+| SISAB  | Primary care coverage indicators (REST API) | Monthly         | 2007–present |
 
 ## Getting started
 
@@ -43,7 +44,7 @@ To see all available data sources at a glance:
 
 ``` r
 list_sources()
-#> # A tibble: 12 x 5
+#> # A tibble: 13 x 5
 #>    source  name                         description                    years       status
 #>    <chr>   <chr>                        <chr>                          <chr>       <chr>
 #>  1 vigitel VIGITEL                      Telephone survey on chronic... 2006-2024   available
@@ -322,6 +323,33 @@ cobertura <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
 # explore vaccines and categories
 sipni_dictionary("IMUNO")
 sipni_variables()
+```
+
+## SISAB – Primary care coverage
+
+SISAB provides aggregated coverage indicators for primary care (Atencao
+Primaria) via a public REST API. Unlike other DATASUS modules, no FTP
+download or .dbc decompression is needed.
+
+``` r
+# module overview
+sisab_info()
+
+# APS coverage by state, January 2024
+cobertura <- sisab_data(year = 2024, month = 1)
+
+# national total, full year 2023
+sisab_data(year = 2023, level = "brazil")
+
+# oral health coverage
+sisab_data(year = 2024, type = "sb", month = 6)
+
+# municipality level for Sao Paulo
+sisab_data(year = 2024, level = "municipality", uf = "SP", month = 1)
+
+# explore variables
+sisab_variables()
+sisab_variables(type = "sb")
 ```
 
 ## Caching

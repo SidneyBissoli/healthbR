@@ -10,9 +10,10 @@ Information System), SINASC (Live Birth Information System), SIH
 (Hospital Information System), SIA (Outpatient Information System),
 SINAN (Notifiable Diseases Surveillance), CNES (National Health Facility
 Registry), SI-PNI (National Immunization Program - vaccination doses and
-coverage), and other health information systems. Data is downloaded from
-the Brazilian Ministry of Health and IBGE repositories. Data is returned
-in tidy format following tidyverse conventions.
+coverage), SISAB (Primary Care Health Information System - coverage
+indicators via REST API), and other health information systems. Data is
+downloaded from the Brazilian Ministry of Health and IBGE repositories.
+Data is returned in tidy format following tidyverse conventions.
 
 ## See also
 

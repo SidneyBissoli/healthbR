@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, and SI-PNI • healthbR</title>
+<title>DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB • healthbR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, and SI-PNI">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/censo-denominadores.html">Population Denominators from the Census with healthbR</a></li>
-    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, and SI-PNI</a></li>
+    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB</a></li>
     <li><a class="dropdown-item" href="../articles/pof-health-data.html">Analyzing Health Data from POF with healthbR</a></li>
   </ul>
 </li>
@@ -59,7 +59,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, and SI-PNI</h1>
+      <h1>DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/vignettes/datasus-modules.Rmd" class="external-link"><code>vignettes/datasus-modules.Rmd</code></a></small>
@@ -71,10 +71,10 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The <code>healthbR</code> package provides access to seven DATASUS
-information systems via FTP, covering mortality, live births, hospital
+<p>The <code>healthbR</code> package provides access to eight DATASUS
+information systems, covering mortality, live births, hospital
 admissions, outpatient production, notifiable diseases, the health
-facility registry, and vaccination data:</p>
+facility registry, vaccination data, and primary care coverage:</p>
 <table class="table">
 <colgroup>
 <col width="14%">
@@ -139,6 +139,13 @@ facility registry, and vaccination data:</p>
 <td>PNI (doses e cobertura)</td>
 <td>Annual/UF</td>
 <td>1994–2019</td>
+</tr>
+<tr class="even">
+<td>SISAB</td>
+<td><code><a href="../reference/sisab_data.html">sisab_data()</a></code></td>
+<td>Cobertura da Atencao Primaria</td>
+<td>Monthly</td>
+<td>2007–present</td>
 </tr>
 </tbody>
 </table>

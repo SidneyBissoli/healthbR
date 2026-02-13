@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/censo-denominadores.html">Population Denominators from the Census with healthbR</a></li>
-    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, and SI-PNI</a></li>
+    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB</a></li>
     <li><a class="dropdown-item" href="../articles/pof-health-data.html">Analyzing Health Data from POF with healthbR</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -39,6 +39,33 @@
       <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.10.0" id="healthbr-0100">healthbR 0.10.0<a class="anchor" aria-label="anchor" href="#healthbr-0100"></a></h2>
+<div class="section level3">
+<h3 id="new-modules-0-10-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-10-0"></a></h3>
+<ul><li>
+<strong>SISAB (Sistema de Informacao em Saude para a Atencao Basica)</strong>: Added module for accessing primary care coverage indicators from the relatorioaps REST API.
+<ul><li>
+<code><a href="../reference/sisab_years.html">sisab_years()</a></code>, <code><a href="../reference/sisab_info.html">sisab_info()</a></code> for module metadata</li>
+<li>
+<code><a href="../reference/sisab_variables.html">sisab_variables()</a></code> for variable exploration</li>
+<li>
+<code><a href="../reference/sisab_data.html">sisab_data()</a></code> for downloading coverage data</li>
+<li>
+<code><a href="../reference/sisab_cache_status.html">sisab_cache_status()</a></code>, <code><a href="../reference/sisab_clear_cache.html">sisab_clear_cache()</a></code> for cache management</li>
+<li>
+<strong>4 report types</strong>: aps (APS coverage, default), sb (Oral health), acs (Community health agents), pns (PNS coverage). Use <code>type</code> parameter to select.</li>
+<li>
+<strong>4 geographic levels</strong>: brazil, region, uf, municipality. Use <code>level</code> parameter to select.</li>
+<li>
+<strong>REST API access</strong>: Unlike other DATASUS modules, SISAB uses a public REST API (no FTP, no .dbc/.dbf files). No authentication required.</li>
+<li>
+<strong>Aggregated data</strong>: Coverage indicators per geographic unit and period (competencia CNES), not individual-level microdata.</li>
+<li>Output includes <code>year</code> and <code>type</code> columns to identify the source</li>
+<li>Column names preserved from API (camelCase)</li>
+</ul></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.9.0" id="healthbr-090">healthbR 0.9.0<a class="anchor" aria-label="anchor" href="#healthbr-090"></a></h2>
 <div class="section level3">

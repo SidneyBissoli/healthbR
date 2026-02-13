@@ -143,6 +143,23 @@ Vaccination doses and coverage from SI-PNI (DATASUS FTP, 1994–2019)
 - [`sipni_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sipni_clear_cache.md)
   : Clear SI-PNI Cache
 
+## SISAB – Primary care coverage
+
+Primary care coverage indicators from SISAB (REST API, 2007–present)
+
+- [`sisab_data()`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)
+  : Download SISAB Coverage Data
+- [`sisab_years()`](https://sidneybissoli.github.io/healthbR/reference/sisab_years.md)
+  : List Available SISAB Years
+- [`sisab_info()`](https://sidneybissoli.github.io/healthbR/reference/sisab_info.md)
+  : SISAB Module Information
+- [`sisab_variables()`](https://sidneybissoli.github.io/healthbR/reference/sisab_variables.md)
+  : List SISAB Variables
+- [`sisab_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/sisab_cache_status.md)
+  : Show SISAB Cache Status
+- [`sisab_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sisab_clear_cache.md)
+  : Clear SISAB Cache
+
 ## VIGITEL – Telephone survey
 
 Surveillance of Risk Factors for Chronic Diseases (2006–2024)

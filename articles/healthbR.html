@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/censo-denominadores.html">Population Denominators from the Census with healthbR</a></li>
-    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, and SI-PNI</a></li>
+    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB</a></li>
     <li><a class="dropdown-item" href="../articles/pof-health-data.html">Analyzing Health Data from POF with healthbR</a></li>
   </ul>
 </li>
@@ -75,7 +75,7 @@
 directly from R. The package downloads, caches, and processes data from
 official sources (Ministry of Health, IBGE, DATASUS), returning clean,
 analysis-ready tibbles following tidyverse conventions.</p>
-<p>The package currently supports <strong>12 data sources</strong>
+<p>The package currently supports <strong>13 data sources</strong>
 organized in two groups:</p>
 <p><strong>Surveys (IBGE / Ministry of Health)</strong></p>
 <table class="table">
@@ -174,6 +174,12 @@ organized in two groups:</p>
 <td>Annual/UF</td>
 <td>1994–2019</td>
 </tr>
+<tr class="even">
+<td>SISAB</td>
+<td>Primary care coverage indicators (REST API)</td>
+<td>Monthly</td>
+<td>2007–present</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -186,7 +192,7 @@ organized in two groups:</p>
 <p>To see all available data sources at a glance:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/list_sources.html">list_sources</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 12 x 5</span></span>
+<span><span class="co">#&gt; # A tibble: 13 x 5</span></span>
 <span><span class="co">#&gt;    source  name                         description                    years       status</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;                        &lt;chr&gt;                          &lt;chr&gt;       &lt;chr&gt;</span></span>
 <span><span class="co">#&gt;  1 vigitel VIGITEL                      Telephone survey on chronic... 2006-2024   available</span></span>
@@ -453,15 +459,41 @@ Unlike other DATASUS modules, data is in plain .DBF format and covers
 <span><span class="fu"><a href="../reference/sipni_variables.html">sipni_variables</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="sisab-primary-care-coverage">SISAB – Primary care coverage<a class="anchor" aria-label="anchor" href="#sisab-primary-care-coverage"></a>
+</h2>
+<p>SISAB provides aggregated coverage indicators for primary care
+(Atencao Primaria) via a public REST API. Unlike other DATASUS modules,
+no FTP download or .dbc decompression is needed.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># module overview</span></span>
+<span><span class="fu"><a href="../reference/sisab_info.html">sisab_info</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># APS coverage by state, January 2024</span></span>
+<span><span class="va">cobertura</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sisab_data.html">sisab_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># national total, full year 2023</span></span>
+<span><span class="fu"><a href="../reference/sisab_data.html">sisab_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, level <span class="op">=</span> <span class="st">"brazil"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># oral health coverage</span></span>
+<span><span class="fu"><a href="../reference/sisab_data.html">sisab_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, type <span class="op">=</span> <span class="st">"sb"</span>, month <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># municipality level for Sao Paulo</span></span>
+<span><span class="fu"><a href="../reference/sisab_data.html">sisab_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, level <span class="op">=</span> <span class="st">"municipality"</span>, uf <span class="op">=</span> <span class="st">"SP"</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># explore variables</span></span>
+<span><span class="fu"><a href="../reference/sisab_variables.html">sisab_variables</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sisab_variables.html">sisab_variables</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"sb"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="caching">Caching<a class="anchor" aria-label="anchor" href="#caching"></a>
 </h2>
 <p>All modules cache downloaded data automatically to avoid repeated
 downloads. Install <code>arrow</code> for optimized Parquet caching
 (recommended):</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
 <p>Cache management works the same across all modules:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check what is cached</span></span>
 <span><span class="fu"><a href="../reference/sim_cache_status.html">sim_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/vigitel_cache_status.html">vigitel_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -478,7 +510,7 @@ downloads. Install <code>arrow</code> for optimized Parquet caching
 <p>healthbR’s real power comes from combining data across modules. For
 example, calculating mortality rates requires deaths (SIM) and
 population (Censo):</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># deaths by state</span></span>
