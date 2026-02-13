@@ -1,0 +1,633 @@
+# DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB
+
+## Overview
+
+The `healthbR` package provides access to eight DATASUS information
+systems, covering mortality, live births, hospital admissions,
+outpatient production, notifiable diseases, the health facility
+registry, vaccination data, and primary care coverage:
+
+| Module | Function                                                                             | Source document                            | Granularity     | Years        |
+|--------|--------------------------------------------------------------------------------------|--------------------------------------------|-----------------|--------------|
+| SIM    | [`sim_data()`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)       | Declaracao de Obito (DO)                   | Annual/UF       | 1996–2024    |
+| SINASC | [`sinasc_data()`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md) | Declaracao de Nascido Vivo (DN)            | Annual/UF       | 1996–2024    |
+| SIH    | [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)       | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF      | 2008–2024    |
+| SIA    | [`sia_data()`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)       | BPA / APAC                                 | Monthly/type/UF | 2008–2024    |
+| SINAN  | [`sinan_data()`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)   | Ficha de Notificacao                       | Annual/National | 2007–2024    |
+| CNES   | [`cnes_data()`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)     | Cadastro de Estabelecimentos               | Monthly/type/UF | 2005–2024    |
+| SI-PNI | [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)   | PNI (doses, cobertura, microdados)         | Annual/UF       | 1994–2025    |
+| SISAB  | [`sisab_data()`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)   | Cobertura da Atencao Primaria              | Monthly         | 2007–present |
+
+All seven modules share the same infrastructure:
+
+- **DBC decompression**: .dbc files (compressed DBF) are decompressed
+  internally using vendored C code – no external dependencies required.
+- **FTP download**: files are fetched from `ftp.datasus.gov.br` with
+  automatic retry and exponential backoff.
+- **Cache**: downloaded data is cached locally in Parquet (if `arrow` is
+  installed) or .rds format.
+- **Consistent API**: every module exposes `*_years()`, `*_info()`,
+  `*_variables()`, `*_dictionary()`, `*_data()`, `*_cache_status()`, and
+  `*_clear_cache()`.
+
+## Getting started
+
+``` r
+library(healthbR)
+library(dplyr)
+```
+
+### Common helper functions
+
+Each module provides the same set of helper functions. Here is a quick
+tour using SIM as an example:
+
+``` r
+# available years
+sim_years()
+#> [1] 1996 1997 1998 ... 2023
+
+# module information (data source, key variables, usage tips)
+sim_info()
+
+# list all variables with descriptions
+sim_variables()
+
+# search for a specific variable
+sim_variables(search = "causa")
+
+# data dictionary with category labels
+sim_dictionary("SEXO")
+```
+
+The same pattern works for `sinasc_*()`, `sih_*()`, `sia_*()`,
+`sinan_*()`, `cnes_*()`, and `sipni_*()`.
+
+## SIM – Mortality
+
+The SIM (Sistema de Informacoes sobre Mortalidade) contains individual
+death records based on the Declaracao de Obito (DO).
+
+### Basic download
+
+``` r
+# all deaths in Acre, 2022
+obitos_ac <- sim_data(year = 2022, uf = "AC")
+obitos_ac
+```
+
+### Filter by cause of death
+
+The `cause` parameter filters by underlying cause of death (CAUSABAS)
+using CID-10 prefix matching:
+
+``` r
+# deaths from acute myocardial infarction (I21)
+obitos_iam <- sim_data(year = 2022, uf = "AC", cause = "I21")
+
+# all cardiovascular deaths (chapter I)
+obitos_cardio <- sim_data(year = 2022, uf = "AC", cause = "I")
+```
+
+### Key variables
+
+| Variable    | Description                                         |
+|-------------|-----------------------------------------------------|
+| `CAUSABAS`  | Underlying cause of death (CID-10)                  |
+| `DTOBITO`   | Date of death                                       |
+| `SEXO`      | Sex (M = Male, F = Female, I = Unknown)             |
+| `IDADE`     | Age (encoded: 1st digit = unit, digits 2-3 = value) |
+| `CODMUNRES` | Municipality of residence (IBGE code)               |
+
+### Example: deaths by cause chapter
+
+``` r
+obitos_ac <- sim_data(year = 2022, uf = "AC")
+
+obitos_ac |>
+  mutate(chapter = substr(CAUSABAS, 1, 1)) |>
+  count(chapter, sort = TRUE)
+```
+
+## SINASC – Live births
+
+The SINASC (Sistema de Informacoes sobre Nascidos Vivos) contains
+individual live birth records from the Declaracao de Nascido Vivo (DN).
+
+### Basic download
+
+``` r
+nasc_ac <- sinasc_data(year = 2022, uf = "AC")
+nasc_ac
+```
+
+### Filter by congenital anomaly
+
+The `anomaly` parameter filters by the CODANOMAL variable using CID-10
+prefix matching:
+
+``` r
+# births with any congenital anomaly (chapter Q)
+anomalias <- sinasc_data(year = 2022, uf = "AC", anomaly = "Q")
+```
+
+### Key variables
+
+| Variable    | Description                             |
+|-------------|-----------------------------------------|
+| `DTNASC`    | Date of birth                           |
+| `SEXO`      | Sex (1 = Male, 2 = Female, 0 = Unknown) |
+| `PESO`      | Birth weight (grams)                    |
+| `IDADEMAE`  | Mother’s age                            |
+| `CODMUNRES` | Municipality of residence (IBGE code)   |
+| `CODANOMAL` | Congenital anomaly code (CID-10)        |
+
+### Example: birth weight distribution
+
+``` r
+nasc_ac <- sinasc_data(year = 2022, uf = "AC")
+
+nasc_ac |>
+  mutate(peso_num = as.numeric(PESO)) |>
+  filter(!is.na(peso_num), peso_num > 0) |>
+  mutate(weight_group = case_when(
+    peso_num < 1500 ~ "Very low (<1500g)",
+    peso_num < 2500 ~ "Low (1500-2499g)",
+    peso_num < 4000 ~ "Normal (2500-3999g)",
+    TRUE            ~ "High (>=4000g)"
+  )) |>
+  count(weight_group)
+```
+
+## SIH – Hospital admissions
+
+The SIH (Sistema de Informacoes Hospitalares) contains individual
+hospital admission records from the AIH (Autorizacao de Internacao
+Hospitalar). Unlike SIM and SINASC, data is organized **monthly**.
+
+### Basic download
+
+``` r
+# admissions in Acre, January 2022
+intern_jan <- sih_data(year = 2022, month = 1, uf = "AC")
+intern_jan
+```
+
+### The `month` parameter
+
+SIH data is monthly – one file per UF per month. Use `month` to control
+which months to download:
+
+``` r
+# single month
+sih_data(year = 2022, month = 6, uf = "AC")
+
+# first semester
+sih_data(year = 2022, month = 1:6, uf = "AC")
+
+# all 12 months (default when month = NULL -- downloads 12 files per UF)
+sih_data(year = 2022, uf = "AC")
+```
+
+### Filter by diagnosis
+
+The `diagnosis` parameter filters by the principal diagnosis
+(DIAG_PRINC) using CID-10 prefix matching:
+
+``` r
+# respiratory admissions (chapter J)
+resp <- sih_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
+
+# pneumonia specifically (J12-J18)
+pneum <- sih_data(year = 2022, month = 1, uf = "AC",
+                  diagnosis = c("J12", "J13", "J14", "J15", "J16", "J17", "J18"))
+```
+
+### Key variables
+
+| Variable     | Description                             |
+|--------------|-----------------------------------------|
+| `DIAG_PRINC` | Principal diagnosis (CID-10)            |
+| `DT_INTER`   | Admission date                          |
+| `SEXO`       | Sex (1 = Male, 3 = Female, 0 = Unknown) |
+| `MORTE`      | In-hospital death (1 = Yes, 0 = No)     |
+| `VAL_TOT`    | Total value (R\$)                       |
+| `DIAS_PERM`  | Length of stay (days)                   |
+
+### Example: admissions by diagnosis chapter
+
+``` r
+intern <- sih_data(year = 2022, month = 1, uf = "AC")
+
+intern |>
+  mutate(chapter = substr(DIAG_PRINC, 1, 1)) |>
+  count(chapter, sort = TRUE)
+```
+
+## SIA – Outpatient production
+
+The SIA (Sistema de Informacoes Ambulatoriais) contains outpatient
+production records. Like SIH, data is monthly, but SIA also has **13
+file types** covering different categories of outpatient care.
+
+### File types
+
+| Code | Name                                  | Description                    |
+|------|---------------------------------------|--------------------------------|
+| PA   | Producao Ambulatorial                 | BPA consolidated (default)     |
+| BI   | Boletim Individualizado               | BPA individualized             |
+| AD   | APAC Laudos Diversos                  | High-complexity authorizations |
+| AM   | APAC Medicamentos                     | High-cost medications          |
+| AN   | APAC Nefrologia                       | Nephrology procedures          |
+| AQ   | APAC Quimioterapia                    | Oncology chemotherapy          |
+| AR   | APAC Radioterapia                     | Oncology radiotherapy          |
+| AB   | APAC Cirurgia Bariatrica              | Bariatric surgery              |
+| ACF  | APAC Confeccao de Fistula             | Arteriovenous fistula          |
+| ATD  | APAC Tratamento Dialitico             | Dialysis                       |
+| AMP  | APAC Acompanhamento Multiprofissional | Multiprofessional follow-up    |
+| SAD  | RAAS Atencao Domiciliar               | Home care services             |
+| PS   | RAAS Psicossocial                     | CAPS and psychosocial services |
+
+### Basic download
+
+``` r
+# outpatient production in Acre, January 2022 (default type = "PA")
+ambul_jan <- sia_data(year = 2022, month = 1, uf = "AC")
+ambul_jan
+
+# different file type: high-cost medications
+med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
+```
+
+### Filter by procedure and diagnosis
+
+``` r
+# filter by SIGTAP procedure code (prefix match on PA_PROC_ID)
+consult <- sia_data(year = 2022, month = 1, uf = "AC", procedure = "0301")
+
+# filter by CID-10 diagnosis (prefix match on PA_CIDPRI)
+resp <- sia_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
+```
+
+### Key variables (PA type)
+
+| Variable     | Description                  |
+|--------------|------------------------------|
+| `PA_PROC_ID` | Procedure code (SIGTAP)      |
+| `PA_CIDPRI`  | Principal diagnosis (CID-10) |
+| `PA_SEXO`    | Sex (1 = Male, 2 = Female)   |
+| `PA_IDADE`   | Patient age                  |
+| `PA_VALAPR`  | Approved value (R\$)         |
+| `PA_QTDAPR`  | Approved quantity            |
+
+### Example: production by procedure group
+
+``` r
+ambul <- sia_data(year = 2022, month = 1, uf = "AC")
+
+ambul |>
+  mutate(proc_group = substr(PA_PROC_ID, 1, 2)) |>
+  count(proc_group, sort = TRUE)
+```
+
+## SINAN – Notifiable diseases
+
+The SINAN (Sistema de Informacao de Agravos de Notificacao) contains
+individual notification records for 31 compulsorily notifiable diseases.
+Unlike other DATASUS modules, SINAN files are **national** (one file per
+disease per year, covering all of Brazil).
+
+### Available diseases
+
+SINAN covers 31 diseases. Use
+[`sinan_diseases()`](https://sidneybissoli.github.io/healthbR/reference/sinan_diseases.md)
+to see all available codes:
+
+``` r
+sinan_diseases()
+#> # A tibble: 31 x 3
+#>    code  name                      description
+#>    <chr> <chr>                     <chr>
+#>  1 DENG  Dengue                    Dengue
+#>  2 CHIK  Chikungunya               Febre de Chikungunya
+#>  3 ZIKA  Zika                      Zika virus
+#>  4 TUBE  Tuberculose               Tuberculose
+#>  ...
+
+# search for a specific disease
+sinan_diseases(search = "sifilis")
+```
+
+### Basic download
+
+``` r
+# dengue notifications, 2022 (default disease)
+dengue <- sinan_data(year = 2022)
+
+# tuberculosis notifications, 2020-2022
+tb <- sinan_data(year = 2020:2022, disease = "TUBE")
+
+# select specific variables
+sinan_data(year = 2022, disease = "DENG",
+           vars = c("DT_NOTIFIC", "CS_SEXO", "NU_IDADE_N",
+                    "ID_MUNICIP", "CLASSI_FIN"))
+```
+
+### Filtering by state
+
+Since files are national, filter by UF after download:
+
+``` r
+dengue <- sinan_data(year = 2022)
+
+# filter by state of notification
+dengue_sp <- dengue |>
+  filter(SG_UF_NOT == "35")  # Sao Paulo (IBGE code)
+
+# or by municipality
+dengue_rio <- dengue |>
+  filter(substr(ID_MUNICIP, 1, 2) == "33")  # Rio de Janeiro state
+```
+
+### Key variables
+
+| Variable     | Description                                         |
+|--------------|-----------------------------------------------------|
+| `DT_NOTIFIC` | Notification date                                   |
+| `ID_AGRAVO`  | Disease code (CID-10)                               |
+| `CS_SEXO`    | Sex (M = Male, F = Female, I = Unknown)             |
+| `NU_IDADE_N` | Age (encoded: 1st digit = unit, digits 2-4 = value) |
+| `ID_MUNICIP` | Municipality of notification (IBGE code)            |
+| `CLASSI_FIN` | Final classification (1 = Confirmed, 2 = Discarded) |
+| `EVOLUCAO`   | Outcome (1 = Cure, 2 = Death from disease)          |
+
+### Example: confirmed dengue by month
+
+``` r
+dengue <- sinan_data(year = 2022, disease = "DENG")
+
+dengue |>
+  filter(CLASSI_FIN %in% c("1", "5")) |>  # confirmed cases
+  mutate(month = substr(DT_NOTIFIC, 4, 5)) |>
+  count(month, sort = TRUE)
+```
+
+## CNES – Health facility registry
+
+The CNES (Cadastro Nacional de Estabelecimentos de Saude) is the
+national registry of all health facilities in Brazil. Like SIH and SIA,
+data is organized **monthly** (one file per type/UF/month), and there
+are **13 file types** covering different aspects of the registry.
+
+### File types
+
+| Code | Name                  | Description                 |
+|------|-----------------------|-----------------------------|
+| ST   | Estabelecimentos      | Facility registry (default) |
+| LT   | Leitos                | Hospital beds               |
+| PF   | Profissional          | Health professionals        |
+| DC   | Dados Complementares  | Complementary facility data |
+| EQ   | Equipamentos          | Health equipment            |
+| SR   | Servico Especializado | Specialized services        |
+| HB   | Habilitacao           | Facility certifications     |
+| EP   | Equipes               | Health teams                |
+| RC   | Regra Contratual      | Contractual rules           |
+| IN   | Incentivos            | Financial incentives        |
+| EE   | Estab. de Ensino      | Teaching facilities         |
+| EF   | Estab. Filantropico   | Philanthropic facilities    |
+| GM   | Gestao e Metas        | Management and targets      |
+
+### Basic download
+
+``` r
+# establishments in Acre, January 2023
+estab <- cnes_data(year = 2023, month = 1, uf = "AC")
+
+# hospital beds
+leitos <- cnes_data(year = 2023, month = 1, uf = "AC", type = "LT")
+
+# health professionals
+prof <- cnes_data(year = 2023, month = 1, uf = "AC", type = "PF")
+```
+
+### Key variables (ST type)
+
+| Variable    | Description                                          |
+|-------------|------------------------------------------------------|
+| `CNES`      | Facility CNES code                                   |
+| `CODUFMUN`  | Municipality (UF + IBGE 6-digit code)                |
+| `TP_UNID`   | Facility type (22 categories)                        |
+| `VINC_SUS`  | SUS-linked (0 = No, 1 = Yes)                         |
+| `TP_GESTAO` | Management type (M = Municipal, E = State, D = Dual) |
+| `ESFERA_A`  | Administrative sphere (1-4)                          |
+
+### Example: facility types in a state
+
+``` r
+estab <- cnes_data(year = 2023, month = 1, uf = "AC")
+
+estab |>
+  count(TP_UNID, sort = TRUE) |>
+  left_join(
+    cnes_dictionary("TP_UNID") |> select(code, label),
+    by = c("TP_UNID" = "code")
+  )
+```
+
+## SI-PNI – Vaccination data
+
+The SI-PNI (Sistema de Informacao do Programa Nacional de Imunizacoes)
+provides vaccination data from two sources:
+
+- **FTP (1994–2019)**: Aggregated data with dose counts and coverage
+  rates per municipality/vaccine/age group. Plain .DBF files (not
+  DBC-compressed).
+- **OpenDataSUS API (2020–2025)**: Individual-level microdata with one
+  row per vaccination dose (~47 fields per record).
+
+[`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
+transparently routes to the correct source based on the requested year.
+
+### File types
+
+| Code | Name              | Description                                                                      |
+|------|-------------------|----------------------------------------------------------------------------------|
+| DPNI | Doses Aplicadas   | Doses applied per municipality, age group, vaccine, and dose type (FTP, default) |
+| CPNI | Cobertura Vacinal | Vaccination coverage per municipality and vaccine (FTP)                          |
+| API  | Microdados        | Individual-level microdata via OpenDataSUS (2020+, automatic)                    |
+
+### Basic download
+
+``` r
+# FTP: doses applied in Acre, 2019 (default type = "DPNI")
+doses_ac <- sipni_data(year = 2019, uf = "AC")
+doses_ac
+
+# FTP: vaccination coverage
+cob_ac <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
+
+# API: individual-level microdata, Acre, January 2024
+micro_ac <- sipni_data(year = 2024, uf = "AC", month = 1)
+micro_ac
+```
+
+### Key variables (DPNI)
+
+| Variable    | Description                         |
+|-------------|-------------------------------------|
+| `IMUNO`     | Vaccine code (immunobiological)     |
+| `QT_DOSE`   | Number of doses applied             |
+| `DOSE`      | Dose type (1st, 2nd, booster, etc.) |
+| `FX_ETARIA` | Age group (coded)                   |
+| `MUNIC`     | Municipality (IBGE 6-digit code)    |
+| `ANOMES`    | Year and month (YYYYMM)             |
+
+### Key variables (CPNI)
+
+| Variable  | Description                      |
+|-----------|----------------------------------|
+| `IMUNO`   | Vaccine code                     |
+| `QT_DOSE` | Number of doses applied          |
+| `POP`     | Target population                |
+| `COBERT`  | Vaccination coverage (%)         |
+| `MUNIC`   | Municipality (IBGE 6-digit code) |
+
+### Example: doses by vaccine
+
+``` r
+doses <- sipni_data(year = 2019, uf = "AC")
+
+doses |>
+  group_by(IMUNO) |>
+  summarize(total_doses = sum(as.numeric(QT_DOSE), na.rm = TRUE)) |>
+  arrange(desc(total_doses)) |>
+  left_join(
+    sipni_dictionary("IMUNO") |> select(code, label),
+    by = c("IMUNO" = "code")
+  )
+```
+
+## Cross-module analyses
+
+A key strength of `healthbR` is the ability to combine data from
+different DATASUS modules and Census denominators in a single workflow.
+Below are three practical examples.
+
+### Mortality rate (SIM + Census)
+
+Calculate the crude cardiovascular mortality rate per 100,000
+population:
+
+``` r
+# step 1: count cardiovascular deaths in Sao Paulo, 2022
+obitos_cardio <- sim_data(year = 2022, uf = "SP", cause = "I")
+n_obitos <- nrow(obitos_cardio)
+
+# step 2: get population denominator from Census 2022
+pop_sp <- censo_populacao(year = 2022, territorial_level = "state") |>
+  filter(grepl("Paulo", territorial_unit))
+
+# step 3: calculate rate
+taxa_mortalidade <- n_obitos / pop_sp$population * 100000
+taxa_mortalidade
+```
+
+### Live births to deaths ratio (SINASC + SIM)
+
+Compare the number of live births and deaths in a state:
+
+``` r
+# births and deaths in Acre, 2022
+nascimentos <- sinasc_data(year = 2022, uf = "AC")
+obitos <- sim_data(year = 2022, uf = "AC")
+
+razao <- nrow(nascimentos) / nrow(obitos)
+razao
+#> ratio > 1 means more births than deaths (population growth)
+```
+
+### Hospital vs. outpatient care (SIH + SIA)
+
+Compare volumes and costs of respiratory care (CID-10 chapter J) between
+hospital and outpatient settings:
+
+``` r
+# hospital admissions for respiratory diseases, January 2022
+intern_resp <- sih_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
+
+# outpatient production for respiratory diseases, January 2022
+ambul_resp <- sia_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
+
+# compare volumes
+n_internacoes <- nrow(intern_resp)
+n_ambulatorial <- nrow(ambul_resp)
+
+# compare costs
+custo_intern <- sum(as.numeric(intern_resp$VAL_TOT), na.rm = TRUE)
+custo_ambul <- sum(as.numeric(ambul_resp$PA_VALAPR), na.rm = TRUE)
+
+tibble::tibble(
+  setting = c("Hospital (SIH)", "Outpatient (SIA)"),
+  records = c(n_internacoes, n_ambulatorial),
+  total_cost_brl = c(custo_intern, custo_ambul)
+)
+```
+
+## Cache and performance
+
+### Automatic caching
+
+All DATASUS modules cache downloaded data automatically. When the
+`arrow` package is installed, data is saved in Parquet format (fast and
+compact); otherwise, .rds is used as fallback.
+
+``` r
+# install arrow for optimized caching (recommended)
+install.packages("arrow")
+```
+
+### Cache management
+
+Each module provides `*_cache_status()` and `*_clear_cache()`:
+
+``` r
+# check what is cached
+sim_cache_status()
+sih_cache_status()
+sia_cache_status()
+
+# clear cache for a specific module
+sim_clear_cache()
+```
+
+### Tips for managing downloads
+
+- **Use `uf`** to download only the states you need instead of all 27
+  (SIM, SINASC, SIH, SIA, CNES).
+- **Use `month`** (SIH, SIA, CNES) to limit monthly downloads.
+  Downloading a full year for all states requires 324 files per module
+  (27 UFs x 12 months).
+- **Use `vars`** to keep only the variables you need, reducing memory
+  usage.
+- SIM and SINASC are annual (one file per UF per year), so a full-year
+  download is 27 files.
+- SINAN files are national (one file per disease per year), so downloads
+  are fast but files can be large.
+- SIH, SIA, and CNES are monthly, so a full-year download is 324 files
+  per type. SIA and CNES each have 13 file types – always filter by
+  `type`, `uf`, and `month`.
+- SI-PNI FTP is annual with plain .DBF files (one per type/UF/year,
+  1994–2019). API data (2020+) is per-UF/year; use `month` to limit
+  months.
+
+## Additional resources
+
+- [DATASUS
+  TabNet](https://datasus.saude.gov.br/informacoes-de-saude-tabnet/) –
+  online tabulation tool for DATASUS data
+- [DATASUS FTP](ftp://ftp.datasus.gov.br/dissemin/publicos/) – public
+  FTP server with raw data files
+- [CID-10 (WHO ICD-10)](https://icd.who.int/browse10/2019/en) –
+  International Classification of Diseases, 10th revision
+- [SIGTAP](http://sigtap.datasus.gov.br/) – procedure code table for SUS
+  (SIA/SIH)

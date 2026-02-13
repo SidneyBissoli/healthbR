@@ -11,7 +11,7 @@ Data is organized monthly – one .dbc file per type, state (UF), and month."></
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,7 @@ Data is organized monthly – one .dbc file per type, state (UF), and month."></
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Download CNES Health Facility Registry Data</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/HEAD/R/cnes.R" class="external-link"><code>R/cnes.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/R/cnes.R" class="external-link"><code>R/cnes.R</code></a></small>
       <div class="d-none name"><code>cnes_data.Rd</code></div>
     </div>
 
@@ -73,7 +73,7 @@ Data is organized monthly – one .dbc file per type, state (UF), and month.</p>
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p>Character. File type to download. Default: <code>"ST"</code>
-(establishments). See <code><a href="cnes_info.html">cnes_info</a>()</code> for all 13 types.</p></dd>
+(establishments). See <code><a href="cnes_info.html">cnes_info()</a></code> for all 13 types.</p></dd>
 
 
 <dt id="arg-month">month<a class="anchor" aria-label="anchor" href="#arg-month"></a></dt>
@@ -84,7 +84,7 @@ downloads all 12 months. Example: <code>1</code> (January), <code>1:6</code>
 
 <dt id="arg-vars">vars<a class="anchor" aria-label="anchor" href="#arg-vars"></a></dt>
 <dd><p>Character vector. Variables to keep. If NULL (default),
-returns all available variables. Use <code><a href="cnes_variables.html">cnes_variables</a>()</code> to see
+returns all available variables. Use <code><a href="cnes_variables.html">cnes_variables()</a></code> to see
 available variables.</p></dd>
 
 
@@ -119,19 +119,19 @@ blast library. No external dependencies are required.</p>
 324 files (27 UFs x 12 months) per type. Use <code>uf</code> and <code>month</code>
 to limit downloads.</p>
 <p>The CNES has 13 file types. The default <code>"ST"</code> (establishments) is
-the most commonly used. Use <code><a href="cnes_info.html">cnes_info</a>()</code> to see all types.</p>
+the most commonly used. Use <code><a href="cnes_info.html">cnes_info()</a></code> to see all types.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="cnes_info.html">cnes_info</a>()</code> for file type descriptions,
-<code><a href="censo_populacao.html">censo_populacao</a>()</code> for population denominators.</p>
+    <div class="dont-index"><p><code><a href="cnes_info.html">cnes_info()</a></code> for file type descriptions,
+<code><a href="censo_populacao.html">censo_populacao()</a></code> for population denominators.</p>
 <p>Other cnes:
-<code><a href="cnes_cache_status.html">cnes_cache_status</a>()</code>,
-<code><a href="cnes_clear_cache.html">cnes_clear_cache</a>()</code>,
-<code><a href="cnes_dictionary.html">cnes_dictionary</a>()</code>,
-<code><a href="cnes_info.html">cnes_info</a>()</code>,
-<code><a href="cnes_variables.html">cnes_variables</a>()</code>,
-<code><a href="cnes_years.html">cnes_years</a>()</code></p></div>
+<code><a href="cnes_cache_status.html">cnes_cache_status()</a></code>,
+<code><a href="cnes_clear_cache.html">cnes_clear_cache()</a></code>,
+<code><a href="cnes_dictionary.html">cnes_dictionary()</a></code>,
+<code><a href="cnes_info.html">cnes_info()</a></code>,
+<code><a href="cnes_variables.html">cnes_variables()</a></code>,
+<code><a href="cnes_years.html">cnes_years()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -161,7 +161,7 @@ the most commonly used. Use <code><a href="cnes_info.html">cnes_info</a>()</code
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

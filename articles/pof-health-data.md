@@ -1,0 +1,316 @@
+# Analyzing Health Data from POF with healthbR
+
+## Overview
+
+The **POF (Pesquisa de Orçamentos Familiares)** is a household budget
+survey conducted by IBGE that investigates household expenditures,
+living conditions, and nutritional profiles of the Brazilian population.
+It is conducted in partnership with the Ministry of Health.
+
+The `healthbR` package provides access to POF microdata with a focus on
+**health-related data**:
+
+| Module                   | Description                           | Available editions   |
+|--------------------------|---------------------------------------|----------------------|
+| **Food Security (EBIA)** | Brazilian Food Insecurity Scale       | 2017-2018            |
+| **Food Consumption**     | Detailed personal food intake         | 2008-2009, 2017-2018 |
+| **Anthropometry**        | Weight, height, BMI                   | 2008-2009            |
+| **Health Expenses**      | Medications, insurance, consultations | All editions         |
+
+## Getting started
+
+``` r
+library(healthbR)
+library(dplyr)
+```
+
+### Check available editions
+
+``` r
+pof_years()
+#> [1] "2002-2003" "2008-2009" "2017-2018"
+```
+
+### Survey information
+
+Use
+[`pof_info()`](https://sidneybissoli.github.io/healthbR/reference/pof_info.md)
+to see which health modules are available for each edition:
+
+``` r
+pof_info("2017-2018")
+```
+
+### List available registers
+
+Each POF edition contains multiple data registers. Use
+[`pof_registers()`](https://sidneybissoli.github.io/healthbR/reference/pof_registers.md)
+to see them:
+
+``` r
+# all registers
+pof_registers("2017-2018")
+
+# only health-related registers
+pof_registers("2017-2018", health_only = TRUE)
+```
+
+### Explore variables
+
+Before downloading data, you can browse available variables:
+
+``` r
+# list all variables in the domicilio register
+pof_variables("2017-2018", "domicilio")
+
+# search for food security variables
+pof_variables("2017-2018", search = "ebia")
+
+# search for weight-related variables
+pof_variables("2017-2018", "morador", search = "peso")
+```
+
+## Food Security Analysis (EBIA)
+
+The **EBIA (Escala Brasileira de Insegurança Alimentar)** is available
+in the 2017-2018 edition through the `domicilio` register. The variable
+`V6199` contains the food security classification.
+
+### Download domicilio data
+
+``` r
+domicilio <- pof_data("2017-2018", "domicilio")
+```
+
+### EBIA classification
+
+The EBIA classifies households into four levels:
+
+| Code | Classification           |
+|------|--------------------------|
+| 1    | Food security            |
+| 2    | Mild food insecurity     |
+| 3    | Moderate food insecurity |
+| 4    | Severe food insecurity   |
+
+### Create EBIA categories
+
+``` r
+domicilio <- domicilio |>
+  mutate(
+    ebia = factor(
+      V6199,
+      levels = 1:4,
+      labels = c(
+        "Food security",
+        "Mild insecurity",
+        "Moderate insecurity",
+        "Severe insecurity"
+      )
+    )
+  )
+
+# frequency table
+domicilio |>
+  count(ebia) |>
+  mutate(pct = n / sum(n) * 100)
+```
+
+### Weighted estimates with survey design
+
+For proper population estimates, use the survey design:
+
+``` r
+library(srvyr)
+
+domicilio_svy <- pof_data("2017-2018", "domicilio", as_survey = TRUE)
+
+# add EBIA categories
+domicilio_svy <- domicilio_svy |>
+  mutate(
+    ebia = factor(
+      V6199,
+      levels = 1:4,
+      labels = c(
+        "Food security",
+        "Mild insecurity",
+        "Moderate insecurity",
+        "Severe insecurity"
+      )
+    )
+  )
+
+# weighted prevalence
+domicilio_svy |>
+  group_by(ebia) |>
+  summarize(
+    prevalence = survey_mean(na.rm = TRUE, vartype = "ci"),
+    n = unweighted(n())
+  )
+```
+
+### EBIA by region (UF)
+
+``` r
+# food insecurity by state
+domicilio_svy |>
+  group_by(UF, ebia) |>
+  summarize(
+    prevalence = survey_mean(na.rm = TRUE, vartype = "ci"),
+    n = unweighted(n())
+  ) |>
+  filter(ebia == "Severe insecurity") |>
+  arrange(desc(prevalence))
+```
+
+## Food Consumption Analysis
+
+The `consumo_alimentar` register contains detailed personal food intake
+data from a subsample. This data is available for the 2008-2009 and
+2017-2018 editions.
+
+### Download food consumption data
+
+``` r
+consumo <- pof_data("2017-2018", "consumo_alimentar")
+```
+
+### Key variables
+
+| Variable       | Description      |
+|----------------|------------------|
+| `V9001`        | Food item code   |
+| `V9005`        | Amount consumed  |
+| `V9007`        | Unit of measure  |
+| `ENERGIA_KCAL` | Energy (kcal)    |
+| `PROTEINA`     | Protein (g)      |
+| `CARBOIDRATO`  | Carbohydrate (g) |
+| `LIPIDIO`      | Total lipids (g) |
+
+### Average caloric intake
+
+``` r
+# total daily caloric intake per person
+consumo |>
+  group_by(COD_UPA, NUM_DOM, NUM_UC, COD_INFORMANTE) |>
+  summarize(
+    total_kcal = sum(ENERGIA_KCAL, na.rm = TRUE),
+    total_protein = sum(PROTEINA, na.rm = TRUE),
+    total_carb = sum(CARBOIDRATO, na.rm = TRUE),
+    total_fat = sum(LIPIDIO, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  summarize(
+    mean_kcal = mean(total_kcal, na.rm = TRUE),
+    mean_protein = mean(total_protein, na.rm = TRUE),
+    mean_carb = mean(total_carb, na.rm = TRUE),
+    mean_fat = mean(total_fat, na.rm = TRUE)
+  )
+```
+
+## Health Expenses
+
+The `despesa_individual` register contains individual expenses,
+including health-related spending such as medications, health insurance,
+and medical consultations.
+
+### Download expense data
+
+``` r
+despesas <- pof_data("2017-2018", "despesa_individual")
+```
+
+### Filter health expenses
+
+Health-related expenses can be identified by product group codes:
+
+``` r
+# explore expense categories
+despesas |>
+  count(QUADRO) |>
+  arrange(desc(n))
+```
+
+## Combining registers
+
+For many analyses you need to combine data from multiple registers. Use
+the household identifier variables (`COD_UPA`, `NUM_DOM`, `NUM_UC`) to
+merge:
+
+``` r
+# download morador (demographic data) and domicilio (household data)
+morador <- pof_data("2017-2018", "morador")
+domicilio <- pof_data("2017-2018", "domicilio")
+
+# merge: add household-level EBIA to individual-level data
+morador_ebia <- morador |>
+  left_join(
+    domicilio |> select(COD_UPA, NUM_DOM, NUM_UC, V6199),
+    by = c("COD_UPA", "NUM_DOM", "NUM_UC")
+  ) |>
+  mutate(
+    ebia = factor(
+      V6199,
+      levels = 1:4,
+      labels = c(
+        "Food security",
+        "Mild insecurity",
+        "Moderate insecurity",
+        "Severe insecurity"
+      )
+    )
+  )
+
+# food insecurity by age group
+morador_ebia |>
+  mutate(age_group = cut(V0403, breaks = c(0, 5, 12, 18, 30, 60, Inf))) |>
+  count(age_group, ebia) |>
+  group_by(age_group) |>
+  mutate(pct = n / sum(n) * 100)
+```
+
+## Comparing editions
+
+The POF has been conducted in different years, and data structure may
+vary. Use
+[`pof_info()`](https://sidneybissoli.github.io/healthbR/reference/pof_info.md)
+to check what is available in each edition:
+
+``` r
+# check health modules by edition
+pof_info("2017-2018")  # EBIA + food consumption
+pof_info("2008-2009")  # anthropometry + food consumption
+pof_info("2002-2003")  # expenses only
+```
+
+## Cache management
+
+POF data files are large. healthbR caches downloaded files locally so
+you only download once:
+
+``` r
+# check cached files
+pof_cache_status()
+
+# clear cache if needed
+pof_clear_cache()
+```
+
+If the `arrow` package is installed, data is cached in Parquet format
+for faster loading:
+
+``` r
+# install arrow for optimized caching (recommended)
+install.packages("arrow")
+```
+
+## Additional resources
+
+- [POF official page
+  (IBGE)](https://www.ibge.gov.br/estatisticas/sociais/saude/24786-pesquisa-de-orcamentos-familiares-2.html)
+- [POF 2017-2018 Food Security
+  publication](https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&id=2101749)
+- [POF 2017-2018 Food Consumption
+  publication](https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&id=2101742)
+- [srvyr package
+  documentation](https://cran.r-project.org/package=srvyr)
