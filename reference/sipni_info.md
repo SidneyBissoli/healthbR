@@ -32,14 +32,14 @@ sipni_info()
 #> ── SI-PNI — Sistema de Informação do Programa Nacional de Imunizações ──────────
 #> 
 #> Fonte: Ministério da Saúde / DATASUS
-#> Acesso: FTP DATASUS (1994-2019) + OpenDataSUS API (2020+)
-#> Dados: Agregados (FTP) e microdados individuais (API)
-#> Granularidade: Anual/UF (FTP), Mensal/UF (API)
+#> Acesso: FTP DATASUS (1994-2019) + OpenDataSUS CSV (2020+)
+#> Dados: Agregados (FTP) e microdados individuais (CSV)
+#> Granularidade: Anual/UF (FTP), Mensal/UF (CSV)
 #> 
 #> ── Fontes de dados ──
 #> 
 #> • FTP DATASUS (1994–2019): Dados agregados (DPNI/CPNI) em .DBF
-#> • OpenDataSUS API (2020–2025): Microdados individuais (1 linha por dose)
+#> • OpenDataSUS CSV (2020–2025): Microdados individuais (1 linha por dose)
 #> 
 #> ── Dados disponíveis ──
 #> 
@@ -54,7 +54,7 @@ sipni_info()
 #> imuno e dose (FTP, 1994-2019)
 #> CPNI Cobertura Vacinal — Cobertura vacinal por município e imunobiológico (FTP,
 #> 1994-2019)
-#> API Microdados API — Microdados individuais de vacinação via OpenDataSUS API
+#> API Microdados CSV — Microdados individuais de vacinação via OpenDataSUS CSV
 #> (2020+)
 #> 
 #> ── Variáveis-chave (DPNI) ──
@@ -74,6 +74,6 @@ sipni_info()
 #> data_vacina Data da vacinação
 #> 
 #> ℹ 1994-2019: Dados agregados (contagens por município/vacina/faixa).
-#> ℹ 2020+: Microdados individuais (1 linha por dose aplicada) via API.
-#> ℹ Use `month` em `sipni_data()` para filtrar meses (API 2020+).
+#> ℹ 2020+: Microdados individuais (1 linha por dose aplicada) via CSV.
+#> ℹ Use `month` em `sipni_data()` para filtrar meses (CSV 2020+).
 ```

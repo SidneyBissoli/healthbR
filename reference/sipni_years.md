@@ -20,8 +20,8 @@ SI-PNI data is available from two sources:
 - **FTP (1994–2019)**: Aggregated data (doses applied and coverage) from
   DATASUS FTP as plain .DBF files.
 
-- **API (2020–2025)**: Individual-level microdata from the OpenDataSUS
-  REST API (one row per vaccination dose).
+- **CSV (2020–2025)**: Individual-level microdata from OpenDataSUS as
+  monthly CSV bulk downloads (one row per vaccination dose).
 
 ## See also
 

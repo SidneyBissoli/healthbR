@@ -4,24 +4,29 @@
 
 ### Extended modules
 
-- **SI-PNI post-2019 support via OpenDataSUS API**: The SI-PNI module
-  now supports vaccination data from 2020 to 2025 via the OpenDataSUS
-  REST API, in addition to the existing DATASUS FTP data (1994-2019).
+- **SI-PNI post-2019 support via OpenDataSUS CSV**: The SI-PNI module
+  now supports vaccination data from 2020 to 2025 via OpenDataSUS
+  monthly CSV bulk downloads, in addition to the existing DATASUS FTP
+  data (1994-2019).
   - [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
     transparently routes by year: FTP for 1994-2019 (aggregated
-    DPNI/CPNI), API for 2020+ (individual-level microdata)
-  - New `month` parameter for API years (filters by `data_vacina` field)
+    DPNI/CPNI), CSV for 2020+ (individual-level microdata)
+  - New `month` parameter for CSV years (selects monthly files to
+    download)
   - `sipni_variables(type = "API")` shows 47 microdata variables
   - [`sipni_years()`](https://sidneybissoli.github.io/healthbR/reference/sipni_years.md)
     now returns `1994:2025` (was `1994:2019`)
-  - Automatic API pagination with progress bar
-  - Per-month caching for API data (`sipni_API_{UF}_{YYYYMM}`)
-  - API microdata includes patient demographics, vaccine details,
+  - Memory-efficient chunked CSV reading with UF filtering (national
+    files are ~6 GB uncompressed; only matching UF rows are kept in
+    memory)
+  - Per-month caching for CSV data (`sipni_API_{UF}_{YYYYMM}`)
+  - Microdata includes patient demographics, vaccine details,
     establishment info, and administration strategy (one row per
     vaccination dose)
   - [`sipni_info()`](https://sidneybissoli.github.io/healthbR/reference/sipni_info.md)
     updated to show both data sources
-  - No new R dependencies (uses existing `curl` + `jsonlite`)
+  - New dependency: `readr` (for chunked CSV reading with encoding
+    support)
 
 ## healthbR 0.10.0
 

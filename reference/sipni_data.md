@@ -2,8 +2,8 @@
 
 Downloads and returns vaccination data from SI-PNI. For years 1994–2019,
 data is downloaded from DATASUS FTP (aggregated doses/coverage). For
-years 2020+, data is fetched from the OpenDataSUS REST API
-(individual-level microdata with one row per vaccination dose).
+years 2020+, data is downloaded from OpenDataSUS as monthly CSV bulk
+files (individual-level microdata with one row per vaccination dose).
 
 ## Usage
 
@@ -38,9 +38,9 @@ sipni_data(
 
 - month:
 
-  Integer. Month(s) to download (1–12). For years \>= 2020 (API),
-  filters by vaccination date month. For years \<= 2019 (FTP), this
-  parameter is ignored (FTP files are annual). If NULL (default),
+  Integer. Month(s) to download (1–12). For years \>= 2020 (CSV),
+  selects which monthly CSV files to download. For years \<= 2019 (FTP),
+  this parameter is ignored (FTP files are annual). If NULL (default),
   downloads all 12 months.
 
 - vars:
@@ -70,7 +70,7 @@ to identify the source when multiple years/states are combined.
 - **1994–2019 (FTP)**: Aggregated data with DPNI (12 vars) or CPNI (7
   vars) columns, all character.
 
-- **2020+ (API)**: Individual-level microdata with ~47 columns
+- **2020+ (CSV)**: Individual-level microdata with ~47 columns
   (snake_case Portuguese), all character. Use
   `sipni_variables(type = "API")` to see the full list.
 
@@ -81,11 +81,12 @@ data is **aggregated** (dose counts and coverage rates per municipality,
 vaccine, and age group). Two file types: DPNI (doses) and CPNI
 (coverage).
 
-**API data (2020+):** Fetched from the OpenDataSUS REST API with
-automatic pagination. This is **individual-level microdata** (one row
-per vaccination dose, ~47 fields per record). The `type` parameter is
-ignored for API years. Data is filtered server-side by UF and
-client-side by month (using the `data_vacina` field).
+**CSV data (2020+):** Downloaded from OpenDataSUS as monthly CSV bulk
+files (national, semicolon-delimited, latin1 encoding). Each monthly ZIP
+is ~1.4 GB. This is **individual-level microdata** (one row per
+vaccination dose, ~47 fields per record). The `type` parameter is
+ignored for CSV years. Data is filtered by UF during chunked reading to
+avoid loading the full national file into memory.
 
 ## See also
 

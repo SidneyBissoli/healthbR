@@ -44,20 +44,20 @@
 <div class="section level3">
 <h3 id="extended-modules-0-11-0">Extended modules<a class="anchor" aria-label="anchor" href="#extended-modules-0-11-0"></a></h3>
 <ul><li>
-<strong>SI-PNI post-2019 support via OpenDataSUS API</strong>: The SI-PNI module now supports vaccination data from 2020 to 2025 via the OpenDataSUS REST API, in addition to the existing DATASUS FTP data (1994-2019).
+<strong>SI-PNI post-2019 support via OpenDataSUS CSV</strong>: The SI-PNI module now supports vaccination data from 2020 to 2025 via OpenDataSUS monthly CSV bulk downloads, in addition to the existing DATASUS FTP data (1994-2019).
 <ul><li>
-<code><a href="../reference/sipni_data.html">sipni_data()</a></code> transparently routes by year: FTP for 1994-2019 (aggregated DPNI/CPNI), API for 2020+ (individual-level microdata)</li>
-<li>New <code>month</code> parameter for API years (filters by <code>data_vacina</code> field)</li>
+<code><a href="../reference/sipni_data.html">sipni_data()</a></code> transparently routes by year: FTP for 1994-2019 (aggregated DPNI/CPNI), CSV for 2020+ (individual-level microdata)</li>
+<li>New <code>month</code> parameter for CSV years (selects monthly files to download)</li>
 <li>
 <code>sipni_variables(type = "API")</code> shows 47 microdata variables</li>
 <li>
 <code><a href="../reference/sipni_years.html">sipni_years()</a></code> now returns <code>1994:2025</code> (was <code>1994:2019</code>)</li>
-<li>Automatic API pagination with progress bar</li>
-<li>Per-month caching for API data (<code>sipni_API_{UF}_{YYYYMM}</code>)</li>
-<li>API microdata includes patient demographics, vaccine details, establishment info, and administration strategy (one row per vaccination dose)</li>
+<li>Memory-efficient chunked CSV reading with UF filtering (national files are ~6 GB uncompressed; only matching UF rows are kept in memory)</li>
+<li>Per-month caching for CSV data (<code>sipni_API_{UF}_{YYYYMM}</code>)</li>
+<li>Microdata includes patient demographics, vaccine details, establishment info, and administration strategy (one row per vaccination dose)</li>
 <li>
 <code><a href="../reference/sipni_info.html">sipni_info()</a></code> updated to show both data sources</li>
-<li>No new R dependencies (uses existing <code>curl</code> + <code>jsonlite</code>)</li>
+<li>New dependency: <code>readr</code> (for chunked CSV reading with encoding support)</li>
 </ul></li>
 </ul></div>
 </div>

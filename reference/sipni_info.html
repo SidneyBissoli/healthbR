@@ -77,14 +77,14 @@ and usage guidance.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">SI-PNI — Sistema de Informação do Programa Nacional de Imunizações</span> <span style="color: #00BBBB;">──────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Fonte: Ministério da Saúde / DATASUS</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Acesso: FTP DATASUS (1994-2019) + OpenDataSUS API (2020+)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Dados: Agregados (FTP) e microdados individuais (API)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Granularidade: Anual/UF (FTP), Mensal/UF (API)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Acesso: FTP DATASUS (1994-2019) + OpenDataSUS CSV (2020+)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Dados: Agregados (FTP) e microdados individuais (CSV)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Granularidade: Anual/UF (FTP), Mensal/UF (CSV)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Fontes de dados</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> FTP DATASUS (1994–2019): Dados agregados (DPNI/CPNI) em .DBF</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> OpenDataSUS API (2020–2025): Microdados individuais (1 linha por dose)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> OpenDataSUS CSV (2020–2025): Microdados individuais (1 linha por dose)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Dados disponíveis</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
@@ -99,7 +99,7 @@ and usage guidance.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> imuno e dose (FTP, 1994-2019)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> CPNI Cobertura Vacinal — Cobertura vacinal por município e imunobiológico (FTP,</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1994-2019)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> API Microdados API — Microdados individuais de vacinação via OpenDataSUS API</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> API Microdados CSV — Microdados individuais de vacinação via OpenDataSUS CSV</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> (2020+)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Variáveis-chave (DPNI)</span> ──</span>
@@ -119,8 +119,8 @@ and usage guidance.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> data_vacina Data da vacinação</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> 1994-2019: Dados agregados (contagens por município/vacina/faixa).</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> 2020+: Microdados individuais (1 linha por dose aplicada) via API.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `month` em `sipni_data()` para filtrar meses (API 2020+).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> 2020+: Microdados individuais (1 linha por dose aplicada) via CSV.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `month` em `sipni_data()` para filtrar meses (CSV 2020+).</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
