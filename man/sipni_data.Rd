@@ -26,8 +26,8 @@ If NULL (default), downloads all 27 states.
 Example: \code{"SP"}, \code{c("SP", "RJ")}.}
 
 \item{month}{Integer. Month(s) to download (1--12). For years >= 2020
-(API), filters by vaccination date month. For years <= 2019 (FTP),
-this parameter is ignored (FTP files are annual).
+(CSV), selects which monthly CSV files to download. For years <= 2019
+(FTP), this parameter is ignored (FTP files are annual).
 If NULL (default), downloads all 12 months.}
 
 \item{vars}{Character vector. Variables to keep. If NULL (default),
@@ -49,7 +49,7 @@ when multiple years/states are combined.
 \itemize{
 \item \strong{1994--2019 (FTP)}: Aggregated data with DPNI (12 vars) or
 CPNI (7 vars) columns, all character.
-\item \strong{2020+ (API)}: Individual-level microdata with ~47 columns
+\item \strong{2020+ (CSV)}: Individual-level microdata with ~47 columns
 (snake_case Portuguese), all character. Use
 \code{sipni_variables(type = "API")} to see the full list.
 }
@@ -57,8 +57,8 @@ CPNI (7 vars) columns, all character.
 \description{
 Downloads and returns vaccination data from SI-PNI. For years 1994--2019,
 data is downloaded from DATASUS FTP (aggregated doses/coverage). For years
-2020+, data is fetched from the OpenDataSUS REST API (individual-level
-microdata with one row per vaccination dose).
+2020+, data is downloaded from OpenDataSUS as monthly CSV bulk files
+(individual-level microdata with one row per vaccination dose).
 }
 \details{
 \strong{FTP data (1994--2019):}
@@ -66,12 +66,13 @@ Downloaded as plain .DBF files. SI-PNI FTP data is \strong{aggregated} (dose
 counts and coverage rates per municipality, vaccine, and age group).
 Two file types: DPNI (doses) and CPNI (coverage).
 
-\strong{API data (2020+):}
-Fetched from the OpenDataSUS REST API with automatic pagination.
+\strong{CSV data (2020+):}
+Downloaded from OpenDataSUS as monthly CSV bulk files (national,
+semicolon-delimited, latin1 encoding). Each monthly ZIP is ~1.4 GB.
 This is \strong{individual-level microdata} (one row per vaccination dose,
-~47 fields per record). The \code{type} parameter is ignored for API
-years. Data is filtered server-side by UF and client-side by month
-(using the \code{data_vacina} field).
+~47 fields per record). The \code{type} parameter is ignored for CSV
+years. Data is filtered by UF during chunked reading to avoid loading
+the full national file into memory.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

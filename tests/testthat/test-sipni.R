@@ -41,9 +41,9 @@ test_that("sipni_info returns expected structure", {
 test_that("sipni_info mentions both data sources", {
   info <- sipni_info()
   expect_true(grepl("FTP", info$source))
-  expect_true(grepl("API", info$source))
+  expect_true(grepl("CSV", info$source))
   expect_true("url_ftp" %in% names(info))
-  expect_true("url_api" %in% names(info))
+  expect_true("url_csv" %in% names(info))
 })
 
 # ============================================================================
@@ -193,21 +193,30 @@ test_that(".sipni_build_ftp_url errors on pre-1994", {
 })
 
 # ============================================================================
-# .sipni_api_build_url
+# .sipni_csv_build_url
 # ============================================================================
 
-test_that(".sipni_api_build_url constructs correct URL", {
-  url <- .sipni_api_build_url(2024)
+test_that(".sipni_csv_build_url constructs correct URL", {
+  url <- .sipni_csv_build_url(2024, 1)
   expect_equal(url,
-    "https://apidadosabertos.saude.gov.br/vacinacao/doses-aplicadas-pni-2024")
+    "https://arquivosdadosabertos.saude.gov.br/dados/dbbni/vacinacao_jan_2024_csv.zip")
 })
 
-test_that(".sipni_api_build_url works for different years", {
-  url_2020 <- .sipni_api_build_url(2020)
-  expect_match(url_2020, "pni-2020$")
+test_that(".sipni_csv_build_url works for different months", {
+  url_jun <- .sipni_csv_build_url(2024, 6)
+  expect_match(url_jun, "vacinacao_jun_2024_csv\\.zip$")
 
-  url_2025 <- .sipni_api_build_url(2025)
-  expect_match(url_2025, "pni-2025$")
+  url_dez <- .sipni_csv_build_url(2025, 12)
+  expect_match(url_dez, "vacinacao_dez_2025_csv\\.zip$")
+})
+
+test_that(".sipni_csv_build_url uses correct Portuguese month names", {
+  months <- c("jan", "fev", "mar", "abr", "mai", "jun",
+              "jul", "ago", "set", "out", "nov", "dez")
+  for (i in seq_along(months)) {
+    url <- .sipni_csv_build_url(2024, i)
+    expect_match(url, months[i], info = paste("Month", i))
+  }
 })
 
 # ============================================================================
@@ -447,12 +456,19 @@ test_that("API cache naming follows expected pattern", {
 })
 
 # ============================================================================
-# API base URL
+# CSV base URL and month names
 # ============================================================================
 
-test_that("sipni_api_base_url is correct", {
-  expect_equal(sipni_api_base_url,
-               "https://apidadosabertos.saude.gov.br")
+test_that("sipni_csv_base_url is correct", {
+  expect_equal(sipni_csv_base_url,
+               "https://arquivosdadosabertos.saude.gov.br/dados/dbbni")
+})
+
+test_that("sipni_month_names has 12 Portuguese month abbreviations", {
+  expect_equal(length(sipni_month_names), 12)
+  expect_equal(sipni_month_names[1], "jan")
+  expect_equal(sipni_month_names[6], "jun")
+  expect_equal(sipni_month_names[12], "dez")
 })
 
 # ============================================================================

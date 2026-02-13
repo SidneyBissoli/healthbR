@@ -5,7 +5,7 @@
 # available years
 # ============================================================================
 
-#' SI-PNI available years (FTP 1994-2019 + API 2020-2025)
+#' SI-PNI available years (FTP 1994-2019 + OpenDataSUS CSV 2020-2025)
 #' @noRd
 sipni_available_years <- 1994L:2025L
 
@@ -16,9 +16,16 @@ sipni_ftp_years <- 1994L:2019L
 #' @noRd
 sipni_api_years <- 2020L:2025L
 
-#' SI-PNI OpenDataSUS API base URL
+#' SI-PNI OpenDataSUS CSV base URL
 #' @noRd
-sipni_api_base_url <- "https://apidadosabertos.saude.gov.br"
+sipni_csv_base_url <- "https://arquivosdadosabertos.saude.gov.br/dados/dbbni"
+
+#' SI-PNI month names in Portuguese (for CSV ZIP filenames)
+#' @noRd
+sipni_month_names <- c(
+  "jan", "fev", "mar", "abr", "mai", "jun",
+  "jul", "ago", "set", "out", "nov", "dez"
+)
 
 # ============================================================================
 # UF codes
@@ -40,11 +47,11 @@ sipni_uf_list <- c(
 #' @noRd
 sipni_valid_types <- tibble::tibble(
   code = c("DPNI", "CPNI", "API"),
-  name = c("Doses Aplicadas", "Cobertura Vacinal", "Microdados API"),
+  name = c("Doses Aplicadas", "Cobertura Vacinal", "Microdados CSV"),
   description = c(
     "Doses de vacinas aplicadas por munic\u00edpio, faixa et\u00e1ria, imuno e dose (FTP, 1994-2019)",
     "Cobertura vacinal por munic\u00edpio e imunobiol\u00f3gico (FTP, 1994-2019)",
-    "Microdados individuais de vacina\u00e7\u00e3o via OpenDataSUS API (2020+)"
+    "Microdados individuais de vacina\u00e7\u00e3o via OpenDataSUS CSV (2020+)"
   )
 )
 
