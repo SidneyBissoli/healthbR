@@ -62,7 +62,7 @@
       <h1>Introduction to healthbR</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/vignettes/healthbR.Rmd" class="external-link"><code>vignettes/healthbR.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/HEAD/vignettes/healthbR.Rmd" class="external-link"><code>vignettes/healthbR.Rmd</code></a></small>
       <div class="d-none name"><code>healthbR.Rmd</code></div>
     </div>
 
@@ -71,19 +71,10 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>healthbR provides easy access to Brazilian public health data
-directly from R. The package downloads, caches, and processes data from
-official sources (Ministry of Health, IBGE, DATASUS), returning clean,
-analysis-ready tibbles following tidyverse conventions.</p>
-<p>The package currently supports <strong>13 data sources</strong>
-organized in two groups:</p>
+<p>healthbR provides easy access to Brazilian public health data directly from R. The package downloads, caches, and processes data from official sources (Ministry of Health, IBGE, DATASUS), returning clean, analysis-ready tibbles following tidyverse conventions.</p>
+<p>The package currently supports <strong>13 data sources</strong> organized in two groups:</p>
 <p><strong>Surveys (IBGE / Ministry of Health)</strong></p>
 <table class="table">
-<colgroup>
-<col width="34%">
-<col width="34%">
-<col width="30%">
-</colgroup>
 <thead><tr class="header">
 <th>Module</th>
 <th>Source</th>
@@ -119,12 +110,6 @@ organized in two groups:</p>
 </table>
 <p><strong>DATASUS (Ministry of Health FTP)</strong></p>
 <table class="table">
-<colgroup>
-<col width="22%">
-<col width="22%">
-<col width="36%">
-<col width="19%">
-</colgroup>
 <thead><tr class="header">
 <th>Module</th>
 <th>Source</th>
@@ -201,24 +186,19 @@ organized in two groups:</p>
 <p>All modules follow a consistent API pattern:</p>
 <ul>
 <li>
-<code>*_years()</code> / <code>*_info()</code> – metadata and
-available years</li>
+<code>*_years()</code> / <code>*_info()</code> – metadata and available years</li>
 <li>
-<code>*_variables()</code> / <code>*_dictionary()</code> – variable
-names and category labels</li>
+<code>*_variables()</code> / <code>*_dictionary()</code> – variable names and category labels</li>
 <li>
 <code>*_data()</code> – download and load data</li>
 <li>
-<code>*_cache_status()</code> / <code>*_clear_cache()</code> – cache
-management</li>
+<code>*_cache_status()</code> / <code>*_clear_cache()</code> – cache management</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="vigitel-chronic-disease-risk-factors">VIGITEL – Chronic disease risk factors<a class="anchor" aria-label="anchor" href="#vigitel-chronic-disease-risk-factors"></a>
 </h2>
-<p>VIGITEL is a telephone survey conducted annually in all 27 state
-capitals, monitoring risk and protective factors for chronic
-non-communicable diseases.</p>
+<p>VIGITEL is a telephone survey conducted annually in all 27 state capitals, monitoring risk and protective factors for chronic non-communicable diseases.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check available years</span></span>
 <span><span class="fu"><a href="../reference/vigitel_years.html">vigitel_years</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -231,9 +211,7 @@ non-communicable diseases.</p>
 <span></span>
 <span><span class="co"># list variables</span></span>
 <span><span class="fu"><a href="../reference/vigitel_variables.html">vigitel_variables</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Key variables include <code>pesorake</code> (survey weight),
-<code>diab</code> (diabetes), <code>hart</code> (hypertension),
-<code>fumante</code> (smoker), and <code>imc</code> (BMI).</p>
+<p>Key variables include <code>pesorake</code> (survey weight), <code>diab</code> (diabetes), <code>hart</code> (hypertension), <code>fumante</code> (smoker), and <code>imc</code> (BMI).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># weighted prevalence of diabetes by city using srvyr</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://gdfe.co/srvyr/" class="external-link">srvyr</a></span><span class="op">)</span></span>
@@ -249,8 +227,7 @@ non-communicable diseases.</p>
 <div class="section level2">
 <h2 id="pns-national-health-survey">PNS – National Health Survey<a class="anchor" aria-label="anchor" href="#pns-national-health-survey"></a>
 </h2>
-<p>The PNS provides comprehensive data on health conditions, lifestyle,
-and healthcare access from ~100,000 households.</p>
+<p>The PNS provides comprehensive data on health conditions, lifestyle, and healthcare access from ~100,000 households.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># microdata</span></span>
 <span><span class="va">pns</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pns_data.html">pns_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span><span class="op">)</span></span>
@@ -266,9 +243,7 @@ and healthcare access from ~100,000 households.</p>
 <div class="section level2">
 <h2 id="pnad-continua-household-survey-supplements">PNAD Continua – Household survey supplements<a class="anchor" aria-label="anchor" href="#pnad-continua-household-survey-supplements"></a>
 </h2>
-<p>PNAD Continua includes health-related supplementary modules on
-disability, housing conditions, primary health care (APS), and household
-characteristics.</p>
+<p>PNAD Continua includes health-related supplementary modules on disability, housing conditions, primary health care (APS), and household characteristics.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># list available modules</span></span>
 <span><span class="fu"><a href="../reference/pnadc_modules.html">pnadc_modules</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -282,9 +257,7 @@ characteristics.</p>
 <div class="section level2">
 <h2 id="pof-food-security-and-nutrition">POF – Food security and nutrition<a class="anchor" aria-label="anchor" href="#pof-food-security-and-nutrition"></a>
 </h2>
-<p>The POF (Household Budget Survey) contains data on food insecurity
-(EBIA), individual food consumption, anthropometry, and health
-expenses.</p>
+<p>The POF (Household Budget Survey) contains data on food insecurity (EBIA), individual food consumption, anthropometry, and health expenses.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># list available registers</span></span>
 <span><span class="fu"><a href="../reference/pof_registers.html">pof_registers</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2018</span><span class="op">)</span></span>
@@ -297,15 +270,12 @@ expenses.</p>
 <span></span>
 <span><span class="co"># variable dictionary for a specific register</span></span>
 <span><span class="fu"><a href="../reference/pof_dictionary.html">pof_dictionary</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2018</span>, register <span class="op">=</span> <span class="st">"morador"</span><span class="op">)</span></span></code></pre></div>
-<p>See <code><a href="../articles/pof-health-data.html">vignette("pof-health-data")</a></code> for a detailed
-walkthrough.</p>
+<p>See <code><a href="../articles/pof-health-data.html">vignette("pof-health-data")</a></code> for a detailed walkthrough.</p>
 </div>
 <div class="section level2">
 <h2 id="censo-population-denominators">Censo – Population denominators<a class="anchor" aria-label="anchor" href="#censo-population-denominators"></a>
 </h2>
-<p>The Census module queries the IBGE SIDRA API for population
-denominators, essential for calculating mortality rates, incidence, and
-other epidemiological indicators.</p>
+<p>The Census module queries the IBGE SIDRA API for population denominators, essential for calculating mortality rates, incidence, and other epidemiological indicators.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># population by state, sex, and age group (2022 Census)</span></span>
 <span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/censo_populacao.html">censo_populacao</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, territorial_level <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span>
@@ -316,14 +286,12 @@ other epidemiological indicators.</p>
 <span><span class="co"># query any Census SIDRA table directly</span></span>
 <span><span class="fu"><a href="../reference/censo_sidra_search.html">censo_sidra_search</a></span><span class="op">(</span><span class="st">"populacao"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/censo_sidra_data.html">censo_sidra_data</a></span><span class="op">(</span>table <span class="op">=</span> <span class="fl">9514</span>, territorial_level <span class="op">=</span> <span class="st">"brazil"</span>, year <span class="op">=</span> <span class="fl">2022</span><span class="op">)</span></span></code></pre></div>
-<p>See <code><a href="../articles/censo-denominadores.html">vignette("censo-denominadores")</a></code> for epidemiological
-examples.</p>
+<p>See <code><a href="../articles/censo-denominadores.html">vignette("censo-denominadores")</a></code> for epidemiological examples.</p>
 </div>
 <div class="section level2">
 <h2 id="sim-mortality-data">SIM – Mortality data<a class="anchor" aria-label="anchor" href="#sim-mortality-data"></a>
 </h2>
-<p>SIM contains individual death records from death certificates
-(CID-10, 1996+).</p>
+<p>SIM contains individual death records from death certificates (CID-10, 1996+).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># deaths in Acre, 2022</span></span>
 <span><span class="va">obitos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
@@ -338,8 +306,7 @@ examples.</p>
 <div class="section level2">
 <h2 id="sinasc-live-births">SINASC – Live births<a class="anchor" aria-label="anchor" href="#sinasc-live-births"></a>
 </h2>
-<p>SINASC contains individual birth records including birth weight,
-gestational age, prenatal care, and congenital anomalies.</p>
+<p>SINASC contains individual birth records including birth weight, gestational age, prenatal care, and congenital anomalies.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># births in Acre, 2022</span></span>
 <span><span class="va">nascimentos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinasc_data.html">sinasc_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
@@ -353,8 +320,7 @@ gestational age, prenatal care, and congenital anomalies.</p>
 <div class="section level2">
 <h2 id="sih-hospital-admissions">SIH – Hospital admissions<a class="anchor" aria-label="anchor" href="#sih-hospital-admissions"></a>
 </h2>
-<p>SIH contains hospital admission records (AIH) with diagnosis,
-procedures, length of stay, and costs. Data is organized monthly.</p>
+<p>SIH contains hospital admission records (AIH) with diagnosis, procedures, length of stay, and costs. Data is organized monthly.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># admissions in Acre, January 2022</span></span>
 <span><span class="va">internacoes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
@@ -368,8 +334,7 @@ procedures, length of stay, and costs. Data is organized monthly.</p>
 <div class="section level2">
 <h2 id="sia-outpatient-procedures">SIA – Outpatient procedures<a class="anchor" aria-label="anchor" href="#sia-outpatient-procedures"></a>
 </h2>
-<p>SIA covers outpatient production data with 13 file types (BPA, APAC,
-RAAS).</p>
+<p>SIA covers outpatient production data with 13 file types (BPA, APAC, RAAS).</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># outpatient production in Acre, January 2022 (default type: PA)</span></span>
 <span><span class="va">ambulatorial</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
@@ -384,11 +349,7 @@ RAAS).</p>
 <div class="section level2">
 <h2 id="sinan-notifiable-diseases">SINAN – Notifiable diseases<a class="anchor" aria-label="anchor" href="#sinan-notifiable-diseases"></a>
 </h2>
-<p>SINAN contains individual notification records for 31 notifiable
-diseases including dengue, tuberculosis, chikungunya, zika, hepatitis,
-syphilis, and others. Files are <strong>national</strong> (not
-per-state), so each download covers all of Brazil for a given disease
-and year.</p>
+<p>SINAN contains individual notification records for 31 notifiable diseases including dengue, tuberculosis, chikungunya, zika, hepatitis, syphilis, and others. Files are <strong>national</strong> (not per-state), so each download covers all of Brazil for a given disease and year.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># list available diseases</span></span>
 <span><span class="fu"><a href="../reference/sinan_diseases.html">sinan_diseases</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -405,9 +366,7 @@ and year.</p>
 <span><span class="co"># explore variables and categories</span></span>
 <span><span class="fu"><a href="../reference/sinan_variables.html">sinan_variables</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/sinan_dictionary.html">sinan_dictionary</a></span><span class="op">(</span><span class="st">"EVOLUCAO"</span><span class="op">)</span></span></code></pre></div>
-<p>Since SINAN files are national, filter by state after download using
-<code>SG_UF_NOT</code> (UF of notification) or <code>ID_MUNICIP</code>
-(municipality code):</p>
+<p>Since SINAN files are national, filter by state after download using <code>SG_UF_NOT</code> (UF of notification) or <code>ID_MUNICIP</code> (municipality code):</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dengue</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">SG_UF_NOT</span> <span class="op">==</span> <span class="st">"35"</span><span class="op">)</span>  <span class="co"># Sao Paulo</span></span></code></pre></div>
@@ -415,9 +374,7 @@ and year.</p>
 <div class="section level2">
 <h2 id="cnes-health-facility-registry">CNES – Health facility registry<a class="anchor" aria-label="anchor" href="#cnes-health-facility-registry"></a>
 </h2>
-<p>CNES is the national registry of health facilities, covering
-hospitals, clinics, primary care units, and all other health
-establishments. Data is organized monthly with 13 file types.</p>
+<p>CNES is the national registry of health facilities, covering hospitals, clinics, primary care units, and all other health establishments. Data is organized monthly with 13 file types.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># see all file types</span></span>
 <span><span class="fu"><a href="../reference/cnes_info.html">cnes_info</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -434,16 +391,12 @@ establishments. Data is organized monthly with 13 file types.</p>
 <span><span class="co"># explore variables and categories</span></span>
 <span><span class="fu"><a href="../reference/cnes_variables.html">cnes_variables</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/cnes_dictionary.html">cnes_dictionary</a></span><span class="op">(</span><span class="st">"TP_UNID"</span><span class="op">)</span></span></code></pre></div>
-<p>See <code><a href="../articles/datasus-modules.html">vignette("datasus-modules")</a></code> for cross-module
-analysis examples.</p>
+<p>See <code><a href="../articles/datasus-modules.html">vignette("datasus-modules")</a></code> for cross-module analysis examples.</p>
 </div>
 <div class="section level2">
 <h2 id="si-pni-vaccination-data">SI-PNI – Vaccination data<a class="anchor" aria-label="anchor" href="#si-pni-vaccination-data"></a>
 </h2>
-<p>The SI-PNI contains aggregated vaccination data: dose counts (DPNI)
-and coverage rates (CPNI) per municipality, vaccine, and age group.
-Unlike other DATASUS modules, data is in plain .DBF format and covers
-1994–2019.</p>
+<p>The SI-PNI contains aggregated vaccination data: dose counts (DPNI) and coverage rates (CPNI) per municipality, vaccine, and age group. Unlike other DATASUS modules, data is in plain .DBF format and covers 1994–2019.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># module overview</span></span>
 <span><span class="fu"><a href="../reference/sipni_info.html">sipni_info</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -461,9 +414,7 @@ Unlike other DATASUS modules, data is in plain .DBF format and covers
 <div class="section level2">
 <h2 id="sisab-primary-care-coverage">SISAB – Primary care coverage<a class="anchor" aria-label="anchor" href="#sisab-primary-care-coverage"></a>
 </h2>
-<p>SISAB provides aggregated coverage indicators for primary care
-(Atencao Primaria) via a public REST API. Unlike other DATASUS modules,
-no FTP download or .dbc decompression is needed.</p>
+<p>SISAB provides aggregated coverage indicators for primary care (Atencao Primaria) via a public REST API. Unlike other DATASUS modules, no FTP download or .dbc decompression is needed.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># module overview</span></span>
 <span><span class="fu"><a href="../reference/sisab_info.html">sisab_info</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -487,9 +438,7 @@ no FTP download or .dbc decompression is needed.</p>
 <div class="section level2">
 <h2 id="caching">Caching<a class="anchor" aria-label="anchor" href="#caching"></a>
 </h2>
-<p>All modules cache downloaded data automatically to avoid repeated
-downloads. Install <code>arrow</code> for optimized Parquet caching
-(recommended):</p>
+<p>All modules cache downloaded data automatically to avoid repeated downloads. Install <code>arrow</code> for optimized Parquet caching (recommended):</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
 <p>Cache management works the same across all modules:</p>
@@ -507,9 +456,7 @@ downloads. Install <code>arrow</code> for optimized Parquet caching
 <div class="section level2">
 <h2 id="combining-modules">Combining modules<a class="anchor" aria-label="anchor" href="#combining-modules"></a>
 </h2>
-<p>healthbR’s real power comes from combining data across modules. For
-example, calculating mortality rates requires deaths (SIM) and
-population (Censo):</p>
+<p>healthbR’s real power comes from combining data across modules. For example, calculating mortality rates requires deaths (SIM) and population (Censo):</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
@@ -529,18 +476,13 @@ population (Censo):</p>
 </h2>
 <ul>
 <li>
-<code><a href="../articles/pof-health-data.html">vignette("pof-health-data")</a></code> – Analyzing food security
-and nutrition from POF</li>
+<code><a href="../articles/pof-health-data.html">vignette("pof-health-data")</a></code> – Analyzing food security and nutrition from POF</li>
 <li>
-<code><a href="../articles/censo-denominadores.html">vignette("censo-denominadores")</a></code> – Population
-denominators for epidemiology</li>
+<code><a href="../articles/censo-denominadores.html">vignette("censo-denominadores")</a></code> – Population denominators for epidemiology</li>
 <li>
-<code><a href="../articles/datasus-modules.html">vignette("datasus-modules")</a></code> – SIM, SINASC, SIH, SIA,
-SINAN, and CNES in depth</li>
-<li><a href="https://sidneybissoli.github.io/healthbR/">Package
-website</a></li>
-<li><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">GitHub
-repository</a></li>
+<code><a href="../articles/datasus-modules.html">vignette("datasus-modules")</a></code> – SIM, SINASC, SIH, SIA, SINAN, and CNES in depth</li>
+<li><a href="https://sidneybissoli.github.io/healthbR/">Package website</a></li>
+<li><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">GitHub repository</a></li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -554,7 +496,7 @@ repository</a></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

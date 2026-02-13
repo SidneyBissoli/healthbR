@@ -62,7 +62,7 @@
       <h1>DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/vignettes/datasus-modules.Rmd" class="external-link"><code>vignettes/datasus-modules.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/HEAD/vignettes/datasus-modules.Rmd" class="external-link"><code>vignettes/datasus-modules.Rmd</code></a></small>
       <div class="d-none name"><code>datasus-modules.Rmd</code></div>
     </div>
 
@@ -71,10 +71,7 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The <code>healthbR</code> package provides access to eight DATASUS
-information systems, covering mortality, live births, hospital
-admissions, outpatient production, notifiable diseases, the health
-facility registry, vaccination data, and primary care coverage:</p>
+<p>The <code>healthbR</code> package provides access to eight DATASUS information systems, covering mortality, live births, hospital admissions, outpatient production, notifiable diseases, the health facility registry, vaccination data, and primary care coverage:</p>
 <table class="table">
 <colgroup>
 <col width="14%">
@@ -152,22 +149,13 @@ facility registry, vaccination data, and primary care coverage:</p>
 <p>All seven modules share the same infrastructure:</p>
 <ul>
 <li>
-<strong>DBC decompression</strong>: .dbc files (compressed DBF) are
-decompressed internally using vendored C code – no external dependencies
-required.</li>
+<strong>DBC decompression</strong>: .dbc files (compressed DBF) are decompressed internally using vendored C code – no external dependencies required.</li>
 <li>
-<strong>FTP download</strong>: files are fetched from
-<code>ftp.datasus.gov.br</code> with automatic retry and exponential
-backoff.</li>
+<strong>FTP download</strong>: files are fetched from <code>ftp.datasus.gov.br</code> with automatic retry and exponential backoff.</li>
 <li>
-<strong>Cache</strong>: downloaded data is cached locally in Parquet
-(if <code>arrow</code> is installed) or .rds format.</li>
+<strong>Cache</strong>: downloaded data is cached locally in Parquet (if <code>arrow</code> is installed) or .rds format.</li>
 <li>
-<strong>Consistent API</strong>: every module exposes
-<code>*_years()</code>, <code>*_info()</code>,
-<code>*_variables()</code>, <code>*_dictionary()</code>,
-<code>*_data()</code>, <code>*_cache_status()</code>, and
-<code>*_clear_cache()</code>.</li>
+<strong>Consistent API</strong>: every module exposes <code>*_years()</code>, <code>*_info()</code>, <code>*_variables()</code>, <code>*_dictionary()</code>, <code>*_data()</code>, <code>*_cache_status()</code>, and <code>*_clear_cache()</code>.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -179,8 +167,7 @@ backoff.</li>
 <div class="section level3">
 <h3 id="common-helper-functions">Common helper functions<a class="anchor" aria-label="anchor" href="#common-helper-functions"></a>
 </h3>
-<p>Each module provides the same set of helper functions. Here is a
-quick tour using SIM as an example:</p>
+<p>Each module provides the same set of helper functions. Here is a quick tour using SIM as an example:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># available years</span></span>
 <span><span class="fu"><a href="../reference/sim_years.html">sim_years</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -197,16 +184,13 @@ quick tour using SIM as an example:</p>
 <span></span>
 <span><span class="co"># data dictionary with category labels</span></span>
 <span><span class="fu"><a href="../reference/sim_dictionary.html">sim_dictionary</a></span><span class="op">(</span><span class="st">"SEXO"</span><span class="op">)</span></span></code></pre></div>
-<p>The same pattern works for <code>sinasc_*()</code>,
-<code>sih_*()</code>, <code>sia_*()</code>, <code>sinan_*()</code>,
-<code>cnes_*()</code>, and <code>sipni_*()</code>.</p>
+<p>The same pattern works for <code>sinasc_*()</code>, <code>sih_*()</code>, <code>sia_*()</code>, <code>sinan_*()</code>, <code>cnes_*()</code>, and <code>sipni_*()</code>.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="sim-mortality">SIM – Mortality<a class="anchor" aria-label="anchor" href="#sim-mortality"></a>
 </h2>
-<p>The SIM (Sistema de Informacoes sobre Mortalidade) contains
-individual death records based on the Declaracao de Obito (DO).</p>
+<p>The SIM (Sistema de Informacoes sobre Mortalidade) contains individual death records based on the Declaracao de Obito (DO).</p>
 <div class="section level3">
 <h3 id="basic-download">Basic download<a class="anchor" aria-label="anchor" href="#basic-download"></a>
 </h3>
@@ -218,8 +202,7 @@ individual death records based on the Declaracao de Obito (DO).</p>
 <div class="section level3">
 <h3 id="filter-by-cause-of-death">Filter by cause of death<a class="anchor" aria-label="anchor" href="#filter-by-cause-of-death"></a>
 </h3>
-<p>The <code>cause</code> parameter filters by underlying cause of death
-(CAUSABAS) using CID-10 prefix matching:</p>
+<p>The <code>cause</code> parameter filters by underlying cause of death (CAUSABAS) using CID-10 prefix matching:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># deaths from acute myocardial infarction (I21)</span></span>
 <span><span class="va">obitos_iam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, cause <span class="op">=</span> <span class="st">"I21"</span><span class="op">)</span></span>
@@ -273,9 +256,7 @@ individual death records based on the Declaracao de Obito (DO).</p>
 <div class="section level2">
 <h2 id="sinasc-live-births">SINASC – Live births<a class="anchor" aria-label="anchor" href="#sinasc-live-births"></a>
 </h2>
-<p>The SINASC (Sistema de Informacoes sobre Nascidos Vivos) contains
-individual live birth records from the Declaracao de Nascido Vivo
-(DN).</p>
+<p>The SINASC (Sistema de Informacoes sobre Nascidos Vivos) contains individual live birth records from the Declaracao de Nascido Vivo (DN).</p>
 <div class="section level3">
 <h3 id="basic-download-1">Basic download<a class="anchor" aria-label="anchor" href="#basic-download-1"></a>
 </h3>
@@ -286,8 +267,7 @@ individual live birth records from the Declaracao de Nascido Vivo
 <div class="section level3">
 <h3 id="filter-by-congenital-anomaly">Filter by congenital anomaly<a class="anchor" aria-label="anchor" href="#filter-by-congenital-anomaly"></a>
 </h3>
-<p>The <code>anomaly</code> parameter filters by the CODANOMAL variable
-using CID-10 prefix matching:</p>
+<p>The <code>anomaly</code> parameter filters by the CODANOMAL variable using CID-10 prefix matching:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># births with any congenital anomaly (chapter Q)</span></span>
 <span><span class="va">anomalias</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinasc_data.html">sinasc_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, anomaly <span class="op">=</span> <span class="st">"Q"</span><span class="op">)</span></span></code></pre></div>
@@ -337,7 +317,7 @@ using CID-10 prefix matching:</p>
 <span><span class="va">nasc_ac</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>peso_num <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">peso_num</span><span class="op">)</span>, <span class="va">peso_num</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>weight_group <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>weight_group <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
 <span>    <span class="va">peso_num</span> <span class="op">&lt;</span> <span class="fl">1500</span> <span class="op">~</span> <span class="st">"Very low (&lt;1500g)"</span>,</span>
 <span>    <span class="va">peso_num</span> <span class="op">&lt;</span> <span class="fl">2500</span> <span class="op">~</span> <span class="st">"Low (1500-2499g)"</span>,</span>
 <span>    <span class="va">peso_num</span> <span class="op">&lt;</span> <span class="fl">4000</span> <span class="op">~</span> <span class="st">"Normal (2500-3999g)"</span>,</span>
@@ -349,10 +329,7 @@ using CID-10 prefix matching:</p>
 <div class="section level2">
 <h2 id="sih-hospital-admissions">SIH – Hospital admissions<a class="anchor" aria-label="anchor" href="#sih-hospital-admissions"></a>
 </h2>
-<p>The SIH (Sistema de Informacoes Hospitalares) contains individual
-hospital admission records from the AIH (Autorizacao de Internacao
-Hospitalar). Unlike SIM and SINASC, data is organized
-<strong>monthly</strong>.</p>
+<p>The SIH (Sistema de Informacoes Hospitalares) contains individual hospital admission records from the AIH (Autorizacao de Internacao Hospitalar). Unlike SIM and SINASC, data is organized <strong>monthly</strong>.</p>
 <div class="section level3">
 <h3 id="basic-download-2">Basic download<a class="anchor" aria-label="anchor" href="#basic-download-2"></a>
 </h3>
@@ -364,8 +341,7 @@ Hospitalar). Unlike SIM and SINASC, data is organized
 <div class="section level3">
 <h3 id="the-month-parameter">The <code>month</code> parameter<a class="anchor" aria-label="anchor" href="#the-month-parameter"></a>
 </h3>
-<p>SIH data is monthly – one file per UF per month. Use
-<code>month</code> to control which months to download:</p>
+<p>SIH data is monthly – one file per UF per month. Use <code>month</code> to control which months to download:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># single month</span></span>
 <span><span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">6</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
@@ -379,8 +355,7 @@ Hospitalar). Unlike SIM and SINASC, data is organized
 <div class="section level3">
 <h3 id="filter-by-diagnosis">Filter by diagnosis<a class="anchor" aria-label="anchor" href="#filter-by-diagnosis"></a>
 </h3>
-<p>The <code>diagnosis</code> parameter filters by the principal
-diagnosis (DIAG_PRINC) using CID-10 prefix matching:</p>
+<p>The <code>diagnosis</code> parameter filters by the principal diagnosis (DIAG_PRINC) using CID-10 prefix matching:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># respiratory admissions (chapter J)</span></span>
 <span><span class="va">resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, diagnosis <span class="op">=</span> <span class="st">"J"</span><span class="op">)</span></span>
@@ -439,19 +414,11 @@ diagnosis (DIAG_PRINC) using CID-10 prefix matching:</p>
 <div class="section level2">
 <h2 id="sia-outpatient-production">SIA – Outpatient production<a class="anchor" aria-label="anchor" href="#sia-outpatient-production"></a>
 </h2>
-<p>The SIA (Sistema de Informacoes Ambulatoriais) contains outpatient
-production records. Like SIH, data is monthly, but SIA also has
-<strong>13 file types</strong> covering different categories of
-outpatient care.</p>
+<p>The SIA (Sistema de Informacoes Ambulatoriais) contains outpatient production records. Like SIH, data is monthly, but SIA also has <strong>13 file types</strong> covering different categories of outpatient care.</p>
 <div class="section level3">
 <h3 id="file-types">File types<a class="anchor" aria-label="anchor" href="#file-types"></a>
 </h3>
 <table class="table">
-<colgroup>
-<col width="24%">
-<col width="24%">
-<col width="52%">
-</colgroup>
 <thead><tr class="header">
 <th>Code</th>
 <th>Name</th>
@@ -597,15 +564,11 @@ outpatient care.</p>
 <div class="section level2">
 <h2 id="sinan-notifiable-diseases">SINAN – Notifiable diseases<a class="anchor" aria-label="anchor" href="#sinan-notifiable-diseases"></a>
 </h2>
-<p>The SINAN (Sistema de Informacao de Agravos de Notificacao) contains
-individual notification records for 31 compulsorily notifiable diseases.
-Unlike other DATASUS modules, SINAN files are <strong>national</strong>
-(one file per disease per year, covering all of Brazil).</p>
+<p>The SINAN (Sistema de Informacao de Agravos de Notificacao) contains individual notification records for 31 compulsorily notifiable diseases. Unlike other DATASUS modules, SINAN files are <strong>national</strong> (one file per disease per year, covering all of Brazil).</p>
 <div class="section level3">
 <h3 id="available-diseases">Available diseases<a class="anchor" aria-label="anchor" href="#available-diseases"></a>
 </h3>
-<p>SINAN covers 31 diseases. Use <code><a href="../reference/sinan_diseases.html">sinan_diseases()</a></code> to see
-all available codes:</p>
+<p>SINAN covers 31 diseases. Use <code><a href="../reference/sinan_diseases.html">sinan_diseases()</a></code> to see all available codes:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/sinan_diseases.html">sinan_diseases</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 31 x 3</span></span>
@@ -705,11 +668,7 @@ all available codes:</p>
 <div class="section level2">
 <h2 id="cnes-health-facility-registry">CNES – Health facility registry<a class="anchor" aria-label="anchor" href="#cnes-health-facility-registry"></a>
 </h2>
-<p>The CNES (Cadastro Nacional de Estabelecimentos de Saude) is the
-national registry of all health facilities in Brazil. Like SIH and SIA,
-data is organized <strong>monthly</strong> (one file per type/UF/month),
-and there are <strong>13 file types</strong> covering different aspects
-of the registry.</p>
+<p>The CNES (Cadastro Nacional de Estabelecimentos de Saude) is the national registry of all health facilities in Brazil. Like SIH and SIA, data is organized <strong>monthly</strong> (one file per type/UF/month), and there are <strong>13 file types</strong> covering different aspects of the registry.</p>
 <div class="section level3">
 <h3 id="file-types-1">File types<a class="anchor" aria-label="anchor" href="#file-types-1"></a>
 </h3>
@@ -854,11 +813,7 @@ of the registry.</p>
 <div class="section level2">
 <h2 id="si-pni-vaccination-data">SI-PNI – Vaccination data<a class="anchor" aria-label="anchor" href="#si-pni-vaccination-data"></a>
 </h2>
-<p>The SI-PNI (Sistema de Informacao do Programa Nacional de
-Imunizacoes) contains <strong>aggregated</strong> vaccination data from
-the National Immunization Program. Unlike other DATASUS modules, SI-PNI
-files are plain .DBF (not DBC-compressed) and contain dose counts and
-coverage rates rather than individual-level microdata.</p>
+<p>The SI-PNI (Sistema de Informacao do Programa Nacional de Imunizacoes) contains <strong>aggregated</strong> vaccination data from the National Immunization Program. Unlike other DATASUS modules, SI-PNI files are plain .DBF (not DBC-compressed) and contain dose counts and coverage rates rather than individual-level microdata.</p>
 <div class="section level3">
 <h3 id="file-types-2">File types<a class="anchor" aria-label="anchor" href="#file-types-2"></a>
 </h3>
@@ -877,8 +832,7 @@ coverage rates rather than individual-level microdata.</p>
 <tr class="odd">
 <td>DPNI</td>
 <td>Doses Aplicadas</td>
-<td>Doses applied per municipality, age group, vaccine, and dose type
-(default)</td>
+<td>Doses applied per municipality, age group, vaccine, and dose type (default)</td>
 </tr>
 <tr class="even">
 <td>CPNI</td>
@@ -986,14 +940,11 @@ coverage rates rather than individual-level microdata.</p>
 <div class="section level2">
 <h2 id="cross-module-analyses">Cross-module analyses<a class="anchor" aria-label="anchor" href="#cross-module-analyses"></a>
 </h2>
-<p>A key strength of <code>healthbR</code> is the ability to combine
-data from different DATASUS modules and Census denominators in a single
-workflow. Below are three practical examples.</p>
+<p>A key strength of <code>healthbR</code> is the ability to combine data from different DATASUS modules and Census denominators in a single workflow. Below are three practical examples.</p>
 <div class="section level3">
 <h3 id="mortality-rate-sim-census">Mortality rate (SIM + Census)<a class="anchor" aria-label="anchor" href="#mortality-rate-sim-census"></a>
 </h3>
-<p>Calculate the crude cardiovascular mortality rate per 100,000
-population:</p>
+<p>Calculate the crude cardiovascular mortality rate per 100,000 population:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># step 1: count cardiovascular deaths in Sao Paulo, 2022</span></span>
 <span><span class="va">obitos_cardio</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"SP"</span>, cause <span class="op">=</span> <span class="st">"I"</span><span class="op">)</span></span>
@@ -1023,8 +974,7 @@ population:</p>
 <div class="section level3">
 <h3 id="hospital-vs--outpatient-care-sih-sia">Hospital vs. outpatient care (SIH + SIA)<a class="anchor" aria-label="anchor" href="#hospital-vs--outpatient-care-sih-sia"></a>
 </h3>
-<p>Compare volumes and costs of respiratory care (CID-10 chapter J)
-between hospital and outpatient settings:</p>
+<p>Compare volumes and costs of respiratory care (CID-10 chapter J) between hospital and outpatient settings:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># hospital admissions for respiratory diseases, January 2022</span></span>
 <span><span class="va">intern_resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, diagnosis <span class="op">=</span> <span class="st">"J"</span><span class="op">)</span></span>
@@ -1053,9 +1003,7 @@ between hospital and outpatient settings:</p>
 <div class="section level3">
 <h3 id="automatic-caching">Automatic caching<a class="anchor" aria-label="anchor" href="#automatic-caching"></a>
 </h3>
-<p>All DATASUS modules cache downloaded data automatically. When the
-<code>arrow</code> package is installed, data is saved in Parquet format
-(fast and compact); otherwise, .rds is used as fallback.</p>
+<p>All DATASUS modules cache downloaded data automatically. When the <code>arrow</code> package is installed, data is saved in Parquet format (fast and compact); otherwise, .rds is used as fallback.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install arrow for optimized caching (recommended)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
@@ -1063,8 +1011,7 @@ between hospital and outpatient settings:</p>
 <div class="section level3">
 <h3 id="cache-management">Cache management<a class="anchor" aria-label="anchor" href="#cache-management"></a>
 </h3>
-<p>Each module provides <code>*_cache_status()</code> and
-<code>*_clear_cache()</code>:</p>
+<p>Each module provides <code>*_cache_status()</code> and <code>*_clear_cache()</code>:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check what is cached</span></span>
 <span><span class="fu"><a href="../reference/sim_cache_status.html">sim_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -1079,24 +1026,15 @@ between hospital and outpatient settings:</p>
 </h3>
 <ul>
 <li>
-<strong>Use <code>uf</code></strong> to download only the states you
-need instead of all 27 (SIM, SINASC, SIH, SIA, CNES).</li>
+<strong>Use <code>uf</code></strong> to download only the states you need instead of all 27 (SIM, SINASC, SIH, SIA, CNES).</li>
 <li>
-<strong>Use <code>month</code></strong> (SIH, SIA, CNES) to limit
-monthly downloads. Downloading a full year for all states requires 324
-files per module (27 UFs x 12 months).</li>
+<strong>Use <code>month</code></strong> (SIH, SIA, CNES) to limit monthly downloads. Downloading a full year for all states requires 324 files per module (27 UFs x 12 months).</li>
 <li>
-<strong>Use <code>vars</code></strong> to keep only the variables
-you need, reducing memory usage.</li>
-<li>SIM and SINASC are annual (one file per UF per year), so a full-year
-download is 27 files.</li>
-<li>SINAN files are national (one file per disease per year), so
-downloads are fast but files can be large.</li>
-<li>SIH, SIA, and CNES are monthly, so a full-year download is 324 files
-per type. SIA and CNES each have 13 file types – always filter by
-<code>type</code>, <code>uf</code>, and <code>month</code>.</li>
-<li>SI-PNI is annual with plain .DBF files (one per type/UF/year). Data
-available 1994–2019 only.</li>
+<strong>Use <code>vars</code></strong> to keep only the variables you need, reducing memory usage.</li>
+<li>SIM and SINASC are annual (one file per UF per year), so a full-year download is 27 files.</li>
+<li>SINAN files are national (one file per disease per year), so downloads are fast but files can be large.</li>
+<li>SIH, SIA, and CNES are monthly, so a full-year download is 324 files per type. SIA and CNES each have 13 file types – always filter by <code>type</code>, <code>uf</code>, and <code>month</code>.</li>
+<li>SI-PNI is annual with plain .DBF files (one per type/UF/year). Data available 1994–2019 only.</li>
 </ul>
 </div>
 </div>
@@ -1105,18 +1043,13 @@ available 1994–2019 only.</li>
 </h2>
 <ul>
 <li>
-<a href="https://datasus.saude.gov.br/informacoes-de-saude-tabnet/" class="external-link">DATASUS
-TabNet</a> – online tabulation tool for DATASUS data</li>
+<a href="https://datasus.saude.gov.br/informacoes-de-saude-tabnet/" class="external-link">DATASUS TabNet</a> – online tabulation tool for DATASUS data</li>
 <li>
-<a href="ftp://ftp.datasus.gov.br/dissemin/publicos/">DATASUS
-FTP</a> – public FTP server with raw data files</li>
+<a href="ftp://ftp.datasus.gov.br/dissemin/publicos/">DATASUS FTP</a> – public FTP server with raw data files</li>
 <li>
-<a href="https://icd.who.int/browse10/2019/en" class="external-link">CID-10 (WHO
-ICD-10)</a> – International Classification of Diseases, 10th
-revision</li>
+<a href="https://icd.who.int/browse10/2019/en" class="external-link">CID-10 (WHO ICD-10)</a> – International Classification of Diseases, 10th revision</li>
 <li>
-<a href="http://sigtap.datasus.gov.br/" class="external-link">SIGTAP</a> – procedure code
-table for SUS (SIA/SIH)</li>
+<a href="http://sigtap.datasus.gov.br/" class="external-link">SIGTAP</a> – procedure code table for SUS (SIA/SIH)</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -1130,7 +1063,7 @@ table for SUS (SIA/SIH)</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

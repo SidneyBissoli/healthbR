@@ -36,7 +36,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
@@ -44,8 +44,7 @@
 <div class="section level3">
 <h3 id="new-modules-0-10-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-10-0"></a></h3>
 <ul><li>
-<strong>SISAB (Sistema de Informacao em Saude para a Atencao Basica)</strong>: Added module for accessing primary care coverage indicators from the relatorioaps REST API.
-<ul><li>
+<strong>SISAB (Sistema de Informacao em Saude para a Atencao Basica)</strong>: Added module for accessing primary care coverage indicators from the relatorioaps REST API.<ul><li>
 <code><a href="../reference/sisab_years.html">sisab_years()</a></code>, <code><a href="../reference/sisab_info.html">sisab_info()</a></code> for module metadata</li>
 <li>
 <code><a href="../reference/sisab_variables.html">sisab_variables()</a></code> for variable exploration</li>
@@ -63,16 +62,14 @@
 <strong>Aggregated data</strong>: Coverage indicators per geographic unit and period (competencia CNES), not individual-level microdata.</li>
 <li>Output includes <code>year</code> and <code>type</code> columns to identify the source</li>
 <li>Column names preserved from API (camelCase)</li>
-</ul></li>
-</ul></div>
+</ul></li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.9.0" id="healthbr-090">healthbR 0.9.0<a class="anchor" aria-label="anchor" href="#healthbr-090"></a></h2>
 <div class="section level3">
 <h3 id="new-modules-0-9-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-9-0"></a></h3>
 <ul><li>
-<strong>SI-PNI (Sistema de Informacao do Programa Nacional de Imunizacoes)</strong>: Added module for accessing aggregated vaccination data from DATASUS FTP as plain .DBF files (1994-2019).
-<ul><li>
+<strong>SI-PNI (Sistema de Informacao do Programa Nacional de Imunizacoes)</strong>: Added module for accessing aggregated vaccination data from DATASUS FTP as plain .DBF files (1994-2019).<ul><li>
 <code><a href="../reference/sipni_years.html">sipni_years()</a></code>, <code><a href="../reference/sipni_info.html">sipni_info()</a></code> for module metadata</li>
 <li>
 <code><a href="../reference/sipni_variables.html">sipni_variables()</a></code>, <code><a href="../reference/sipni_dictionary.html">sipni_dictionary()</a></code> for variable exploration</li>
@@ -89,16 +86,14 @@
 <li>Output includes <code>year</code> and <code>uf_source</code> columns</li>
 <li>CPNI coverage field (<code>COBERT</code>) decimal separator automatically converted from comma to dot</li>
 <li>Data on DATASUS FTP frozen at 2019; post-2019 requires SI-PNI web API (future work)</li>
-</ul></li>
-</ul></div>
+</ul></li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.8.0" id="healthbr-080">healthbR 0.8.0<a class="anchor" aria-label="anchor" href="#healthbr-080"></a></h2>
 <div class="section level3">
 <h3 id="new-modules-0-8-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-8-0"></a></h3>
 <ul><li>
-<strong>SINAN (Sistema de Informacao de Agravos de Notificacao)</strong>: Added module for accessing notifiable diseases surveillance microdata from DATASUS FTP as .dbc files (2007-2024).
-<ul><li>
+<strong>SINAN (Sistema de Informacao de Agravos de Notificacao)</strong>: Added module for accessing notifiable diseases surveillance microdata from DATASUS FTP as .dbc files (2007-2024).<ul><li>
 <code><a href="../reference/sinan_years.html">sinan_years()</a></code>, <code><a href="../reference/sinan_info.html">sinan_info()</a></code> for module metadata</li>
 <li>
 <code><a href="../reference/sinan_diseases.html">sinan_diseases()</a></code> for listing available diseases (agravos)</li>
@@ -114,16 +109,14 @@
 <strong>National files</strong>: SINAN files are national (not per-state). Filter by UF using <code>SG_UF_NOT</code> or <code>ID_MUNICIP</code> columns after download.</li>
 <li>Output includes <code>year</code> and <code>disease</code> columns</li>
 <li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
+</ul></li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.0" id="healthbr-070">healthbR 0.7.0<a class="anchor" aria-label="anchor" href="#healthbr-070"></a></h2>
 <div class="section level3">
 <h3 id="new-modules-0-7-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-7-0"></a></h3>
 <ul><li>
-<strong>CNES (Cadastro Nacional de Estabelecimentos de Saude)</strong>: Added module for accessing the national health facility registry from DATASUS FTP as .dbc files (2005-2024).
-<ul><li>
+<strong>CNES (Cadastro Nacional de Estabelecimentos de Saude)</strong>: Added module for accessing the national health facility registry from DATASUS FTP as .dbc files (2005-2024).<ul><li>
 <code><a href="../reference/cnes_years.html">cnes_years()</a></code>, <code><a href="../reference/cnes_info.html">cnes_info()</a></code> for module metadata</li>
 <li>
 <code><a href="../reference/cnes_variables.html">cnes_variables()</a></code>, <code><a href="../reference/cnes_dictionary.html">cnes_dictionary()</a></code> for variable exploration</li>
@@ -137,8 +130,7 @@
 <strong>Monthly data</strong>: CNES data is organized per month (one .dbc file per type/UF/month). Use <code>month</code> parameter to select specific months.</li>
 <li>Output includes <code>year</code>, <code>month</code>, and <code>uf_source</code> columns</li>
 <li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
+</ul></li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.1" id="healthbr-061">healthbR 0.6.1<a class="anchor" aria-label="anchor" href="#healthbr-061"></a></h2>
@@ -158,8 +150,7 @@
 <div class="section level3">
 <h3 id="new-modules-0-6-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-6-0"></a></h3>
 <ul><li>
-<strong>SIA (Sistema de Informacoes Ambulatoriais)</strong>: Added module for accessing outpatient production microdata from DATASUS FTP as .dbc files (2008-2024).
-<ul><li>
+<strong>SIA (Sistema de Informacoes Ambulatoriais)</strong>: Added module for accessing outpatient production microdata from DATASUS FTP as .dbc files (2008-2024).<ul><li>
 <code><a href="../reference/sia_years.html">sia_years()</a></code>, <code><a href="../reference/sia_info.html">sia_info()</a></code> for module metadata</li>
 <li>
 <code><a href="../reference/sia_variables.html">sia_variables()</a></code>, <code><a href="../reference/sia_dictionary.html">sia_dictionary()</a></code> for variable exploration</li>
@@ -175,16 +166,14 @@
 <li>Diagnosis filtering by CID-10 code (<code>diagnosis</code> parameter)</li>
 <li>Output includes <code>year</code>, <code>month</code>, and <code>uf_source</code> columns</li>
 <li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
+</ul></li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.5.0" id="healthbr-050">healthbR 0.5.0<a class="anchor" aria-label="anchor" href="#healthbr-050"></a></h2>
 <div class="section level3">
 <h3 id="new-modules-0-5-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-5-0"></a></h3>
 <ul><li>
-<strong>SIH (Sistema de Informacoes Hospitalares)</strong>: Added module for accessing hospital admission microdata from DATASUS FTP as .dbc files (2008-2024).
-<ul><li>
+<strong>SIH (Sistema de Informacoes Hospitalares)</strong>: Added module for accessing hospital admission microdata from DATASUS FTP as .dbc files (2008-2024).<ul><li>
 <code><a href="../reference/sih_years.html">sih_years()</a></code>, <code><a href="../reference/sih_info.html">sih_info()</a></code> for module metadata</li>
 <li>
 <code><a href="../reference/sih_variables.html">sih_variables()</a></code>, <code><a href="../reference/sih_dictionary.html">sih_dictionary()</a></code> for variable exploration</li>
@@ -197,16 +186,14 @@
 <li>Principal diagnosis filtering by CID-10 code (<code>diagnosis</code> parameter)</li>
 <li>Output includes <code>year</code>, <code>month</code>, and <code>uf_source</code> columns</li>
 <li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
+</ul></li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="healthbr-040">healthbR 0.4.0<a class="anchor" aria-label="anchor" href="#healthbr-040"></a></h2>
 <div class="section level3">
 <h3 id="new-modules-0-4-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-4-0"></a></h3>
 <ul><li>
-<strong>SINASC (Sistema de Informacoes sobre Nascidos Vivos)</strong>: Added module for accessing live birth microdata from DATASUS FTP as .dbc files (1996-2024).
-<ul><li>
+<strong>SINASC (Sistema de Informacoes sobre Nascidos Vivos)</strong>: Added module for accessing live birth microdata from DATASUS FTP as .dbc files (1996-2024).<ul><li>
 <code><a href="../reference/sinasc_years.html">sinasc_years()</a></code>, <code><a href="../reference/sinasc_info.html">sinasc_info()</a></code> for module metadata</li>
 <li>
 <code><a href="../reference/sinasc_variables.html">sinasc_variables()</a></code>, <code><a href="../reference/sinasc_dictionary.html">sinasc_dictionary()</a></code> for variable exploration</li>
@@ -216,16 +203,14 @@
 <code><a href="../reference/sinasc_cache_status.html">sinasc_cache_status()</a></code>, <code><a href="../reference/sinasc_clear_cache.html">sinasc_clear_cache()</a></code> for cache management</li>
 <li>Congenital anomaly filtering by CID-10 code (<code>anomaly</code> parameter)</li>
 <li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
+</ul></li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="healthbr-030">healthbR 0.3.0<a class="anchor" aria-label="anchor" href="#healthbr-030"></a></h2>
 <div class="section level3">
 <h3 id="new-modules-0-3-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-3-0"></a></h3>
 <ul><li>
-<strong>SIM (Sistema de Informacoes sobre Mortalidade)</strong>: Added module for accessing mortality microdata from DATASUS FTP as .dbc files (CID-10, 1996-2024).
-<ul><li>
+<strong>SIM (Sistema de Informacoes sobre Mortalidade)</strong>: Added module for accessing mortality microdata from DATASUS FTP as .dbc files (CID-10, 1996-2024).<ul><li>
 <code><a href="../reference/sim_years.html">sim_years()</a></code>, <code><a href="../reference/sim_info.html">sim_info()</a></code> for module metadata</li>
 <li>
 <code><a href="../reference/sim_variables.html">sim_variables()</a></code>, <code><a href="../reference/sim_dictionary.html">sim_dictionary()</a></code> for variable exploration</li>
@@ -237,23 +222,19 @@
 <li>Cause-of-death filtering by CID-10 code (<code>cause</code> parameter)</li>
 <li>Efficient per-state downloads (e.g., ~1 MB for Acre vs ~150 MB for all)</li>
 <li>Parquet caching when <code>arrow</code> is installed, .rds fallback otherwise</li>
-</ul></li>
-</ul></div>
+</ul></li></ul></div>
 <div class="section level3">
 <h3 id="new-infrastructure-0-3-0">New infrastructure<a class="anchor" aria-label="anchor" href="#new-infrastructure-0-3-0"></a></h3>
 <ul><li>
-<strong>DBC decompression</strong>: Added shared C infrastructure for reading DATASUS .dbc files (PKWare DCL compressed DBF). This enables future modules for SIH, SINASC, CNES, SIA, and SINAN.
-<ul><li>Vendored <code>blast.c</code>/<code>blast.h</code> from Mark Adler (zlib license)</li>
+<strong>DBC decompression</strong>: Added shared C infrastructure for reading DATASUS .dbc files (PKWare DCL compressed DBF). This enables future modules for SIH, SINASC, CNES, SIA, and SINAN.<ul><li>Vendored <code>blast.c</code>/<code>blast.h</code> from Mark Adler (zlib license)</li>
 <li>
 <code>dbc2dbf.c</code> written from scratch (MIT license)</li>
 <li>Internal functions: <code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>
 </li>
-</ul></li>
-</ul></div>
+</ul></li></ul></div>
 <div class="section level3">
 <h3 id="dependencies-0-3-0">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies-0-3-0"></a></h3>
-<ul><li>Added <code>foreign</code> to Imports (for reading .dbf files after decompression).</li>
-</ul></div>
+<ul><li>Added <code>foreign</code> to Imports (for reading .dbf files after decompression).</li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="healthbr-020">healthbR 0.2.0<a class="anchor" aria-label="anchor" href="#healthbr-020"></a></h2>
@@ -317,8 +298,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-0-2-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
-<ul><li>Fixed CRAN check issues related to <code>arrow</code> dependency and cache files.</li>
-</ul></div>
+<ul><li>Fixed CRAN check issues related to <code>arrow</code> dependency and cache files.</li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.1" id="healthbr-011">healthbR 0.1.1<a class="anchor" aria-label="anchor" href="#healthbr-011"></a></h2><p class="text-muted">CRAN release: 2026-02-04</p>
@@ -342,8 +322,7 @@
 <li>
 <code><a href="../reference/vigitel_dictionary.html">vigitel_dictionary()</a></code> - get the data dictionary with variable descriptions</li>
 <li>
-<code><a href="../reference/vigitel_data.html">vigitel_data()</a></code> - download and load VIGITEL data with multiple options:
-<ul><li>Support for single or multiple years</li>
+<code><a href="../reference/vigitel_data.html">vigitel_data()</a></code> - download and load VIGITEL data with multiple options:<ul><li>Support for single or multiple years</li>
 <li>Automatic caching to avoid repeated downloads</li>
 <li>Parquet conversion for faster subsequent loads</li>
 <li>Parallel downloads with <code>furrr</code>
@@ -370,7 +349,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

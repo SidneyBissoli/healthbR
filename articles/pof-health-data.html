@@ -62,7 +62,7 @@
       <h1>Analyzing Health Data from POF with healthbR</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/vignettes/pof-health-data.Rmd" class="external-link"><code>vignettes/pof-health-data.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/HEAD/vignettes/pof-health-data.Rmd" class="external-link"><code>vignettes/pof-health-data.Rmd</code></a></small>
       <div class="d-none name"><code>pof-health-data.Rmd</code></div>
     </div>
 
@@ -71,19 +71,9 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The <strong>POF (Pesquisa de Orçamentos Familiares)</strong> is a
-household budget survey conducted by IBGE that investigates household
-expenditures, living conditions, and nutritional profiles of the
-Brazilian population. It is conducted in partnership with the Ministry
-of Health.</p>
-<p>The <code>healthbR</code> package provides access to POF microdata
-with a focus on <strong>health-related data</strong>:</p>
+<p>The <strong>POF (Pesquisa de Orçamentos Familiares)</strong> is a household budget survey conducted by IBGE that investigates household expenditures, living conditions, and nutritional profiles of the Brazilian population. It is conducted in partnership with the Ministry of Health.</p>
+<p>The <code>healthbR</code> package provides access to POF microdata with a focus on <strong>health-related data</strong>:</p>
 <table class="table">
-<colgroup>
-<col width="20%">
-<col width="32%">
-<col width="47%">
-</colgroup>
 <thead><tr class="header">
 <th>Module</th>
 <th>Description</th>
@@ -129,16 +119,14 @@ with a focus on <strong>health-related data</strong>:</p>
 <div class="section level3">
 <h3 id="survey-information">Survey information<a class="anchor" aria-label="anchor" href="#survey-information"></a>
 </h3>
-<p>Use <code><a href="../reference/pof_info.html">pof_info()</a></code> to see which health modules are available
-for each edition:</p>
+<p>Use <code><a href="../reference/pof_info.html">pof_info()</a></code> to see which health modules are available for each edition:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pof_info.html">pof_info</a></span><span class="op">(</span><span class="st">"2017-2018"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="list-available-registers">List available registers<a class="anchor" aria-label="anchor" href="#list-available-registers"></a>
 </h3>
-<p>Each POF edition contains multiple data registers. Use
-<code><a href="../reference/pof_registers.html">pof_registers()</a></code> to see them:</p>
+<p>Each POF edition contains multiple data registers. Use <code><a href="../reference/pof_registers.html">pof_registers()</a></code> to see them:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># all registers</span></span>
 <span><span class="fu"><a href="../reference/pof_registers.html">pof_registers</a></span><span class="op">(</span><span class="st">"2017-2018"</span><span class="op">)</span></span>
@@ -164,10 +152,7 @@ for each edition:</p>
 <div class="section level2">
 <h2 id="food-security-analysis-ebia">Food Security Analysis (EBIA)<a class="anchor" aria-label="anchor" href="#food-security-analysis-ebia"></a>
 </h2>
-<p>The <strong>EBIA (Escala Brasileira de Insegurança
-Alimentar)</strong> is available in the 2017-2018 edition through the
-<code>domicilio</code> register. The variable <code>V6199</code>
-contains the food security classification.</p>
+<p>The <strong>EBIA (Escala Brasileira de Insegurança Alimentar)</strong> is available in the 2017-2018 edition through the <code>domicilio</code> register. The variable <code>V6199</code> contains the food security classification.</p>
 <div class="section level3">
 <h3 id="download-domicilio-data">Download domicilio data<a class="anchor" aria-label="anchor" href="#download-domicilio-data"></a>
 </h3>
@@ -276,9 +261,7 @@ contains the food security classification.</p>
 <div class="section level2">
 <h2 id="food-consumption-analysis">Food Consumption Analysis<a class="anchor" aria-label="anchor" href="#food-consumption-analysis"></a>
 </h2>
-<p>The <code>consumo_alimentar</code> register contains detailed
-personal food intake data from a subsample. This data is available for
-the 2008-2009 and 2017-2018 editions.</p>
+<p>The <code>consumo_alimentar</code> register contains detailed personal food intake data from a subsample. This data is available for the 2008-2009 and 2017-2018 editions.</p>
 <div class="section level3">
 <h3 id="download-food-consumption-data">Download food consumption data<a class="anchor" aria-label="anchor" href="#download-food-consumption-data"></a>
 </h3>
@@ -350,9 +333,7 @@ the 2008-2009 and 2017-2018 editions.</p>
 <div class="section level2">
 <h2 id="health-expenses">Health Expenses<a class="anchor" aria-label="anchor" href="#health-expenses"></a>
 </h2>
-<p>The <code>despesa_individual</code> register contains individual
-expenses, including health-related spending such as medications, health
-insurance, and medical consultations.</p>
+<p>The <code>despesa_individual</code> register contains individual expenses, including health-related spending such as medications, health insurance, and medical consultations.</p>
 <div class="section level3">
 <h3 id="download-expense-data">Download expense data<a class="anchor" aria-label="anchor" href="#download-expense-data"></a>
 </h3>
@@ -373,9 +354,7 @@ insurance, and medical consultations.</p>
 <div class="section level2">
 <h2 id="combining-registers">Combining registers<a class="anchor" aria-label="anchor" href="#combining-registers"></a>
 </h2>
-<p>For many analyses you need to combine data from multiple registers.
-Use the household identifier variables (<code>COD_UPA</code>,
-<code>NUM_DOM</code>, <code>NUM_UC</code>) to merge:</p>
+<p>For many analyses you need to combine data from multiple registers. Use the household identifier variables (<code>COD_UPA</code>, <code>NUM_DOM</code>, <code>NUM_UC</code>) to merge:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># download morador (demographic data) and domicilio (household data)</span></span>
 <span><span class="va">morador</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pof_data.html">pof_data</a></span><span class="op">(</span><span class="st">"2017-2018"</span>, <span class="st">"morador"</span><span class="op">)</span></span>
@@ -410,9 +389,7 @@ Use the household identifier variables (<code>COD_UPA</code>,
 <div class="section level2">
 <h2 id="comparing-editions">Comparing editions<a class="anchor" aria-label="anchor" href="#comparing-editions"></a>
 </h2>
-<p>The POF has been conducted in different years, and data structure may
-vary. Use <code><a href="../reference/pof_info.html">pof_info()</a></code> to check what is available in each
-edition:</p>
+<p>The POF has been conducted in different years, and data structure may vary. Use <code><a href="../reference/pof_info.html">pof_info()</a></code> to check what is available in each edition:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check health modules by edition</span></span>
 <span><span class="fu"><a href="../reference/pof_info.html">pof_info</a></span><span class="op">(</span><span class="st">"2017-2018"</span><span class="op">)</span>  <span class="co"># EBIA + food consumption</span></span>
@@ -422,16 +399,14 @@ edition:</p>
 <div class="section level2">
 <h2 id="cache-management">Cache management<a class="anchor" aria-label="anchor" href="#cache-management"></a>
 </h2>
-<p>POF data files are large. healthbR caches downloaded files locally so
-you only download once:</p>
+<p>POF data files are large. healthbR caches downloaded files locally so you only download once:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check cached files</span></span>
 <span><span class="fu"><a href="../reference/pof_cache_status.html">pof_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># clear cache if needed</span></span>
 <span><span class="fu"><a href="../reference/pof_clear_cache.html">pof_clear_cache</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>If the <code>arrow</code> package is installed, data is cached in
-Parquet format for faster loading:</p>
+<p>If the <code>arrow</code> package is installed, data is cached in Parquet format for faster loading:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install arrow for optimized caching (recommended)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
@@ -440,14 +415,10 @@ Parquet format for faster loading:</p>
 <h2 id="additional-resources">Additional resources<a class="anchor" aria-label="anchor" href="#additional-resources"></a>
 </h2>
 <ul>
-<li><a href="https://www.ibge.gov.br/estatisticas/sociais/saude/24786-pesquisa-de-orcamentos-familiares-2.html" class="external-link">POF
-official page (IBGE)</a></li>
-<li><a href="https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&amp;id=2101749" class="external-link">POF
-2017-2018 Food Security publication</a></li>
-<li><a href="https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&amp;id=2101742" class="external-link">POF
-2017-2018 Food Consumption publication</a></li>
-<li><a href="https://cran.r-project.org/package=srvyr" class="external-link">srvyr package
-documentation</a></li>
+<li><a href="https://www.ibge.gov.br/estatisticas/sociais/saude/24786-pesquisa-de-orcamentos-familiares-2.html" class="external-link">POF official page (IBGE)</a></li>
+<li><a href="https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&amp;id=2101749" class="external-link">POF 2017-2018 Food Security publication</a></li>
+<li><a href="https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&amp;id=2101742" class="external-link">POF 2017-2018 Food Consumption publication</a></li>
+<li><a href="https://cran.r-project.org/package=srvyr" class="external-link">srvyr package documentation</a></li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -461,7 +432,7 @@ documentation</a></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

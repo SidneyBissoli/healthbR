@@ -62,7 +62,7 @@
       <h1>Population Denominators from the Census with healthbR</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/master/vignettes/censo-denominadores.Rmd" class="external-link"><code>vignettes/censo-denominadores.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/HEAD/vignettes/censo-denominadores.Rmd" class="external-link"><code>vignettes/censo-denominadores.Rmd</code></a></small>
       <div class="d-none name"><code>censo-denominadores.Rmd</code></div>
     </div>
 
@@ -71,18 +71,9 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The <strong>Censo Demografico</strong> (Demographic Census) is the
-main source of population denominators in Brazil, essential for
-calculating mortality rates, disease incidence, and other
-epidemiological indicators.</p>
-<p>The <code>healthbR</code> package provides direct access to Census
-population data via the IBGE SIDRA API, covering:</p>
+<p>The <strong>Censo Demografico</strong> (Demographic Census) is the main source of population denominators in Brazil, essential for calculating mortality rates, disease incidence, and other epidemiological indicators.</p>
+<p>The <code>healthbR</code> package provides direct access to Census population data via the IBGE SIDRA API, covering:</p>
 <table class="table">
-<colgroup>
-<col width="33%">
-<col width="43%">
-<col width="23%">
-</colgroup>
 <thead><tr class="header">
 <th>Function</th>
 <th>Description</th>
@@ -130,8 +121,7 @@ population data via the IBGE SIDRA API, covering:</p>
 <div class="section level2">
 <h2 id="population-by-state">Population by state<a class="anchor" aria-label="anchor" href="#population-by-state"></a>
 </h2>
-<p>The most common use case: getting population by state as a
-denominator for health indicators.</p>
+<p>The most common use case: getting population by state as a denominator for health indicators.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># total population by state, Census 2022</span></span>
 <span><span class="va">pop_state</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/censo_populacao.html">censo_populacao</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, territorial_level <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span>
@@ -176,8 +166,7 @@ denominator for health indicators.</p>
 <div class="section level2">
 <h2 id="intercensitary-estimates">Intercensitary estimates<a class="anchor" aria-label="anchor" href="#intercensitary-estimates"></a>
 </h2>
-<p>For years between censuses, IBGE publishes annual population
-estimates that serve as denominators:</p>
+<p>For years between censuses, IBGE publishes annual population estimates that serve as denominators:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># population estimates 2015-2021</span></span>
 <span><span class="va">estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/censo_estimativa.html">censo_estimativa</a></span><span class="op">(</span></span>
@@ -189,8 +178,7 @@ estimates that serve as denominators:</p>
 <div class="section level2">
 <h2 id="example-calculating-a-mortality-rate">Example: calculating a mortality rate<a class="anchor" aria-label="anchor" href="#example-calculating-a-mortality-rate"></a>
 </h2>
-<p>A typical epidemiological workflow combines mortality data (SIM) with
-Census denominators:</p>
+<p>A typical epidemiological workflow combines mortality data (SIM) with Census denominators:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># step 1: get population denominator</span></span>
 <span><span class="va">pop_2010</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/censo_populacao.html">censo_populacao</a></span><span class="op">(</span></span>
@@ -210,8 +198,7 @@ Census denominators:</p>
 <div class="section level2">
 <h2 id="exploring-census-tables">Exploring Census tables<a class="anchor" aria-label="anchor" href="#exploring-census-tables"></a>
 </h2>
-<p>The Census module includes a catalog of SIDRA tables organized by
-theme:</p>
+<p>The Census module includes a catalog of SIDRA tables organized by theme:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># list all available tables</span></span>
 <span><span class="fu"><a href="../reference/censo_sidra_tables.html">censo_sidra_tables</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -227,8 +214,7 @@ theme:</p>
 <div class="section level2">
 <h2 id="custom-sidra-queries">Custom SIDRA queries<a class="anchor" aria-label="anchor" href="#custom-sidra-queries"></a>
 </h2>
-<p>For full flexibility, use <code><a href="../reference/censo_sidra_data.html">censo_sidra_data()</a></code> to query
-any Census table:</p>
+<p>For full flexibility, use <code><a href="../reference/censo_sidra_data.html">censo_sidra_data()</a></code> to query any Census table:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># population by race from table 9605</span></span>
 <span><span class="va">pop_race_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/censo_sidra_data.html">censo_sidra_data</a></span><span class="op">(</span></span>
@@ -266,7 +252,7 @@ any Census table:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
