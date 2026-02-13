@@ -7,16 +7,20 @@
 sipni_years()
 }
 \value{
-An integer vector of available years (1994--2019).
+An integer vector of available years (1994--2025).
 }
 \description{
 Returns an integer vector with years for which vaccination data are
-available from DATASUS FTP.
+available.
 }
 \details{
-SI-PNI data on the DATASUS FTP is available from 1994 to 2019.
-All data is definitive (no preliminary/final distinction).
-Post-2019 data requires the SI-PNI web API (not yet supported).
+SI-PNI data is available from two sources:
+\itemize{
+\item \strong{FTP (1994--2019)}: Aggregated data (doses applied and coverage)
+from DATASUS FTP as plain .DBF files.
+\item \strong{API (2020--2025)}: Individual-level microdata from the
+OpenDataSUS REST API (one row per vaccination dose).
+}
 }
 \examples{
 sipni_years()

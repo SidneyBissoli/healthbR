@@ -44,7 +44,7 @@ The package currently supports **13 data sources** organized in two groups:
 | SIA | Outpatient procedures (13 file types) | Monthly/UF | 2008--2024 |
 | SINAN | Notifiable diseases (31 diseases) | Annual/National | 2007--2024 |
 | CNES | Health facility registry (13 file types) | Monthly/UF | 2005--2024 |
-| SI-PNI | Vaccination doses and coverage (aggregated) | Annual/UF | 1994--2019 |
+| SI-PNI | Vaccination (aggregated FTP + microdata API) | Annual/UF | 1994--2025 |
 | SISAB | Primary care coverage indicators (REST API) | Monthly | 2007--present |
 
 ## Getting started
@@ -308,23 +308,28 @@ See `vignette("datasus-modules")` for cross-module analysis examples.
 
 ## SI-PNI -- Vaccination data
 
-The SI-PNI contains aggregated vaccination data: dose counts (DPNI) and
-coverage rates (CPNI) per municipality, vaccine, and age group. Unlike other
-DATASUS modules, data is in plain .DBF format and covers 1994--2019.
+SI-PNI data comes from two sources: **FTP** (1994--2019) with aggregated dose
+counts and coverage rates, and the **OpenDataSUS API** (2020--2025) with
+individual-level microdata (one row per vaccination dose). `sipni_data()`
+routes transparently based on the requested year.
 
 ```{r}
 # module overview
 sipni_info()
 
-# doses applied in Acre, 2019
+# FTP: doses applied in Acre, 2019 (aggregated)
 doses <- sipni_data(year = 2019, uf = "AC")
 
-# vaccination coverage
+# FTP: vaccination coverage
 cobertura <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
 
-# explore vaccines and categories
-sipni_dictionary("IMUNO")
-sipni_variables()
+# API: microdata for Acre, January 2024
+micro <- sipni_data(year = 2024, uf = "AC", month = 1)
+
+# explore variables for each data source
+sipni_variables()                  # FTP DPNI variables
+sipni_variables(type = "API")      # API microdata variables
+sipni_dictionary("IMUNO")          # FTP dictionary
 ```
 
 ## SISAB -- Primary care coverage

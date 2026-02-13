@@ -1,6 +1,7 @@
 # sipni functions for healthbR package
 # functions to access vaccination data from the SI-PNI (Sistema de Informacao
-# do Programa Nacional de Imunizacoes) via DATASUS FTP
+# do Programa Nacional de Imunizacoes) via DATASUS FTP (1994-2019) and
+# OpenDataSUS API (2020+)
 
 # ============================================================================
 # internal validation functions
@@ -22,7 +23,7 @@
       "Year(s) {.val {invalid}} not available.",
       "i" = "Available years: {.val {range(available)[[1]]}}--{.val {range(available)[[2]]}}",
       "i" = "Use {.code sipni_years()} to see all options.",
-      "i" = "SI-PNI data on DATASUS FTP is available from 1994 to 2019."
+      "i" = "SI-PNI: FTP 1994-2019 (aggregated), API 2020-2025 (microdata)."
     ))
   }
 
@@ -40,11 +41,32 @@
     cli::cli_abort(c(
       "Invalid SI-PNI type: {.val {type}}.",
       "i" = "Valid types: {.val {valid_codes}}",
-      "i" = "DPNI = Doses aplicadas, CPNI = Cobertura vacinal."
+      "i" = "DPNI = Doses aplicadas, CPNI = Cobertura vacinal, API = Microdados 2020+."
     ))
   }
 
   type
+}
+
+
+#' Validate SI-PNI month parameter
+#' @noRd
+.sipni_validate_month <- function(month) {
+  if (is.null(month)) {
+    return(1L:12L)
+  }
+
+  month <- as.integer(month)
+  invalid <- month[month < 1L | month > 12L | is.na(month)]
+
+  if (length(invalid) > 0) {
+    cli::cli_abort(c(
+      "Invalid month(s): {.val {invalid}}.",
+      "i" = "Month must be between 1 and 12."
+    ))
+  }
+
+  month
 }
 
 
@@ -68,7 +90,11 @@
 #' Validate SI-PNI vars parameter (warning only)
 #' @noRd
 .sipni_validate_vars <- function(vars, type = "DPNI") {
-  meta <- if (type == "CPNI") sipni_variables_cpni else sipni_variables_dpni
+  meta <- switch(type,
+    "CPNI" = sipni_variables_cpni,
+    "API"  = sipni_variables_api,
+    sipni_variables_dpni
+  )
   known_vars <- meta$variable
   invalid <- vars[!vars %in% known_vars]
 
@@ -83,7 +109,7 @@
 
 
 # ============================================================================
-# internal helper functions
+# internal helper functions (FTP path, 1994-2019)
 # ============================================================================
 
 #' Build FTP URL for SI-PNI .DBF file
@@ -124,7 +150,7 @@
 }
 
 
-#' Download and read a SI-PNI .DBF file for one UF/year/type
+#' Download and read a SI-PNI .DBF file for one UF/year/type (FTP, 1994-2019)
 #' @noRd
 .sipni_download_and_read <- function(year, uf, type = "DPNI",
                                      cache = TRUE, cache_dir = NULL) {
@@ -205,20 +231,215 @@
 
 
 # ============================================================================
+# internal helper functions (API path, 2020+)
+# ============================================================================
+
+#' Build OpenDataSUS API URL for a given year
+#' @noRd
+.sipni_api_build_url <- function(year) {
+  stringr::str_c(sipni_api_base_url, "/vacinacao/doses-aplicadas-pni-", year)
+}
+
+
+#' Fetch a single page from the OpenDataSUS API
+#' @noRd
+.sipni_api_fetch_page <- function(url, uf = NULL, limit = 1000L,
+                                  offset = 0L) {
+  # build query string
+  params <- list(limit = limit, offset = offset)
+  if (!is.null(uf)) {
+    params[["sigla_uf_estabelecimento"]] <- uf
+  }
+
+  query <- paste(
+    vapply(names(params), function(k) {
+      paste0(k, "=", curl::curl_escape(as.character(params[[k]])))
+    }, character(1)),
+    collapse = "&"
+  )
+
+  full_url <- paste0(url, "?", query)
+
+  resp <- curl::curl_fetch_memory(full_url)
+
+  if (resp$status_code != 200L) {
+    cli::cli_abort(c(
+      "OpenDataSUS API returned status {resp$status_code}.",
+      "i" = "URL: {.url {full_url}}",
+      "i" = "Response: {rawToChar(resp$content)}"
+    ))
+  }
+
+  json <- jsonlite::fromJSON(rawToChar(resp$content), simplifyDataFrame = TRUE)
+
+  # response is {"doses_aplicadas_pni": [...]}
+  key <- names(json)[1]
+  result <- json[[key]]
+
+  if (is.null(result) || length(result) == 0) {
+    return(tibble::tibble())
+  }
+
+  tibble::as_tibble(result)
+}
+
+
+#' Paginate through all results from the OpenDataSUS API
+#' @noRd
+.sipni_api_paginate <- function(url, uf = NULL, limit = 1000L) {
+  offset <- 0L
+  all_results <- list()
+  page <- 1L
+
+  cli::cli_progress_bar(
+    "Fetching SI-PNI API data",
+    type = "iterator",
+    clear = FALSE
+  )
+
+  repeat {
+    cli::cli_progress_update()
+
+    page_data <- .sipni_api_fetch_page(url, uf = uf, limit = limit,
+                                       offset = offset)
+
+    if (nrow(page_data) == 0) break
+
+    all_results[[page]] <- page_data
+    page <- page + 1L
+
+    if (nrow(page_data) < limit) break
+
+    offset <- offset + limit
+  }
+
+  cli::cli_progress_done()
+
+  if (length(all_results) == 0) {
+    return(tibble::tibble())
+  }
+
+  dplyr::bind_rows(all_results)
+}
+
+
+#' Download and read SI-PNI data from OpenDataSUS API for one UF/year
+#' @noRd
+.sipni_api_download_and_read <- function(year, uf, month = 1L:12L,
+                                         cache = TRUE, cache_dir = NULL) {
+  cache_dir <- .sipni_cache_dir(cache_dir)
+
+  # check cache for each month; return cached data if all months are cached
+  cached_data <- list()
+  all_cached <- TRUE
+
+  for (m in month) {
+    mm <- sprintf("%02d", m)
+    cache_base <- stringr::str_c("sipni_API_", uf, "_", year, mm)
+    cache_parquet <- file.path(cache_dir,
+                               stringr::str_c(cache_base, ".parquet"))
+    cache_rds <- file.path(cache_dir, stringr::str_c(cache_base, ".rds"))
+
+    if (isTRUE(cache)) {
+      if (file.exists(cache_parquet) &&
+          requireNamespace("arrow", quietly = TRUE)) {
+        cached_data[[mm]] <- arrow::read_parquet(cache_parquet)
+        next
+      }
+      if (file.exists(cache_rds)) {
+        cached_data[[mm]] <- readRDS(cache_rds)
+        next
+      }
+    }
+    all_cached <- FALSE
+  }
+
+  if (all_cached && length(cached_data) > 0) {
+    return(dplyr::bind_rows(cached_data))
+  }
+
+  # not all cached, need to fetch from API (downloads full year, then splits)
+  cli::cli_inform(c(
+    "i" = "Downloading SI-PNI API data: {uf} {year}..."
+  ))
+
+  url <- .sipni_api_build_url(year)
+  data <- .sipni_api_paginate(url, uf = uf)
+
+  if (nrow(data) == 0) {
+    cli::cli_warn(c(
+      "!" = "No data returned from API for {uf} {year}.",
+      "i" = "The OpenDataSUS API may not have data for this combination."
+    ))
+    return(tibble::tibble())
+  }
+
+  # convert all columns to character for consistency
+  data <- tibble::as_tibble(lapply(data, as.character))
+
+  # extract month from data_vacina column (format: "2024-04-17")
+  if ("data_vacina" %in% names(data)) {
+    data_month <- as.integer(substr(data$data_vacina, 6, 7))
+  } else {
+    data_month <- rep(NA_integer_, nrow(data))
+  }
+
+  # cache each month separately
+  if (isTRUE(cache)) {
+    all_months <- sort(unique(data_month[!is.na(data_month)]))
+    for (m in all_months) {
+      mm <- sprintf("%02d", m)
+      cache_base <- stringr::str_c("sipni_API_", uf, "_", year, mm)
+      cache_parquet <- file.path(cache_dir,
+                                 stringr::str_c(cache_base, ".parquet"))
+      cache_rds <- file.path(cache_dir, stringr::str_c(cache_base, ".rds"))
+
+      # skip if already cached
+      if (file.exists(cache_parquet) || file.exists(cache_rds)) next
+
+      month_data <- data[data_month == m & !is.na(data_month), ]
+      if (nrow(month_data) == 0) next
+
+      if (requireNamespace("arrow", quietly = TRUE)) {
+        tryCatch(
+          arrow::write_parquet(month_data, cache_parquet),
+          error = function(e) {
+            cli::cli_warn("Failed to write parquet cache: {e$message}")
+            saveRDS(month_data, cache_rds)
+          }
+        )
+      } else {
+        saveRDS(month_data, cache_rds)
+      }
+    }
+  }
+
+  # filter to requested months
+  data <- data[data_month %in% month | is.na(data_month), ]
+
+  data
+}
+
+
+# ============================================================================
 # exported functions
 # ============================================================================
 
 #' List Available SI-PNI Years
 #'
 #' Returns an integer vector with years for which vaccination data are
-#' available from DATASUS FTP.
+#' available.
 #'
-#' @return An integer vector of available years (1994--2019).
+#' @return An integer vector of available years (1994--2025).
 #'
 #' @details
-#' SI-PNI data on the DATASUS FTP is available from 1994 to 2019.
-#' All data is definitive (no preliminary/final distinction).
-#' Post-2019 data requires the SI-PNI web API (not yet supported).
+#' SI-PNI data is available from two sources:
+#' \itemize{
+#'   \item **FTP (1994--2019)**: Aggregated data (doses applied and coverage)
+#'     from DATASUS FTP as plain .DBF files.
+#'   \item **API (2020--2025)**: Individual-level microdata from the
+#'     OpenDataSUS REST API (one row per vaccination dose).
+#' }
 #'
 #' @export
 #' @family sipni
@@ -252,18 +473,26 @@ sipni_info <- function() {
 
   cli::cli_text("")
   cli::cli_text("Fonte:          Minist\u00e9rio da Sa\u00fade / DATASUS")
-  cli::cli_text("Acesso:         FTP DATASUS")
   cli::cli_text(
-    "Dados:          Doses aplicadas e cobertura vacinal (dados agregados)"
+    "Acesso:         FTP DATASUS (1994-2019) + OpenDataSUS API (2020+)"
   )
-  cli::cli_text("Granularidade:  Anual (um arquivo por tipo/UF/ano)")
+  cli::cli_text(
+    "Dados:          Agregados (FTP) e microdados individuais (API)"
+  )
+  cli::cli_text("Granularidade:  Anual/UF (FTP), Mensal/UF (API)")
+
+  cli::cli_h2("Fontes de dados")
+  cli::cli_bullets(c(
+    "*" = "FTP DATASUS (1994\u20132019): Dados agregados (DPNI/CPNI) em .DBF",
+    "*" = "OpenDataSUS API (2020\u20132025): Microdados individuais (1 linha por dose)"
+  ))
 
   cli::cli_h2("Dados dispon\u00edveis")
   cli::cli_bullets(c(
-    "*" = "{.fun sipni_data}: Dados de vacina\u00e7\u00e3o (doses ou cobertura)",
+    "*" = "{.fun sipni_data}: Dados de vacina\u00e7\u00e3o (doses, cobertura ou microdados)",
     " " = "  Anos: {yr_range[1]}\u2013{yr_range[2]}",
     "*" = "{.fun sipni_variables}: Lista de vari\u00e1veis dispon\u00edveis",
-    "*" = "{.fun sipni_dictionary}: Dicion\u00e1rio com categorias"
+    "*" = "{.fun sipni_dictionary}: Dicion\u00e1rio com categorias (FTP)"
   ))
 
   cli::cli_h2("Tipos de arquivo")
@@ -280,25 +509,34 @@ sipni_info <- function() {
   cli::cli_text("  FX_ETARIA  Faixa et\u00e1ria")
   cli::cli_text("  MUNIC      Munic\u00edpio (IBGE 6 d\u00edgitos)")
 
+  cli::cli_h2("Vari\u00e1veis-chave (API 2020+)")
+  cli::cli_text("  descricao_vacina       Nome da vacina")
+  cli::cli_text("  descricao_dose_vacina  Descri\u00e7\u00e3o da dose")
+  cli::cli_text("  tipo_sexo_paciente     Sexo do paciente (M/F)")
+  cli::cli_text("  numero_idade_paciente  Idade do paciente")
+  cli::cli_text("  data_vacina            Data da vacina\u00e7\u00e3o")
+
   cli::cli_text("")
   cli::cli_alert_info(
-    "Dados agregados (contagens por munic\u00edpio/vacina/faixa), n\u00e3o microdados."
+    "1994-2019: Dados agregados (contagens por munic\u00edpio/vacina/faixa)."
   )
   cli::cli_alert_info(
-    "Use {.arg type} em {.fun sipni_data}: DPNI (doses) ou CPNI (cobertura)."
+    "2020+: Microdados individuais (1 linha por dose aplicada) via API."
   )
   cli::cli_alert_info(
-    "Dados no FTP dispon\u00edveis at\u00e9 2019. P\u00f3s-2019 requer API web (futuro)."
+    "Use {.arg month} em {.fun sipni_data} para filtrar meses (API 2020+)."
   )
 
   invisible(list(
     name = "SI-PNI - Sistema de Informa\u00e7\u00e3o do Programa Nacional de Imuniza\u00e7\u00f5es",
-    source = "DATASUS FTP",
+    source = "DATASUS FTP + OpenDataSUS API",
     years = sipni_available_years,
     n_types = nrow(sipni_valid_types),
     n_variables_dpni = nrow(sipni_variables_dpni),
     n_variables_cpni = nrow(sipni_variables_cpni),
-    url = "ftp://ftp.datasus.gov.br/dissemin/publicos/PNI/"
+    n_variables_api = nrow(sipni_variables_api),
+    url_ftp = "ftp://ftp.datasus.gov.br/dissemin/publicos/PNI/",
+    url_api = sipni_api_base_url
   ))
 }
 
@@ -309,7 +547,9 @@ sipni_info <- function() {
 #' including descriptions and value types.
 #'
 #' @param type Character. File type to show variables for.
-#'   \code{"DPNI"} (default) for doses applied, \code{"CPNI"} for coverage.
+#'   \code{"DPNI"} (default) for doses applied (FTP, 1994-2019),
+#'   \code{"CPNI"} for coverage (FTP, 1994-2019), or \code{"API"} for
+#'   individual-level microdata (OpenDataSUS, 2020+).
 #' @param search Character. Optional search term to filter variables by
 #'   name or description. Case-insensitive and accent-insensitive.
 #'
@@ -321,10 +561,15 @@ sipni_info <- function() {
 #' @examples
 #' sipni_variables()
 #' sipni_variables(type = "CPNI")
+#' sipni_variables(type = "API")
 #' sipni_variables(search = "dose")
 sipni_variables <- function(type = "DPNI", search = NULL) {
   type <- .sipni_validate_type(type)
-  result <- if (type == "CPNI") sipni_variables_cpni else sipni_variables_dpni
+  result <- switch(type,
+    "CPNI" = sipni_variables_cpni,
+    "API"  = sipni_variables_api,
+    sipni_variables_dpni
+  )
 
   if (!is.null(search)) {
     search_lower <- tolower(search)
@@ -350,13 +595,19 @@ sipni_variables <- function(type = "DPNI", search = NULL) {
 
 #' SI-PNI Data Dictionary
 #'
-#' Returns a tibble with the data dictionary for the SI-PNI,
-#' including variable descriptions and category labels.
+#' Returns a tibble with the data dictionary for the SI-PNI FTP data
+#' (1994--2019), including variable descriptions and category labels.
 #'
 #' @param variable Character. If provided, returns dictionary for a specific
 #'   variable only. Default: NULL (returns all variables).
 #'
 #' @return A tibble with columns: variable, description, code, label.
+#'
+#' @details
+#' The dictionary covers FTP data variables (DPNI/CPNI, 1994--2019).
+#' API microdata (2020+) has description fields embedded in the data
+#' itself (e.g., \code{descricao_vacina}, \code{nome_raca_cor_paciente}),
+#' so a separate dictionary is not needed.
 #'
 #' @export
 #' @family sipni
@@ -375,7 +626,8 @@ sipni_dictionary <- function(variable = NULL) {
     if (nrow(result) == 0) {
       cli::cli_warn(c(
         "Variable {.val {variable}} not found in SI-PNI dictionary.",
-        "i" = "Use {.code sipni_dictionary()} to see all available variables."
+        "i" = "Use {.code sipni_dictionary()} to see all available variables.",
+        "i" = "Note: API data (2020+) has descriptions embedded in the data."
       ))
     }
   }
@@ -386,17 +638,22 @@ sipni_dictionary <- function(variable = NULL) {
 
 #' Download SI-PNI Vaccination Data
 #'
-#' Downloads and returns vaccination data (doses applied or coverage) from
-#' DATASUS FTP. Data is aggregated (counts per municipality/vaccine/age group),
-#' not individual-level microdata.
+#' Downloads and returns vaccination data from SI-PNI. For years 1994--2019,
+#' data is downloaded from DATASUS FTP (aggregated doses/coverage). For years
+#' 2020+, data is fetched from the OpenDataSUS REST API (individual-level
+#' microdata with one row per vaccination dose).
 #'
 #' @param year Integer. Year(s) of the data. Required.
-#' @param type Character. File type to download. Default: \code{"DPNI"}
-#'   (doses applied). Use \code{"CPNI"} for vaccination coverage.
-#'   See \code{\link{sipni_info}()} for details.
+#' @param type Character. File type for FTP data (1994--2019). Default:
+#'   \code{"DPNI"} (doses applied). Use \code{"CPNI"} for vaccination coverage.
+#'   Ignored for years >= 2020 (API data is always microdata).
 #' @param uf Character. Two-letter state abbreviation(s) to download.
 #'   If NULL (default), downloads all 27 states.
 #'   Example: \code{"SP"}, \code{c("SP", "RJ")}.
+#' @param month Integer. Month(s) to download (1--12). For years >= 2020
+#'   (API), filters by vaccination date month. For years <= 2019 (FTP),
+#'   this parameter is ignored (FTP files are annual).
+#'   If NULL (default), downloads all 12 months.
 #' @param vars Character vector. Variables to keep. If NULL (default),
 #'   returns all available variables. Use \code{\link{sipni_variables}()} to see
 #'   available variables.
@@ -409,24 +666,27 @@ sipni_dictionary <- function(variable = NULL) {
 #'   \code{year} and \code{uf_source} to identify the source
 #'   when multiple years/states are combined.
 #'
+#'   **Output differs by year range:**
+#'   \itemize{
+#'     \item **1994--2019 (FTP)**: Aggregated data with DPNI (12 vars) or
+#'       CPNI (7 vars) columns, all character.
+#'     \item **2020+ (API)**: Individual-level microdata with ~47 columns
+#'       (snake_case Portuguese), all character. Use
+#'       \code{sipni_variables(type = "API")} to see the full list.
+#'   }
+#'
 #' @details
-#' Data is downloaded from DATASUS FTP as plain .DBF files (one per
-#' type/state/year). Unlike other DATASUS modules, SI-PNI files are not
-#' DBC-compressed.
+#' **FTP data (1994--2019):**
+#' Downloaded as plain .DBF files. SI-PNI FTP data is **aggregated** (dose
+#' counts and coverage rates per municipality, vaccine, and age group).
+#' Two file types: DPNI (doses) and CPNI (coverage).
 #'
-#' SI-PNI data is **aggregated** (dose counts and coverage rates per
-#' municipality, vaccine, and age group), not individual-level microdata.
-#'
-#' Two file types are available:
-#' \itemize{
-#'   \item \code{"DPNI"} (default): Doses applied -- monthly data within each
-#'     annual file, with age group and dose type breakdowns.
-#'   \item \code{"CPNI"}: Vaccination coverage -- annual rates including
-#'     target population and coverage percentage.
-#' }
-#'
-#' Data on DATASUS FTP is available from 1994 to 2019. Post-2019 data
-#' requires the SI-PNI web API (not yet supported).
+#' **API data (2020+):**
+#' Fetched from the OpenDataSUS REST API with automatic pagination.
+#' This is **individual-level microdata** (one row per vaccination dose,
+#' ~47 fields per record). The \code{type} parameter is ignored for API
+#' years. Data is filtered server-side by UF and client-side by month
+#' (using the \code{data_vacina} field).
 #'
 #' @export
 #' @family sipni
@@ -435,83 +695,186 @@ sipni_dictionary <- function(variable = NULL) {
 #'   \code{\link{censo_populacao}()} for population denominators.
 #'
 #' @examplesIf interactive()
-#' # doses applied in Acre, 2019
+#' # FTP: doses applied in Acre, 2019
 #' ac_doses <- sipni_data(year = 2019, uf = "AC")
 #'
-#' # vaccination coverage in Acre, 2019
+#' # FTP: vaccination coverage in Acre, 2019
 #' ac_cob <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
 #'
-#' # only key variables
-#' sipni_data(year = 2019, uf = "AC",
-#'            vars = c("IMUNO", "QT_DOSE", "DOSE", "FX_ETARIA"))
-sipni_data <- function(year, type = "DPNI", uf = NULL, vars = NULL,
-                       cache = TRUE, cache_dir = NULL) {
+#' # API: microdata for Acre, January 2024
+#' ac_api <- sipni_data(year = 2024, uf = "AC", month = 1)
+#'
+#' # API: select specific variables
+#' sipni_data(year = 2024, uf = "AC", month = 1,
+#'            vars = c("descricao_vacina", "tipo_sexo_paciente",
+#'                     "data_vacina"))
+sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
+                       vars = NULL, cache = TRUE, cache_dir = NULL) {
 
   # validate inputs
   year <- .sipni_validate_year(year)
-  type <- .sipni_validate_type(type)
   if (!is.null(uf)) uf <- .sipni_validate_uf(uf)
-  if (!is.null(vars)) .sipni_validate_vars(vars, type = type)
+
+  # split years into FTP and API groups
+  ftp_years <- year[year %in% sipni_ftp_years]
+  api_years <- year[year %in% sipni_api_years]
+
+  # validate type for FTP years
+  if (length(ftp_years) > 0) {
+    type <- .sipni_validate_type(type)
+  }
+
+  # warn if type specified for API years
+  if (length(api_years) > 0 && !missing(type) && toupper(type) %in%
+      c("DPNI", "CPNI")) {
+    cli::cli_warn(c(
+      "!" = "{.arg type} is ignored for years >= 2020 (API microdata).",
+      "i" = "API data is always individual-level microdata (no DPNI/CPNI)."
+    ))
+  }
+
+  # validate month (applies to API years; ignored for FTP)
+  month_vals <- .sipni_validate_month(month)
+
+  # validate vars
+  if (!is.null(vars)) {
+    effective_type <- if (length(api_years) > 0) "API" else type
+    .sipni_validate_vars(vars, type = effective_type)
+  }
 
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sipni_uf_list
 
-  # build all year x UF combinations
-  combinations <- expand.grid(
-    year = year, uf = target_ufs,
-    stringsAsFactors = FALSE
-  )
+  results <- list()
 
-  n_combos <- nrow(combinations)
-  if (n_combos > 1) {
-    cli::cli_inform(c(
-      "i" = "Downloading {n_combos} file(s) ({length(unique(combinations$uf))} UF(s) x {length(unique(combinations$year))} year(s))..."
-    ))
+  # --- FTP path (1994-2019) ---
+  if (length(ftp_years) > 0) {
+    ftp_combos <- expand.grid(
+      year = ftp_years, uf = target_ufs,
+      stringsAsFactors = FALSE
+    )
+
+    n_ftp <- nrow(ftp_combos)
+    if (n_ftp > 1) {
+      cli::cli_inform(c(
+        "i" = "Downloading {n_ftp} FTP file(s) ({length(unique(ftp_combos$uf))} UF(s) x {length(unique(ftp_combos$year))} year(s))..."
+      ))
+    }
+
+    ftp_results <- purrr::map(seq_len(n_ftp), function(i) {
+      yr <- ftp_combos$year[i]
+      st <- ftp_combos$uf[i]
+
+      tryCatch({
+        data <- .sipni_download_and_read(yr, st, type = type,
+                                         cache = cache, cache_dir = cache_dir)
+        data$year <- as.integer(yr)
+        data$uf_source <- st
+        cols <- names(data)
+        data <- data[, c("year", "uf_source",
+                          setdiff(cols, c("year", "uf_source")))]
+        data
+      }, error = function(e) {
+        cli::cli_warn(c(
+          "!" = "Failed to download/read SI-PNI data for {type} {st} {yr}.",
+          "x" = "{e$message}"
+        ))
+        NULL
+      })
+    })
+
+    results <- c(results, ftp_results[!vapply(ftp_results, is.null,
+                                              logical(1))])
   }
 
-  # download and read each combination
-  results <- purrr::map(seq_len(n_combos), function(i) {
-    yr <- combinations$year[i]
-    st <- combinations$uf[i]
+  # --- API path (2020+) ---
+  if (length(api_years) > 0) {
+    api_combos <- expand.grid(
+      year = api_years, uf = target_ufs,
+      stringsAsFactors = FALSE
+    )
 
-    tryCatch({
-      data <- .sipni_download_and_read(yr, st, type = type,
-                                       cache = cache, cache_dir = cache_dir)
-      data$year <- as.integer(yr)
-      data$uf_source <- st
-      # move year and uf_source to front
-      cols <- names(data)
-      data <- data[, c("year", "uf_source",
-                        setdiff(cols, c("year", "uf_source")))]
-      data
-    }, error = function(e) {
-      cli::cli_warn(c(
-        "!" = "Failed to download/read SI-PNI data for {type} {st} {yr}.",
-        "x" = "{e$message}"
+    n_api <- nrow(api_combos)
+    if (n_api > 0) {
+      cli::cli_inform(c(
+        "i" = "Fetching {n_api} API request(s) ({length(unique(api_combos$uf))} UF(s) x {length(unique(api_combos$year))} year(s))..."
       ))
-      NULL
+    }
+
+    api_results <- purrr::map(seq_len(n_api), function(i) {
+      yr <- api_combos$year[i]
+      st <- api_combos$uf[i]
+
+      tryCatch({
+        data <- .sipni_api_download_and_read(
+          yr, st, month = month_vals,
+          cache = cache, cache_dir = cache_dir
+        )
+        if (nrow(data) == 0) return(NULL)
+        data$year <- as.integer(yr)
+        data$uf_source <- st
+        cols <- names(data)
+        data <- data[, c("year", "uf_source",
+                          setdiff(cols, c("year", "uf_source")))]
+        data
+      }, error = function(e) {
+        cli::cli_warn(c(
+          "!" = "Failed to fetch SI-PNI API data for {st} {yr}.",
+          "x" = "{e$message}"
+        ))
+        NULL
+      })
     })
-  })
 
-  # remove NULLs and bind
-  results <- results[!vapply(results, is.null, logical(1))]
+    results <- c(results, api_results[!vapply(api_results, is.null,
+                                              logical(1))])
+  }
 
+  # combine results
   if (length(results) == 0) {
     cli::cli_abort(
       "No data could be downloaded for the requested year(s)/UF(s)."
     )
   }
 
-  results <- dplyr::bind_rows(results)
+  # bind FTP and API results separately to avoid column mismatch issues
+  ftp_count <- length(ftp_years) * length(target_ufs)
+  ftp_results_final <- if (ftp_count > 0 && length(results) > 0) {
+    results[seq_len(min(ftp_count, length(results)))]
+  } else {
+    list()
+  }
+  ftp_results_final <- ftp_results_final[!vapply(ftp_results_final, is.null,
+                                                  logical(1))]
+
+  api_start <- ftp_count + 1
+  api_results_final <- if (api_start <= length(results)) {
+    results[api_start:length(results)]
+  } else {
+    list()
+  }
+  api_results_final <- api_results_final[!vapply(api_results_final, is.null,
+                                                  logical(1))]
+
+  # bind within groups (same schema), then across groups if both present
+  bound_parts <- list()
+  if (length(ftp_results_final) > 0) {
+    bound_parts <- c(bound_parts, list(dplyr::bind_rows(ftp_results_final)))
+  }
+  if (length(api_results_final) > 0) {
+    bound_parts <- c(bound_parts, list(dplyr::bind_rows(api_results_final)))
+  }
+
+  combined <- dplyr::bind_rows(bound_parts)
 
   # select variables if requested
   if (!is.null(vars)) {
     keep_cols <- unique(c("year", "uf_source", vars))
-    keep_cols <- intersect(keep_cols, names(results))
-    results <- results[, keep_cols, drop = FALSE]
+    keep_cols <- intersect(keep_cols, names(combined))
+    combined <- combined[, keep_cols, drop = FALSE]
   }
 
-  tibble::as_tibble(results)
+  tibble::as_tibble(combined)
 }
 
 

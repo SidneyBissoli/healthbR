@@ -27,7 +27,7 @@ The `healthbR` package provides access to eight DATASUS information systems, cov
 | SIA | `sia_data()` | BPA / APAC | Monthly/type/UF | 2008--2024 |
 | SINAN | `sinan_data()` | Ficha de Notificacao | Annual/National | 2007--2024 |
 | CNES | `cnes_data()` | Cadastro de Estabelecimentos | Monthly/type/UF | 2005--2024 |
-| SI-PNI | `sipni_data()` | PNI (doses e cobertura) | Annual/UF | 1994--2019 |
+| SI-PNI | `sipni_data()` | PNI (doses, cobertura, microdados) | Annual/UF | 1994--2025 |
 | SISAB | `sisab_data()` | Cobertura da Atencao Primaria | Monthly | 2007--present |
 
 All seven modules share the same infrastructure:
@@ -423,24 +423,34 @@ estab |>
 
 ## SI-PNI -- Vaccination data
 
-The SI-PNI (Sistema de Informacao do Programa Nacional de Imunizacoes) contains **aggregated** vaccination data from the National Immunization Program. Unlike other DATASUS modules, SI-PNI files are plain .DBF (not DBC-compressed) and contain dose counts and coverage rates rather than individual-level microdata.
+The SI-PNI (Sistema de Informacao do Programa Nacional de Imunizacoes) provides vaccination data from two sources:
+
+- **FTP (1994--2019)**: Aggregated data with dose counts and coverage rates per municipality/vaccine/age group. Plain .DBF files (not DBC-compressed).
+- **OpenDataSUS API (2020--2025)**: Individual-level microdata with one row per vaccination dose (~47 fields per record).
+
+`sipni_data()` transparently routes to the correct source based on the requested year.
 
 ### File types
 
 | Code | Name | Description |
 |------|------|-------------|
-| DPNI | Doses Aplicadas | Doses applied per municipality, age group, vaccine, and dose type (default) |
-| CPNI | Cobertura Vacinal | Vaccination coverage per municipality and vaccine |
+| DPNI | Doses Aplicadas | Doses applied per municipality, age group, vaccine, and dose type (FTP, default) |
+| CPNI | Cobertura Vacinal | Vaccination coverage per municipality and vaccine (FTP) |
+| API | Microdados | Individual-level microdata via OpenDataSUS (2020+, automatic) |
 
 ### Basic download
 
 ```{r}
-# doses applied in Acre, 2019 (default type = "DPNI")
+# FTP: doses applied in Acre, 2019 (default type = "DPNI")
 doses_ac <- sipni_data(year = 2019, uf = "AC")
 doses_ac
 
-# vaccination coverage
+# FTP: vaccination coverage
 cob_ac <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
+
+# API: individual-level microdata, Acre, January 2024
+micro_ac <- sipni_data(year = 2024, uf = "AC", month = 1)
+micro_ac
 ```
 
 ### Key variables (DPNI)
@@ -574,7 +584,7 @@ sim_clear_cache()
 - SIM and SINASC are annual (one file per UF per year), so a full-year download is 27 files.
 - SINAN files are national (one file per disease per year), so downloads are fast but files can be large.
 - SIH, SIA, and CNES are monthly, so a full-year download is 324 files per type. SIA and CNES each have 13 file types -- always filter by `type`, `uf`, and `month`.
-- SI-PNI is annual with plain .DBF files (one per type/UF/year). Data available 1994--2019 only.
+- SI-PNI FTP is annual with plain .DBF files (one per type/UF/year, 1994--2019). API data (2020+) is per-UF/year; use `month` to limit months.
 
 ## Additional resources
 

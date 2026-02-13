@@ -8,6 +8,7 @@ sipni_data(
   year,
   type = "DPNI",
   uf = NULL,
+  month = NULL,
   vars = NULL,
   cache = TRUE,
   cache_dir = NULL
@@ -16,13 +17,18 @@ sipni_data(
 \arguments{
 \item{year}{Integer. Year(s) of the data. Required.}
 
-\item{type}{Character. File type to download. Default: \code{"DPNI"}
-(doses applied). Use \code{"CPNI"} for vaccination coverage.
-See \code{\link{sipni_info}()} for details.}
+\item{type}{Character. File type for FTP data (1994--2019). Default:
+\code{"DPNI"} (doses applied). Use \code{"CPNI"} for vaccination coverage.
+Ignored for years >= 2020 (API data is always microdata).}
 
 \item{uf}{Character. Two-letter state abbreviation(s) to download.
 If NULL (default), downloads all 27 states.
 Example: \code{"SP"}, \code{c("SP", "RJ")}.}
+
+\item{month}{Integer. Month(s) to download (1--12). For years >= 2020
+(API), filters by vaccination date month. For years <= 2019 (FTP),
+this parameter is ignored (FTP files are annual).
+If NULL (default), downloads all 12 months.}
 
 \item{vars}{Character vector. Variables to keep. If NULL (default),
 returns all available variables. Use \code{\link{sipni_variables}()} to see
@@ -38,42 +44,50 @@ faster future access.}
 A tibble with vaccination data. Includes columns
 \code{year} and \code{uf_source} to identify the source
 when multiple years/states are combined.
+
+\strong{Output differs by year range:}
+\itemize{
+\item \strong{1994--2019 (FTP)}: Aggregated data with DPNI (12 vars) or
+CPNI (7 vars) columns, all character.
+\item \strong{2020+ (API)}: Individual-level microdata with ~47 columns
+(snake_case Portuguese), all character. Use
+\code{sipni_variables(type = "API")} to see the full list.
+}
 }
 \description{
-Downloads and returns vaccination data (doses applied or coverage) from
-DATASUS FTP. Data is aggregated (counts per municipality/vaccine/age group),
-not individual-level microdata.
+Downloads and returns vaccination data from SI-PNI. For years 1994--2019,
+data is downloaded from DATASUS FTP (aggregated doses/coverage). For years
+2020+, data is fetched from the OpenDataSUS REST API (individual-level
+microdata with one row per vaccination dose).
 }
 \details{
-Data is downloaded from DATASUS FTP as plain .DBF files (one per
-type/state/year). Unlike other DATASUS modules, SI-PNI files are not
-DBC-compressed.
+\strong{FTP data (1994--2019):}
+Downloaded as plain .DBF files. SI-PNI FTP data is \strong{aggregated} (dose
+counts and coverage rates per municipality, vaccine, and age group).
+Two file types: DPNI (doses) and CPNI (coverage).
 
-SI-PNI data is \strong{aggregated} (dose counts and coverage rates per
-municipality, vaccine, and age group), not individual-level microdata.
-
-Two file types are available:
-\itemize{
-\item \code{"DPNI"} (default): Doses applied -- monthly data within each
-annual file, with age group and dose type breakdowns.
-\item \code{"CPNI"}: Vaccination coverage -- annual rates including
-target population and coverage percentage.
-}
-
-Data on DATASUS FTP is available from 1994 to 2019. Post-2019 data
-requires the SI-PNI web API (not yet supported).
+\strong{API data (2020+):}
+Fetched from the OpenDataSUS REST API with automatic pagination.
+This is \strong{individual-level microdata} (one row per vaccination dose,
+~47 fields per record). The \code{type} parameter is ignored for API
+years. Data is filtered server-side by UF and client-side by month
+(using the \code{data_vacina} field).
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
-# doses applied in Acre, 2019
+# FTP: doses applied in Acre, 2019
 ac_doses <- sipni_data(year = 2019, uf = "AC")
 
-# vaccination coverage in Acre, 2019
+# FTP: vaccination coverage in Acre, 2019
 ac_cob <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
 
-# only key variables
-sipni_data(year = 2019, uf = "AC",
-           vars = c("IMUNO", "QT_DOSE", "DOSE", "FX_ETARIA"))
+# API: microdata for Acre, January 2024
+ac_api <- sipni_data(year = 2024, uf = "AC", month = 1)
+
+# API: select specific variables
+sipni_data(year = 2024, uf = "AC", month = 1,
+           vars = c("descricao_vacina", "tipo_sexo_paciente",
+                    "data_vacina"))
 \dontshow{\}) # examplesIf}
 }
 \seealso{

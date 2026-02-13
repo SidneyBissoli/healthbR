@@ -8,7 +8,9 @@ sipni_variables(type = "DPNI", search = NULL)
 }
 \arguments{
 \item{type}{Character. File type to show variables for.
-\code{"DPNI"} (default) for doses applied, \code{"CPNI"} for coverage.}
+\code{"DPNI"} (default) for doses applied (FTP, 1994-2019),
+\code{"CPNI"} for coverage (FTP, 1994-2019), or \code{"API"} for
+individual-level microdata (OpenDataSUS, 2020+).}
 
 \item{search}{Character. Optional search term to filter variables by
 name or description. Case-insensitive and accent-insensitive.}
@@ -23,6 +25,7 @@ including descriptions and value types.
 \examples{
 sipni_variables()
 sipni_variables(type = "CPNI")
+sipni_variables(type = "API")
 sipni_variables(search = "dose")
 }
 \seealso{

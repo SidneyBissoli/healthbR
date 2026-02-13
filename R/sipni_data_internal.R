@@ -5,9 +5,20 @@
 # available years
 # ============================================================================
 
-#' SI-PNI available years (all data is final, frozen at 2019)
+#' SI-PNI available years (FTP 1994-2019 + API 2020-2025)
 #' @noRd
-sipni_available_years <- 1994L:2019L
+sipni_available_years <- 1994L:2025L
+
+#' SI-PNI year ranges by source
+#' @noRd
+sipni_ftp_years <- 1994L:2019L
+
+#' @noRd
+sipni_api_years <- 2020L:2025L
+
+#' SI-PNI OpenDataSUS API base URL
+#' @noRd
+sipni_api_base_url <- "https://apidadosabertos.saude.gov.br"
 
 # ============================================================================
 # UF codes
@@ -28,11 +39,12 @@ sipni_uf_list <- c(
 #' SI-PNI valid file types
 #' @noRd
 sipni_valid_types <- tibble::tibble(
-  code = c("DPNI", "CPNI"),
-  name = c("Doses Aplicadas", "Cobertura Vacinal"),
+  code = c("DPNI", "CPNI", "API"),
+  name = c("Doses Aplicadas", "Cobertura Vacinal", "Microdados API"),
   description = c(
-    "Doses de vacinas aplicadas por munic\u00edpio, faixa et\u00e1ria, imuno e dose",
-    "Cobertura vacinal por munic\u00edpio e imunobiol\u00f3gico"
+    "Doses de vacinas aplicadas por munic\u00edpio, faixa et\u00e1ria, imuno e dose (FTP, 1994-2019)",
+    "Cobertura vacinal por munic\u00edpio e imunobiol\u00f3gico (FTP, 1994-2019)",
+    "Microdados individuais de vacina\u00e7\u00e3o via OpenDataSUS API (2020+)"
   )
 )
 
@@ -189,6 +201,114 @@ sipni_dictionary_data <- tibble::tibble(
     "15 a 19 anos",
     "20 anos e mais",
     "Ignorado"
+  )
+)
+
+# ============================================================================
+# label maps for categorical variables
+# ============================================================================
+
+# ============================================================================
+# variables metadata (API type - individual-level microdata)
+# ============================================================================
+
+#' SI-PNI variables metadata tibble (API type - OpenDataSUS microdata)
+#' @noRd
+sipni_variables_api <- tibble::tibble(
+  variable = c(
+    # establishment
+    "sigla_uf_estabelecimento", "nome_uf_estabelecimento",
+    "codigo_municipio_estabelecimento", "nome_municipio_estabelecimento",
+    "codigo_cnes_estabelecimento", "nome_razao_social_estabelecimento",
+    "nome_fantasia_estalecimento", "codigo_tipo_estabelecimento",
+    "descricao_tipo_estabelecimento", "codigo_natureza_estabelecimento",
+    "descricao_natureza_estabelecimento",
+    # patient
+    "codigo_paciente", "tipo_sexo_paciente", "numero_idade_paciente",
+    "codigo_raca_cor_paciente", "nome_raca_cor_paciente",
+    "sigla_uf_paciente", "nome_uf_paciente",
+    "codigo_municipio_paciente", "nome_municipio_paciente",
+    "numero_cep_paciente", "codigo_etnia_indigena_paciente",
+    "nome_etnia_indigena_paciente", "codigo_pais_paciente",
+    "nome_pais_paciente", "descricao_nacionalidade_paciente",
+    # vaccine
+    "codigo_vacina", "sigla_vacina", "descricao_vacina",
+    "codigo_dose_vacina", "descricao_dose_vacina",
+    "codigo_lote_vacina", "codigo_vacina_fabricante",
+    "descricao_vacina_fabricante", "data_vacina",
+    # administration
+    "codigo_via_administracao", "descricao_via_administracao",
+    "codigo_local_aplicacao", "descricao_local_aplicacao",
+    # strategy
+    "codigo_estrategia_vacinacao", "descricao_estrategia_vacinacao",
+    "codigo_vacina_grupo_atendimento", "descricao_vacina_grupo_atendimento",
+    "codigo_vacina_categoria_atendimento", "descricao_vacina_categoria_atendimento",
+    # maternal
+    "codigo_condicao_maternal", "descricao_condicao_maternal"
+  ),
+  description = c(
+    # establishment
+    "Sigla UF do estabelecimento",
+    "Nome UF do estabelecimento",
+    "C\u00f3digo munic\u00edpio do estabelecimento (IBGE)",
+    "Nome munic\u00edpio do estabelecimento",
+    "C\u00f3digo CNES do estabelecimento",
+    "Raz\u00e3o social do estabelecimento",
+    "Nome fantasia do estabelecimento",
+    "C\u00f3digo tipo do estabelecimento",
+    "Descri\u00e7\u00e3o tipo do estabelecimento",
+    "C\u00f3digo natureza jur\u00eddica do estabelecimento",
+    "Descri\u00e7\u00e3o natureza jur\u00eddica do estabelecimento",
+    # patient
+    "C\u00f3digo anonimizado do paciente",
+    "Sexo do paciente (M/F)",
+    "Idade do paciente",
+    "C\u00f3digo ra\u00e7a/cor do paciente",
+    "Nome ra\u00e7a/cor do paciente",
+    "Sigla UF do paciente",
+    "Nome UF do paciente",
+    "C\u00f3digo munic\u00edpio do paciente (IBGE)",
+    "Nome munic\u00edpio do paciente",
+    "CEP do paciente",
+    "C\u00f3digo etnia ind\u00edgena do paciente",
+    "Nome etnia ind\u00edgena do paciente",
+    "C\u00f3digo pa\u00eds do paciente",
+    "Nome pa\u00eds do paciente",
+    "Descri\u00e7\u00e3o da nacionalidade do paciente",
+    # vaccine
+    "C\u00f3digo da vacina",
+    "Sigla da vacina",
+    "Descri\u00e7\u00e3o da vacina",
+    "C\u00f3digo da dose",
+    "Descri\u00e7\u00e3o da dose",
+    "C\u00f3digo do lote da vacina",
+    "C\u00f3digo do fabricante da vacina",
+    "Descri\u00e7\u00e3o do fabricante da vacina",
+    "Data da vacina\u00e7\u00e3o (AAAA-MM-DD)",
+    # administration
+    "C\u00f3digo via de administra\u00e7\u00e3o",
+    "Descri\u00e7\u00e3o via de administra\u00e7\u00e3o",
+    "C\u00f3digo local de aplica\u00e7\u00e3o",
+    "Descri\u00e7\u00e3o local de aplica\u00e7\u00e3o",
+    # strategy
+    "C\u00f3digo estrat\u00e9gia de vacina\u00e7\u00e3o",
+    "Descri\u00e7\u00e3o estrat\u00e9gia de vacina\u00e7\u00e3o",
+    "C\u00f3digo grupo de atendimento",
+    "Descri\u00e7\u00e3o grupo de atendimento",
+    "C\u00f3digo categoria de atendimento",
+    "Descri\u00e7\u00e3o categoria de atendimento",
+    # maternal
+    "C\u00f3digo condi\u00e7\u00e3o maternal",
+    "Descri\u00e7\u00e3o condi\u00e7\u00e3o maternal"
+  ),
+  type = rep("character", 47),
+  section = c(
+    rep("estabelecimento", 11),
+    rep("paciente", 15),
+    rep("vacina", 9),
+    rep("administracao", 4),
+    rep("estrategia", 6),
+    rep("maternal", 2)
   )
 )
 

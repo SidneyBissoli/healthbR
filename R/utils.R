@@ -66,7 +66,7 @@ list_sources <- function() {
       "Outpatient procedures",
       "Notifiable diseases surveillance",
       "Health facilities registry",
-      "Vaccination doses and coverage (aggregated)",
+      "Vaccination doses/coverage (aggregated 1994-2019, microdata 2020+)",
       "Primary care coverage indicators (REST API)"
     ),
     years = c(
@@ -81,7 +81,7 @@ list_sources <- function() {
       "1994-2023",
       "2007-2024",
       "2005-2023",
-      "1994-2019",
+      "1994-2025",
       "2007-2025"
     ),
     status = c(

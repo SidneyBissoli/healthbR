@@ -14,8 +14,14 @@ variable only. Default: NULL (returns all variables).}
 A tibble with columns: variable, description, code, label.
 }
 \description{
-Returns a tibble with the data dictionary for the SI-PNI,
-including variable descriptions and category labels.
+Returns a tibble with the data dictionary for the SI-PNI FTP data
+(1994--2019), including variable descriptions and category labels.
+}
+\details{
+The dictionary covers FTP data variables (DPNI/CPNI, 1994--2019).
+API microdata (2020+) has description fields embedded in the data
+itself (e.g., \code{descricao_vacina}, \code{nome_raca_cor_paciente}),
+so a separate dictionary is not needed.
 }
 \examples{
 sipni_dictionary()

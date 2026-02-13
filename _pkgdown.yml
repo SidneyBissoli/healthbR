@@ -75,7 +75,7 @@ reference:
       - cnes_clear_cache
 
   - title: "SI-PNI -- Vaccination"
-    desc: "Vaccination doses and coverage from SI-PNI (DATASUS FTP, 1994--2019)"
+    desc: "Vaccination data from SI-PNI (FTP 1994--2019, OpenDataSUS API 2020--2025)"
     contents:
       - sipni_data
       - sipni_years
