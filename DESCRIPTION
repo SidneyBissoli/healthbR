@@ -1,6 +1,6 @@
 Package: healthbR
 Title: Access Brazilian Public Health Data
-Version: 0.9.0
+Version: 0.10.0
 Authors@R: 
     person("Sidney", "Bissoli", , "sbissoli76@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-0442-3700"))
@@ -14,7 +14,8 @@ Description: Provides easy access to Brazilian public health data from multiple
     SIA (Outpatient Information System), SINAN (Notifiable Diseases Surveillance),
     CNES (National Health Facility Registry),
     SI-PNI (National Immunization Program - vaccination doses and coverage),
-    and other health information systems. Data is downloaded
+    SISAB (Primary Care Health Information System - coverage indicators via
+    REST API), and other health information systems. Data is downloaded
     from the Brazilian Ministry of Health and IBGE repositories. Data is returned
     in tidy format following tidyverse conventions.
 License: MIT + file LICENSE

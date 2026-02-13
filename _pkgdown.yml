@@ -85,6 +85,16 @@ reference:
       - sipni_cache_status
       - sipni_clear_cache
 
+  - title: "SISAB -- Primary care coverage"
+    desc: "Primary care coverage indicators from SISAB (REST API, 2007--present)"
+    contents:
+      - sisab_data
+      - sisab_years
+      - sisab_info
+      - sisab_variables
+      - sisab_cache_status
+      - sisab_clear_cache
+
   - title: "VIGITEL -- Telephone survey"
     desc: "Surveillance of Risk Factors for Chronic Diseases (2006--2024)"
     contents:

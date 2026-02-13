@@ -1,3 +1,26 @@
+# healthbR 0.10.0
+
+## New modules
+
+* **SISAB (Sistema de Informacao em Saude para a Atencao Basica)**: Added
+  module for accessing primary care coverage indicators from the
+  relatorioaps REST API.
+  - `sisab_years()`, `sisab_info()` for module metadata
+  - `sisab_variables()` for variable exploration
+  - `sisab_data()` for downloading coverage data
+  - `sisab_cache_status()`, `sisab_clear_cache()` for cache management
+  - **4 report types**: aps (APS coverage, default), sb (Oral health),
+    acs (Community health agents), pns (PNS coverage).
+    Use `type` parameter to select.
+  - **4 geographic levels**: brazil, region, uf, municipality.
+    Use `level` parameter to select.
+  - **REST API access**: Unlike other DATASUS modules, SISAB uses a
+    public REST API (no FTP, no .dbc/.dbf files). No authentication required.
+  - **Aggregated data**: Coverage indicators per geographic unit and
+    period (competencia CNES), not individual-level microdata.
+  - Output includes `year` and `type` columns to identify the source
+  - Column names preserved from API (camelCase)
+
 # healthbR 0.9.0
 
 ## New modules
