@@ -451,7 +451,7 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
   # download and read each combination
   labels <- paste(combinations$uf, combinations$year)
 
-  results <- .map_parallel(seq_len(n_combos), function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
     yr <- combinations$year[i]
     st <- combinations$uf[i]
 

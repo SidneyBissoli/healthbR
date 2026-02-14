@@ -538,7 +538,7 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
     paste(type, level, uf_part, combinations$year[i])
   }, character(1))
 
-  results <- .map_parallel(seq_len(n_combos), function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
     yr <- combinations$year[i]
     uf_val <- target_ufs[[combinations$uf_idx[i]]]
 

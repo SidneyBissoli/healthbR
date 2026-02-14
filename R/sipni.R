@@ -941,7 +941,7 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
 
     ftp_labels <- paste(ftp_combos$uf, ftp_combos$year)
 
-    ftp_results <- .map_parallel(seq_len(n_ftp), function(i) {
+    ftp_results <- .map_parallel(seq_len(n_ftp), .delay = 0.5, function(i) {
       yr <- ftp_combos$year[i]
       st <- ftp_combos$uf[i]
 

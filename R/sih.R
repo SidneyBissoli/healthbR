@@ -486,7 +486,7 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
   labels <- paste(combinations$uf,
                   paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
 
-  results <- .map_parallel(seq_len(n_combos), function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
     yr <- combinations$year[i]
     mo <- combinations$month[i]
     st <- combinations$uf[i]
