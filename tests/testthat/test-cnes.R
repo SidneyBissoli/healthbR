@@ -483,3 +483,27 @@ test_that("cnes parse converts mock data correctly", {
   expect_type(parsed$CNES, "character")
   expect_type(parsed$TP_UNID, "character")
 })
+
+
+# ============================================================================
+# consolidated download failure reporting
+# ============================================================================
+
+test_that("cnes_data reports partial download failures", {
+  local_mocked_bindings(
+    .cnes_validate_year = function(year, ...) as.integer(year),
+    .cnes_validate_uf = function(uf) toupper(uf),
+    .cnes_download_and_read = function(year, month, uf, ...) {
+      if (uf == "XX") stop("Not found")
+      tibble::tibble(year = as.integer(year), month = as.integer(month),
+                     uf_source = uf, CNES = "1234567")
+    }
+  )
+  result <- suppressWarnings(
+    cnes_data(2023, month = 1, uf = c("AC", "XX"), parse = FALSE)
+  )
+  expect_s3_class(result, "data.frame")
+  failures <- attr(result, "download_failures")
+  expect_false(is.null(failures))
+  expect_equal(failures, "ST XX 2023/01")
+})

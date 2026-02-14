@@ -513,21 +513,21 @@ sinan_data <- function(year, disease = "DENG", vars = NULL,
   }
 
   # download and read each year
+  labels <- paste(disease, year)
+
   results <- .map_parallel(year, function(yr) {
     tryCatch({
       .sinan_download_and_read(yr, disease, cache = cache,
                                cache_dir = cache_dir)
     }, error = function(e) {
-      cli::cli_warn(c(
-        "!" = "Failed to download/read SINAN data for {disease} {yr}.",
-        "x" = "{e$message}"
-      ))
       NULL
     })
   })
 
   # remove NULLs and bind
-  results <- results[!vapply(results, is.null, logical(1))]
+  succeeded <- !vapply(results, is.null, logical(1))
+  failed_labels <- labels[!succeeded]
+  results <- results[succeeded]
 
   if (length(results) == 0) {
     cli::cli_abort(
@@ -560,6 +560,8 @@ sinan_data <- function(year, disease = "DENG", vars = NULL,
     keep_cols <- intersect(keep_cols, names(results))
     results <- results[, keep_cols, drop = FALSE]
   }
+
+  results <- .report_download_failures(results, failed_labels, "SINAN")
 
   tibble::as_tibble(results)
 }

@@ -523,3 +523,27 @@ test_that("sia parse converts mock data correctly", {
   expect_type(parsed$PA_VALAPR, "double")
   expect_type(parsed$PA_SEXO, "character")
 })
+
+
+# ============================================================================
+# consolidated download failure reporting
+# ============================================================================
+
+test_that("sia_data reports partial download failures", {
+  local_mocked_bindings(
+    .sia_validate_year = function(year, ...) as.integer(year),
+    .sia_validate_uf = function(uf) toupper(uf),
+    .sia_download_and_read = function(year, month, uf, ...) {
+      if (uf == "XX") stop("Not found")
+      tibble::tibble(year = as.integer(year), month = as.integer(month),
+                     uf_source = uf, PA_PROC_ID = "0301")
+    }
+  )
+  result <- suppressWarnings(
+    sia_data(2022, month = 1, uf = c("AC", "XX"), parse = FALSE)
+  )
+  expect_s3_class(result, "data.frame")
+  failures <- attr(result, "download_failures")
+  expect_false(is.null(failures))
+  expect_equal(failures, "PA XX 2022/01")
+})

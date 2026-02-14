@@ -517,6 +517,9 @@ cnes_data <- function(year, type = "ST", month = NULL, vars = NULL, uf = NULL,
   }
 
   # download and read each combination
+  labels <- paste(type, combinations$uf,
+                  paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
+
   results <- .map_parallel(seq_len(n_combos), function(i) {
     yr <- combinations$year[i]
     mo <- combinations$month[i]
@@ -526,16 +529,14 @@ cnes_data <- function(year, type = "ST", month = NULL, vars = NULL, uf = NULL,
       .cnes_download_and_read(yr, mo, st, type = type,
                               cache = cache, cache_dir = cache_dir)
     }, error = function(e) {
-      cli::cli_warn(c(
-        "!" = "Failed to download/read CNES data for {type} {st} {yr}/{sprintf('%02d', mo)}.",
-        "x" = "{e$message}"
-      ))
       NULL
     })
   })
 
   # remove NULLs and bind
-  results <- results[!vapply(results, is.null, logical(1))]
+  succeeded <- !vapply(results, is.null, logical(1))
+  failed_labels <- labels[!succeeded]
+  results <- results[succeeded]
 
   if (length(results) == 0) {
     cli::cli_abort(
@@ -569,6 +570,8 @@ cnes_data <- function(year, type = "ST", month = NULL, vars = NULL, uf = NULL,
     keep_cols <- intersect(keep_cols, names(results))
     results <- results[, keep_cols, drop = FALSE]
   }
+
+  results <- .report_download_failures(results, failed_labels, "CNES")
 
   tibble::as_tibble(results)
 }

@@ -433,3 +433,26 @@ test_that("sinan parse converts mock data correctly", {
   expect_type(parsed$CS_SEXO, "character")
   expect_type(parsed$NU_IDADE_N, "character")
 })
+
+
+# ============================================================================
+# consolidated download failure reporting
+# ============================================================================
+
+test_that("sinan_data reports partial download failures", {
+  local_mocked_bindings(
+    .sinan_validate_year = function(year, ...) as.integer(year),
+    .sinan_download_and_read = function(year, disease, ...) {
+      if (year == 9999L) stop("Not found")
+      tibble::tibble(year = as.integer(year), disease = disease,
+                     DT_NOTIFIC = "01012022")
+    }
+  )
+  result <- suppressWarnings(
+    sinan_data(c(2022, 9999), parse = FALSE)
+  )
+  expect_s3_class(result, "data.frame")
+  failures <- attr(result, "download_failures")
+  expect_false(is.null(failures))
+  expect_equal(failures, "DENG 9999")
+})

@@ -629,3 +629,27 @@ test_that("sipni parse converts mock API data correctly", {
   expect_type(parsed$numero_idade_paciente, "integer")
   expect_type(parsed$tipo_sexo_paciente, "character")
 })
+
+
+# ============================================================================
+# consolidated download failure reporting
+# ============================================================================
+
+test_that("sipni_data reports partial download failures (FTP)", {
+  local_mocked_bindings(
+    .sipni_validate_year = function(year) as.integer(year),
+    .sipni_validate_uf = function(uf) toupper(uf),
+    .sipni_download_and_read = function(year, uf, ...) {
+      if (uf == "XX") stop("Not found")
+      tibble::tibble(year = as.integer(year), uf_source = uf, IMUNO = "001")
+    }
+  )
+  # use year 2019 to stay in FTP path (sipni_ftp_years)
+  result <- suppressWarnings(
+    sipni_data(2019, uf = c("AC", "XX"), parse = FALSE)
+  )
+  expect_s3_class(result, "data.frame")
+  failures <- attr(result, "download_failures")
+  expect_false(is.null(failures))
+  expect_equal(failures, "XX 2019")
+})

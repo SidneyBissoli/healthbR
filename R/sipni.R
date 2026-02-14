@@ -502,16 +502,8 @@
               downloaded_results <- c(downloaded_results, list(data))
             }
           }, error = function(e) {
-            cli::cli_warn(c(
-              "!" = "Failed to process SI-PNI CSV for {sipni_month_names[m]} {year}.",
-              "x" = "{e$message}"
-            ))
+            NULL
           })
-        } else {
-          cli::cli_warn(c(
-            "!" = "Failed to download SI-PNI CSV for {sipni_month_names[m]} {year}.",
-            "x" = "{dl_results$error[idx]}"
-          ))
         }
         # clean up ZIP
         if (file.exists(zip_paths[idx])) file.remove(zip_paths[idx])
@@ -526,11 +518,7 @@
           downloaded_results <- c(downloaded_results, list(data))
         }
       }, error = function(e) {
-        m <- needs_download[1]
-        cli::cli_warn(c(
-          "!" = "Failed to download SI-PNI CSV for {uf} {sipni_month_names[m]} {year}.",
-          "x" = "{e$message}"
-        ))
+        NULL
       })
     }
   }
@@ -934,6 +922,8 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
   target_ufs <- if (!is.null(uf)) toupper(uf) else sipni_uf_list
 
   results <- list()
+  ftp_failed_labels <- character(0)
+  api_failed_labels <- character(0)
 
   # --- FTP path (1994-2019) ---
   if (length(ftp_years) > 0) {
@@ -949,6 +939,8 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
       ))
     }
 
+    ftp_labels <- paste(ftp_combos$uf, ftp_combos$year)
+
     ftp_results <- .map_parallel(seq_len(n_ftp), function(i) {
       yr <- ftp_combos$year[i]
       st <- ftp_combos$uf[i]
@@ -957,16 +949,13 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
         .sipni_download_and_read(yr, st, type = type,
                                  cache = cache, cache_dir = cache_dir)
       }, error = function(e) {
-        cli::cli_warn(c(
-          "!" = "Failed to download/read SI-PNI data for {type} {st} {yr}.",
-          "x" = "{e$message}"
-        ))
         NULL
       })
     })
 
-    results <- c(results, ftp_results[!vapply(ftp_results, is.null,
-                                              logical(1))])
+    ftp_succeeded <- !vapply(ftp_results, is.null, logical(1))
+    ftp_failed_labels <- ftp_labels[!ftp_succeeded]
+    results <- c(results, ftp_results[ftp_succeeded])
   }
 
   # --- API path (2020+) ---
@@ -983,6 +972,8 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
       ))
     }
 
+    api_labels <- paste(api_combos$uf, api_combos$year)
+
     api_results <- .map_parallel(seq_len(n_api), function(i) {
       yr <- api_combos$year[i]
       st <- api_combos$uf[i]
@@ -995,16 +986,13 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
         if (nrow(data) == 0) return(NULL)
         data
       }, error = function(e) {
-        cli::cli_warn(c(
-          "!" = "Failed to download SI-PNI CSV data for {st} {yr}.",
-          "x" = "{e$message}"
-        ))
         NULL
       })
     })
 
-    results <- c(results, api_results[!vapply(api_results, is.null,
-                                              logical(1))])
+    api_succeeded <- !vapply(api_results, is.null, logical(1))
+    api_failed_labels <- api_labels[!api_succeeded]
+    results <- c(results, api_results[api_succeeded])
   }
 
   # combine results
@@ -1090,6 +1078,9 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
     keep_cols <- intersect(keep_cols, names(combined))
     combined <- combined[, keep_cols, drop = FALSE]
   }
+
+  all_failed <- c(ftp_failed_labels, api_failed_labels)
+  combined <- .report_download_failures(combined, all_failed, "SI-PNI")
 
   tibble::as_tibble(combined)
 }

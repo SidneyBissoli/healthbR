@@ -335,3 +335,26 @@ test_that("sinasc parse converts mock data correctly", {
   expect_type(parsed$APGAR1, "integer")
   expect_type(parsed$SEXO, "character")
 })
+
+
+# ============================================================================
+# consolidated download failure reporting
+# ============================================================================
+
+test_that("sinasc_data reports partial download failures", {
+  local_mocked_bindings(
+    .sinasc_validate_year = function(year, ...) as.integer(year),
+    .sinasc_validate_uf = function(uf) toupper(uf),
+    .sinasc_download_and_read = function(year, uf, ...) {
+      if (uf == "XX") stop("Not found")
+      tibble::tibble(year = as.integer(year), uf_source = uf, CODANOMAL = "Q00")
+    }
+  )
+  result <- suppressWarnings(
+    sinasc_data(2022, uf = c("AC", "XX"), parse = FALSE)
+  )
+  expect_s3_class(result, "data.frame")
+  failures <- attr(result, "download_failures")
+  expect_false(is.null(failures))
+  expect_equal(failures, "XX 2022")
+})

@@ -360,3 +360,25 @@ test_that("sisab_data cache works (second call faster)", {
                                 month = 1, cache_dir = cache_dir))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
+
+
+# ============================================================================
+# consolidated download failure reporting
+# ============================================================================
+
+test_that("sisab_data reports partial download failures", {
+  local_mocked_bindings(
+    .sisab_validate_year = function(year) as.integer(year),
+    .sisab_download_and_read = function(year, ...) {
+      if (year == 9999L) return(NULL)
+      tibble::tibble(cobertura = 0.5)
+    }
+  )
+  result <- suppressWarnings(
+    sisab_data(c(2024, 9999))
+  )
+  expect_s3_class(result, "data.frame")
+  failures <- attr(result, "download_failures")
+  expect_false(is.null(failures))
+  expect_true(any(grepl("9999", failures)))
+})

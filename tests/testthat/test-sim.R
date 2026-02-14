@@ -319,3 +319,26 @@ test_that("sim_data parse = FALSE returns all character", {
   expect_type(parsed$SEXO, "character")
   expect_type(parsed$IDADEMAE, "integer")
 })
+
+
+# ============================================================================
+# consolidated download failure reporting
+# ============================================================================
+
+test_that("sim_data reports partial download failures", {
+  local_mocked_bindings(
+    .sim_validate_year = function(year, ...) as.integer(year),
+    .sim_validate_uf = function(uf) toupper(uf),
+    .sim_download_and_read = function(year, uf, ...) {
+      if (uf == "XX") stop("Not found")
+      tibble::tibble(year = as.integer(year), uf_source = uf, CAUSABAS = "X00")
+    }
+  )
+  result <- suppressWarnings(
+    sim_data(2022, uf = c("AC", "XX"), parse = FALSE, decode_age = FALSE)
+  )
+  expect_s3_class(result, "data.frame")
+  failures <- attr(result, "download_failures")
+  expect_false(is.null(failures))
+  expect_equal(failures, "XX 2022")
+})

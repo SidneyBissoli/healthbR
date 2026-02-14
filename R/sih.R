@@ -483,6 +483,9 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
   }
 
   # download and read each combination
+  labels <- paste(combinations$uf,
+                  paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
+
   results <- .map_parallel(seq_len(n_combos), function(i) {
     yr <- combinations$year[i]
     mo <- combinations$month[i]
@@ -492,16 +495,14 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
       .sih_download_and_read(yr, mo, st, cache = cache,
                              cache_dir = cache_dir)
     }, error = function(e) {
-      cli::cli_warn(c(
-        "!" = "Failed to download/read SIH data for {st} {yr}/{sprintf('%02d', mo)}.",
-        "x" = "{e$message}"
-      ))
       NULL
     })
   })
 
   # remove NULLs and bind
-  results <- results[!vapply(results, is.null, logical(1))]
+  succeeded <- !vapply(results, is.null, logical(1))
+  failed_labels <- labels[!succeeded]
+  results <- results[succeeded]
 
   if (length(results) == 0) {
     cli::cli_abort("No data could be downloaded for the requested year(s)/month(s)/UF(s).")
@@ -547,6 +548,8 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
     keep_cols <- intersect(keep_cols, names(results))
     results <- results[, keep_cols, drop = FALSE]
   }
+
+  results <- .report_download_failures(results, failed_labels, "SIH")
 
   tibble::as_tibble(results)
 }

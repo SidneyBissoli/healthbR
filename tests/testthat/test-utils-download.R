@@ -161,3 +161,35 @@ test_that(".http_download downloads a small file", {
   expect_true(file.exists(dest))
   expect_gt(file.size(dest), 0)
 })
+
+
+# ============================================================================
+# .report_download_failures() tests
+# ============================================================================
+
+test_that(".report_download_failures returns data unchanged when no failures", {
+  data <- tibble::tibble(x = 1:3)
+  result <- .report_download_failures(data, character(0), "TEST")
+  expect_identical(result, data)
+  expect_null(attr(result, "download_failures"))
+})
+
+test_that(".report_download_failures attaches attribute on failure", {
+  data <- tibble::tibble(x = 1:3)
+  failed <- c("AC 2022", "SP 2023")
+  result <- suppressWarnings(
+    .report_download_failures(data, failed, "TEST")
+  )
+  expect_equal(result$x, data$x)
+  expect_equal(nrow(result), nrow(data))
+  expect_equal(attr(result, "download_failures"), failed)
+})
+
+test_that(".report_download_failures warns with correct message", {
+  data <- tibble::tibble(x = 1:3)
+  failed <- c("AC 2022", "SP 2023")
+  expect_warning(
+    .report_download_failures(data, failed, "SIM"),
+    "SIM: 2 files failed"
+  )
+})

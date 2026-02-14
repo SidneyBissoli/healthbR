@@ -282,3 +282,36 @@
     stringsAsFactors = FALSE
   )
 }
+
+
+# ============================================================================
+# Consolidated download failure reporting
+# ============================================================================
+
+#' Report download failures as a single consolidated warning (internal)
+#'
+#' Replaces per-file warnings with a single summary warning listing all
+#' failed downloads. Attaches the failed labels as the `"download_failures"`
+#' attribute on the returned data so programmatic users can inspect them.
+#'
+#' @param data Data frame. The successfully downloaded and combined data.
+#' @param failed_labels Character vector. Labels of the files that failed
+#'   (e.g., `"AC 2022"`, `"DENG 2022"`). If empty, `data` is returned
+#'   unchanged.
+#' @param module_name Character. Module name for the warning message
+#'   (e.g., `"SIM"`, `"SINAN"`).
+#'
+#' @return The input `data`, with `attr(data, "download_failures")` set
+#'   to `failed_labels` when there are failures.
+#'
+#' @noRd
+.report_download_failures <- function(data, failed_labels, module_name) {
+  if (length(failed_labels) == 0L) return(data)
+  n_failed <- length(failed_labels)
+  cli::cli_warn(c(
+    "!" = "{module_name}: {n_failed} file{?s} failed to download.",
+    "i" = "Failed: {.val {failed_labels}}"
+  ))
+  attr(data, "download_failures") <- failed_labels
+  data
+}

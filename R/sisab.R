@@ -532,6 +532,12 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
   }
 
   # download each combination
+  labels <- vapply(seq_len(n_combos), function(i) {
+    uf_val <- target_ufs[[combinations$uf_idx[i]]]
+    uf_part <- if (!is.null(uf_val)) uf_val else "ALL"
+    paste(type, level, uf_part, combinations$year[i])
+  }, character(1))
+
   results <- .map_parallel(seq_len(n_combos), function(i) {
     yr <- combinations$year[i]
     uf_val <- target_ufs[[combinations$uf_idx[i]]]
@@ -543,9 +549,6 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
       )
 
       if (is.null(data) || nrow(data) == 0) {
-        cli::cli_warn(c(
-          "!" = "No data returned for SISAB {type} {level} {yr}."
-        ))
         return(NULL)
       }
 
@@ -558,16 +561,14 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
                         setdiff(cols, c("year", "type")))]
       data
     }, error = function(e) {
-      cli::cli_warn(c(
-        "!" = "Failed to download SISAB data for {type} {level} {yr}.",
-        "x" = "{e$message}"
-      ))
       NULL
     })
   })
 
   # remove NULLs and bind
-  results <- results[!vapply(results, is.null, logical(1))]
+  succeeded <- !vapply(results, is.null, logical(1))
+  failed_labels <- labels[!succeeded]
+  results <- results[succeeded]
 
   if (length(results) == 0) {
     cli::cli_abort(
@@ -583,6 +584,8 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
     keep_cols <- intersect(keep_cols, names(results))
     results <- results[, keep_cols, drop = FALSE]
   }
+
+  results <- .report_download_failures(results, failed_labels, "SISAB")
 
   tibble::as_tibble(results)
 }

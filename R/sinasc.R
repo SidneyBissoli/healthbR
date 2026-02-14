@@ -449,6 +449,8 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
   }
 
   # download and read each combination
+  labels <- paste(combinations$uf, combinations$year)
+
   results <- .map_parallel(seq_len(n_combos), function(i) {
     yr <- combinations$year[i]
     st <- combinations$uf[i]
@@ -456,16 +458,14 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
     tryCatch({
       .sinasc_download_and_read(yr, st, cache = cache, cache_dir = cache_dir)
     }, error = function(e) {
-      cli::cli_warn(c(
-        "!" = "Failed to download/read SINASC data for {st} {yr}.",
-        "x" = "{e$message}"
-      ))
       NULL
     })
   })
 
   # remove NULLs and bind
-  results <- results[!vapply(results, is.null, logical(1))]
+  succeeded <- !vapply(results, is.null, logical(1))
+  failed_labels <- labels[!succeeded]
+  results <- results[succeeded]
 
   if (length(results) == 0) {
     cli::cli_abort("No data could be downloaded for the requested year(s)/UF(s).")
@@ -506,6 +506,8 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
     keep_cols <- intersect(keep_cols, names(results))
     results <- results[, keep_cols, drop = FALSE]
   }
+
+  results <- .report_download_failures(results, failed_labels, "SINASC")
 
   tibble::as_tibble(results)
 }

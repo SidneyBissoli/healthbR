@@ -393,3 +393,27 @@ test_that("sih parse converts mock data correctly", {
   expect_type(parsed$DIAS_PERM, "integer")
   expect_type(parsed$SEXO, "character")
 })
+
+
+# ============================================================================
+# consolidated download failure reporting
+# ============================================================================
+
+test_that("sih_data reports partial download failures", {
+  local_mocked_bindings(
+    .sih_validate_year = function(year, ...) as.integer(year),
+    .sih_validate_uf = function(uf) toupper(uf),
+    .sih_download_and_read = function(year, month, uf, ...) {
+      if (uf == "XX") stop("Not found")
+      tibble::tibble(year = as.integer(year), month = as.integer(month),
+                     uf_source = uf, DIAG_PRINC = "I21")
+    }
+  )
+  result <- suppressWarnings(
+    sih_data(2022, month = 1, uf = c("AC", "XX"), parse = FALSE)
+  )
+  expect_s3_class(result, "data.frame")
+  failures <- attr(result, "download_failures")
+  expect_false(is.null(failures))
+  expect_equal(failures, "XX 2022/01")
+})
