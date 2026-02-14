@@ -302,23 +302,7 @@ sim_info <- function() {
 sim_variables <- function(year = NULL, search = NULL) {
   result <- sim_variables_metadata
 
-  if (!is.null(search)) {
-    search_lower <- tolower(search)
-    # strip accents for search matching
-    search_ascii <- chartr(
-      "\u00e0\u00e1\u00e2\u00e3\u00e4\u00e7\u00e8\u00e9\u00ea\u00eb\u00ec\u00ed\u00ee\u00ef\u00f2\u00f3\u00f4\u00f5\u00f6\u00f9\u00fa\u00fb\u00fc",
-      "aaaaaceeeeiiiiooooouuuu",
-      search_lower
-    )
-    match_idx <- grepl(search_lower, tolower(result$variable), fixed = TRUE) |
-      grepl(search_lower, tolower(result$description), fixed = TRUE) |
-      grepl(search_ascii, chartr(
-        "\u00e0\u00e1\u00e2\u00e3\u00e4\u00e7\u00e8\u00e9\u00ea\u00eb\u00ec\u00ed\u00ee\u00ef\u00f2\u00f3\u00f4\u00f5\u00f6\u00f9\u00fa\u00fb\u00fc",
-        "aaaaaceeeeiiiiooooouuuu",
-        tolower(result$description)
-      ), fixed = TRUE)
-    result <- result[match_idx, ]
-  }
+  result <- .search_metadata(result, search, c("variable", "description"))
 
   result
 }

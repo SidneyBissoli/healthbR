@@ -258,16 +258,8 @@ pof_cache_dir <- function(cache_dir = NULL) {
   }
 
   # approach 3: look for files with "variav" in accent-stripped name
-  accent_from <- paste0(
-    "\u00e1\u00e9\u00ed\u00f3\u00fa\u00e0\u00e8\u00ec\u00f2\u00f9",
-    "\u00e2\u00ea\u00ee\u00f4\u00fb\u00e3\u00f5\u00e7",
-    "\u00c1\u00c9\u00cd\u00d3\u00da\u00c0\u00c8\u00cc\u00d2\u00d9",
-    "\u00c2\u00ca\u00ce\u00d4\u00db\u00c3\u00d5\u00c7",
-    "\u00fc\u00dc\u00f1\u00d1"
-  )
-  accent_to <- "aeiouaeiouaeiouaocAEIOUAEIOUAEIOUAOCuUnN"
   for (f in xls_files) {
-    bn_ascii <- chartr(accent_from, accent_to, basename(f))
+    bn_ascii <- .strip_accents(basename(f))
     if (grepl("dicion|variav", bn_ascii, ignore.case = TRUE, useBytes = TRUE)) {
       return(f)
     }
@@ -283,16 +275,6 @@ pof_cache_dir <- function(cache_dir = NULL) {
   # read all sheets from Excel file
   sheets <- readxl::excel_sheets(dict_path)
 
-  # helper to remove accents using chartr (iconv can segfault on Windows)
-  accent_from <- paste0(
-    "\u00e1\u00e9\u00ed\u00f3\u00fa\u00e0\u00e8\u00ec\u00f2\u00f9",
-    "\u00e2\u00ea\u00ee\u00f4\u00fb\u00e3\u00f5\u00e7",
-    "\u00c1\u00c9\u00cd\u00d3\u00da\u00c0\u00c8\u00cc\u00d2\u00d9",
-    "\u00c2\u00ca\u00ce\u00d4\u00db\u00c3\u00d5\u00c7",
-    "\u00fc\u00dc\u00f1\u00d1"
-  )
-  accent_to <- "aeiouaeiouaeiouaocAEIOUAEIOUAEIOUAOCuUnN"
-
   # filter to relevant sheets (register names)
   register_patterns <- c(
     "domicilio", "morador", "caderneta", "despesa",
@@ -301,7 +283,7 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
   all_dicts <- purrr::map(sheets, function(sheet) {
     # strip accents and lowercase for matching
-    sheet_ascii <- tolower(chartr(accent_from, accent_to, sheet))
+    sheet_ascii <- tolower(.strip_accents(sheet))
     is_register <- any(purrr::map_lgl(register_patterns, ~ grepl(.x, sheet_ascii)))
 
     if (!is_register) {
