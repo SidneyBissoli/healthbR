@@ -14,7 +14,9 @@ pnadc_data(
   vars = NULL,
   as_survey = FALSE,
   cache_dir = NULL,
-  refresh = FALSE
+  refresh = FALSE,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
 )
 ```
 
@@ -51,6 +53,21 @@ pnadc_data(
 
   Logical. If TRUE, re-download even if file exists in cache. Default is
   FALSE.
+
+- lazy:
+
+  Logical. If TRUE, returns a lazy query object instead of a tibble.
+  Requires the arrow package. The lazy object supports dplyr verbs
+  (filter, select, mutate, etc.) which are pushed down to the query
+  engine before collecting into memory. Call
+  [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
+  to materialize the result. Default: FALSE.
+
+- backend:
+
+  Character. Backend for lazy evaluation: `"arrow"` (default) or
+  `"duckdb"`. Only used when `lazy = TRUE`. DuckDB backend requires the
+  duckdb package.
 
 ## Value
 

@@ -14,8 +14,12 @@ sipni_data(
   uf = NULL,
   month = NULL,
   vars = NULL,
+  parse = TRUE,
+  col_types = NULL,
   cache = TRUE,
-  cache_dir = NULL
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
 )
 ```
 
@@ -50,6 +54,21 @@ sipni_data(
   [`sipni_variables()`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md)
   to see available variables.
 
+- parse:
+
+  Logical. If TRUE (default), converts columns to appropriate types
+  (integer, double, Date) based on the variable metadata. Use
+  [`sipni_variables()`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md)
+  to see the target type for each variable. Set to FALSE for
+  backward-compatible all-character output.
+
+- col_types:
+
+  Named list. Override the default type for specific columns. Names are
+  column names, values are type strings: `"character"`, `"integer"`,
+  `"double"`, `"date_dmy"`, `"date_ymd"`, `"date_ym"`, `"date"`.
+  Example: `list(QT_DOSE = "character")` to keep QT_DOSE as character.
+
 - cache:
 
   Logical. If TRUE (default), caches downloaded data for faster future
@@ -59,6 +78,21 @@ sipni_data(
 
   Character. Directory for caching. Default:
   `tools::R_user_dir("healthbR", "cache")`.
+
+- lazy:
+
+  Logical. If TRUE, returns a lazy query object instead of a tibble.
+  Requires the arrow package. The lazy object supports dplyr verbs
+  (filter, select, mutate, etc.) which are pushed down to the query
+  engine before collecting into memory. Call
+  [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
+  to materialize the result. Default: FALSE.
+
+- backend:
+
+  Character. Backend for lazy evaluation: `"arrow"` (default) or
+  `"duckdb"`. Only used when `lazy = TRUE`. DuckDB backend requires the
+  duckdb package.
 
 ## Value
 

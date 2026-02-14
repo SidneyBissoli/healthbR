@@ -92,9 +92,9 @@ name or description. Case-insensitive.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> CEP       CEP do paciente                                       char… identi…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> MUNIC_RES Município de residência (código IBGE 6 dígitos)       char… identi…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> MUNIC_MOV Município de atendimento (código IBGE 6 dígitos)      char… identi…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> NASC      Data de nascimento (aaaammdd)                         char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> NASC      Data de nascimento (aaaammdd)                         date… pacien…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> SEXO      Sexo (0=Ignorado, 1=Masculino, 3=Feminino)            char… pacien…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> IDADE     Idade (valor numérico conforme COD_IDADE)             char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> IDADE     Idade (valor numérico conforme COD_IDADE)             inte… pacien…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> COD_IDADE Código da unidade de idade (2=dias, 3=meses, 4=anos)  char… pacien…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> RACA_COR  Raça/cor (01=Branca, 02=Preta, 03=Parda, 04=Amarela,… char… pacien…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 31 more rows</span></span>
@@ -107,14 +107,14 @@ name or description. Case-insensitive.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> DIAGSEC1   Diagnóstico secundário 1 (CID-10) character clinica</span>
 <span class="r-in"><span><span class="fu">sih_variables</span><span class="op">(</span>search <span class="op">=</span> <span class="st">"valor"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   variable description                               type      section   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> IDADE    Idade (valor numérico conforme COD_IDADE) character paciente  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> VAL_SH   Valor dos serviços hospitalares           character financeiro</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> VAL_SP   Valor dos serviços profissionais          character financeiro</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> VAL_TOT  Valor total da AIH                        character financeiro</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> VAL_UTI  Valor de UTI                              character financeiro</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> US_TOT   Valor total dos procedimentos (US$)       character financeiro</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   variable description                               type    section   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> IDADE    Idade (valor numérico conforme COD_IDADE) integer paciente  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> VAL_SH   Valor dos serviços hospitalares           double  financeiro</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> VAL_SP   Valor dos serviços profissionais          double  financeiro</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> VAL_TOT  Valor total da AIH                        double  financeiro</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> VAL_UTI  Valor de UTI                              double  financeiro</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> US_TOT   Valor total dos procedimentos (US$)       double  financeiro</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

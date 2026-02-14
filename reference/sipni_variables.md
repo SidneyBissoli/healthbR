@@ -52,7 +52,7 @@ sipni_variables()
 #>  6 FX_ETARIA Faixa etária (codificada)         character paciente   
 #>  7 IMUNO     Código do imunobiológico          character vacinacao  
 #>  8 DOSE      Tipo de dose                      character vacinacao  
-#>  9 QT_DOSE   Quantidade de doses aplicadas     character vacinacao  
+#>  9 QT_DOSE   Quantidade de doses aplicadas     integer   vacinacao  
 #> 10 DOSE1     (Reservado)                       character vacinacao  
 #> 11 DOSEN     (Reservado)                       character vacinacao  
 #> 12 DIFER     (Reservado)                       character vacinacao  
@@ -64,9 +64,9 @@ sipni_variables(type = "CPNI")
 #> 2 UF       Código UF (IBGE 2 dígitos)        character localizacao
 #> 3 MUNIC    Código município (IBGE 6 dígitos) character localizacao
 #> 4 IMUNO    Código do imunobiológico          character vacinacao  
-#> 5 QT_DOSE  Quantidade de doses aplicadas     character vacinacao  
-#> 6 POP      População alvo                    character vacinacao  
-#> 7 COBERT   Cobertura vacinal (%)             character vacinacao  
+#> 5 QT_DOSE  Quantidade de doses aplicadas     integer   vacinacao  
+#> 6 POP      População alvo                    integer   vacinacao  
+#> 7 COBERT   Cobertura vacinal (%)             double    vacinacao  
 sipni_variables(type = "API")
 #> # A tibble: 47 × 4
 #>    variable                          description                   type  section
@@ -87,7 +87,7 @@ sipni_variables(search = "dose")
 #>   variable description                   type      section  
 #>   <chr>    <chr>                         <chr>     <chr>    
 #> 1 DOSE     Tipo de dose                  character vacinacao
-#> 2 QT_DOSE  Quantidade de doses aplicadas character vacinacao
+#> 2 QT_DOSE  Quantidade de doses aplicadas integer   vacinacao
 #> 3 DOSE1    (Reservado)                   character vacinacao
 #> 4 DOSEN    (Reservado)                   character vacinacao
 ```
