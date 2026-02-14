@@ -492,3 +492,34 @@ test_that("sia_data downloads different file type (BI)", {
   expect_true("month" %in% names(data))
   expect_true("uf_source" %in% names(data))
 })
+
+# ============================================================================
+# smart type parsing
+# ============================================================================
+
+test_that("sia_variables type column has non-character types", {
+  vars <- sia_variables()
+  types <- unique(vars$type)
+  expect_true("date_ym" %in% types)
+  expect_true("integer" %in% types)
+  expect_true("double" %in% types)
+  expect_equal(vars$type[vars$variable == "PA_MVM"], "date_ym")
+  expect_equal(vars$type[vars$variable == "PA_QTDPRO"], "integer")
+  expect_equal(vars$type[vars$variable == "PA_VALAPR"], "double")
+  expect_equal(vars$type[vars$variable == "PA_SEXO"], "character")
+})
+
+test_that("sia parse converts mock data correctly", {
+  mock_data <- tibble::tibble(
+    year = 2022L, month = 1L, uf_source = "AC",
+    PA_MVM = "202201", PA_QTDPRO = "10",
+    PA_VALAPR = "150.75", PA_SEXO = "1"
+  )
+  spec <- .build_type_spec(sia_variables_metadata)
+  parsed <- .parse_columns(mock_data, spec)
+
+  expect_s3_class(parsed$PA_MVM, "Date")
+  expect_type(parsed$PA_QTDPRO, "integer")
+  expect_type(parsed$PA_VALAPR, "double")
+  expect_type(parsed$PA_SEXO, "character")
+})

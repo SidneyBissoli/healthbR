@@ -6,14 +6,6 @@
 # internal helper functions
 # ============================================================================
 
-#' Check if arrow package is available
-#'
-#' @return TRUE if arrow is available, FALSE otherwise
-#' @keywords internal
-has_arrow <- function() {
-  requireNamespace("arrow", quietly = TRUE)
-}
-
 #' Get VIGITEL cache directory
 #'
 #' Returns the path to the cache directory for VIGITEL data.
@@ -24,16 +16,7 @@ has_arrow <- function() {
 #' @return Path to cache directory
 #' @keywords internal
 vigitel_cache_dir <- function(cache_dir = NULL) {
-  if (is.null(cache_dir)) {
-    cache_dir <- tools::R_user_dir("healthbR", which = "cache")
-  }
-  vigitel_dir <- file.path(cache_dir, "vigitel")
-
-  if (!dir.exists(vigitel_dir)) {
-    dir.create(vigitel_dir, recursive = TRUE)
-  }
-
-  vigitel_dir
+  .module_cache_dir("vigitel", cache_dir)
 }
 
 #' Get VIGITEL base URL
@@ -181,7 +164,7 @@ get_arrow_column_names <- function(dataset) {
 #'
 #' @keywords internal
 create_partitioned_cache <- function(df, cache_dir) {
-  if (!has_arrow()) {
+  if (!.has_arrow()) {
     cli::cli_warn(
       c(
         "Package {.pkg arrow} not available.",
@@ -192,29 +175,11 @@ create_partitioned_cache <- function(df, cache_dir) {
     return(invisible(NULL))
   }
 
-  parquet_dir <- file.path(cache_dir, "vigitel_data")
-
-  cli::cli_inform("Creating partitioned parquet cache for faster future reads...")
-
-  # identify year column
   year_col <- vigitel_identify_year_column(df)
-
-  # ensure directory exists
-  if (dir.exists(parquet_dir)) {
-    unlink(parquet_dir, recursive = TRUE)
-  }
-
-  # write partitioned by year
-  arrow::write_dataset(
-    df,
-    path = parquet_dir,
-    format = "parquet",
-    partitioning = year_col
-  )
-
-  cli::cli_alert_success("Partitioned cache created at {.path {parquet_dir}}")
-
-  invisible(parquet_dir)
+  cli::cli_inform("Creating partitioned parquet cache for faster future reads...")
+  result <- .cache_write_partitioned(df, cache_dir, "vigitel_data", year_col)
+  cli::cli_alert_success("Partitioned cache created.")
+  invisible(result)
 }
 
 #' Check if partitioned cache exists
@@ -223,8 +188,7 @@ create_partitioned_cache <- function(df, cache_dir) {
 #' @return Logical. TRUE if partitioned cache exists.
 #' @keywords internal
 has_partitioned_cache <- function(cache_dir) {
-  parquet_dir <- file.path(cache_dir, "vigitel_data")
-  dir.exists(parquet_dir) && length(list.dirs(parquet_dir, recursive = FALSE)) > 0
+  .has_partitioned_cache(cache_dir, "vigitel_data")
 }
 
 # ============================================================================
@@ -263,6 +227,15 @@ vigitel_years <- function() {
 #'   Default uses `tools::R_user_dir("healthbR", "cache")`.
 #' @param force Logical. If TRUE, re-download even if file exists in cache.
 #'   Default is FALSE.
+#'
+#' @param lazy Logical. If TRUE, returns a lazy query object instead of a
+#'   tibble. Requires the \pkg{arrow} package. The lazy object supports
+#'   dplyr verbs (filter, select, mutate, etc.) which are pushed down
+#'   to the query engine before collecting into memory. Call
+#'   \code{dplyr::collect()} to materialize the result. Default: FALSE.
+#' @param backend Character. Backend for lazy evaluation: \code{"arrow"}
+#'   (default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+#'   DuckDB backend requires the \pkg{duckdb} package.
 #'
 #' @return A tibble with VIGITEL microdata.
 #'
@@ -317,7 +290,8 @@ vigitel_data <- function(year = NULL,
                          format = c("dta", "csv"),
                          vars = NULL,
                          cache_dir = NULL,
-                         force = FALSE) {
+                         force = FALSE,
+                         lazy = FALSE, backend = c("arrow", "duckdb")) {
 
   format <- match.arg(format)
   cache_dir <- vigitel_cache_dir(cache_dir)
@@ -347,8 +321,17 @@ vigitel_data <- function(year = NULL,
   data_path <- file.path(cache_dir, data_filename)
 
   # check cache status
-  use_arrow <- has_arrow()
+  use_arrow <- .has_arrow()
   cache_exists <- has_partitioned_cache(cache_dir)
+
+  # lazy evaluation: return lazy query object if available
+  if (isTRUE(lazy) && !force) {
+    backend_choice <- match.arg(backend)
+    ds <- .lazy_return(cache_dir, "vigitel_data", backend_choice,
+                       filters = if (!is.null(year)) list(ano = as.integer(year)) else list(),
+                       select_cols = vars)
+    if (!is.null(ds)) return(ds)
+  }
 
   # FAST PATH: read from partitioned cache if available
   if (!force && cache_exists && use_arrow) {
@@ -402,6 +385,15 @@ vigitel_data <- function(year = NULL,
 
       # optionally delete source file to save space
       # unlink(data_path)
+    }
+
+    # if lazy was requested, return from cache after creation
+    if (isTRUE(lazy)) {
+      backend_choice <- match.arg(backend)
+      ds <- .lazy_return(cache_dir, "vigitel_data", backend_choice,
+                         filters = if (!is.null(year)) list(ano = as.integer(year)) else list(),
+                         select_cols = vars)
+      if (!is.null(ds)) return(ds)
     }
 
     # filter by year

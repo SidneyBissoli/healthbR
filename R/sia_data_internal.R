@@ -128,7 +128,23 @@ sia_variables_metadata <- tibble::tibble(
     "M\u00eas/ano de movimenta\u00e7\u00e3o (AAAAMM)",
     "M\u00eas/ano de compet\u00eancia (AAAAMM)"
   ),
-  type = rep("character", 28),
+  type = c(
+    # gestao
+    "character", "character", "character",
+    # procedimento
+    "character", "character", "character", "character",
+    "character", "character", "character", "character",
+    # paciente
+    "character", "character", "character", "character",
+    # diagnostico
+    "character", "character", "character",
+    # financeiro
+    "integer", "integer", "double", "double",
+    # localizacao
+    "character", "character", "character", "character",
+    # temporal
+    "date_ym", "date_ym"
+  ),
   section = c(
     # gestao
     rep("gestao", 3),

@@ -109,7 +109,7 @@ sim_variables_metadata <- tibble::tibble(
   ),
   type = c(
     # identification
-    "character", "character", "character", "character", "character",
+    "character", "date_dmy", "character", "character", "date_dmy",
     # location
     "character", "character", "character",
     # demographics
@@ -119,8 +119,8 @@ sim_variables_metadata <- tibble::tibble(
     "character", "character", "character", "character", "character",
     "character", "character", "character",
     # maternal/perinatal
-    "character", "character", "character", "character", "character",
-    "character", "character", "character",
+    "integer", "character", "character", "character", "character",
+    "character", "character", "integer",
     # investigation
     "character", "character", "character", "character",
     "character", "character", "character", "character"

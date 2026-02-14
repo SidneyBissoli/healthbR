@@ -404,3 +404,32 @@ test_that("sinan_data cache works (second call faster)", {
                                 cache_dir = cache_dir))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
+
+# ============================================================================
+# smart type parsing
+# ============================================================================
+
+test_that("sinan_variables type column has non-character types", {
+  vars <- sinan_variables()
+  types <- unique(vars$type)
+  expect_true("date_dmy" %in% types)
+  expect_true("integer" %in% types)
+  expect_equal(vars$type[vars$variable == "DT_NOTIFIC"], "date_dmy")
+  expect_equal(vars$type[vars$variable == "NU_ANO"], "integer")
+  expect_equal(vars$type[vars$variable == "CS_SEXO"], "character")
+})
+
+test_that("sinan parse converts mock data correctly", {
+  mock_data <- tibble::tibble(
+    year = 2022L, disease = "DENG",
+    DT_NOTIFIC = "15012022", NU_ANO = "2022",
+    CS_SEXO = "M", NU_IDADE_N = "4025"
+  )
+  spec <- .build_type_spec(sinan_variables_metadata)
+  parsed <- .parse_columns(mock_data, spec)
+
+  expect_s3_class(parsed$DT_NOTIFIC, "Date")
+  expect_type(parsed$NU_ANO, "integer")
+  expect_type(parsed$CS_SEXO, "character")
+  expect_type(parsed$NU_IDADE_N, "character")
+})

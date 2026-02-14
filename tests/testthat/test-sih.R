@@ -362,3 +362,34 @@ test_that("sih_data handles multiple months", {
   expect_gt(nrow(data), 0)
   expect_true(all(c(1L, 2L) %in% data$month))
 })
+
+# ============================================================================
+# smart type parsing
+# ============================================================================
+
+test_that("sih_variables type column has non-character types", {
+  vars <- sih_variables()
+  types <- unique(vars$type)
+  expect_true("date_ymd" %in% types)
+  expect_true("integer" %in% types)
+  expect_true("double" %in% types)
+  expect_equal(vars$type[vars$variable == "DT_INTER"], "date_ymd")
+  expect_equal(vars$type[vars$variable == "VAL_TOT"], "double")
+  expect_equal(vars$type[vars$variable == "DIAS_PERM"], "integer")
+  expect_equal(vars$type[vars$variable == "SEXO"], "character")
+})
+
+test_that("sih parse converts mock data correctly", {
+  mock_data <- tibble::tibble(
+    year = 2022L, month = 1L, uf_source = "AC",
+    DT_INTER = "20220115", VAL_TOT = "1500.50",
+    DIAS_PERM = "5", SEXO = "1"
+  )
+  spec <- .build_type_spec(sih_variables_metadata)
+  parsed <- .parse_columns(mock_data, spec)
+
+  expect_s3_class(parsed$DT_INTER, "Date")
+  expect_type(parsed$VAL_TOT, "double")
+  expect_type(parsed$DIAS_PERM, "integer")
+  expect_type(parsed$SEXO, "character")
+})

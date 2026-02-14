@@ -110,24 +110,24 @@ sih_variables_metadata <- tibble::tibble(
     # identificacao
     "character", "character", "character", "character", "character",
     # paciente
-    "character", "character", "character", "character", "character",
+    "date_ymd", "character", "integer", "character", "character",
     "character", "character",
     # clinica
     "character", "character", "character", "character",
     "character",
     # procedimento
-    "character", "character", "character",
+    "character", "character", "integer",
     # internacao
-    "character", "character", "character", "character", "character",
-    "character",
+    "date_ymd", "date_ymd", "character", "character", "character",
+    "integer",
     # hospital
     "character", "character", "character", "character",
     # desfecho
     "character", "character", "character",
     # financeiro
-    "character", "character", "character", "character", "character",
+    "double", "double", "double", "double", "double",
     # uti
-    "character", "character", "character"
+    "integer", "character", "integer"
   ),
   section = c(
     # identificacao

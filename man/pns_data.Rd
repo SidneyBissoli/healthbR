@@ -4,7 +4,14 @@
 \alias{pns_data}
 \title{Download PNS microdata}
 \usage{
-pns_data(year = NULL, vars = NULL, cache_dir = NULL, refresh = FALSE)
+pns_data(
+  year = NULL,
+  vars = NULL,
+  cache_dir = NULL,
+  refresh = FALSE,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+)
 }
 \arguments{
 \item{year}{Numeric or vector. Year(s) to download (2013, 2019).
@@ -18,6 +25,16 @@ Default uses \code{tools::R_user_dir("healthbR", "cache")}.}
 
 \item{refresh}{Logical. If TRUE, re-download even if file exists in cache.
 Default is FALSE.}
+
+\item{lazy}{Logical. If TRUE, returns a lazy query object instead of a
+tibble. Requires the \pkg{arrow} package. The lazy object supports
+dplyr verbs (filter, select, mutate, etc.) which are pushed down
+to the query engine before collecting into memory. Call
+\code{dplyr::collect()} to materialize the result. Default: FALSE.}
+
+\item{backend}{Character. Backend for lazy evaluation: \code{"arrow"}
+(default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+DuckDB backend requires the \pkg{duckdb} package.}
 }
 \value{
 A tibble with PNS microdata.

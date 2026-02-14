@@ -4,7 +4,17 @@
 \alias{sinan_data}
 \title{Download SINAN Notifiable Disease Microdata}
 \usage{
-sinan_data(year, disease = "DENG", vars = NULL, cache = TRUE, cache_dir = NULL)
+sinan_data(
+  year,
+  disease = "DENG",
+  vars = NULL,
+  parse = TRUE,
+  col_types = NULL,
+  cache = TRUE,
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+)
 }
 \arguments{
 \item{year}{Integer. Year(s) of the data. Required.}
@@ -16,11 +26,32 @@ sinan_data(year, disease = "DENG", vars = NULL, cache = TRUE, cache_dir = NULL)
 returns all available variables. Use \code{\link[=sinan_variables]{sinan_variables()}} to see
 available variables.}
 
+\item{parse}{Logical. If TRUE (default), converts columns to
+appropriate types (integer, double, Date) based on the variable
+metadata. Use \code{\link[=sinan_variables]{sinan_variables()}} to see the target type for each
+variable. Set to FALSE for backward-compatible all-character output.}
+
+\item{col_types}{Named list. Override the default type for specific
+columns. Names are column names, values are type strings:
+\code{"character"}, \code{"integer"}, \code{"double"},
+\code{"date_dmy"}, \code{"date_ymd"}, \code{"date_ym"}, \code{"date"}.
+Example: \code{list(DT_NOTIFIC = "character")} to keep DT_NOTIFIC as character.}
+
 \item{cache}{Logical. If TRUE (default), caches downloaded data for
 faster future access.}
 
 \item{cache_dir}{Character. Directory for caching. Default:
 \code{tools::R_user_dir("healthbR", "cache")}.}
+
+\item{lazy}{Logical. If TRUE, returns a lazy query object instead of a
+tibble. Requires the \pkg{arrow} package. The lazy object supports
+dplyr verbs (filter, select, mutate, etc.) which are pushed down
+to the query engine before collecting into memory. Call
+\code{dplyr::collect()} to materialize the result. Default: FALSE.}
+
+\item{backend}{Character. Backend for lazy evaluation: \code{"arrow"}
+(default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+DuckDB backend requires the \pkg{duckdb} package.}
 }
 \value{
 A tibble with notifiable disease microdata. Includes columns

@@ -459,3 +459,27 @@ test_that("cnes_data cache works (second call faster)", {
                                cache_dir = cache_dir))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
+
+# ============================================================================
+# smart type parsing
+# ============================================================================
+
+test_that("cnes_variables type column has date_ym for COMPETEN", {
+  vars <- cnes_variables()
+  expect_equal(vars$type[vars$variable == "COMPETEN"], "date_ym")
+  # most should still be character
+  expect_true(sum(vars$type == "character") > 20)
+})
+
+test_that("cnes parse converts mock data correctly", {
+  mock_data <- tibble::tibble(
+    year = 2023L, month = 1L, uf_source = "AC",
+    COMPETEN = "202301", CNES = "1234567", TP_UNID = "05"
+  )
+  spec <- .build_type_spec(cnes_variables_metadata)
+  parsed <- .parse_columns(mock_data, spec)
+
+  expect_s3_class(parsed$COMPETEN, "Date")
+  expect_type(parsed$CNES, "character")
+  expect_type(parsed$TP_UNID, "character")
+})

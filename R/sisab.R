@@ -230,11 +230,7 @@
 #' Get/create SISAB cache directory
 #' @noRd
 .sisab_cache_dir <- function(cache_dir = NULL) {
-  if (is.null(cache_dir)) {
-    cache_dir <- file.path(tools::R_user_dir("healthbR", "cache"), "sisab")
-  }
-  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
-  cache_dir
+  .module_cache_dir("sisab", cache_dir)
 }
 
 
@@ -254,18 +250,11 @@
   cache_base <- stringr::str_c(
     "sisab_", type, "_", level, "_", uf_part, "_", year, "_", month_part
   )
-  cache_parquet <- file.path(cache_dir, stringr::str_c(cache_base, ".parquet"))
-  cache_rds <- file.path(cache_dir, stringr::str_c(cache_base, ".rds"))
 
   # check cache
   if (isTRUE(cache)) {
-    if (file.exists(cache_parquet) &&
-        requireNamespace("arrow", quietly = TRUE)) {
-      return(arrow::read_parquet(cache_parquet))
-    }
-    if (file.exists(cache_rds)) {
-      return(readRDS(cache_rds))
-    }
+    cached <- .cache_read(cache_dir, cache_base)
+    if (!is.null(cached)) return(cached)
   }
 
   # fetch from API
@@ -281,17 +270,7 @@
 
   # write to cache
   if (isTRUE(cache)) {
-    if (requireNamespace("arrow", quietly = TRUE)) {
-      tryCatch(
-        arrow::write_parquet(data, cache_parquet),
-        error = function(e) {
-          cli::cli_warn("Failed to write parquet cache: {e$message}")
-          saveRDS(data, cache_rds)
-        }
-      )
-    } else {
-      saveRDS(data, cache_rds)
-    }
+    .cache_write(data, cache_dir, cache_base)
   }
 
   data
@@ -553,7 +532,7 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
   }
 
   # download each combination
-  results <- purrr::map(seq_len(n_combos), function(i) {
+  results <- .map_parallel(seq_len(n_combos), function(i) {
     yr <- combinations$year[i]
     uf_val <- target_ufs[[combinations$uf_idx[i]]]
 

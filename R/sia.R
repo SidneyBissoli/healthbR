@@ -127,39 +127,55 @@
 #' Get/create SIA cache directory
 #' @noRd
 .sia_cache_dir <- function(cache_dir = NULL) {
-  if (is.null(cache_dir)) {
-    cache_dir <- file.path(tools::R_user_dir("healthbR", "cache"), "sia")
-  }
-  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
-  cache_dir
+  .module_cache_dir("sia", cache_dir)
 }
 
 
 #' Download and read a SIA .dbc file for one UF/year/month/type
+#'
+#' Returns a tibble with `year`, `month`, and `uf_source` columns already added.
+#' Uses partitioned cache (Hive-style) when arrow is available, with
+#' flat cache as migration fallback.
+#'
 #' @noRd
 .sia_download_and_read <- function(year, month, uf, type = "PA",
                                    cache = TRUE, cache_dir = NULL) {
   cache_dir <- .sia_cache_dir(cache_dir)
+  dataset_name <- "sia_data"
+  target_year <- as.integer(year)
+  target_month <- as.integer(month)
+  target_uf <- uf
 
-  # determine cache file path (includes type and month)
-  cache_base <- stringr::str_c(
-    "sia_", type, "_", uf, "_", year, sprintf("%02d", month)
-  )
-  cache_parquet <- file.path(cache_dir, stringr::str_c(cache_base, ".parquet"))
-  cache_rds <- file.path(cache_dir, stringr::str_c(cache_base, ".rds"))
+  # 1. check partitioned cache first (preferred path)
+  if (isTRUE(cache) && .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)) {
+    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+    cached <- ds |>
+      dplyr::filter(.data$uf_source == target_uf,
+                     .data$year == target_year,
+                     .data$month == target_month) |>
+      dplyr::collect()
+    if (nrow(cached) > 0) return(cached)
+  }
 
-  # check cache
+  # 2. fall back to flat cache (migration from old format)
   if (isTRUE(cache)) {
-    if (file.exists(cache_parquet) &&
-        requireNamespace("arrow", quietly = TRUE)) {
-      return(arrow::read_parquet(cache_parquet))
-    }
-    if (file.exists(cache_rds)) {
-      return(readRDS(cache_rds))
+    flat_base <- stringr::str_c(
+      "sia_", type, "_", uf, "_", year, sprintf("%02d", month)
+    )
+    flat_cached <- .cache_read(cache_dir, flat_base)
+    if (!is.null(flat_cached)) {
+      flat_cached$year <- target_year
+      flat_cached$month <- target_month
+      flat_cached$uf_source <- target_uf
+      cols <- names(flat_cached)
+      flat_cached <- flat_cached[, c("year", "month", "uf_source",
+                                      setdiff(cols, c("year", "month", "uf_source")))]
+      return(flat_cached)
     }
   }
 
-  # build URL and download
+  # 3. download from FTP
   url <- .sia_build_ftp_url(year, month, uf, type)
   temp_dbc <- tempfile(fileext = ".dbc")
   on.exit(if (file.exists(temp_dbc)) file.remove(temp_dbc), add = TRUE)
@@ -182,19 +198,18 @@
   # read .dbc
   data <- .read_dbc(temp_dbc)
 
-  # write to cache
+  # add partition columns
+  data$year <- target_year
+  data$month <- target_month
+  data$uf_source <- target_uf
+  cols <- names(data)
+  data <- data[, c("year", "month", "uf_source",
+                    setdiff(cols, c("year", "month", "uf_source")))]
+
+  # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    if (requireNamespace("arrow", quietly = TRUE)) {
-      tryCatch(
-        arrow::write_parquet(data, cache_parquet),
-        error = function(e) {
-          cli::cli_warn("Failed to write parquet cache: {e$message}")
-          saveRDS(data, cache_rds)
-        }
-      )
-    } else {
-      saveRDS(data, cache_rds)
-    }
+    .cache_append_partitioned(data, cache_dir, dataset_name,
+                              c("uf_source", "year", "month"))
   }
 
   data
@@ -409,10 +424,27 @@ sia_dictionary <- function(variable = NULL) {
 #'   diagnosis (\code{PA_CIDPRI}). Supports partial matching (prefix).
 #'   If NULL (default), returns all diagnoses.
 #'   Example: \code{"J"} (respiratory diseases).
+#' @param parse Logical. If TRUE (default), converts columns to
+#'   appropriate types (integer, double, Date) based on the variable
+#'   metadata. Use \code{\link{sia_variables}()} to see the target type for each
+#'   variable. Set to FALSE for backward-compatible all-character output.
+#' @param col_types Named list. Override the default type for specific
+#'   columns. Names are column names, values are type strings:
+#'   \code{"character"}, \code{"integer"}, \code{"double"},
+#'   \code{"date_dmy"}, \code{"date_ymd"}, \code{"date_ym"}, \code{"date"}.
+#'   Example: \code{list(PA_VALAPR = "character")} to keep PA_VALAPR as character.
 #' @param cache Logical. If TRUE (default), caches downloaded data for
 #'   faster future access.
 #' @param cache_dir Character. Directory for caching. Default:
 #'   \code{tools::R_user_dir("healthbR", "cache")}.
+#' @param lazy Logical. If TRUE, returns a lazy query object instead of a
+#'   tibble. Requires the \pkg{arrow} package. The lazy object supports
+#'   dplyr verbs (filter, select, mutate, etc.) which are pushed down
+#'   to the query engine before collecting into memory. Call
+#'   \code{dplyr::collect()} to materialize the result. Default: FALSE.
+#' @param backend Character. Backend for lazy evaluation: \code{"arrow"}
+#'   (default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+#'   DuckDB backend requires the \pkg{duckdb} package.
 #'
 #' @return A tibble with outpatient production microdata. Includes columns
 #'   \code{year}, \code{month}, and \code{uf_source} to identify the source
@@ -457,7 +489,9 @@ sia_dictionary <- function(variable = NULL) {
 #' med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
 sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
                      procedure = NULL, diagnosis = NULL,
-                     cache = TRUE, cache_dir = NULL) {
+                     parse = TRUE, col_types = NULL,
+                     cache = TRUE, cache_dir = NULL,
+                     lazy = FALSE, backend = c("arrow", "duckdb")) {
 
   # validate inputs
   year <- .sia_validate_year(year)
@@ -468,6 +502,21 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
 
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sia_uf_list
+
+  # lazy evaluation: return from partitioned cache if available
+  if (isTRUE(lazy)) {
+    if (isTRUE(parse)) {
+      cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
+    }
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .sia_cache_dir(cache_dir)
+    filters <- list(year = year, uf_source = target_ufs)
+    if (!is.null(month)) filters$month <- as.integer(month)
+    select_cols <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, "sia_data", backend,
+                       filters = filters, select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
 
   # build all year x month x UF combinations
   combinations <- expand.grid(
@@ -483,22 +532,14 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
   }
 
   # download and read each combination
-  results <- purrr::map(seq_len(n_combos), function(i) {
+  results <- .map_parallel(seq_len(n_combos), function(i) {
     yr <- combinations$year[i]
     mo <- combinations$month[i]
     st <- combinations$uf[i]
 
     tryCatch({
-      data <- .sia_download_and_read(yr, mo, st, type = type,
-                                     cache = cache, cache_dir = cache_dir)
-      data$year <- as.integer(yr)
-      data$month <- as.integer(mo)
-      data$uf_source <- st
-      # move year, month, and uf_source to front
-      cols <- names(data)
-      data <- data[, c("year", "month", "uf_source",
-                        setdiff(cols, c("year", "month", "uf_source")))]
-      data
+      .sia_download_and_read(yr, mo, st, type = type,
+                             cache = cache, cache_dir = cache_dir)
     }, error = function(e) {
       cli::cli_warn(c(
         "!" = "Failed to download/read SIA data for {type} {st} {yr}/{sprintf('%02d', mo)}.",
@@ -518,6 +559,24 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
   }
 
   results <- dplyr::bind_rows(results)
+
+  # if lazy was requested, return from cache after download
+  if (isTRUE(lazy)) {
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .sia_cache_dir(cache_dir)
+    filters <- list(year = year, uf_source = target_ufs)
+    if (!is.null(month)) filters$month <- as.integer(month)
+    select_cols <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, "sia_data", backend,
+                       filters = filters, select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
+
+  # parse column types
+  if (isTRUE(parse) && !isTRUE(lazy)) {
+    type_spec <- .build_type_spec(sia_variables_metadata)
+    results <- .parse_columns(results, type_spec, col_types = col_types)
+  }
 
   # filter by procedure if requested
   if (!is.null(procedure)) {

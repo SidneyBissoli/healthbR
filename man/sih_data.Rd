@@ -10,8 +10,12 @@ sih_data(
   vars = NULL,
   uf = NULL,
   diagnosis = NULL,
+  parse = TRUE,
+  col_types = NULL,
   cache = TRUE,
-  cache_dir = NULL
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
 )
 }
 \arguments{
@@ -33,11 +37,32 @@ diagnosis (\code{DIAG_PRINC}). Supports partial matching (prefix).
 If NULL (default), returns all diagnoses.
 Example: \code{"I21"} (acute myocardial infarction), \code{"J"} (respiratory).}
 
+\item{parse}{Logical. If TRUE (default), converts columns to
+appropriate types (integer, double, Date) based on the variable
+metadata. Use \code{\link[=sih_variables]{sih_variables()}} to see the target type for each
+variable. Set to FALSE for backward-compatible all-character output.}
+
+\item{col_types}{Named list. Override the default type for specific
+columns. Names are column names, values are type strings:
+\code{"character"}, \code{"integer"}, \code{"double"},
+\code{"date_dmy"}, \code{"date_ymd"}, \code{"date_ym"}, \code{"date"}.
+Example: \code{list(VAL_TOT = "character")} to keep VAL_TOT as character.}
+
 \item{cache}{Logical. If TRUE (default), caches downloaded data for
 faster future access.}
 
 \item{cache_dir}{Character. Directory for caching. Default:
 \code{tools::R_user_dir("healthbR", "cache")}.}
+
+\item{lazy}{Logical. If TRUE, returns a lazy query object instead of a
+tibble. Requires the \pkg{arrow} package. The lazy object supports
+dplyr verbs (filter, select, mutate, etc.) which are pushed down
+to the query engine before collecting into memory. Call
+\code{dplyr::collect()} to materialize the result. Default: FALSE.}
+
+\item{backend}{Character. Backend for lazy evaluation: \code{"arrow"}
+(default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+DuckDB backend requires the \pkg{duckdb} package.}
 }
 \value{
 A tibble with hospital admission microdata. Includes columns

@@ -10,7 +10,9 @@ pof_data(
   vars = NULL,
   cache_dir = NULL,
   as_survey = FALSE,
-  refresh = FALSE
+  refresh = FALSE,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
 )
 }
 \arguments{
@@ -31,6 +33,16 @@ Requires srvyr package. Default is FALSE.}
 
 \item{refresh}{Logical. If TRUE, re-download even if file exists in cache.
 Default is FALSE.}
+
+\item{lazy}{Logical. If TRUE, returns a lazy query object instead of a
+tibble. Requires the \pkg{arrow} package. The lazy object supports
+dplyr verbs (filter, select, mutate, etc.) which are pushed down
+to the query engine before collecting into memory. Call
+\code{dplyr::collect()} to materialize the result. Default: FALSE.}
+
+\item{backend}{Character. Backend for lazy evaluation: \code{"arrow"}
+(default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+DuckDB backend requires the \pkg{duckdb} package.}
 }
 \value{
 A tibble with microdata, or tbl_svy if as_survey = TRUE.

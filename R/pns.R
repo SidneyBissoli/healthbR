@@ -236,25 +236,10 @@ pns_sidra_catalog_internal$theme_label <- sidra_theme_labels[pns_sidra_catalog_i
 # internal helper functions
 # ============================================================================
 
-#' Check if arrow package is available
-#' @noRd
-pns_has_arrow <- function() {
-  requireNamespace("arrow", quietly = TRUE)
-}
-
 #' Get PNS cache directory
 #' @noRd
 pns_cache_dir <- function(cache_dir = NULL) {
-  if (is.null(cache_dir)) {
-    cache_dir <- tools::R_user_dir("healthbR", which = "cache")
-  }
-  pns_dir <- file.path(cache_dir, "pns")
-
-  if (!dir.exists(pns_dir)) {
-    dir.create(pns_dir, recursive = TRUE)
-  }
-
-  pns_dir
+  .module_cache_dir("pns", cache_dir)
 }
 
 #' Validate PNS year parameter
@@ -900,6 +885,15 @@ pns_variables <- function(year = 2019,
 #' @param refresh Logical. If TRUE, re-download even if file exists in cache.
 #'   Default is FALSE.
 #'
+#' @param lazy Logical. If TRUE, returns a lazy query object instead of a
+#'   tibble. Requires the \pkg{arrow} package. The lazy object supports
+#'   dplyr verbs (filter, select, mutate, etc.) which are pushed down
+#'   to the query engine before collecting into memory. Call
+#'   \code{dplyr::collect()} to materialize the result. Default: FALSE.
+#' @param backend Character. Backend for lazy evaluation: \code{"arrow"}
+#'   (default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+#'   DuckDB backend requires the \pkg{duckdb} package.
+#'
 #' @return A tibble with PNS microdata.
 #'
 #' @details
@@ -939,7 +933,8 @@ pns_variables <- function(year = 2019,
 pns_data <- function(year = NULL,
                      vars = NULL,
                      cache_dir = NULL,
-                     refresh = FALSE) {
+                     refresh = FALSE,
+                     lazy = FALSE, backend = c("arrow", "duckdb")) {
 
   # validate year
   year <- validate_pns_year(year)
@@ -947,38 +942,71 @@ pns_data <- function(year = NULL,
   # set cache directory
   cache_dir <- pns_cache_dir(cache_dir)
 
-  # download and load data for each year
-  data_list <- purrr::map(year, function(y) {
-    # check for parquet cache first
-    use_parquet <- pns_has_arrow()
-    cache_file <- file.path(cache_dir, paste0("pns_", y, if (use_parquet) ".parquet" else ".rds"))
+  # lazy evaluation: return from partitioned cache if available
+  if (isTRUE(lazy)) {
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .module_cache_dir("pns", cache_dir)
+    year_filter <- if (!is.null(year)) as.character(year) else NULL
+    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, "pns_data", backend,
+                       filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
+                       select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
 
-    if (file.exists(cache_file) && !refresh) {
-      cli::cli_inform("Loading PNS {y} from cache...")
-      if (use_parquet) {
-        return(arrow::read_parquet(cache_file))
-      } else {
-        return(readRDS(cache_file))
+  # download and load data for each year
+  dataset_name <- "pns_data"
+
+  data_list <- .map_parallel(year, function(y) {
+    target_year <- as.character(y)
+
+    # 1. check partitioned cache first (preferred path)
+    if (!refresh && .has_arrow() &&
+        .has_partitioned_cache(cache_dir, dataset_name)) {
+      ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+      cached <- ds |>
+        dplyr::filter(.data$year == target_year) |>
+        dplyr::collect()
+      if (nrow(cached) > 0) {
+        cli::cli_inform("Loading PNS {y} from cache...")
+        return(cached)
       }
     }
 
-    # download and read
+    # 2. fall back to flat cache (migration from old format)
+    if (!refresh) {
+      flat_base <- paste0("pns_", y)
+      flat_cached <- .cache_read(cache_dir, flat_base)
+      if (!is.null(flat_cached)) {
+        cli::cli_inform("Loading PNS {y} from cache...")
+        return(flat_cached)
+      }
+    }
+
+    # 3. download and read
     zip_path <- pns_download_data(y, cache_dir, refresh)
     data <- pns_read_microdata(zip_path, y)
 
-    # save to cache
-    cli::cli_inform("Saving to cache...")
-    if (use_parquet) {
-      arrow::write_parquet(data, cache_file)
-    } else {
-      saveRDS(data, cache_file)
-    }
+    # 4. write to partitioned cache
+    .cache_append_partitioned(data, cache_dir, dataset_name, c("year"))
 
     data
   })
 
   # combine all years
   combined_data <- dplyr::bind_rows(data_list)
+
+  # if lazy was requested, return from cache after download
+  if (isTRUE(lazy)) {
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .module_cache_dir("pns", cache_dir)
+    year_filter <- if (!is.null(year)) as.character(year) else NULL
+    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, "pns_data", backend,
+                       filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
+                       select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
 
   # select variables if specified
   if (!is.null(vars)) {

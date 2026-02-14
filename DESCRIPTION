@@ -46,6 +46,10 @@ Suggests:
     furrr,
     future,
     arrow,
+    DBI,
+    duckdb,
+    vroom,
+    piggyback,
     survey,
     srvyr
 Config/testthat/edition: 3

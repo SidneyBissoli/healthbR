@@ -106,23 +106,23 @@ sinasc_variables_metadata <- tibble::tibble(
   ),
   type = c(
     # recem_nascido
-    "character", "character", "character", "character", "character",
-    "character", "character", "character", "character",
+    "date_dmy", "character", "character", "character", "integer",
+    "integer", "integer", "character", "character",
     # materna
-    "character", "character", "character", "character",
-    "character", "character", "character", "character",
+    "integer", "character", "character", "character",
+    "character", "character", "integer", "integer",
     "character",
     # gestacao
-    "character", "character", "character", "character",
-    "character", "character",
+    "character", "integer", "character", "character",
+    "integer", "character",
     # parto
     "character", "character", "character", "character",
     # localizacao
     "character", "character", "character", "character",
     "character",
     # administrativa
-    "character", "character", "character", "character",
-    "character", "character", "character", "character",
+    "character", "character", "character", "date_dmy",
+    "date_dmy", "integer", "character", "character",
     "character", "character", "character"
   ),
   section = c(

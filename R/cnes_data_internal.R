@@ -123,7 +123,21 @@ cnes_variables_metadata <- tibble::tibble(
     "Data de carga dos dados",
     "Data de atualiza\u00e7\u00e3o do cadastro"
   ),
-  type = rep("character", 27),
+  type = c(
+    # identificacao
+    "character", "character", "character", "character", "character",
+    "character", "character", "character",
+    # classificacao
+    "character", "character", "character", "character",
+    # sus
+    "character", "character", "character", "character",
+    "character", "character",
+    # atendimento
+    "character", "character", "character", "character",
+    "character", "character",
+    # temporal
+    "date_ym", "character", "character"
+  ),
   section = c(
     # identificacao
     rep("identificacao", 8),

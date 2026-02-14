@@ -134,19 +134,19 @@ sinan_variables_metadata <- tibble::tibble(
   ),
   type = c(
     # notificacao
-    "character", "character", "character", "character", "character",
-    "character", "character", "character",
+    "character", "character", "character", "date_dmy", "character",
+    "integer", "date_dmy", "character",
     # paciente
-    "character", "character", "character", "character", "character",
+    "character", "date_dmy", "character", "character", "character",
     "character", "character",
     # residencia
     "character", "character", "character", "character",
     "character", "character", "character",
     # investigacao
-    "character", "character", "character", "character",
-    "character", "character",
+    "character", "character", "character", "date_dmy",
+    "date_dmy", "date_dmy",
     # temporal
-    "character", "character", "character", "character"
+    "date_dmy", "character", "character", "character"
   ),
   section = c(
     # notificacao

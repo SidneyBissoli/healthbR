@@ -195,8 +195,8 @@ test_that("pnadc_clear_cache validates module parameter", {
 # helper function tests
 # ============================================================================
 
-test_that("pnadc_has_arrow returns logical", {
-  result <- pnadc_has_arrow()
+test_that(".has_arrow returns logical", {
+  result <- healthbR:::.has_arrow()
   expect_type(result, "logical")
 })
 

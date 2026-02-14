@@ -86,12 +86,6 @@ pnadc_required_vars <- function() {
 # internal helper functions
 # ============================================================================
 
-#' Check if arrow package is available
-#' @noRd
-pnadc_has_arrow <- function() {
-  requireNamespace("arrow", quietly = TRUE)
-}
-
 #' Check if srvyr package is available
 #' @noRd
 pnadc_has_srvyr <- function() {
@@ -101,16 +95,7 @@ pnadc_has_srvyr <- function() {
 #' Get PNADC cache directory
 #' @noRd
 pnadc_cache_dir <- function(cache_dir = NULL) {
-  if (is.null(cache_dir)) {
-    cache_dir <- tools::R_user_dir("healthbR", which = "cache")
-  }
-  pnadc_dir <- file.path(cache_dir, "pnadc")
-
-  if (!dir.exists(pnadc_dir)) {
-    dir.create(pnadc_dir, recursive = TRUE)
-  }
-
- pnadc_dir
+  .module_cache_dir("pnadc", cache_dir)
 }
 
 #' Validate PNADC module parameter
@@ -736,6 +721,15 @@ pnadc_variables <- function(module,
 #' @param refresh Logical. If TRUE, re-download even if file exists in cache.
 #'   Default is FALSE.
 #'
+#' @param lazy Logical. If TRUE, returns a lazy query object instead of a
+#'   tibble. Requires the \pkg{arrow} package. The lazy object supports
+#'   dplyr verbs (filter, select, mutate, etc.) which are pushed down
+#'   to the query engine before collecting into memory. Call
+#'   \code{dplyr::collect()} to materialize the result. Default: FALSE.
+#' @param backend Character. Backend for lazy evaluation: \code{"arrow"}
+#'   (default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+#'   DuckDB backend requires the \pkg{duckdb} package.
+#'
 #' @return A tibble with PNADC microdata, or a `srvyr` survey design object
 #'   if `as_survey = TRUE`.
 #'
@@ -792,7 +786,8 @@ pnadc_data <- function(module,
                        vars = NULL,
                        as_survey = FALSE,
                        cache_dir = NULL,
-                       refresh = FALSE) {
+                       refresh = FALSE,
+                       lazy = FALSE, backend = c("arrow", "duckdb")) {
   # validate parameters
   module <- validate_pnadc_module(module)
   years <- validate_pnadc_year(year, module)
@@ -800,24 +795,49 @@ pnadc_data <- function(module,
   # set cache directory
   cache_dir <- pnadc_cache_dir(cache_dir)
 
-  # download and load data for each year
-  data_list <- purrr::map(years, function(y) {
-    # check for parquet cache first
-    use_parquet <- pnadc_has_arrow()
-    cache_file <- file.path(
-      cache_dir,
-      paste0("pnadc_", module, "_", y, if (use_parquet) ".parquet" else ".rds")
-    )
+  # lazy evaluation: return from partitioned cache if available
+  if (isTRUE(lazy)) {
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .module_cache_dir("pnadc", cache_dir)
+    ds_name <- paste0("pnadc_", module, "_data")
+    year_filter <- if (!is.null(year)) as.integer(year) else NULL
+    select_cols <- if (!is.null(vars)) unique(c("year", "pnadc_module", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
+                       filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
+                       select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
 
-    if (file.exists(cache_file) && !refresh) {
-      cli::cli_inform("Loading PNADC {module} {y} from cache...")
-      if (use_parquet) {
-        return(arrow::read_parquet(cache_file))
-      } else {
-        return(readRDS(cache_file))
+  # download and load data for each year
+  dataset_name <- paste0("pnadc_", module, "_data")
+
+  data_list <- .map_parallel(years, function(y) {
+    target_year <- as.integer(y)
+
+    # 1. check partitioned cache first (preferred path)
+    if (!refresh && .has_arrow() &&
+        .has_partitioned_cache(cache_dir, dataset_name)) {
+      ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+      cached <- ds |>
+        dplyr::filter(.data$year == target_year) |>
+        dplyr::collect()
+      if (nrow(cached) > 0) {
+        cli::cli_inform("Loading PNADC {module} {y} from cache...")
+        return(cached)
       }
     }
 
+    # 2. fall back to flat cache (migration from old format)
+    if (!refresh) {
+      flat_base <- paste0("pnadc_", module, "_", y)
+      flat_cached <- .cache_read(cache_dir, flat_base)
+      if (!is.null(flat_cached)) {
+        cli::cli_inform("Loading PNADC {module} {y} from cache...")
+        return(flat_cached)
+      }
+    }
+
+    # 3. download and read
     # find the correct URL for this module and year
     url_info <- pnadc_find_data_url(module, y)
     zip_path <- file.path(cache_dir, url_info$data_filename)
@@ -838,23 +858,31 @@ pnadc_data <- function(module,
     # read data
     data <- pnadc_read_zip(zip_path, input_path, module, y)
 
-    # add module identifier
+    # add module identifier and year partition column
     data <- data |>
-      dplyr::mutate(pnadc_module = module, .before = 1)
+      dplyr::mutate(year = target_year, pnadc_module = module, .before = 1)
 
-    # save to cache
-    cli::cli_inform("Saving to cache...")
-    if (use_parquet) {
-      arrow::write_parquet(data, cache_file)
-    } else {
-      saveRDS(data, cache_file)
-    }
+    # 4. write to partitioned cache
+    .cache_append_partitioned(data, cache_dir, dataset_name, c("year"))
 
     data
   })
 
   # combine all years
   combined_data <- dplyr::bind_rows(data_list)
+
+  # if lazy was requested, return from cache after download
+  if (isTRUE(lazy)) {
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .module_cache_dir("pnadc", cache_dir)
+    ds_name <- paste0("pnadc_", module, "_data")
+    year_filter <- if (!is.null(year)) as.integer(year) else NULL
+    select_cols <- if (!is.null(vars)) unique(c("year", "pnadc_module", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
+                       filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
+                       select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
 
   # select variables if specified
   if (!is.null(vars)) {

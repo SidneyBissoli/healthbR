@@ -285,3 +285,37 @@ test_that("sim_data cache works (second call faster)", {
   t2 <- system.time(sim_data(year = 2022, uf = "AC", cache_dir = cache_dir))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
+
+# ============================================================================
+# smart type parsing
+# ============================================================================
+
+test_that("sim_variables type column has non-character types", {
+  vars <- sim_variables()
+  types <- unique(vars$type)
+  expect_true("date_dmy" %in% types)
+  expect_true("integer" %in% types)
+  expect_true("character" %in% types)
+  # specific checks
+  expect_equal(vars$type[vars$variable == "DTOBITO"], "date_dmy")
+  expect_equal(vars$type[vars$variable == "PESO"], "integer")
+  expect_equal(vars$type[vars$variable == "SEXO"], "character")
+})
+
+test_that("sim_data parse = FALSE returns all character", {
+  # create mock data as if downloaded
+  mock_data <- tibble::tibble(
+    year = 2022L, uf_source = "AC",
+    DTOBITO = "25122022", PESO = "3500", SEXO = "M",
+    IDADE = "4025", IDADEMAE = "30"
+  )
+
+  # simulate what parse = FALSE should preserve
+  spec <- .build_type_spec(sim_variables_metadata)
+  parsed <- .parse_columns(mock_data, spec)
+
+  expect_s3_class(parsed$DTOBITO, "Date")
+  expect_type(parsed$PESO, "integer")
+  expect_type(parsed$SEXO, "character")
+  expect_type(parsed$IDADEMAE, "integer")
+})

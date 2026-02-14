@@ -90,7 +90,16 @@ sipni_variables_dpni <- tibble::tibble(
     "(Reservado)",
     "(Reservado)"
   ),
-  type = rep("character", 12),
+  type = c(
+    # temporal
+    "character", "character", "character",
+    # localizacao
+    "character", "character",
+    # paciente
+    "character",
+    # vacinacao
+    "character", "character", "integer", "character", "character", "character"
+  ),
   section = c(
     # temporal
     rep("temporal", 3),
@@ -130,7 +139,14 @@ sipni_variables_cpni <- tibble::tibble(
     "Popula\u00e7\u00e3o alvo",
     "Cobertura vacinal (%)"
   ),
-  type = rep("character", 7),
+  type = c(
+    # temporal
+    "character",
+    # localizacao
+    "character", "character",
+    # vacinacao
+    "character", "integer", "integer", "double"
+  ),
   section = c(
     "temporal",
     rep("localizacao", 2),
@@ -308,7 +324,26 @@ sipni_variables_api <- tibble::tibble(
     "C\u00f3digo condi\u00e7\u00e3o maternal",
     "Descri\u00e7\u00e3o condi\u00e7\u00e3o maternal"
   ),
-  type = rep("character", 47),
+  type = c(
+    # establishment (11)
+    "character", "character", "character", "character", "character",
+    "character", "character", "character", "character", "character",
+    "character",
+    # patient (15)
+    "character", "character", "integer", "character", "character",
+    "character", "character", "character", "character", "character",
+    "character", "character", "character", "character", "character",
+    # vaccine (9)
+    "character", "character", "character", "character", "character",
+    "character", "character", "character", "date",
+    # administration (4)
+    "character", "character", "character", "character",
+    # strategy (6)
+    "character", "character", "character", "character",
+    "character", "character",
+    # maternal (2)
+    "character", "character"
+  ),
   section = c(
     rep("estabelecimento", 11),
     rep("paciente", 15),

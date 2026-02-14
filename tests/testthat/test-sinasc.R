@@ -305,3 +305,33 @@ test_that("sinasc_data handles multiple UFs", {
   expect_gt(nrow(data), 0)
   expect_true(all(c("AC", "RR") %in% data$uf_source))
 })
+
+# ============================================================================
+# smart type parsing
+# ============================================================================
+
+test_that("sinasc_variables type column has non-character types", {
+  vars <- sinasc_variables()
+  types <- unique(vars$type)
+  expect_true("date_dmy" %in% types)
+  expect_true("integer" %in% types)
+  expect_equal(vars$type[vars$variable == "DTNASC"], "date_dmy")
+  expect_equal(vars$type[vars$variable == "PESO"], "integer")
+  expect_equal(vars$type[vars$variable == "APGAR1"], "integer")
+  expect_equal(vars$type[vars$variable == "SEXO"], "character")
+})
+
+test_that("sinasc parse converts mock data correctly", {
+  mock_data <- tibble::tibble(
+    year = 2022L, uf_source = "AC",
+    DTNASC = "25122022", PESO = "3500", APGAR1 = "8",
+    SEXO = "1", IDADEMAE = "30"
+  )
+  spec <- .build_type_spec(sinasc_variables_metadata)
+  parsed <- .parse_columns(mock_data, spec)
+
+  expect_s3_class(parsed$DTNASC, "Date")
+  expect_type(parsed$PESO, "integer")
+  expect_type(parsed$APGAR1, "integer")
+  expect_type(parsed$SEXO, "character")
+})

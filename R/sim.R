@@ -103,11 +103,7 @@
 #' Get/create SIM cache directory
 #' @noRd
 .sim_cache_dir <- function(cache_dir = NULL) {
-  if (is.null(cache_dir)) {
-    cache_dir <- file.path(tools::R_user_dir("healthbR", "cache"), "sim")
-  }
-  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
-  cache_dir
+  .module_cache_dir("sim", cache_dir)
 }
 
 
@@ -144,29 +140,45 @@
 
 
 #' Download and read a SIM .dbc file for one UF/year
+#'
+#' Returns a tibble with `year` and `uf_source` columns already added.
+#' Uses partitioned cache (Hive-style) when arrow is available, with
+#' flat cache as migration fallback.
+#'
 #' @noRd
 .sim_download_and_read <- function(year, uf, cache = TRUE, cache_dir = NULL) {
   cache_dir <- .sim_cache_dir(cache_dir)
+  dataset_name <- "sim_data"
+  target_year <- as.integer(year)
+  target_uf <- uf
 
-  # determine cache file path
-  cache_base <- stringr::str_c("sim_", uf, "_", year)
-  cache_parquet <- file.path(cache_dir, stringr::str_c(cache_base, ".parquet"))
-  cache_rds <- file.path(cache_dir, stringr::str_c(cache_base, ".rds"))
+  # 1. check partitioned cache first (preferred path)
+  if (isTRUE(cache) && .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)) {
+    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+    cached <- ds |>
+      dplyr::filter(.data$uf_source == target_uf,
+                     .data$year == target_year) |>
+      dplyr::collect()
+    if (nrow(cached) > 0) return(cached)
+  }
 
-  # check cache
+  # 2. fall back to flat cache (migration from old format)
   if (isTRUE(cache)) {
-    if (file.exists(cache_parquet) &&
-        requireNamespace("arrow", quietly = TRUE)) {
-      return(arrow::read_parquet(cache_parquet))
-    }
-    if (file.exists(cache_rds)) {
-      return(readRDS(cache_rds))
+    flat_base <- stringr::str_c("sim_", uf, "_", year)
+    flat_cached <- .cache_read(cache_dir, flat_base)
+    if (!is.null(flat_cached)) {
+      flat_cached$year <- target_year
+      flat_cached$uf_source <- target_uf
+      cols <- names(flat_cached)
+      flat_cached <- flat_cached[, c("year", "uf_source",
+                                      setdiff(cols, c("year", "uf_source")))]
+      return(flat_cached)
     }
   }
 
-  # build URL and download
-
-url <- .sim_build_ftp_url(year, uf)
+  # 3. download from FTP
+  url <- .sim_build_ftp_url(year, uf)
   temp_dbc <- tempfile(fileext = ".dbc")
   on.exit(if (file.exists(temp_dbc)) file.remove(temp_dbc), add = TRUE)
 
@@ -176,7 +188,6 @@ url <- .sim_build_ftp_url(year, uf)
 
   .datasus_download(url, temp_dbc)
 
-  # check file size
   if (file.size(temp_dbc) < 100) {
     cli::cli_abort(c(
       "Downloaded file appears corrupted (too small).",
@@ -185,22 +196,18 @@ url <- .sim_build_ftp_url(year, uf)
     ))
   }
 
-  # read .dbc
   data <- .read_dbc(temp_dbc)
 
-  # write to cache
+  # add partition columns
+  data$year <- target_year
+  data$uf_source <- target_uf
+  cols <- names(data)
+  data <- data[, c("year", "uf_source", setdiff(cols, c("year", "uf_source")))]
+
+  # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    if (requireNamespace("arrow", quietly = TRUE)) {
-      tryCatch(
-        arrow::write_parquet(data, cache_parquet),
-        error = function(e) {
-          cli::cli_warn("Failed to write parquet cache: {e$message}")
-          saveRDS(data, cache_rds)
-        }
-      )
-    } else {
-      saveRDS(data, cache_rds)
-    }
+    .cache_append_partitioned(data, cache_dir, dataset_name,
+                              c("uf_source", "year"))
   }
 
   data
@@ -398,10 +405,28 @@ sim_dictionary <- function(variable = NULL) {
 #'   Example: `"I21"` (infarct), `"C"` (all neoplasms).
 #' @param decode_age Logical. If TRUE (default), adds a numeric column
 #'   `age_years` with age in years decoded from the `IDADE` variable.
+#' @param parse Logical. If TRUE (default), converts columns to
+#'   appropriate types (integer, double, Date) based on the variable
+#'   metadata. Use [sim_variables()] to see the target type for each
+#'   variable. Set to FALSE for backward-compatible all-character output.
+#' @param col_types Named list. Override the default type for specific
+#'   columns. Names are column names, values are type strings:
+#'   \code{"character"}, \code{"integer"}, \code{"double"},
+#'   \code{"date_dmy"}, \code{"date_ymd"}, \code{"date_ym"}, \code{"date"}.
+#'   Example: \code{list(PESO = "character")} to keep PESO as character.
 #' @param cache Logical. If TRUE (default), caches downloaded data for
 #'   faster future access.
 #' @param cache_dir Character. Directory for caching. Default:
 #'   `tools::R_user_dir("healthbR", "cache")`.
+#'
+#' @param lazy Logical. If TRUE, returns a lazy query object instead of a
+#'   tibble. Requires the \pkg{arrow} package. The lazy object supports
+#'   dplyr verbs (filter, select, mutate, etc.) which are pushed down
+#'   to the query engine before collecting into memory. Call
+#'   \code{dplyr::collect()} to materialize the result. Default: FALSE.
+#' @param backend Character. Backend for lazy evaluation: \code{"arrow"}
+#'   (default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+#'   DuckDB backend requires the \pkg{duckdb} package.
 #'
 #' @return A tibble with mortality microdata. Includes columns `year`
 #'   and `uf_source` to identify the source when multiple years/states
@@ -433,8 +458,10 @@ sim_dictionary <- function(variable = NULL) {
 #'          vars = c("DTOBITO", "SEXO", "IDADE",
 #'                   "RACACOR", "CODMUNRES", "CAUSABAS"))
 sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
-                     decode_age = TRUE, cache = TRUE,
-                     cache_dir = NULL) {
+                     decode_age = TRUE,
+                     parse = TRUE, col_types = NULL,
+                     cache = TRUE, cache_dir = NULL,
+                     lazy = FALSE, backend = c("arrow", "duckdb")) {
 
   # validate inputs
   year <- .sim_validate_year(year)
@@ -443,6 +470,21 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
 
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sim_uf_list
+
+  # lazy evaluation: return from partitioned cache if available
+  if (isTRUE(lazy)) {
+    if (isTRUE(parse)) {
+      cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
+    }
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .sim_cache_dir(cache_dir)
+    select_cols <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, "sim_data", backend,
+                       filters = list(year = year, uf_source = target_ufs),
+                       select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+    # cache not available — fall through to eager download
+  }
 
   # build all year x UF combinations
   combinations <- expand.grid(
@@ -458,18 +500,12 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
   }
 
   # download and read each combination
-  results <- purrr::map(seq_len(n_combos), function(i) {
+  results <- .map_parallel(seq_len(n_combos), function(i) {
     yr <- combinations$year[i]
     st <- combinations$uf[i]
 
     tryCatch({
-      data <- .sim_download_and_read(yr, st, cache = cache, cache_dir = cache_dir)
-      data$year <- as.integer(yr)
-      data$uf_source <- st
-      # move year and uf_source to front
-      cols <- names(data)
-      data <- data[, c("year", "uf_source", setdiff(cols, c("year", "uf_source")))]
-      data
+      .sim_download_and_read(yr, st, cache = cache, cache_dir = cache_dir)
     }, error = function(e) {
       cli::cli_warn(c(
         "!" = "Failed to download/read SIM data for {st} {yr}.",
@@ -488,6 +524,17 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
 
   results <- dplyr::bind_rows(results)
 
+  # if lazy was requested, return from cache after download
+  if (isTRUE(lazy)) {
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .sim_cache_dir(cache_dir)
+    select_cols <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, "sim_data", backend,
+                       filters = list(year = year, uf_source = target_ufs),
+                       select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
+
   # filter by cause if requested
   if (!is.null(cause)) {
     cause_pattern <- stringr::str_c("^(", stringr::str_c(cause, collapse = "|"), ")")
@@ -496,6 +543,12 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
     } else {
       cli::cli_warn("Column {.var CAUSABAS} not found in data. Cannot filter by cause.")
     }
+  }
+
+  # parse column types
+  if (isTRUE(parse) && !isTRUE(lazy)) {
+    type_spec <- .build_type_spec(sim_variables_metadata)
+    results <- .parse_columns(results, type_spec, col_types = col_types)
   }
 
   # decode age if requested

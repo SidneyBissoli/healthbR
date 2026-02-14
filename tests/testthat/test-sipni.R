@@ -578,3 +578,54 @@ test_that("sipni_data API cache works", {
                                 cache_dir = cache_dir))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
+
+# ============================================================================
+# smart type parsing
+# ============================================================================
+
+test_that("sipni_variables type column has non-character types (DPNI)", {
+  vars <- sipni_variables(type = "DPNI")
+  expect_equal(vars$type[vars$variable == "QT_DOSE"], "integer")
+  expect_equal(vars$type[vars$variable == "IMUNO"], "character")
+})
+
+test_that("sipni_variables type column has non-character types (CPNI)", {
+  vars <- sipni_variables(type = "CPNI")
+  expect_equal(vars$type[vars$variable == "QT_DOSE"], "integer")
+  expect_equal(vars$type[vars$variable == "POP"], "integer")
+  expect_equal(vars$type[vars$variable == "COBERT"], "double")
+})
+
+test_that("sipni_variables type column has non-character types (API)", {
+  vars <- sipni_variables(type = "API")
+  expect_equal(vars$type[vars$variable == "data_vacina"], "date")
+  expect_equal(vars$type[vars$variable == "numero_idade_paciente"], "integer")
+  expect_equal(vars$type[vars$variable == "tipo_sexo_paciente"], "character")
+})
+
+test_that("sipni parse converts mock FTP data correctly", {
+  mock_data <- tibble::tibble(
+    year = 2019L, uf_source = "AC",
+    QT_DOSE = "100", IMUNO = "09", MUNIC = "120040"
+  )
+  spec <- .build_type_spec(sipni_variables_dpni)
+  parsed <- .parse_columns(mock_data, spec)
+
+  expect_type(parsed$QT_DOSE, "integer")
+  expect_type(parsed$IMUNO, "character")
+})
+
+test_that("sipni parse converts mock API data correctly", {
+  mock_data <- tibble::tibble(
+    year = 2024L, month = 1L, uf_source = "AC",
+    data_vacina = "2024-01-15",
+    numero_idade_paciente = "30",
+    tipo_sexo_paciente = "F"
+  )
+  spec <- .build_type_spec(sipni_variables_api)
+  parsed <- .parse_columns(mock_data, spec)
+
+  expect_s3_class(parsed$data_vacina, "Date")
+  expect_type(parsed$numero_idade_paciente, "integer")
+  expect_type(parsed$tipo_sexo_paciente, "character")
+})

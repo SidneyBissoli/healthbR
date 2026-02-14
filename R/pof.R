@@ -94,25 +94,10 @@ pof_health_registers <- c(
 # internal helper functions
 # ============================================================================
 
-#' Check if arrow package is available
-#' @noRd
-pof_has_arrow <- function() {
-  requireNamespace("arrow", quietly = TRUE)
-}
-
 #' Get POF cache directory
 #' @noRd
 pof_cache_dir <- function(cache_dir = NULL) {
-  if (is.null(cache_dir)) {
-    cache_dir <- tools::R_user_dir("healthbR", which = "cache")
-  }
-  pof_dir <- file.path(cache_dir, "pof")
-
-  if (!dir.exists(pof_dir)) {
-    dir.create(pof_dir, recursive = TRUE)
-  }
-
-  pof_dir
+  .module_cache_dir("pof", cache_dir)
 }
 
 #' Validate POF year parameter
@@ -1173,6 +1158,15 @@ pof_variables <- function(year = "2017-2018",
 #' @param refresh Logical. If TRUE, re-download even if file exists in cache.
 #'   Default is FALSE.
 #'
+#' @param lazy Logical. If TRUE, returns a lazy query object instead of a
+#'   tibble. Requires the \pkg{arrow} package. The lazy object supports
+#'   dplyr verbs (filter, select, mutate, etc.) which are pushed down
+#'   to the query engine before collecting into memory. Call
+#'   \code{dplyr::collect()} to materialize the result. Default: FALSE.
+#' @param backend Character. Backend for lazy evaluation: \code{"arrow"}
+#'   (default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
+#'   DuckDB backend requires the \pkg{duckdb} package.
+#'
 #' @return A tibble with microdata, or tbl_svy if as_survey = TRUE.
 #'
 #' @details
@@ -1232,7 +1226,8 @@ pof_data <- function(year = "2017-2018",
                      vars = NULL,
                      cache_dir = NULL,
                      as_survey = FALSE,
-                     refresh = FALSE) {
+                     refresh = FALSE,
+                     lazy = FALSE, backend = c("arrow", "duckdb")) {
   # 1. validate parameters
   .pof_validate_year(year)
   .pof_validate_register(register, year)
@@ -1249,27 +1244,46 @@ pof_data <- function(year = "2017-2018",
 
   # 3. set cache directory
   cache_dir <- pof_cache_dir(cache_dir)
+  dataset_name <- stringr::str_c("pof_", register, "_data")
+  df <- NULL
 
-  # 4. build file paths
-  use_parquet <- pof_has_arrow()
-  data_file <- file.path(
-    cache_dir,
-    stringr::str_c(
-      "pof_", year, "_", register,
-      if (use_parquet) ".parquet" else ".rds"
-    )
-  )
+  # lazy evaluation: return from partitioned cache if available
+  if (isTRUE(lazy)) {
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .module_cache_dir("pof", cache_dir)
+    ds_name <- stringr::str_c("pof_", register, "_data")
+    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
+                       filters = list(year = year),
+                       select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
 
-  # 5. check cache
-  if (file.exists(data_file) && !refresh) {
-    cli::cli_inform("Loading {register} data from cache...")
-    if (use_parquet) {
-      df <- arrow::read_parquet(data_file)
-    } else {
-      df <- readRDS(data_file)
+  # 4. check partitioned cache first (preferred path)
+  if (!refresh && .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)) {
+    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+    cached <- ds |>
+      dplyr::filter(.data$year == !!year) |>
+      dplyr::collect()
+    if (nrow(cached) > 0) {
+      cli::cli_inform("Loading {register} data from cache...")
+      df <- cached
     }
-  } else {
-    # 6. download data if not cached
+  }
+
+  # 4b. fall back to flat cache (migration from old format)
+  if (is.null(df) && !refresh) {
+    flat_base <- stringr::str_c("pof_", year, "_", register)
+    flat_cached <- .cache_read(cache_dir, flat_base)
+    if (!is.null(flat_cached)) {
+      cli::cli_inform("Loading {register} data from cache...")
+      df <- flat_cached
+    }
+  }
+
+  # 5. download data if not cached
+  if (is.null(df)) {
     cli::cli_inform("Downloading POF {year} {register} data...")
 
     # download zip file
@@ -1285,14 +1299,20 @@ pof_data <- function(year = "2017-2018",
     df <- df |>
       dplyr::mutate(year = year, .before = 1)
 
-    # save to cache
-    cli::cli_inform("Saving to cache...")
-    if (use_parquet) {
-      arrow::write_parquet(df, data_file)
-    } else {
-      saveRDS(df, data_file)
-    }
-    cli::cli_alert_success("Data cached: {.path {data_file}}")
+    # write to partitioned cache
+    .cache_append_partitioned(df, cache_dir, dataset_name, c("year"))
+  }
+
+  # if lazy was requested, return from cache after download
+  if (isTRUE(lazy)) {
+    backend <- match.arg(backend)
+    cache_dir_resolved <- .module_cache_dir("pof", cache_dir)
+    ds_name <- stringr::str_c("pof_", register, "_data")
+    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
+                       filters = list(year = year),
+                       select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
   }
 
   # 7. select specific variables if requested
