@@ -45,7 +45,6 @@ Suggests:
     furrr,
     future,
     arrow,
-    DBI,
     duckdb,
     vroom,
     piggyback,

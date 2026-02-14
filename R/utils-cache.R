@@ -167,8 +167,7 @@
     }
 
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
-    con <- DBI::dbConnect(duckdb::duckdb())
-    return(dplyr::tbl(con, ds))
+    return(arrow::to_duckdb(ds))
   }
 
   NULL
