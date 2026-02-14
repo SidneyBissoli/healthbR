@@ -219,6 +219,85 @@
 
 
 # ============================================================================
+# shared lazy/eager return helpers
+# ============================================================================
+
+#' Try returning from lazy cache (pre-download check)
+#'
+#' Convenience wrapper for the pre-download lazy check that every DATASUS
+#' module performs. Returns a lazy query object if cache exists, or NULL
+#' to signal the caller should proceed with eager download.
+#'
+#' @param lazy Logical. If FALSE, returns NULL immediately.
+#' @param backend Character. "arrow" or "duckdb".
+#' @param cache_dir Character. Module cache directory.
+#' @param dataset_name Character. Name of the dataset subdirectory.
+#' @param filters Named list. Partition-level filters.
+#' @param select_cols Character vector or NULL. Columns to select.
+#' @param parse Logical. If TRUE and lazy is TRUE, emits an informational
+#'   message that parse is ignored.
+#'
+#' @return A lazy query object, or NULL.
+#'
+#' @noRd
+.try_lazy_cache <- function(lazy, backend, cache_dir, dataset_name,
+                            filters, select_cols, parse = FALSE) {
+  if (!isTRUE(lazy)) return(NULL)
+  if (isTRUE(parse)) {
+    cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
+  }
+  backend <- match.arg(backend, c("arrow", "duckdb"))
+  .lazy_return(cache_dir, dataset_name, backend,
+               filters = filters, select_cols = select_cols)
+}
+
+
+#' Return data with optional lazy fallback, column selection, and reporting
+#'
+#' Unified return path for DATASUS modules. Handles:
+#' 1. Post-download lazy return (if lazy=TRUE and cache exists)
+#' 2. Column selection (vars)
+#' 3. Download failure reporting
+#' 4. Conversion to tibble
+#'
+#' @param data A data frame (the downloaded + processed results).
+#' @param lazy Logical. If TRUE, attempts lazy return from cache first.
+#' @param backend Character. "arrow" or "duckdb".
+#' @param cache_dir Character or NULL. Module cache directory.
+#' @param dataset_name Character or NULL. Dataset subdirectory name.
+#' @param filters Named list. Partition-level filters for lazy return.
+#' @param select_cols Character vector or NULL. Columns to select.
+#' @param failed_labels Character vector. Labels of failed downloads.
+#' @param module_name Character. Module name for failure reporting.
+#'
+#' @return A tibble (eager) or lazy query object.
+#'
+#' @noRd
+.data_return <- function(data, lazy = FALSE, backend = "arrow",
+                         cache_dir = NULL, dataset_name = NULL,
+                         filters = list(), select_cols = NULL,
+                         failed_labels = character(0), module_name = "") {
+  # post-download lazy return
+  if (isTRUE(lazy) && !is.null(cache_dir) && !is.null(dataset_name)) {
+    backend <- match.arg(backend, c("arrow", "duckdb"))
+    ds <- .lazy_return(cache_dir, dataset_name, backend,
+                       filters = filters, select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
+
+  # column selection
+  if (!is.null(select_cols)) {
+    keep_cols <- intersect(select_cols, names(data))
+    data <- data[, keep_cols, drop = FALSE]
+  }
+
+  # report failures and return as tibble
+  data <- .report_download_failures(data, failed_labels, module_name)
+  tibble::as_tibble(data)
+}
+
+
+# ============================================================================
 # partitioned cache read/write (Hive-style directories)
 # ============================================================================
 

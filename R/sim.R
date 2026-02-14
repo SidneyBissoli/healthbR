@@ -471,20 +471,15 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sim_uf_list
 
-  # lazy evaluation: return from partitioned cache if available
-  if (isTRUE(lazy)) {
-    if (isTRUE(parse)) {
-      cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
-    }
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .sim_cache_dir(cache_dir)
-    select_cols <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, "sim_data", backend,
-                       filters = list(year = year, uf_source = target_ufs),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-    # cache not available — fall through to eager download
-  }
+  # compute lazy args once
+  cache_dir_resolved <- .sim_cache_dir(cache_dir)
+  lazy_filters <- list(year = year, uf_source = target_ufs)
+  lazy_select <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
+
+  # pre-download lazy check
+  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved, "sim_data",
+                        lazy_filters, lazy_select, parse = parse)
+  if (!is.null(ds)) return(ds)
 
   # build all year x UF combinations
   combinations <- expand.grid(
@@ -524,17 +519,6 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
 
   results <- dplyr::bind_rows(results)
 
-  # if lazy was requested, return from cache after download
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .sim_cache_dir(cache_dir)
-    select_cols <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, "sim_data", backend,
-                       filters = list(year = year, uf_source = target_ufs),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
-
   # filter by cause if requested
   if (!is.null(cause)) {
     cause_pattern <- stringr::str_c("^(", stringr::str_c(cause, collapse = "|"), ")")
@@ -564,19 +548,13 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
     }
   }
 
-  # select variables if requested
-  if (!is.null(vars)) {
-    keep_cols <- unique(c("year", "uf_source", vars))
-    if (isTRUE(decode_age) && "IDADE" %in% vars) {
-      keep_cols <- c(keep_cols, "age_years")
-    }
-    keep_cols <- intersect(keep_cols, names(results))
-    results <- results[, keep_cols, drop = FALSE]
+  # include age_years in select_cols for eager path
+  if (isTRUE(decode_age) && "IDADE" %in% (vars %||% character(0))) {
+    lazy_select <- unique(c(lazy_select, "age_years"))
   }
 
-  results <- .report_download_failures(results, failed_labels, "SIM")
-
-  tibble::as_tibble(results)
+  .data_return(results, lazy, backend, cache_dir_resolved, "sim_data",
+               lazy_filters, lazy_select, failed_labels, "SIM")
 }
 
 

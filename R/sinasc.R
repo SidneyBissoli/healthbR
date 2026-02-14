@@ -420,20 +420,15 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sinasc_uf_list
 
-  # lazy evaluation: return from partitioned cache if available
-  if (isTRUE(lazy)) {
-    if (isTRUE(parse)) {
-      cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
-    }
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .sinasc_cache_dir(cache_dir)
-    select_cols <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, "sinasc_data", backend,
-                       filters = list(year = year, uf_source = target_ufs),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-    # cache not available — fall through to eager download
-  }
+  # compute lazy args once
+  cache_dir_resolved <- .sinasc_cache_dir(cache_dir)
+  lazy_filters <- list(year = year, uf_source = target_ufs)
+  lazy_select <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
+
+  # pre-download lazy check
+  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved, "sinasc_data",
+                        lazy_filters, lazy_select, parse = parse)
+  if (!is.null(ds)) return(ds)
 
   # build all year x UF combinations
   combinations <- expand.grid(
@@ -473,17 +468,6 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
 
   results <- dplyr::bind_rows(results)
 
-  # if lazy was requested, return from cache after download
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .sinasc_cache_dir(cache_dir)
-    select_cols <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, "sinasc_data", backend,
-                       filters = list(year = year, uf_source = target_ufs),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
-
   # parse column types
   if (isTRUE(parse) && !isTRUE(lazy)) {
     type_spec <- .build_type_spec(sinasc_variables_metadata)
@@ -500,16 +484,8 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
     }
   }
 
-  # select variables if requested
-  if (!is.null(vars)) {
-    keep_cols <- unique(c("year", "uf_source", vars))
-    keep_cols <- intersect(keep_cols, names(results))
-    results <- results[, keep_cols, drop = FALSE]
-  }
-
-  results <- .report_download_failures(results, failed_labels, "SINASC")
-
-  tibble::as_tibble(results)
+  .data_return(results, lazy, backend, cache_dir_resolved, "sinasc_data",
+               lazy_filters, lazy_select, failed_labels, "SINASC")
 }
 
 

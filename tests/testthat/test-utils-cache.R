@@ -521,3 +521,175 @@ test_that(".lazy_return ignores non-existent columns in select_cols", {
   collected <- ds |> dplyr::collect()
   expect_equal(sort(names(collected)), c("value", "year"))
 })
+
+
+# ============================================================================
+# .try_lazy_cache
+# ============================================================================
+
+test_that(".try_lazy_cache returns NULL when lazy = FALSE", {
+  result <- healthbR:::.try_lazy_cache(
+    lazy = FALSE, backend = "arrow",
+    cache_dir = tempdir(), dataset_name = "test",
+    filters = list(), select_cols = NULL
+  )
+  expect_null(result)
+})
+
+test_that(".try_lazy_cache emits parse message when parse = TRUE", {
+  expect_message(
+    healthbR:::.try_lazy_cache(
+      lazy = TRUE, backend = "arrow",
+      cache_dir = tempdir(), dataset_name = "nonexistent",
+      filters = list(), select_cols = NULL, parse = TRUE
+    ),
+    "parse.*ignored"
+  )
+})
+
+test_that(".try_lazy_cache returns NULL when no cache exists", {
+  skip_if_not(healthbR:::.has_arrow(), "arrow package not available")
+
+  cache_dir <- file.path(tempdir(), "test_tlc_nocache")
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+  on.exit(unlink(cache_dir, recursive = TRUE))
+
+  result <- healthbR:::.try_lazy_cache(
+    lazy = TRUE, backend = "arrow",
+    cache_dir = cache_dir, dataset_name = "nonexistent",
+    filters = list(), select_cols = NULL
+  )
+  expect_null(result)
+})
+
+test_that(".try_lazy_cache returns lazy dataset when cache exists", {
+  skip_if_not(healthbR:::.has_arrow(), "arrow package not available")
+
+  cache_dir <- file.path(tempdir(), "test_tlc_hit")
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+  on.exit(unlink(cache_dir, recursive = TRUE))
+
+  test_data <- tibble::tibble(
+    year = c(2020L, 2021L), uf_source = c("AC", "SP"), value = c(10, 20)
+  )
+  healthbR:::.cache_write_partitioned(
+    test_data, cache_dir, "test_ds", c("uf_source", "year")
+  )
+
+  ds <- healthbR:::.try_lazy_cache(
+    lazy = TRUE, backend = "arrow",
+    cache_dir = cache_dir, dataset_name = "test_ds",
+    filters = list(year = 2020L), select_cols = c("year", "value")
+  )
+
+  expect_false(is.null(ds))
+  collected <- ds |> dplyr::collect()
+  expect_equal(nrow(collected), 1)
+  expect_equal(sort(names(collected)), c("value", "year"))
+})
+
+
+# ============================================================================
+# .data_return
+# ============================================================================
+
+test_that(".data_return selects columns and returns tibble", {
+  data <- data.frame(
+    year = 2020L, uf_source = "AC", VAR1 = "a", VAR2 = "b",
+    stringsAsFactors = FALSE
+  )
+
+  result <- healthbR:::.data_return(
+    data,
+    select_cols = c("year", "uf_source", "VAR1"),
+    module_name = "TEST"
+  )
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(names(result), c("year", "uf_source", "VAR1"))
+})
+
+test_that(".data_return returns all columns when select_cols is NULL", {
+  data <- data.frame(
+    year = 2020L, uf_source = "AC", VAR1 = "a", VAR2 = "b",
+    stringsAsFactors = FALSE
+  )
+
+  result <- healthbR:::.data_return(data, module_name = "TEST")
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(sort(names(result)), sort(c("uf_source", "VAR1", "VAR2", "year")))
+})
+
+test_that(".data_return reports download failures", {
+  data <- data.frame(year = 2020L, value = 42, stringsAsFactors = FALSE)
+
+  expect_warning(
+    result <- healthbR:::.data_return(
+      data,
+      failed_labels = c("AC 2021", "SP 2021"),
+      module_name = "TEST"
+    ),
+    "failed to download"
+  )
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(attr(result, "download_failures"), c("AC 2021", "SP 2021"))
+})
+
+test_that(".data_return no warning when no failures", {
+  data <- data.frame(year = 2020L, value = 42, stringsAsFactors = FALSE)
+
+  expect_no_warning(
+    result <- healthbR:::.data_return(data, module_name = "TEST")
+  )
+
+  expect_s3_class(result, "tbl_df")
+  expect_null(attr(result, "download_failures"))
+})
+
+test_that(".data_return attempts lazy return when lazy = TRUE", {
+  skip_if_not(healthbR:::.has_arrow(), "arrow package not available")
+
+  cache_dir <- file.path(tempdir(), "test_dr_lazy")
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+  on.exit(unlink(cache_dir, recursive = TRUE))
+
+  test_data <- tibble::tibble(year = c(2020L, 2021L), value = c(10, 20))
+  healthbR:::.cache_write_partitioned(
+    test_data, cache_dir, "test_ds", "year"
+  )
+
+  # pass a dummy eager data frame — but lazy should take priority
+  eager_data <- data.frame(year = 9999L, value = 0, stringsAsFactors = FALSE)
+
+  result <- healthbR:::.data_return(
+    eager_data, lazy = TRUE, backend = "arrow",
+    cache_dir = cache_dir, dataset_name = "test_ds",
+    filters = list(year = 2020L), module_name = "TEST"
+  )
+
+  # should be a lazy object, not the dummy eager data
+  expect_false(inherits(result, "data.frame"))
+  collected <- result |> dplyr::collect()
+  expect_equal(nrow(collected), 1)
+  expect_equal(collected$year, 2020L)
+})
+
+test_that(".data_return falls through to eager when lazy cache missing", {
+  cache_dir <- file.path(tempdir(), "test_dr_lazy_miss")
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+  on.exit(unlink(cache_dir, recursive = TRUE))
+
+  data <- data.frame(year = 2020L, value = 42, stringsAsFactors = FALSE)
+
+  result <- healthbR:::.data_return(
+    data, lazy = TRUE, backend = "arrow",
+    cache_dir = cache_dir, dataset_name = "nonexistent",
+    module_name = "TEST"
+  )
+
+  # should fall through to eager return (tibble)
+  expect_s3_class(result, "tbl_df")
+  expect_equal(result$value, 42)
+})

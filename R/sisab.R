@@ -578,16 +578,10 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
 
   results <- dplyr::bind_rows(results)
 
-  # select variables if requested
-  if (!is.null(vars)) {
-    keep_cols <- unique(c("year", "type", vars))
-    keep_cols <- intersect(keep_cols, names(results))
-    results <- results[, keep_cols, drop = FALSE]
-  }
+  lazy_select <- if (!is.null(vars)) unique(c("year", "type", vars)) else NULL
 
-  results <- .report_download_failures(results, failed_labels, "SISAB")
-
-  tibble::as_tibble(results)
+  .data_return(results, select_cols = lazy_select,
+               failed_labels = failed_labels, module_name = "SISAB")
 }
 
 

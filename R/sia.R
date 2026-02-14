@@ -503,20 +503,16 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sia_uf_list
 
-  # lazy evaluation: return from partitioned cache if available
-  if (isTRUE(lazy)) {
-    if (isTRUE(parse)) {
-      cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
-    }
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .sia_cache_dir(cache_dir)
-    filters <- list(year = year, uf_source = target_ufs)
-    if (!is.null(month)) filters$month <- as.integer(month)
-    select_cols <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, "sia_data", backend,
-                       filters = filters, select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
+  # compute lazy args once
+  cache_dir_resolved <- .sia_cache_dir(cache_dir)
+  lazy_filters <- list(year = year, uf_source = target_ufs)
+  if (!is.null(month)) lazy_filters$month <- as.integer(month)
+  lazy_select <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
+
+  # pre-download lazy check
+  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved, "sia_data",
+                        lazy_filters, lazy_select, parse = parse)
+  if (!is.null(ds)) return(ds)
 
   # build all year x month x UF combinations
   combinations <- expand.grid(
@@ -561,18 +557,6 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
 
   results <- dplyr::bind_rows(results)
 
-  # if lazy was requested, return from cache after download
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .sia_cache_dir(cache_dir)
-    filters <- list(year = year, uf_source = target_ufs)
-    if (!is.null(month)) filters$month <- as.integer(month)
-    select_cols <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, "sia_data", backend,
-                       filters = filters, select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
-
   # parse column types
   if (isTRUE(parse) && !isTRUE(lazy)) {
     type_spec <- .build_type_spec(sia_variables_metadata)
@@ -607,16 +591,8 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
     }
   }
 
-  # select variables if requested
-  if (!is.null(vars)) {
-    keep_cols <- unique(c("year", "month", "uf_source", vars))
-    keep_cols <- intersect(keep_cols, names(results))
-    results <- results[, keep_cols, drop = FALSE]
-  }
-
-  results <- .report_download_failures(results, failed_labels, "SIA")
-
-  tibble::as_tibble(results)
+  .data_return(results, lazy, backend, cache_dir_resolved, "sia_data",
+               lazy_filters, lazy_select, failed_labels, "SIA")
 }
 
 
