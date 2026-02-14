@@ -3,10 +3,14 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   censo-denominadores: censo-denominadores.html
+  cnes-health-facilities: cnes-health-facilities.html
   datasus-modules: datasus-modules.html
   healthbR: healthbR.html
   pof-health-data: pof-health-data.html
-last_built: 2026-02-14T01:55Z
+  sinan-notifiable-diseases: sinan-notifiable-diseases.html
+  sipni-vaccination: sipni-vaccination.html
+  sisab-primary-care: sisab-primary-care.html
+last_built: 2026-02-14T02:05Z
 urls:
   reference: https://sidneybissoli.github.io/healthbR/reference
   article: https://sidneybissoli.github.io/healthbR/articles

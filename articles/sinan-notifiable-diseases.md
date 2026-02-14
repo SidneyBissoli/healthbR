@@ -1,0 +1,290 @@
+# Notifiable Disease Surveillance with SINAN
+
+## Overview
+
+The **SINAN (Sistema de Informacao de Agravos de Notificacao)** is
+Brazil’s national notifiable disease surveillance system, managed by the
+Ministry of Health through DATASUS. It records individual notification
+forms for compulsory-notification diseases.
+
+The `healthbR` package provides access to SINAN microdata from the
+DATASUS FTP:
+
+| Feature  | Details                                  |
+|----------|------------------------------------------|
+| Coverage | National (one file per disease per year) |
+| Diseases | 31 notifiable disease codes              |
+| Years    | 2007–2024 (final + preliminary)          |
+| Unit     | One row per notification record          |
+| Format   | .dbc files, decompressed internally      |
+
+## Getting started
+
+``` r
+library(healthbR)
+library(dplyr)
+```
+
+### Check available years
+
+``` r
+sinan_years()
+#> [1] 2007 2008 2009 ... 2022
+
+sinan_years(status = "all")
+#> [1] 2007 2008 ... 2022 2023 2024
+```
+
+### Module information
+
+``` r
+sinan_info()
+```
+
+## Exploring diseases
+
+SINAN covers 31 notifiable diseases. Use
+[`sinan_diseases()`](https://sidneybissoli.github.io/healthbR/reference/sinan_diseases.md)
+to browse them:
+
+``` r
+# all available diseases
+sinan_diseases()
+
+# search by name or code
+sinan_diseases(search = "dengue")
+sinan_diseases(search = "sifilis")
+sinan_diseases(search = "tuberculose")
+```
+
+Common disease codes:
+
+| Code | Disease           |
+|------|-------------------|
+| DENG | Dengue            |
+| CHIK | Chikungunya       |
+| ZIKA | Zika              |
+| TUBE | Tuberculose       |
+| HANS | Hanseniase        |
+| HEPA | Hepatites virais  |
+| SIFA | Sifilis adquirida |
+| SIFC | Sifilis congenita |
+| LEPT | Leptospirose      |
+| MENI | Meningite         |
+
+## Downloading data
+
+### Basic download (dengue, single year)
+
+``` r
+dengue_2022 <- sinan_data(year = 2022)
+dengue_2022
+```
+
+### Multiple years
+
+``` r
+tb <- sinan_data(year = 2020:2022, disease = "TUBE")
+tb
+```
+
+### Selecting variables
+
+``` r
+# only key variables (faster and less memory)
+dengue_key <- sinan_data(
+  year = 2022,
+  disease = "DENG",
+  vars = c("DT_NOTIFIC", "CS_SEXO", "NU_IDADE_N",
+           "CS_RACA", "ID_MUNICIP", "CLASSI_FIN")
+)
+```
+
+### Exploring variables
+
+``` r
+sinan_variables()
+sinan_variables(search = "sexo")
+sinan_variables(search = "municipio")
+```
+
+## Filtering by state
+
+SINAN files are **national** (not per-state). To filter by geographic
+unit, use the `SG_UF_NOT` (UF of notification) or `ID_MUNICIP`
+(municipality code) columns after download:
+
+``` r
+# filter by UF
+dengue_sp <- sinan_data(year = 2022) |>
+  filter(SG_UF_NOT == "35")  # 35 = Sao Paulo
+
+# filter by municipality
+dengue_rj_capital <- sinan_data(year = 2022) |>
+  filter(ID_MUNICIP == "330455")  # Rio de Janeiro capital
+```
+
+## Key variables
+
+| Variable   | Description                                                    |
+|------------|----------------------------------------------------------------|
+| DT_NOTIFIC | Notification date                                              |
+| ID_AGRAVO  | Disease code (CID-10)                                          |
+| SG_UF_NOT  | UF of notification (IBGE code)                                 |
+| ID_MUNICIP | Municipality of notification (IBGE 6 digits)                   |
+| CS_SEXO    | Sex (M/F/I)                                                    |
+| NU_IDADE_N | Age (encoded: 1st digit = unit, digits 2-3 = value)            |
+| CS_RACA    | Race/color (1=White, 2=Black, 3=Yellow, 4=Brown, 5=Indigenous) |
+| CLASSI_FIN | Final classification (1=Confirmed, 2=Discarded)                |
+| EVOLUCAO   | Outcome (1=Cured, 2=Death by disease, 3=Death other causes)    |
+| CRITERIO   | Confirmation criteria (1=Lab, 2=Clinical-epi)                  |
+
+### Using the dictionary
+
+``` r
+# all coded variables
+sinan_dictionary()
+
+# specific variable
+sinan_dictionary("CS_SEXO")
+sinan_dictionary("EVOLUCAO")
+sinan_dictionary("CLASSI_FIN")
+```
+
+## Preliminary vs. final data
+
+SINAN publishes both final (definitive) and preliminary data. By
+default,
+[`sinan_years()`](https://sidneybissoli.github.io/healthbR/reference/sinan_years.md)
+returns only final years:
+
+``` r
+# final data only (default)
+sinan_years(status = "final")
+
+# preliminary data
+sinan_years(status = "preliminary")
+
+# both
+sinan_years(status = "all")
+```
+
+Preliminary data (2023–2024) may still be revised by the Ministry of
+Health.
+
+## Example: confirmed dengue cases by month
+
+``` r
+dengue <- sinan_data(year = 2022, disease = "DENG") |>
+  filter(CLASSI_FIN %in% c("1", "5")) |>  # confirmed cases
+
+  mutate(month = as.integer(format(DT_NOTIFIC, "%m")))
+
+cases_by_month <- dengue |>
+  count(month) |>
+  arrange(month)
+
+cases_by_month
+```
+
+## Example: tuberculosis by sex and age group
+
+``` r
+tb <- sinan_data(year = 2022, disease = "TUBE")
+
+# decode age: 4th digit means years
+tb_age <- tb |>
+  filter(CLASSI_FIN == "1") |>
+  mutate(
+    age_unit = substr(NU_IDADE_N, 1, 1),
+    age_value = as.integer(substr(NU_IDADE_N, 2, 3)),
+    age_years = ifelse(age_unit == "4", age_value, NA_integer_),
+    age_group = cut(age_years,
+                    breaks = c(0, 15, 30, 45, 60, Inf),
+                    labels = c("<15", "15-29", "30-44", "45-59", "60+"),
+                    right = FALSE)
+  )
+
+tb_age |>
+  filter(!is.na(age_group)) |>
+  count(CS_SEXO, age_group) |>
+  tidyr::pivot_wider(names_from = CS_SEXO, values_from = n)
+```
+
+## Example: incidence rate with Census denominators
+
+Combine SINAN data with Census population to calculate incidence rates:
+
+``` r
+# step 1: confirmed dengue by UF
+dengue_uf <- sinan_data(year = 2022, disease = "DENG") |>
+  filter(CLASSI_FIN %in% c("1", "5")) |>
+  count(SG_UF_NOT, name = "cases")
+
+# step 2: population from Census 2022
+pop <- censo_populacao(year = 2022, territorial_level = "state")
+
+# step 3: calculate incidence rate per 100,000
+# incidence <- dengue_uf |>
+#   left_join(pop, by = ...) |>
+#   mutate(rate_100k = (cases / population) * 100000) |>
+#   arrange(desc(rate_100k))
+```
+
+## Smart type parsing
+
+By default,
+[`sinan_data()`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)
+parses columns to appropriate types (dates, integers):
+
+``` r
+# parsed types (default)
+dengue <- sinan_data(year = 2022, disease = "DENG")
+class(dengue$DT_NOTIFIC)  # Date
+class(dengue$NU_ANO)      # integer
+
+# raw character columns (backward-compatible)
+dengue_raw <- sinan_data(year = 2022, disease = "DENG", parse = FALSE)
+
+# override specific columns
+dengue_custom <- sinan_data(
+  year = 2022,
+  col_types = list(DT_NOTIFIC = "character")
+)
+```
+
+## Cache management
+
+Downloaded data is cached locally for faster future access:
+
+``` r
+# check cache status
+sinan_cache_status()
+
+# clear cache if needed
+sinan_clear_cache()
+```
+
+If the `arrow` package is installed, data is cached in Parquet format
+for faster loading. You can also use lazy evaluation:
+
+``` r
+# lazy query (requires arrow)
+dengue_lazy <- sinan_data(year = 2022, disease = "DENG", lazy = TRUE)
+dengue_lazy |>
+  filter(CLASSI_FIN == "1") |>
+  select(DT_NOTIFIC, CS_SEXO, NU_IDADE_N, ID_MUNICIP) |>
+  collect()
+```
+
+## Additional resources
+
+- [SINAN official page (DATASUS)](http://portalsinan.saude.gov.br/)
+- [Notifiable diseases list (Ministry of
+  Health)](https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/l/lista-nacional-de-notificacao-compulsoria-de-doencas)
+- [SIM
+  vignette](https://sidneybissoli.github.io/healthbR/articles/datasus-modules.md)
+  for mortality data
+- [Census
+  vignette](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)
+  for population denominators
