@@ -28,3 +28,4 @@
 ^healthbR\.Rcheck$
 ^screenshot.*\.png$
 ^healthbR_.*\.tar\.gz$
+^MAINTENANCE\.md$

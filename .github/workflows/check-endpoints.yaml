@@ -1,0 +1,94 @@
+# Monthly check that all external data source URLs are reachable.
+# Failures trigger GitHub email notification to repo watchers.
+
+name: Check Data Source Endpoints
+
+on:
+  schedule:
+    - cron: '0 9 1 * *'   # 1st of each month, 9 AM UTC
+  workflow_dispatch:
+
+jobs:
+  check-endpoints:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe all endpoints
+        run: |
+          FAIL=0
+          TOTAL=0
+
+          probe_ftp() {
+            local label="$1" url="$2"
+            TOTAL=$((TOTAL + 1))
+            if curl --silent --max-time 30 --list-only "$url" > /dev/null 2>&1; then
+              echo "| $TOTAL | $label | FTP dir | :white_check_mark: OK |"
+            else
+              echo "| $TOTAL | $label | FTP dir | :x: FAIL |"
+              FAIL=$((FAIL + 1))
+            fi
+          }
+
+          probe_head() {
+            local label="$1" url="$2"
+            TOTAL=$((TOTAL + 1))
+            local status
+            status=$(curl --silent --head --max-time 30 --output /dev/null --write-out '%{http_code}' "$url" 2>/dev/null || echo "000")
+            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+              echo "| $TOTAL | $label | HTTP HEAD | :white_check_mark: $status |"
+            else
+              echo "| $TOTAL | $label | HTTP HEAD | :x: $status |"
+              FAIL=$((FAIL + 1))
+            fi
+          }
+
+          probe_get() {
+            local label="$1" url="$2"
+            TOTAL=$((TOTAL + 1))
+            local status
+            status=$(curl --silent --max-time 30 --output /dev/null --write-out '%{http_code}' "$url" 2>/dev/null || echo "000")
+            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+              echo "| $TOTAL | $label | HTTP GET | :white_check_mark: $status |"
+            else
+              echo "| $TOTAL | $label | HTTP GET | :x: $status |"
+              FAIL=$((FAIL + 1))
+            fi
+          }
+
+          echo "## Endpoint Health Check — $(date -u '+%Y-%m-%d %H:%M UTC')"
+          echo ""
+          echo "| # | Module | Method | Status |"
+          echo "|---|--------|--------|--------|"
+
+          # DATASUS FTP endpoints
+          probe_ftp "SIM"       "ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/"
+          probe_ftp "SINASC"    "ftp://ftp.datasus.gov.br/dissemin/publicos/SINASC/1996_/Dados/DNRES/"
+          probe_ftp "SIH"       "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/"
+          probe_ftp "SIA"       "ftp://ftp.datasus.gov.br/dissemin/publicos/SIASUS/200801_/Dados/"
+          probe_ftp "SINAN"     "ftp://ftp.datasus.gov.br/dissemin/publicos/SINAN/DADOS/FINAIS/"
+          probe_ftp "CNES"      "ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/ST/"
+          probe_ftp "SI-PNI FTP" "ftp://ftp.datasus.gov.br/dissemin/publicos/PNI/DADOS/"
+
+          # OpenDataSUS (directory listing returns 403; probe a known file with HEAD)
+          probe_head "SI-PNI CSV" "https://arquivosdadosabertos.saude.gov.br/dados/dbbni/vacinacao_jan_2024_csv.zip"
+
+          # SISAB API (smallest possible request)
+          probe_get "SISAB" "https://relatorioaps-prd.saude.gov.br/cobertura/aps?unidadeGeografica=BRASIL&nuCompInicio=202401&nuCompFim=202401"
+
+          # IBGE
+          probe_head "PNS"   "https://ftp.ibge.gov.br/PNS/2019/Microdados/Dados/PNS_2019_20220525.zip"
+          probe_head "PNADC" "https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Trimestral/Microdados/"
+          probe_head "POF"   "https://ftp.ibge.gov.br/Orcamentos_Familiares/Pesquisa_de_Orcamentos_Familiares_2017_2018/Microdados/Dados_20230713.zip"
+
+          # SIDRA API (tiny census request)
+          probe_get "SIDRA" "https://apisidra.ibge.gov.br/values/t/9514/n1/all/v/allxp/p/last%201/c2/6794/f/n"
+
+          # VIGITEL
+          probe_head "VIGITEL" "https://svs.aids.gov.br/daent/cgdnt/vigitel/"
+
+          echo ""
+          echo "**Result: $((TOTAL - FAIL))/$TOTAL passed**"
+
+          if [ "$FAIL" -gt 0 ]; then
+            echo "::error::$FAIL of $TOTAL endpoints failed"
+            exit 1
+          fi
