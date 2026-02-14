@@ -725,3 +725,95 @@ test_that(".warn_flat_cache mentions healthbR_migrate_cache()", {
     "healthbR_migrate_cache"
   )
 })
+
+
+# ============================================================================
+# .cache_status / .clear_cache
+# ============================================================================
+
+test_that(".cache_status returns empty tibble when no files", {
+  temp_dir <- file.path(tempdir(), "cache_status_empty")
+  dir.create(temp_dir, showWarnings = FALSE)
+  on.exit(unlink(temp_dir, recursive = TRUE))
+
+  result <- .cache_status("sim", "SIM", temp_dir)
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 0)
+  expect_named(result, c("file", "size_mb", "modified"))
+})
+
+test_that(".cache_status detects cached parquet files", {
+  temp_dir <- file.path(tempdir(), "cache_status_files")
+  dir.create(temp_dir, showWarnings = FALSE)
+  on.exit(unlink(temp_dir, recursive = TRUE))
+
+  writeLines("data", file.path(temp_dir, "sim_AC_2022.parquet"))
+  writeLines("data", file.path(temp_dir, "sim_SP_2023.parquet"))
+  writeLines("other", file.path(temp_dir, "other_file.txt"))
+
+  result <- .cache_status("sim", "SIM", temp_dir)
+  expect_equal(nrow(result), 2)
+  expect_true(all(grepl("^sim_", result$file)))
+})
+
+test_that(".cache_status detects cached rds files", {
+  temp_dir <- file.path(tempdir(), "cache_status_rds")
+  dir.create(temp_dir, showWarnings = FALSE)
+  on.exit(unlink(temp_dir, recursive = TRUE))
+
+  writeLines("data", file.path(temp_dir, "sih_AC_202201.rds"))
+
+  result <- .cache_status("sih", "SIH", temp_dir)
+  expect_equal(nrow(result), 1)
+  expect_equal(result$file, "sih_AC_202201.rds")
+})
+
+test_that(".cache_status ignores files from other modules", {
+  temp_dir <- file.path(tempdir(), "cache_status_other")
+  dir.create(temp_dir, showWarnings = FALSE)
+  on.exit(unlink(temp_dir, recursive = TRUE))
+
+  writeLines("data", file.path(temp_dir, "sim_AC_2022.parquet"))
+  writeLines("data", file.path(temp_dir, "sih_AC_202201.parquet"))
+
+  result <- .cache_status("sim", "SIM", temp_dir)
+  expect_equal(nrow(result), 1)
+  expect_equal(result$file, "sim_AC_2022.parquet")
+})
+
+test_that(".clear_cache removes matching files", {
+  temp_dir <- file.path(tempdir(), "clear_cache_test")
+  dir.create(temp_dir, showWarnings = FALSE)
+  on.exit(unlink(temp_dir, recursive = TRUE))
+
+  writeLines("data", file.path(temp_dir, "sim_AC_2022.parquet"))
+  writeLines("data", file.path(temp_dir, "sim_SP_2023.rds"))
+  writeLines("keep", file.path(temp_dir, "other_file.txt"))
+
+  .clear_cache("sim", "SIM", temp_dir)
+
+  remaining <- list.files(temp_dir)
+  expect_equal(remaining, "other_file.txt")
+})
+
+test_that(".clear_cache handles empty cache gracefully", {
+  temp_dir <- file.path(tempdir(), "clear_cache_empty")
+  dir.create(temp_dir, showWarnings = FALSE)
+  on.exit(unlink(temp_dir, recursive = TRUE))
+
+  expect_no_error(.clear_cache("sim", "SIM", temp_dir))
+})
+
+test_that(".clear_cache does not remove other modules' files", {
+  temp_dir <- file.path(tempdir(), "clear_cache_cross")
+  dir.create(temp_dir, showWarnings = FALSE)
+  on.exit(unlink(temp_dir, recursive = TRUE))
+
+  writeLines("data", file.path(temp_dir, "sim_AC_2022.parquet"))
+  writeLines("data", file.path(temp_dir, "sih_AC_202201.parquet"))
+
+  .clear_cache("sim", "SIM", temp_dir)
+
+  remaining <- list.files(temp_dir)
+  expect_equal(remaining, "sih_AC_202201.parquet")
+})

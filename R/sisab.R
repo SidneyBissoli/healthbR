@@ -554,31 +554,7 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
 #' @examples
 #' sisab_cache_status()
 sisab_cache_status <- function(cache_dir = NULL) {
-  cache_dir <- .sisab_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^sisab_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached SISAB files found.")
-    return(invisible(tibble::tibble(
-      file = character(), size_mb = numeric(), modified = as.POSIXct(character())
-    )))
-  }
-
-  info <- file.info(files)
-  result <- tibble::tibble(
-    file = basename(files),
-    size_mb = round(info$size / 1e6, 2),
-    modified = info$mtime
-  )
-
-  cli::cli_inform(c(
-    "i" = "SISAB cache: {nrow(result)} file(s), {sum(result$size_mb)} MB total",
-    "i" = "Cache directory: {.file {cache_dir}}"
-  ))
-
-  invisible(result)
+  .cache_status("sisab", "SISAB", .sisab_cache_dir(cache_dir))
 }
 
 
@@ -597,22 +573,5 @@ sisab_cache_status <- function(cache_dir = NULL) {
 #' @examplesIf interactive()
 #' sisab_clear_cache()
 sisab_clear_cache <- function(cache_dir = NULL) {
-  cache_dir <- .sisab_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^sisab_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached SISAB files to clear.")
-    return(invisible(NULL))
-  }
-
-  removed <- file.remove(files)
-  n_removed <- sum(removed)
-
-  cli::cli_inform(c(
-    "v" = "Removed {n_removed} cached SISAB file(s)."
-  ))
-
-  invisible(NULL)
+  .clear_cache("sisab", "SISAB", .sisab_cache_dir(cache_dir))
 }

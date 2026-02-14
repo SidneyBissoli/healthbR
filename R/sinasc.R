@@ -463,31 +463,7 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
 #' @examples
 #' sinasc_cache_status()
 sinasc_cache_status <- function(cache_dir = NULL) {
-  cache_dir <- .sinasc_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^sinasc_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached SINASC files found.")
-    return(invisible(tibble::tibble(
-      file = character(), size_mb = numeric(), modified = as.POSIXct(character())
-    )))
-  }
-
-  info <- file.info(files)
-  result <- tibble::tibble(
-    file = basename(files),
-    size_mb = round(info$size / 1e6, 2),
-    modified = info$mtime
-  )
-
-  cli::cli_inform(c(
-    "i" = "SINASC cache: {nrow(result)} file(s), {sum(result$size_mb)} MB total",
-    "i" = "Cache directory: {.file {cache_dir}}"
-  ))
-
-  invisible(result)
+  .cache_status("sinasc", "SINASC", .sinasc_cache_dir(cache_dir))
 }
 
 
@@ -506,22 +482,5 @@ sinasc_cache_status <- function(cache_dir = NULL) {
 #' @examplesIf interactive()
 #' sinasc_clear_cache()
 sinasc_clear_cache <- function(cache_dir = NULL) {
-  cache_dir <- .sinasc_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^sinasc_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached SINASC files to clear.")
-    return(invisible(NULL))
-  }
-
-  removed <- file.remove(files)
-  n_removed <- sum(removed)
-
-  cli::cli_inform(c(
-    "v" = "Removed {n_removed} cached SINASC file(s)."
-  ))
-
-  invisible(NULL)
+  .clear_cache("sinasc", "SINASC", .sinasc_cache_dir(cache_dir))
 }

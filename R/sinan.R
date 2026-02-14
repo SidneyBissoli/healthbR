@@ -507,31 +507,7 @@ sinan_data <- function(year, disease = "DENG", vars = NULL,
 #' @examples
 #' sinan_cache_status()
 sinan_cache_status <- function(cache_dir = NULL) {
-  cache_dir <- .sinan_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^sinan_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached SINAN files found.")
-    return(invisible(tibble::tibble(
-      file = character(), size_mb = numeric(), modified = as.POSIXct(character())
-    )))
-  }
-
-  info <- file.info(files)
-  result <- tibble::tibble(
-    file = basename(files),
-    size_mb = round(info$size / 1e6, 2),
-    modified = info$mtime
-  )
-
-  cli::cli_inform(c(
-    "i" = "SINAN cache: {nrow(result)} file(s), {sum(result$size_mb)} MB total",
-    "i" = "Cache directory: {.file {cache_dir}}"
-  ))
-
-  invisible(result)
+  .cache_status("sinan", "SINAN", .sinan_cache_dir(cache_dir))
 }
 
 
@@ -550,22 +526,5 @@ sinan_cache_status <- function(cache_dir = NULL) {
 #' @examplesIf interactive()
 #' sinan_clear_cache()
 sinan_clear_cache <- function(cache_dir = NULL) {
-  cache_dir <- .sinan_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^sinan_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached SINAN files to clear.")
-    return(invisible(NULL))
-  }
-
-  removed <- file.remove(files)
-  n_removed <- sum(removed)
-
-  cli::cli_inform(c(
-    "v" = "Removed {n_removed} cached SINAN file(s)."
-  ))
-
-  invisible(NULL)
+  .clear_cache("sinan", "SINAN", .sinan_cache_dir(cache_dir))
 }

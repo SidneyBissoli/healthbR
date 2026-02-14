@@ -484,31 +484,7 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
 #' @examples
 #' sih_cache_status()
 sih_cache_status <- function(cache_dir = NULL) {
-  cache_dir <- .sih_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^sih_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached SIH files found.")
-    return(invisible(tibble::tibble(
-      file = character(), size_mb = numeric(), modified = as.POSIXct(character())
-    )))
-  }
-
-  info <- file.info(files)
-  result <- tibble::tibble(
-    file = basename(files),
-    size_mb = round(info$size / 1e6, 2),
-    modified = info$mtime
-  )
-
-  cli::cli_inform(c(
-    "i" = "SIH cache: {nrow(result)} file(s), {sum(result$size_mb)} MB total",
-    "i" = "Cache directory: {.file {cache_dir}}"
-  ))
-
-  invisible(result)
+  .cache_status("sih", "SIH", .sih_cache_dir(cache_dir))
 }
 
 
@@ -527,22 +503,5 @@ sih_cache_status <- function(cache_dir = NULL) {
 #' @examplesIf interactive()
 #' sih_clear_cache()
 sih_clear_cache <- function(cache_dir = NULL) {
-  cache_dir <- .sih_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^sih_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached SIH files to clear.")
-    return(invisible(NULL))
-  }
-
-  removed <- file.remove(files)
-  n_removed <- sum(removed)
-
-  cli::cli_inform(c(
-    "v" = "Removed {n_removed} cached SIH file(s)."
-  ))
-
-  invisible(NULL)
+  .clear_cache("sih", "SIH", .sih_cache_dir(cache_dir))
 }

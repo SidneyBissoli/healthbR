@@ -451,3 +451,66 @@
     .frequency_id = paste0("healthbR_flat_cache_", module)
   )
 }
+
+# ============================================================================
+# Shared cache status / clear helpers (DATASUS modules)
+# ============================================================================
+
+#' Report cache status for a module
+#' @param module_name Lowercase prefix used in filenames (e.g. "sim", "sih").
+#' @param module_label Display label for messages (e.g. "SIM", "SIH").
+#' @param cache_dir Resolved cache directory path.
+#' @return Invisible tibble with file, size_mb, modified columns.
+#' @noRd
+.cache_status <- function(module_name, module_label, cache_dir) {
+  files <- list.files(cache_dir,
+                      pattern = paste0("^", module_name, "_.*\\.(parquet|rds)$"),
+                      full.names = TRUE)
+
+  if (length(files) == 0) {
+    cli::cli_inform("No cached {module_label} files found.")
+    return(invisible(tibble::tibble(
+      file = character(), size_mb = numeric(), modified = as.POSIXct(character())
+    )))
+  }
+
+  info <- file.info(files)
+  result <- tibble::tibble(
+    file = basename(files),
+    size_mb = round(info$size / 1e6, 2),
+    modified = info$mtime
+  )
+
+  cli::cli_inform(c(
+    "i" = "{module_label} cache: {nrow(result)} file(s), {sum(result$size_mb)} MB total",
+    "i" = "Cache directory: {.file {cache_dir}}"
+  ))
+
+  invisible(result)
+}
+
+#' Clear cached files for a module
+#' @param module_name Lowercase prefix used in filenames (e.g. "sim", "sih").
+#' @param module_label Display label for messages (e.g. "SIM", "SIH").
+#' @param cache_dir Resolved cache directory path.
+#' @return Invisible NULL.
+#' @noRd
+.clear_cache <- function(module_name, module_label, cache_dir) {
+  files <- list.files(cache_dir,
+                      pattern = paste0("^", module_name, "_.*\\.(parquet|rds)$"),
+                      full.names = TRUE)
+
+  if (length(files) == 0) {
+    cli::cli_inform("No cached {module_label} files to clear.")
+    return(invisible(NULL))
+  }
+
+  removed <- file.remove(files)
+  n_removed <- sum(removed)
+
+  cli::cli_inform(c(
+    "v" = "Removed {n_removed} cached {module_label} file(s)."
+  ))
+
+  invisible(NULL)
+}

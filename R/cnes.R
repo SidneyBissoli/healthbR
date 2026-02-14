@@ -506,31 +506,7 @@ cnes_data <- function(year, type = "ST", month = NULL, vars = NULL, uf = NULL,
 #' @examples
 #' cnes_cache_status()
 cnes_cache_status <- function(cache_dir = NULL) {
-  cache_dir <- .cnes_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^cnes_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached CNES files found.")
-    return(invisible(tibble::tibble(
-      file = character(), size_mb = numeric(), modified = as.POSIXct(character())
-    )))
-  }
-
-  info <- file.info(files)
-  result <- tibble::tibble(
-    file = basename(files),
-    size_mb = round(info$size / 1e6, 2),
-    modified = info$mtime
-  )
-
-  cli::cli_inform(c(
-    "i" = "CNES cache: {nrow(result)} file(s), {sum(result$size_mb)} MB total",
-    "i" = "Cache directory: {.file {cache_dir}}"
-  ))
-
-  invisible(result)
+  .cache_status("cnes", "CNES", .cnes_cache_dir(cache_dir))
 }
 
 
@@ -549,22 +525,5 @@ cnes_cache_status <- function(cache_dir = NULL) {
 #' @examplesIf interactive()
 #' cnes_clear_cache()
 cnes_clear_cache <- function(cache_dir = NULL) {
-  cache_dir <- .cnes_cache_dir(cache_dir)
-
-  files <- list.files(cache_dir, pattern = "^cnes_.*\\.(parquet|rds)$",
-                      full.names = TRUE)
-
-  if (length(files) == 0) {
-    cli::cli_inform("No cached CNES files to clear.")
-    return(invisible(NULL))
-  }
-
-  removed <- file.remove(files)
-  n_removed <- sum(removed)
-
-  cli::cli_inform(c(
-    "v" = "Removed {n_removed} cached CNES file(s)."
-  ))
-
-  invisible(NULL)
+  .clear_cache("cnes", "CNES", .cnes_cache_dir(cache_dir))
 }
