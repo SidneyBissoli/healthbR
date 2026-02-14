@@ -104,7 +104,8 @@
 #'
 #' @noRd
 .has_duckdb <- function() {
-  requireNamespace("duckdb", quietly = TRUE)
+  requireNamespace("duckdb", quietly = TRUE) &&
+    requireNamespace("dbplyr", quietly = TRUE)
 }
 
 

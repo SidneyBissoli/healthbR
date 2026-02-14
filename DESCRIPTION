@@ -45,6 +45,7 @@ Suggests:
     furrr,
     future,
     arrow,
+    dbplyr,
     duckdb,
     vroom,
     piggyback,
