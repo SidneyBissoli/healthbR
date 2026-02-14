@@ -64,41 +64,10 @@
 }
 
 
-#' Validate SISAB month parameter
-#' @noRd
-.sisab_validate_month <- function(month) {
-  if (is.null(month)) {
-    return(1L:12L)
-  }
-
-  month <- as.integer(month)
-  invalid <- month[month < 1L | month > 12L | is.na(month)]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Invalid month(s): {.val {invalid}}.",
-      "i" = "Month must be between 1 and 12."
-    ))
-  }
-
-  month
-}
-
-
 #' Validate SISAB UF parameter
 #' @noRd
 .sisab_validate_uf <- function(uf) {
-  uf <- toupper(uf)
-  invalid <- uf[!uf %in% names(sisab_uf_map)]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Invalid UF abbreviation(s): {.val {invalid}}.",
-      "i" = "Valid values: {.val {names(sisab_uf_map)}}"
-    ))
-  }
-
-  uf
+  .validate_uf(uf, names(sisab_uf_map))
 }
 
 
@@ -498,7 +467,7 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
   year <- .sisab_validate_year(year)
   type <- .sisab_validate_type(type)
   level <- .sisab_validate_level(level)
-  month <- .sisab_validate_month(month)
+  month <- .validate_month(month)
   if (!is.null(uf)) uf <- .sisab_validate_uf(uf)
   if (!is.null(vars)) .sisab_validate_vars(vars, type = type)
 

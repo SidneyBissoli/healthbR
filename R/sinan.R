@@ -9,23 +9,8 @@
 #' Validate SINAN year parameter
 #' @noRd
 .sinan_validate_year <- function(year, status = "all") {
-  if (is.null(year) || length(year) == 0) {
-    cli::cli_abort("{.arg year} is required.")
-  }
-
-  year <- as.integer(year)
-  available <- sinan_years(status = status)
-  invalid <- year[!year %in% available]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Year(s) {.val {invalid}} not available.",
-      "i" = "Available years: {.val {range(available)[[1]]}}--{.val {range(available)[[2]]}}",
-      "i" = "Use {.code sinan_years(status = 'all')} to see all options."
-    ))
-  }
-
-  year
+  .validate_year(year, sinan_years(status = status),
+                 years_fn_hint = "sinan_years(status = 'all')")
 }
 
 

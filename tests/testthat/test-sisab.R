@@ -160,21 +160,21 @@ test_that(".sisab_validate_level errors on invalid level", {
 })
 
 # ============================================================================
-# .sisab_validate_month
+# .validate_month
 # ============================================================================
 
-test_that(".sisab_validate_month accepts valid months", {
-  expect_equal(.sisab_validate_month(1), 1L)
-  expect_equal(.sisab_validate_month(c(1, 6, 12)), c(1L, 6L, 12L))
+test_that(".validate_month accepts valid months", {
+  expect_equal(.validate_month(1), 1L)
+  expect_equal(.validate_month(c(1, 6, 12)), c(1L, 6L, 12L))
 })
 
-test_that(".sisab_validate_month returns 1:12 for NULL", {
-  expect_equal(.sisab_validate_month(NULL), 1L:12L)
+test_that(".validate_month returns 1:12 for NULL", {
+  expect_equal(.validate_month(NULL), 1L:12L)
 })
 
-test_that(".sisab_validate_month errors on invalid months", {
-  expect_error(.sisab_validate_month(0), "Invalid")
-  expect_error(.sisab_validate_month(13), "Invalid")
+test_that(".validate_month errors on invalid months", {
+  expect_error(.validate_month(0), "Invalid")
+  expect_error(.validate_month(13), "Invalid")
 })
 
 # ============================================================================

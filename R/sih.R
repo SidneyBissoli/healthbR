@@ -9,61 +9,14 @@
 #' Validate SIH year parameter
 #' @noRd
 .sih_validate_year <- function(year, status = "all") {
-  if (is.null(year) || length(year) == 0) {
-    cli::cli_abort("{.arg year} is required.")
-  }
-
-  year <- as.integer(year)
-  available <- sih_years(status = status)
-  invalid <- year[!year %in% available]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Year(s) {.val {invalid}} not available.",
-      "i" = "Available years: {.val {range(available)[[1]]}}--{.val {range(available)[[2]]}}",
-      "i" = "Use {.code sih_years(status = 'all')} to see all options."
-    ))
-  }
-
-  year
+  .validate_year(year, sih_years(status = status),
+                 years_fn_hint = "sih_years(status = 'all')")
 }
-
-
-#' Validate SIH month parameter
-#' @noRd
-.sih_validate_month <- function(month) {
-  if (is.null(month)) {
-    return(1L:12L)
-  }
-
-  month <- as.integer(month)
-  invalid <- month[month < 1L | month > 12L | is.na(month)]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Invalid month(s): {.val {invalid}}.",
-      "i" = "Month must be between 1 and 12."
-    ))
-  }
-
-  month
-}
-
 
 #' Validate SIH UF parameter
 #' @noRd
 .sih_validate_uf <- function(uf) {
-  uf <- toupper(uf)
-  invalid <- uf[!uf %in% sih_uf_list]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Invalid UF abbreviation(s): {.val {invalid}}.",
-      "i" = "Valid values: {.val {sih_uf_list}}"
-    ))
-  }
-
-  uf
+  .validate_uf(uf, sih_uf_list)
 }
 
 
@@ -448,7 +401,7 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
 
   # validate inputs
   year <- .sih_validate_year(year)
-  month <- .sih_validate_month(month)
+  month <- .validate_month(month)
   if (!is.null(uf)) uf <- .sih_validate_uf(uf)
   if (!is.null(vars)) .sih_validate_vars(vars)
 

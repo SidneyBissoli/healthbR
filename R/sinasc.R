@@ -9,40 +9,14 @@
 #' Validate SINASC year parameter
 #' @noRd
 .sinasc_validate_year <- function(year, status = "all") {
-  if (is.null(year) || length(year) == 0) {
-    cli::cli_abort("{.arg year} is required.")
-  }
-
-  year <- as.integer(year)
-  available <- sinasc_years(status = status)
-  invalid <- year[!year %in% available]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Year(s) {.val {invalid}} not available.",
-      "i" = "Available years: {.val {range(available)[[1]]}}--{.val {range(available)[[2]]}}",
-      "i" = "Use {.code sinasc_years(status = 'all')} to see all options."
-    ))
-  }
-
-  year
+  .validate_year(year, sinasc_years(status = status),
+                 years_fn_hint = "sinasc_years(status = 'all')")
 }
-
 
 #' Validate SINASC UF parameter
 #' @noRd
 .sinasc_validate_uf <- function(uf) {
-  uf <- toupper(uf)
-  invalid <- uf[!uf %in% sinasc_uf_list]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Invalid UF abbreviation(s): {.val {invalid}}.",
-      "i" = "Valid values: {.val {sinasc_uf_list}}"
-    ))
-  }
-
-  uf
+  .validate_uf(uf, sinasc_uf_list)
 }
 
 

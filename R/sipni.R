@@ -10,24 +10,8 @@
 #' Validate SI-PNI year parameter
 #' @noRd
 .sipni_validate_year <- function(year) {
-  if (is.null(year) || length(year) == 0) {
-    cli::cli_abort("{.arg year} is required.")
-  }
-
-  year <- as.integer(year)
-  available <- sipni_available_years
-  invalid <- year[!year %in% available]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Year(s) {.val {invalid}} not available.",
-      "i" = "Available years: {.val {range(available)[[1]]}}--{.val {range(available)[[2]]}}",
-      "i" = "Use {.code sipni_years()} to see all options.",
-      "i" = "SI-PNI: FTP 1994-2019 (aggregated), CSV 2020-2025 (microdata)."
-    ))
-  }
-
-  year
+  .validate_year(year, sipni_available_years,
+                 years_fn_hint = "sipni_years()")
 }
 
 
@@ -49,41 +33,10 @@
 }
 
 
-#' Validate SI-PNI month parameter
-#' @noRd
-.sipni_validate_month <- function(month) {
-  if (is.null(month)) {
-    return(1L:12L)
-  }
-
-  month <- as.integer(month)
-  invalid <- month[month < 1L | month > 12L | is.na(month)]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Invalid month(s): {.val {invalid}}.",
-      "i" = "Month must be between 1 and 12."
-    ))
-  }
-
-  month
-}
-
-
 #' Validate SI-PNI UF parameter
 #' @noRd
 .sipni_validate_uf <- function(uf) {
-  uf <- toupper(uf)
-  invalid <- uf[!uf %in% sipni_uf_list]
-
-  if (length(invalid) > 0) {
-    cli::cli_abort(c(
-      "Invalid UF abbreviation(s): {.val {invalid}}.",
-      "i" = "Valid values: {.val {sipni_uf_list}}"
-    ))
-  }
-
-  uf
+  .validate_uf(uf, sipni_uf_list)
 }
 
 
@@ -879,7 +832,7 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
   }
 
   # validate month (applies to API years; ignored for FTP)
-  month_vals <- .sipni_validate_month(month)
+  month_vals <- .validate_month(month)
 
   # validate vars
   if (!is.null(vars)) {

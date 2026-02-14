@@ -242,29 +242,29 @@ test_that(".sia_validate_type accepts all 13 types", {
 })
 
 # ============================================================================
-# .sia_validate_month
+# .validate_month
 # ============================================================================
 
-test_that(".sia_validate_month accepts valid months", {
-  expect_equal(.sia_validate_month(1), 1L)
-  expect_equal(.sia_validate_month(12), 12L)
-  expect_equal(.sia_validate_month(c(1, 6, 12)), c(1L, 6L, 12L))
+test_that(".validate_month accepts valid months", {
+  expect_equal(.validate_month(1), 1L)
+  expect_equal(.validate_month(12), 12L)
+  expect_equal(.validate_month(c(1, 6, 12)), c(1L, 6L, 12L))
 })
 
-test_that(".sia_validate_month NULL returns 1:12", {
-  expect_equal(.sia_validate_month(NULL), 1L:12L)
+test_that(".validate_month NULL returns 1:12", {
+  expect_equal(.validate_month(NULL), 1L:12L)
 })
 
-test_that(".sia_validate_month errors on invalid months", {
-  expect_error(.sia_validate_month(0), "Invalid")
-  expect_error(.sia_validate_month(13), "Invalid")
-  expect_error(.sia_validate_month(-1), "Invalid")
+test_that(".validate_month errors on invalid months", {
+  expect_error(.validate_month(0), "Invalid")
+  expect_error(.validate_month(13), "Invalid")
+  expect_error(.validate_month(-1), "Invalid")
 })
 
-test_that(".sia_validate_month boundary checks", {
-  expect_equal(.sia_validate_month(1), 1L)
-  expect_equal(.sia_validate_month(12), 12L)
-  expect_error(.sia_validate_month(c(1, 13)), "Invalid")
+test_that(".validate_month boundary checks", {
+  expect_equal(.validate_month(1), 1L)
+  expect_equal(.validate_month(12), 12L)
+  expect_error(.validate_month(c(1, 13)), "Invalid")
 })
 
 # ============================================================================
