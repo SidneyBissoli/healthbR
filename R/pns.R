@@ -726,6 +726,7 @@ pns_dictionary <- function(year = 2019,
 
   if (length(xlsx_files) > 0) {
     # read Excel dictionary
+    rlang::check_installed("readxl", reason = "to read PNS dictionary Excel files")
     cli::cli_inform("Reading Excel dictionary...")
     dict_file <- xlsx_files[1]
     dict_df <- tryCatch(
@@ -765,8 +766,8 @@ pns_dictionary <- function(year = 2019,
   }
 
   # clean and standardize
+  names(dict_df) <- .clean_names(names(dict_df))
   dict_df <- dict_df |>
-    janitor::clean_names() |>
     dplyr::mutate(year = as.character(year), .before = 1)
 
   dict_df <- tibble::as_tibble(dict_df)

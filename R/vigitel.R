@@ -99,6 +99,7 @@ vigitel_read_data <- function(path, format) {
 
   if (format == "dta") {
     # stata format - preserves labels
+    rlang::check_installed("haven", reason = "to read VIGITEL .dta (Stata) files")
     df <- haven::read_dta(path)
   } else {
     # csv format
@@ -477,10 +478,11 @@ vigitel_dictionary <- function(cache_dir = NULL,
   }
 
   # read excel
+  rlang::check_installed("readxl", reason = "to read VIGITEL dictionary files")
   df <- readxl::read_excel(dict_path)
 
   # clean column names
-  df <- janitor::clean_names(df)
+  names(df) <- .clean_names(names(df))
 
   tibble::as_tibble(df)
 }

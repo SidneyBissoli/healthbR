@@ -34,6 +34,6 @@ clean_sidra_response <- function(data_raw, table_code) {
   }
 
   # clean column names to snake_case
-  data_clean |>
-    janitor::clean_names()
+  names(data_clean) <- .clean_names(names(data_clean))
+  data_clean
 }

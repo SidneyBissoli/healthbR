@@ -279,6 +279,7 @@ pof_cache_dir <- function(cache_dir = NULL) {
 #' Parse POF dictionary from Excel file
 #' @noRd
 .pof_parse_dictionary <- function(dict_path, year) {
+  rlang::check_installed("readxl", reason = "to read POF dictionary Excel files")
   # read all sheets from Excel file
   sheets <- readxl::excel_sheets(dict_path)
 
@@ -329,11 +330,11 @@ pof_cache_dir <- function(cache_dir = NULL) {
         if (is.null(header_row)) {
           # fallback: try reading with default headers
           df <- readxl::read_excel(dict_path, sheet = sheet)
-          df <- df |> janitor::clean_names()
+          names(df) <- .clean_names(names(df))
         } else {
           # read skipping rows before the header so the header row becomes col names
           df <- readxl::read_excel(dict_path, sheet = sheet, skip = header_row - 1)
-          df <- df |> janitor::clean_names()
+          names(df) <- .clean_names(names(df))
         }
 
         # remove completely empty rows
@@ -689,6 +690,7 @@ pof_cache_dir <- function(cache_dir = NULL) {
   pos_strat <- tryCatch(
     {
       if (grepl("\\.xlsx?$", pos_strat_file, ignore.case = TRUE)) {
+        rlang::check_installed("readxl", reason = "to read POF post-stratification files")
         readxl::read_excel(pos_strat_file)
       } else {
         readr::read_delim(pos_strat_file, delim = ";", show_col_types = FALSE)
@@ -704,9 +706,8 @@ pof_cache_dir <- function(cache_dir = NULL) {
   unlink(temp_dir, recursive = TRUE)
 
   if (!is.null(pos_strat)) {
-    pos_strat <- pos_strat |>
-      janitor::clean_names() |>
-      tibble::as_tibble()
+    names(pos_strat) <- .clean_names(names(pos_strat))
+    pos_strat <- tibble::as_tibble(pos_strat)
   }
 
   pos_strat

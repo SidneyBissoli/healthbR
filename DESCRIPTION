@@ -28,14 +28,11 @@ Depends:
 Imports:
     tibble,
     dplyr,
-    readxl,
     curl,
     cli,
     rlang,
     stringr,
-    janitor,
     purrr,
-    haven,
     readr,
     jsonlite,
     foreign
@@ -43,6 +40,8 @@ Suggests:
     testthat (>= 3.1.5),
     knitr,
     rmarkdown,
+    readxl,
+    haven,
     furrr,
     future,
     arrow,
