@@ -47,7 +47,6 @@ Suggests:
     arrow,
     dbplyr,
     duckdb,
-    vroom,
     piggyback,
     survey,
     srvyr
