@@ -168,6 +168,7 @@
     flat_base <- stringr::str_c("sim_", uf, "_", year)
     flat_cached <- .cache_read(cache_dir, flat_base)
     if (!is.null(flat_cached)) {
+      .warn_flat_cache("sim")
       flat_cached$year <- target_year
       flat_cached$uf_source <- target_uf
       cols <- names(flat_cached)

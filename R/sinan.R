@@ -135,6 +135,7 @@
     flat_base <- stringr::str_c("sinan_", disease, "_", year)
     flat_cached <- .cache_read(cache_dir, flat_base)
     if (!is.null(flat_cached)) {
+      .warn_flat_cache("sinan")
       flat_cached$year <- target_year
       flat_cached$disease <- target_disease
       cols <- names(flat_cached)

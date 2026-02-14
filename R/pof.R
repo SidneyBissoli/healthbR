@@ -1278,6 +1278,7 @@ pof_data <- function(year = "2017-2018",
     flat_base <- stringr::str_c("pof_", year, "_", register)
     flat_cached <- .cache_read(cache_dir, flat_base)
     if (!is.null(flat_cached)) {
+      .warn_flat_cache("pof")
       cli::cli_inform("Loading {register} data from cache...")
       df <- flat_cached
     }

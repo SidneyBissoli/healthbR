@@ -979,6 +979,7 @@ pns_data <- function(year = NULL,
       flat_base <- paste0("pns_", y)
       flat_cached <- .cache_read(cache_dir, flat_base)
       if (!is.null(flat_cached)) {
+        .warn_flat_cache("pns")
         cli::cli_inform("Loading PNS {y} from cache...")
         return(flat_cached)
       }

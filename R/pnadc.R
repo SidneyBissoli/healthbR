@@ -832,6 +832,7 @@ pnadc_data <- function(module,
       flat_base <- paste0("pnadc_", module, "_", y)
       flat_cached <- .cache_read(cache_dir, flat_base)
       if (!is.null(flat_cached)) {
+        .warn_flat_cache("pnadc")
         cli::cli_inform("Loading PNADC {module} {y} from cache...")
         return(flat_cached)
       }
