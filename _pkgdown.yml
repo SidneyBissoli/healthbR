@@ -2,10 +2,46 @@ url: https://sidneybissoli.github.io/healthbR/
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left: [intro, reference, articles]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+        - text: "Getting started"
+          href: articles/healthbR.html
+        - text: "---"
+        - text: "DATASUS modules"
+        - text: "DATASUS modules overview"
+          href: articles/datasus-modules.html
+        - text: "SINAN -- Notifiable diseases"
+          href: articles/sinan-notifiable-diseases.html
+        - text: "CNES -- Health facilities"
+          href: articles/cnes-health-facilities.html
+        - text: "SI-PNI -- Vaccination"
+          href: articles/sipni-vaccination.html
+        - text: "SISAB -- Primary care"
+          href: articles/sisab-primary-care.html
+        - text: "---"
+        - text: "IBGE surveys"
+        - text: "Censo -- Population denominators"
+          href: articles/censo-denominadores.html
+        - text: "POF -- Household budgets"
+          href: articles/pof-health-data.html
+        - text: "---"
+        - text: "Regulatory agencies"
+        - text: "ANS -- Supplementary health"
+          href: articles/ans-supplementary-health.html
+        - text: "ANVISA -- Health surveillance"
+          href: articles/anvisa-health-surveillance.html
+
 reference:
   - title: "Package overview"
     contents:
       - list_sources
+      - healthbR_migrate_cache
 
   - title: "SIM -- Mortality"
     desc: "Deaths from the Mortality Information System (DATASUS FTP, 1996--2024)"
@@ -41,7 +77,7 @@ reference:
       - sih_clear_cache
 
   - title: "SIA -- Outpatient production"
-    desc: "Outpatient production from the Outpatient Information System (DATASUS FTP, 2008--2024)"
+    desc: "Outpatient and high-complexity procedures (DATASUS FTP, 1994--2023)"
     contents:
       - sia_data
       - sia_years
@@ -75,7 +111,7 @@ reference:
       - cnes_clear_cache
 
   - title: "SI-PNI -- Vaccination"
-    desc: "Vaccination data from SI-PNI (FTP 1994--2019, OpenDataSUS API 2020--2025)"
+    desc: "Vaccination data from SI-PNI (FTP 1994--2019, OpenDataSUS CSV 2020--2025)"
     contents:
       - sipni_data
       - sipni_years
@@ -86,7 +122,7 @@ reference:
       - sipni_clear_cache
 
   - title: "SISAB -- Primary care coverage"
-    desc: "Primary care coverage indicators from SISAB (REST API, 2007--present)"
+    desc: "Primary care coverage indicators from SISAB (REST API, 2019--present)"
     contents:
       - sisab_data
       - sisab_years
@@ -94,6 +130,27 @@ reference:
       - sisab_variables
       - sisab_cache_status
       - sisab_clear_cache
+
+  - title: "ANS -- Supplementary health"
+    desc: "Supplementary health data from ANS (HTTP CSV/ZIP, 2007--present)"
+    contents:
+      - ans_data
+      - ans_operators
+      - ans_years
+      - ans_info
+      - ans_variables
+      - ans_cache_status
+      - ans_clear_cache
+
+  - title: "ANVISA -- Health surveillance"
+    desc: "Product registrations, pharmacovigilance, and SNGPC (HTTPS CSV, 2014--2026)"
+    contents:
+      - anvisa_data
+      - anvisa_types
+      - anvisa_info
+      - anvisa_variables
+      - anvisa_cache_status
+      - anvisa_clear_cache
 
   - title: "VIGITEL -- Telephone survey"
     desc: "Surveillance of Risk Factors for Chronic Diseases (2006--2024)"
@@ -155,3 +212,27 @@ reference:
       - censo_sidra_data
       - censo_sidra_tables
       - censo_sidra_search
+
+articles:
+  - title: "Getting started"
+    navbar: ~
+    contents:
+      - healthbR
+
+  - title: "DATASUS modules"
+    contents:
+      - datasus-modules
+      - sinan-notifiable-diseases
+      - cnes-health-facilities
+      - sipni-vaccination
+      - sisab-primary-care
+
+  - title: "IBGE surveys"
+    contents:
+      - censo-denominadores
+      - pof-health-data
+
+  - title: "Regulatory agencies"
+    contents:
+      - ans-supplementary-health
+      - anvisa-health-surveillance
