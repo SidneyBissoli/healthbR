@@ -488,12 +488,18 @@ Census data and population estimates via SIDRA API (1970–2022)
 - [Primary Care Coverage with
   SISAB](https://sidneybissoli.github.io/healthbR/articles/sisab-primary-care.md):
 
-### IBGE surveys
+### Surveys
 
-- [Population Denominators from the Census with
-  healthbR](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md):
+- [Chronic Disease Risk Factors from VIGITEL with
+  healthbR](https://sidneybissoli.github.io/healthbR/articles/vigitel-telephone-survey.md):
+- [National Health Survey (PNS) with
+  healthbR](https://sidneybissoli.github.io/healthbR/articles/pns-health-survey.md):
+- [Health Data from PNAD Continua with
+  healthbR](https://sidneybissoli.github.io/healthbR/articles/pnadc-household-survey.md):
 - [Analyzing Health Data from POF with
   healthbR](https://sidneybissoli.github.io/healthbR/articles/pof-health-data.md):
+- [Population Denominators from the Census with
+  healthbR](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md):
 
 ### Regulatory agencies
 
