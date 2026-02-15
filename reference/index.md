@@ -4,8 +4,6 @@
 
 - [`list_sources()`](https://sidneybissoli.github.io/healthbR/reference/list_sources.md)
   : List Available Data Sources
-- [`healthbR_migrate_cache()`](https://sidneybissoli.github.io/healthbR/reference/healthbR_migrate_cache.md)
-  : Migrate flat cache files to partitioned parquet datasets
 
 ## SIM – Mortality
 
