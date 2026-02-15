@@ -53,7 +53,7 @@ instead.
 ## Data source
 
 Data is retrieved from IBGE SIDRA API, table 6579:
-<https://sidra.ibge.gov.br/tabela/6579>
+`https://sidra.ibge.gov.br/tabela/6579`
 
 ## Examples
 

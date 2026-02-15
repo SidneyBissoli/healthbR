@@ -279,7 +279,7 @@ dengue_lazy |>
 
 ## Additional resources
 
-- [SINAN official page (DATASUS)](https://portalsinan.saude.gov.br/)
+- SINAN official page (`portalsinan.saude.gov.br`)
 - [SIM
   vignette](https://sidneybissoli.github.io/healthbR/articles/datasus-modules.md)
   for mortality data

@@ -92,7 +92,7 @@ A tibble with ANS data. Includes partition columns: `year` (all types),
 ## Details
 
 Data is downloaded from the ANS open data portal at
-<https://dadosabertos.ans.gov.br/>.
+`https://dadosabertos.ans.gov.br/`.
 
 **Beneficiaries**: Monthly per-state ZIP files containing CSV data with
 consolidated beneficiary counts by operator, plan type, sex, age group,

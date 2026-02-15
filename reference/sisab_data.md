@@ -74,7 +74,7 @@ are preserved from the API (camelCase).
 ## Details
 
 Data is fetched from the relatorioaps REST API
-(<https://relatorioaps.saude.gov.br>), the public reporting portal for
+(`https://relatorioaps.saude.gov.br`), the public reporting portal for
 primary care in Brazil.
 
 Four report types are available:

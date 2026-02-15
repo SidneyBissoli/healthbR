@@ -98,7 +98,7 @@ work with VIGITEL data, installing `arrow` is highly recommended:
 ## Data source
 
 Data is downloaded from the Ministry of Health website:
-<https://svs.aids.gov.br/daent/cgdnt/vigitel/>
+`https://svs.aids.gov.br/daent/cgdnt/vigitel/`
 
 ## Examples
 

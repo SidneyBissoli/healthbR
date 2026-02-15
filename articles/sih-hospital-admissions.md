@@ -191,10 +191,8 @@ lazy |>
 
 ## Further reading
 
-- [SIH on
-  DATASUS](https://datasus.saude.gov.br/transferencia-de-arquivos/)
-- [SIGTAP procedure
-  table](https://wiki.saude.gov.br/sigtap/index.php/P%C3%A1gina_principal)
+- SIH on DATASUS (`datasus.saude.gov.br`)
+- SIGTAP procedure table (`wiki.saude.gov.br/sigtap`)
 - [SIA
   vignette](https://sidneybissoli.github.io/healthbR/articles/sia-outpatient.md)
   for outpatient data

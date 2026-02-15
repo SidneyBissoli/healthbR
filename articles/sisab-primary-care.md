@@ -242,10 +242,9 @@ sisab_clear_cache()
 
 ## Additional resources
 
-- [SISAB reporting portal](https://sisab.saude.gov.br/)
-- [relatorioaps portal](https://relatorioaps.saude.gov.br/)
-- [Primary care policy
-  (SAPS)](https://www.gov.br/saude/pt-br/composicao/saps)
+- SISAB reporting portal (`sisab.saude.gov.br`)
+- relatorioaps portal (`relatorioaps.saude.gov.br`)
+- Primary care policy (SAPS) (`www.gov.br/saude/pt-br/composicao/saps`)
 - [Census
   vignette](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)
   for population denominators

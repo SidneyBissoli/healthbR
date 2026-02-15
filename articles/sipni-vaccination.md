@@ -290,7 +290,7 @@ sipni_lazy |>
 
 ## Additional resources
 
-- [OpenDataSUS](https://dadosabertos.saude.gov.br/)
+- OpenDataSUS (`dadosabertos.saude.gov.br`)
 - [Census
   vignette](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)
   for population denominators

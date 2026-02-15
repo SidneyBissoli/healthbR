@@ -84,7 +84,7 @@ following weight variables with the `srvyr` or `survey` packages:
 ## Data source
 
 Data is downloaded from the IBGE FTP server:
-<https://ftp.ibge.gov.br/PNS/>
+`https://ftp.ibge.gov.br/PNS/`
 
 ## Examples
 

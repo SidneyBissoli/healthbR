@@ -187,8 +187,7 @@ lazy |>
 
 ## Further reading
 
-- [SINASC on
-  DATASUS](https://datasus.saude.gov.br/nascidos-vivos-desde-1994)
+- SINASC on DATASUS (`datasus.saude.gov.br`)
 - [SIM
   vignette](https://sidneybissoli.github.io/healthbR/articles/sim-mortality.md)
   for mortality data

@@ -39,7 +39,7 @@ the data returned by
 ## Data source
 
 Dictionaries are downloaded from the IBGE FTP server:
-<https://ftp.ibge.gov.br/PNS/>
+`https://ftp.ibge.gov.br/PNS/`
 
 ## Examples
 

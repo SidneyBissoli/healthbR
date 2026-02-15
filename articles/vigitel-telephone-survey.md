@@ -162,4 +162,4 @@ lazy_df <- vigitel_data(lazy = TRUE, backend = "arrow")
 
 ## Further reading
 
-- [VIGITEL official page](https://svs.aids.gov.br/daent/cgdnt/vigitel/)
+- VIGITEL official page (`svs.aids.gov.br/daent/cgdnt/vigitel`)

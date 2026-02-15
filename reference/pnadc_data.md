@@ -108,7 +108,7 @@ for analysis with the `srvyr` package.
 ## Data source
 
 Data is downloaded from the IBGE FTP server:
-<https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/>
+`https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/`
 
 ## Examples
 

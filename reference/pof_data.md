@@ -105,7 +105,7 @@ For proper statistical analysis with complex survey design, use
 ## Data source
 
 Data is downloaded from the IBGE FTP server:
-<https://ftp.ibge.gov.br/Orcamentos_Familiares/>
+`https://ftp.ibge.gov.br/Orcamentos_Familiares/`
 
 ## See also
 

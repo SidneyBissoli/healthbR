@@ -83,7 +83,7 @@ partition columns.
 ## Details
 
 Data is downloaded from the ANVISA open data portal at
-<https://dados.anvisa.gov.br/dados/>.
+`https://dados.anvisa.gov.br/dados/`.
 
 **Snapshot types**: Download a single CSV file representing the current
 state of the registry/database. No time dimension. Cached as flat files.

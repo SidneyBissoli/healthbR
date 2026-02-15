@@ -156,7 +156,6 @@ lazy_df <- pnadc_data(
 
 ## Further reading
 
-- [PNAD Continua on
-  IBGE](https://www.ibge.gov.br/estatisticas/sociais/trabalho/17270-pnad-continua.html)
-- [PNAD Continua microdata
-  documentation](https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/)
+- PNAD Continua on IBGE
+  (`www.ibge.gov.br/estatisticas/sociais/trabalho/17270-pnad-continua`)
+- PNAD Continua microdata documentation (`ftp.ibge.gov.br`)

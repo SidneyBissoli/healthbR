@@ -268,9 +268,8 @@ cnes_lazy |>
 
 ## Additional resources
 
-- [CNES official page (DATASUS)](https://cnes.datasus.gov.br/)
-- [CNES open
-  data](https://dados.gov.br/dados/conjuntos-dados/cnes---cadastro-nacional-de-estabelecimentos-de-saude)
+- CNES official page (`cnes.datasus.gov.br`)
+- CNES open data (`dados.gov.br`)
 - [Census
   vignette](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)
   for population denominators

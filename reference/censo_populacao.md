@@ -80,7 +80,7 @@ to query any table with custom parameters.
 
 ## Data source
 
-Data is retrieved from IBGE SIDRA API: <https://sidra.ibge.gov.br/>
+Data is retrieved from IBGE SIDRA API: `https://sidra.ibge.gov.br/`
 
 ## Examples
 

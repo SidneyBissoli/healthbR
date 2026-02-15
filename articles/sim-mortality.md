@@ -191,8 +191,7 @@ lazy |>
 
 ## Further reading
 
-- [SIM on
-  DATASUS](https://datasus.saude.gov.br/mortalidade-desde-1996-pela-cid-10)
+- SIM on DATASUS (`datasus.saude.gov.br`)
 - [SINASC
   vignette](https://sidneybissoli.github.io/healthbR/articles/sinan-notifiable-diseases.md)
   for live birth data

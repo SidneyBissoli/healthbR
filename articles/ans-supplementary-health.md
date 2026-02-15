@@ -339,9 +339,9 @@ ans_clear_cache()
 
 ## Additional resources
 
-- [ANS open data portal](https://dadosabertos.ans.gov.br/)
-- [ANS official website](https://www.gov.br/ans/pt-br)
-- [ANS Tabnet](https://www.ans.gov.br/anstabnet/)
+- ANS open data portal (`dadosabertos.ans.gov.br`)
+- ANS official website (`www.gov.br/ans/pt-br`)
+- ANS Tabnet (`www.ans.gov.br/anstabnet`)
 - [Census
   vignette](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)
   for population denominators
