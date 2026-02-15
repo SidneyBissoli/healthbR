@@ -629,5 +629,5 @@ sim_clear_cache()
   FTP server with raw data files
 - [CID-10 (WHO ICD-10)](https://icd.who.int/browse10/2019/en) –
   International Classification of Diseases, 10th revision
-- [SIGTAP](https://wiki.saude.gov.br/sigtap/) – procedure code table for
-  SUS (SIA/SIH)
+- [SIGTAP](https://wiki.saude.gov.br/sigtap/index.php/P%C3%A1gina_principal)
+  – procedure code table for SUS (SIA/SIH)
