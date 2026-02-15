@@ -41,7 +41,6 @@ reference:
   - title: "Package overview"
     contents:
       - list_sources
-      - healthbR_migrate_cache
 
   - title: "SIM -- Mortality"
     desc: "Deaths from the Mortality Information System (DATASUS FTP, 1996--2024)"

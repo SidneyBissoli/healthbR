@@ -115,22 +115,7 @@
     if (nrow(cached) > 0) return(cached)
   }
 
-  # 2. fall back to flat cache (migration from old format)
-  if (isTRUE(cache)) {
-    flat_base <- stringr::str_c("sinan_", disease, "_", year)
-    flat_cached <- .cache_read(cache_dir, flat_base)
-    if (!is.null(flat_cached)) {
-      .warn_flat_cache("sinan")
-      flat_cached$year <- target_year
-      flat_cached$disease <- target_disease
-      cols <- names(flat_cached)
-      flat_cached <- flat_cached[, c("year", "disease",
-                                      setdiff(cols, c("year", "disease")))]
-      return(flat_cached)
-    }
-  }
-
-  # 3. download from FTP
+  # 2. download from FTP
   url <- .sinan_build_ftp_url(year, disease)
   temp_dbc <- tempfile(fileext = ".dbc")
   on.exit(if (file.exists(temp_dbc)) file.remove(temp_dbc), add = TRUE)

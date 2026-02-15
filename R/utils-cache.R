@@ -441,16 +441,6 @@
   })
 }
 
-# Emit a one-time deprecation warning when flat cache is read
-.warn_flat_cache <- function(module) {
-  cli::cli_warn(
-    c("Found legacy flat cache files for {.pkg {module}}.",
-      "i" = "Flat cache support will be removed in a future version.",
-      "i" = "Run {.code healthbR_migrate_cache()} to upgrade."),
-    .frequency = "once",
-    .frequency_id = paste0("healthbR_flat_cache_", module)
-  )
-}
 
 # ============================================================================
 # Shared cache status / clear helpers (DATASUS modules)

@@ -119,22 +119,7 @@
     if (nrow(cached) > 0) return(cached)
   }
 
-  # 2. fall back to flat cache (migration from old format)
-  if (isTRUE(cache)) {
-    flat_base <- stringr::str_c("sipni_", type, "_", uf, "_", year)
-    flat_cached <- .cache_read(cache_dir, flat_base)
-    if (!is.null(flat_cached)) {
-      .warn_flat_cache("sipni")
-      flat_cached$year <- target_year
-      flat_cached$uf_source <- target_uf
-      cols <- names(flat_cached)
-      flat_cached <- flat_cached[, c("year", "uf_source",
-                                      setdiff(cols, c("year", "uf_source")))]
-      return(flat_cached)
-    }
-  }
-
-  # 3. download from FTP
+  # 2. download from FTP
   url <- .sipni_build_ftp_url(year, uf, type)
   temp_dbf <- tempfile(fileext = ".DBF")
   on.exit(if (file.exists(temp_dbf)) file.remove(temp_dbf), add = TRUE)
@@ -241,24 +226,7 @@
     if (nrow(cached) > 0) return(cached)
   }
 
-  # 2. fall back to flat cache (migration from old format)
-  if (isTRUE(cache)) {
-    mm <- sprintf("%02d", month)
-    flat_base <- stringr::str_c("sipni_API_", uf, "_", year, mm)
-    flat_cached <- .cache_read(cache_dir, flat_base)
-    if (!is.null(flat_cached)) {
-      .warn_flat_cache("sipni")
-      flat_cached$year <- target_year
-      flat_cached$month <- target_month
-      flat_cached$uf_source <- uf
-      cols <- names(flat_cached)
-      flat_cached <- flat_cached[, c("year", "month", "uf_source",
-                                      setdiff(cols, c("year", "month", "uf_source")))]
-      return(flat_cached)
-    }
-  }
-
-  # 3. download ZIP (unless pre-downloaded)
+  # 2. download ZIP (unless pre-downloaded)
   own_zip <- is.null(zip_path)
   if (own_zip) {
     url <- .sipni_csv_build_url(year, month)
@@ -401,24 +369,6 @@
         dplyr::collect()
       if (nrow(cached) > 0) {
         cached_results <- c(cached_results, list(cached))
-        got_cache <- TRUE
-      }
-    }
-
-    if (!got_cache && isTRUE(cache)) {
-      mm <- sprintf("%02d", m)
-      flat_base <- stringr::str_c("sipni_API_", uf, "_", year, mm)
-      flat_cached <- .cache_read(cache_dir, flat_base)
-      if (!is.null(flat_cached)) {
-        .warn_flat_cache("sipni")
-        flat_cached$year <- target_year
-        flat_cached$month <- target_month
-        flat_cached$uf_source <- uf
-        cols <- names(flat_cached)
-        flat_cached <- flat_cached[, c("year", "month", "uf_source",
-                                        setdiff(cols, c("year", "month",
-                                                        "uf_source")))]
-        cached_results <- c(cached_results, list(flat_cached))
         got_cache <- TRUE
       }
     }

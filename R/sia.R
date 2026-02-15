@@ -111,25 +111,7 @@
     if (nrow(cached) > 0) return(cached)
   }
 
-  # 2. fall back to flat cache (migration from old format)
-  if (isTRUE(cache)) {
-    flat_base <- stringr::str_c(
-      "sia_", type, "_", uf, "_", year, sprintf("%02d", month)
-    )
-    flat_cached <- .cache_read(cache_dir, flat_base)
-    if (!is.null(flat_cached)) {
-      .warn_flat_cache("sia")
-      flat_cached$year <- target_year
-      flat_cached$month <- target_month
-      flat_cached$uf_source <- target_uf
-      cols <- names(flat_cached)
-      flat_cached <- flat_cached[, c("year", "month", "uf_source",
-                                      setdiff(cols, c("year", "month", "uf_source")))]
-      return(flat_cached)
-    }
-  }
-
-  # 3. download from FTP
+  # 2. download from FTP
   url <- .sia_build_ftp_url(year, month, uf, type)
   temp_dbc <- tempfile(fileext = ".dbc")
   on.exit(if (file.exists(temp_dbc)) file.remove(temp_dbc), add = TRUE)

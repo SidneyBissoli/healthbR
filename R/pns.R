@@ -974,18 +974,7 @@ pns_data <- function(year = NULL,
       }
     }
 
-    # 2. fall back to flat cache (migration from old format)
-    if (!refresh) {
-      flat_base <- paste0("pns_", y)
-      flat_cached <- .cache_read(cache_dir, flat_base)
-      if (!is.null(flat_cached)) {
-        .warn_flat_cache("pns")
-        cli::cli_inform("Loading PNS {y} from cache...")
-        return(flat_cached)
-      }
-    }
-
-    # 3. download and read
+    # 2. download and read
     zip_path <- pns_download_data(y, cache_dir, refresh)
     data <- pns_read_microdata(zip_path, y)
 

@@ -696,38 +696,6 @@ test_that(".data_return falls through to eager when lazy cache missing", {
 
 
 # ============================================================================
-# .warn_flat_cache()
-# ============================================================================
-
-test_that(".warn_flat_cache emits warning with correct message", {
-  # reset rlang frequency tracking so warning fires
-  rlang::reset_warning_verbosity("healthbR_flat_cache_test_mod")
-  expect_warning(
-    healthbR:::.warn_flat_cache("test_mod"),
-    "legacy flat cache"
-  )
-})
-
-test_that(".warn_flat_cache warns once per module per session", {
-  rlang::reset_warning_verbosity("healthbR_flat_cache_once_mod")
-  expect_warning(
-    healthbR:::.warn_flat_cache("once_mod"),
-    "legacy flat cache"
-  )
-  # second call should NOT warn (frequency = "once")
-  expect_no_warning(healthbR:::.warn_flat_cache("once_mod"))
-})
-
-test_that(".warn_flat_cache mentions healthbR_migrate_cache()", {
-  rlang::reset_warning_verbosity("healthbR_flat_cache_migrate_mod")
-  expect_warning(
-    healthbR:::.warn_flat_cache("migrate_mod"),
-    "healthbR_migrate_cache"
-  )
-})
-
-
-# ============================================================================
 # .cache_status / .clear_cache
 # ============================================================================
 
