@@ -1,0 +1,197 @@
+# Live Birth Data from SINASC with healthbR
+
+## Overview
+
+The **SINASC (Sistema de Informacoes sobre Nascidos Vivos)** is Brazil’s
+national live birth information system, managed by the Ministry of
+Health through DATASUS. It records individual birth certificates
+(*Declaracao de Nascido Vivo*) with maternal, delivery, and newborn
+characteristics.
+
+| Feature  | Details                            |
+|----------|------------------------------------|
+| Coverage | Per state (UF), all 27 states      |
+| Years    | 1996–2024                          |
+| Unit     | One row per live birth certificate |
+| Format   | .dbc files from DATASUS FTP        |
+
+## Getting started
+
+``` r
+library(healthbR)
+library(dplyr)
+```
+
+### Check available years
+
+``` r
+sinasc_years()
+
+# include preliminary data
+sinasc_years(status = "all")
+```
+
+### Module information
+
+``` r
+sinasc_info()
+```
+
+## Downloading data
+
+### Basic download
+
+``` r
+births <- sinasc_data(year = 2022, uf = "AC")
+```
+
+### Multiple states and years
+
+``` r
+births <- sinasc_data(year = 2020:2022, uf = c("SP", "RJ"))
+```
+
+### Filter by congenital anomaly
+
+Use CID-10 code prefixes to filter births with congenital anomalies:
+
+``` r
+# Down syndrome (Q90)
+down <- sinasc_data(year = 2022, uf = "SP", anomaly = "Q90")
+
+# All congenital anomalies (Chapter XVII)
+anomalies <- sinasc_data(year = 2022, uf = "SP", anomaly = "Q")
+```
+
+### Select variables
+
+``` r
+births <- sinasc_data(
+  year = 2022,
+  uf = "SP",
+  vars = c("DTNASC", "SEXO", "PESO", "IDADEMAE", "GESTACAO",
+           "PARTO", "CONSULTAS", "CODMUNRES")
+)
+```
+
+## Key variables
+
+| Variable       | Description                                        |
+|----------------|----------------------------------------------------|
+| DTNASC         | Birth date                                         |
+| SEXO           | Sex (1=Male, 2=Female, 0=Unknown)                  |
+| PESO           | Birth weight (grams)                               |
+| IDADEMAE       | Mother’s age (years)                               |
+| GESTACAO       | Gestational age (weeks, categorized)               |
+| PARTO          | Delivery type (1=Vaginal, 2=Cesarean)              |
+| CONSULTAS      | Prenatal consultations (categorized)               |
+| CODANOMAL      | Congenital anomaly (CID-10 code)                   |
+| CODMUNRES      | Municipality of mother’s residence (IBGE 6 digits) |
+| ESCMAE         | Mother’s education level                           |
+| RACACOR        | Newborn’s race/color                               |
+| APGAR1, APGAR5 | Apgar score at 1 and 5 minutes                     |
+
+### Data dictionary
+
+``` r
+sinasc_dictionary()
+sinasc_dictionary("PARTO")
+sinasc_dictionary("GESTACAO")
+```
+
+### Explore variables
+
+``` r
+sinasc_variables()
+sinasc_variables(search = "mae")
+sinasc_variables(search = "peso")
+```
+
+## Example: Low birth weight by state
+
+``` r
+births <- sinasc_data(year = 2022, uf = c("SP", "RJ", "MG", "BA", "RS"))
+
+lbw <- births |>
+  filter(!is.na(PESO), PESO != "0") |>
+  mutate(
+    weight = as.numeric(PESO),
+    low_weight = weight < 2500
+  ) |>
+  group_by(uf_source) |>
+  summarise(
+    total = n(),
+    low_weight_n = sum(low_weight),
+    low_weight_pct = low_weight_n / total * 100
+  )
+```
+
+## Example: Cesarean rates over time
+
+``` r
+births <- sinasc_data(year = 2018:2022, uf = "SP",
+                      vars = c("PARTO", "CODMUNRES"))
+
+cesarean <- births |>
+  filter(PARTO %in% c("1", "2")) |>
+  group_by(year) |>
+  summarise(
+    vaginal = sum(PARTO == "1"),
+    cesarean = sum(PARTO == "2"),
+    cesarean_rate = cesarean / (vaginal + cesarean) * 100
+  )
+```
+
+## Example: Teen pregnancy
+
+``` r
+births <- sinasc_data(year = 2022, uf = "SP")
+
+teen <- births |>
+  filter(!is.na(IDADEMAE)) |>
+  mutate(
+    mother_age = as.integer(IDADEMAE),
+    teen_mother = mother_age < 20
+  ) |>
+  summarise(
+    total = n(),
+    teen_n = sum(teen_mother, na.rm = TRUE),
+    teen_pct = teen_n / total * 100
+  )
+```
+
+## Smart type parsing
+
+``` r
+# parsed types (default)
+births <- sinasc_data(year = 2022, uf = "AC")
+class(births$DTNASC)  # Date
+class(births$PESO)    # integer
+
+# all character
+births_raw <- sinasc_data(year = 2022, uf = "AC", parse = FALSE)
+```
+
+## Cache and lazy evaluation
+
+``` r
+sinasc_cache_status()
+sinasc_clear_cache()
+
+# lazy query
+lazy <- sinasc_data(year = 2022, uf = "SP", lazy = TRUE)
+lazy |>
+  filter(PARTO == "2") |>
+  collect()
+```
+
+## Further reading
+
+- [SINASC on
+  DATASUS](https://datasus.saude.gov.br/nascidos-vivos-desde-1994)
+- [SIM
+  vignette](https://sidneybissoli.github.io/healthbR/articles/sim-mortality.md)
+  for mortality data
+- [Census
+  vignette](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)
+  for population denominators

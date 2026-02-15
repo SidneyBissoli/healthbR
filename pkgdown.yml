@@ -11,11 +11,15 @@ articles:
   pnadc-household-survey: pnadc-household-survey.html
   pns-health-survey: pns-health-survey.html
   pof-health-data: pof-health-data.html
+  sia-outpatient: sia-outpatient.html
+  sih-hospital-admissions: sih-hospital-admissions.html
+  sim-mortality: sim-mortality.html
   sinan-notifiable-diseases: sinan-notifiable-diseases.html
+  sinasc-live-births: sinasc-live-births.html
   sipni-vaccination: sipni-vaccination.html
   sisab-primary-care: sisab-primary-care.html
   vigitel-telephone-survey: vigitel-telephone-survey.html
-last_built: 2026-02-15T17:30Z
+last_built: 2026-02-15T17:51Z
 urls:
   reference: https://sidneybissoli.github.io/healthbR/reference
   article: https://sidneybissoli.github.io/healthbR/articles
