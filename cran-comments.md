@@ -2,8 +2,10 @@
 
 0 errors | 0 warnings | 0 notes
 
-* Update from 0.1.1 to 0.2.0 (major feature release: 7 new data modules,
-  performance infrastructure, code quality improvements).
+* Resubmission of 0.2.0 addressing reviewer feedback:
+  - Fixed 301 redirect URL (wiki.saude.gov.br/sigtap/) in three vignettes.
+  - Added single quotes around non-English proper nouns, acronyms, and
+    technical terms in DESCRIPTION to resolve spelling NOTE.
 
 ## Changes since last CRAN release (0.1.1)
 
