@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.13.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,15 +19,23 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/censo-denominadores.html">Population Denominators from the Census with healthbR</a></li>
-    <li><a class="dropdown-item" href="../articles/cnes-health-facilities.html">Health Facility Registry with CNES</a></li>
-    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB</a></li>
-    <li><a class="dropdown-item" href="../articles/pof-health-data.html">Analyzing Health Data from POF with healthbR</a></li>
-    <li><a class="dropdown-item" href="../articles/sinan-notifiable-diseases.html">Notifiable Disease Surveillance with SINAN</a></li>
-    <li><a class="dropdown-item" href="../articles/sipni-vaccination.html">Vaccination Data with SI-PNI</a></li>
-    <li><a class="dropdown-item" href="../articles/sisab-primary-care.html">Primary Care Coverage with SISAB</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/healthbR.html">Getting started</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>DATASUS modules</h6></li>
+    <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS modules overview</a></li>
+    <li><a class="dropdown-item" href="../articles/sinan-notifiable-diseases.html">SINAN -- Notifiable diseases</a></li>
+    <li><a class="dropdown-item" href="../articles/cnes-health-facilities.html">CNES -- Health facilities</a></li>
+    <li><a class="dropdown-item" href="../articles/sipni-vaccination.html">SI-PNI -- Vaccination</a></li>
+    <li><a class="dropdown-item" href="../articles/sisab-primary-care.html">SISAB -- Primary care</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>IBGE surveys</h6></li>
+    <li><a class="dropdown-item" href="../articles/censo-denominadores.html">Censo -- Population denominators</a></li>
+    <li><a class="dropdown-item" href="../articles/pof-health-data.html">POF -- Household budgets</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Regulatory agencies</h6></li>
+    <li><a class="dropdown-item" href="../articles/ans-supplementary-health.html">ANS -- Supplementary health</a></li>
+    <li><a class="dropdown-item" href="../articles/anvisa-health-surveillance.html">ANVISA -- Health surveillance</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/SidneyBissoli/healthbR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -58,6 +66,13 @@
 
         </dt>
         <dd>List Available Data Sources</dd>
+
+        <dt>
+
+          <code><a href="healthbR_migrate_cache.html">healthbR_migrate_cache()</a></code>
+
+        </dt>
+        <dd>Migrate flat cache files to partitioned parquet datasets</dd>
       </dl></div><div class="section level2">
       <h2 id="sim-mortality">SIM – Mortality<a class="anchor" aria-label="anchor" href="#sim-mortality"></a></h2>
 
@@ -235,7 +250,7 @@
       </dl></div><div class="section level2">
       <h2 id="sia-outpatient-production">SIA – Outpatient production<a class="anchor" aria-label="anchor" href="#sia-outpatient-production"></a></h2>
 
-      <div class="section-desc"><p>Outpatient production from the Outpatient Information System (DATASUS FTP, 2008–2024)</p></div>
+      <div class="section-desc"><p>Outpatient and high-complexity procedures (DATASUS FTP, 1994–2023)</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -416,7 +431,7 @@
       </dl></div><div class="section level2">
       <h2 id="si-pni-vaccination">SI-PNI – Vaccination<a class="anchor" aria-label="anchor" href="#si-pni-vaccination"></a></h2>
 
-      <div class="section-desc"><p>Vaccination data from SI-PNI (FTP 1994–2019, OpenDataSUS API 2020–2025)</p></div>
+      <div class="section-desc"><p>Vaccination data from SI-PNI (FTP 1994–2019, OpenDataSUS CSV 2020–2025)</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -474,7 +489,7 @@
       </dl></div><div class="section level2">
       <h2 id="sisab-primary-care-coverage">SISAB – Primary care coverage<a class="anchor" aria-label="anchor" href="#sisab-primary-care-coverage"></a></h2>
 
-      <div class="section-desc"><p>Primary care coverage indicators from SISAB (REST API, 2007–present)</p></div>
+      <div class="section-desc"><p>Primary care coverage indicators from SISAB (REST API, 2019–present)</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -522,6 +537,115 @@
 
         </dt>
         <dd>Clear SISAB Cache</dd>
+      </dl></div><div class="section level2">
+      <h2 id="ans-supplementary-health">ANS – Supplementary health<a class="anchor" aria-label="anchor" href="#ans-supplementary-health"></a></h2>
+
+      <div class="section-desc"><p>Supplementary health data from ANS (HTTP CSV/ZIP, 2007–present)</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="ans_data.html">ans_data()</a></code>
+
+        </dt>
+        <dd>Download ANS Data</dd>
+
+        <dt>
+
+          <code><a href="ans_operators.html">ans_operators()</a></code>
+
+        </dt>
+        <dd>Download ANS Operators Registry</dd>
+
+        <dt>
+
+          <code><a href="ans_years.html">ans_years()</a></code>
+
+        </dt>
+        <dd>List Available ANS Years</dd>
+
+        <dt>
+
+          <code><a href="ans_info.html">ans_info()</a></code>
+
+        </dt>
+        <dd>ANS Module Information</dd>
+
+        <dt>
+
+          <code><a href="ans_variables.html">ans_variables()</a></code>
+
+        </dt>
+        <dd>List ANS Variables</dd>
+
+        <dt>
+
+          <code><a href="ans_cache_status.html">ans_cache_status()</a></code>
+
+        </dt>
+        <dd>Show ANS Cache Status</dd>
+
+        <dt>
+
+          <code><a href="ans_clear_cache.html">ans_clear_cache()</a></code>
+
+        </dt>
+        <dd>Clear ANS Cache</dd>
+      </dl></div><div class="section level2">
+      <h2 id="anvisa-health-surveillance">ANVISA – Health surveillance<a class="anchor" aria-label="anchor" href="#anvisa-health-surveillance"></a></h2>
+
+      <div class="section-desc"><p>Product registrations, pharmacovigilance, and SNGPC (HTTPS CSV, 2014–2026)</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="anvisa_data.html">anvisa_data()</a></code>
+
+        </dt>
+        <dd>Download ANVISA Data</dd>
+
+        <dt>
+
+          <code><a href="anvisa_types.html">anvisa_types()</a></code>
+
+        </dt>
+        <dd>List ANVISA Data Types</dd>
+
+        <dt>
+
+          <code><a href="anvisa_info.html">anvisa_info()</a></code>
+
+        </dt>
+        <dd>ANVISA Module Information</dd>
+
+        <dt>
+
+          <code><a href="anvisa_variables.html">anvisa_variables()</a></code>
+
+        </dt>
+        <dd>List ANVISA Variables</dd>
+
+        <dt>
+
+          <code><a href="anvisa_cache_status.html">anvisa_cache_status()</a></code>
+
+        </dt>
+        <dd>Show ANVISA Cache Status</dd>
+
+        <dt>
+
+          <code><a href="anvisa_clear_cache.html">anvisa_clear_cache()</a></code>
+
+        </dt>
+        <dd>Clear ANVISA Cache</dd>
       </dl></div><div class="section level2">
       <h2 id="vigitel-telephone-survey">VIGITEL – Telephone survey<a class="anchor" aria-label="anchor" href="#vigitel-telephone-survey"></a></h2>
 

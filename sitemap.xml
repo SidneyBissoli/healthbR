@@ -3,6 +3,8 @@
 <url><loc>https://sidneybissoli.github.io/healthbR/LICENSE-text.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/LICENSE.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/MAINTENANCE.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/articles/ans-supplementary-health.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/articles/anvisa-health-surveillance.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/articles/cnes-health-facilities.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/articles/datasus-modules.html</loc></url>
@@ -15,6 +17,19 @@
 <url><loc>https://sidneybissoli.github.io/healthbR/authors.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/index.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/news/index.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/ans_cache_status.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/ans_clear_cache.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/ans_data.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/ans_info.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/ans_operators.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/ans_variables.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/ans_years.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/anvisa_cache_status.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/anvisa_clear_cache.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/anvisa_data.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/anvisa_info.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/anvisa_types.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/anvisa_variables.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/reference/censo_estimativa.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/reference/censo_info.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/reference/censo_populacao.html</loc></url>
@@ -33,6 +48,7 @@
 <url><loc>https://sidneybissoli.github.io/healthbR/reference/get_arrow_column_names.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/reference/has_partitioned_cache.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/reference/healthbR-package.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/healthbR/reference/healthbR_migrate_cache.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/reference/index.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/reference/list_sources.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/healthbR/reference/pnadc_cache_status.html</loc></url>

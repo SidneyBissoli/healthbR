@@ -4,6 +4,8 @@
 
 - [`list_sources()`](https://sidneybissoli.github.io/healthbR/reference/list_sources.md)
   : List Available Data Sources
+- [`healthbR_migrate_cache()`](https://sidneybissoli.github.io/healthbR/reference/healthbR_migrate_cache.md)
+  : Migrate flat cache files to partitioned parquet datasets
 
 ## SIM – Mortality
 
@@ -66,8 +68,7 @@ Hospital admissions from the Hospital Information System (DATASUS FTP,
 
 ## SIA – Outpatient production
 
-Outpatient production from the Outpatient Information System (DATASUS
-FTP, 2008–2024)
+Outpatient and high-complexity procedures (DATASUS FTP, 1994–2023)
 
 - [`sia_data()`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)
   : Download SIA Outpatient Production Microdata
@@ -126,7 +127,7 @@ National health facility registry from CNES (DATASUS FTP, 2005–2024)
 
 ## SI-PNI – Vaccination
 
-Vaccination data from SI-PNI (FTP 1994–2019, OpenDataSUS API 2020–2025)
+Vaccination data from SI-PNI (FTP 1994–2019, OpenDataSUS CSV 2020–2025)
 
 - [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
   : Download SI-PNI Vaccination Data
@@ -145,7 +146,7 @@ Vaccination data from SI-PNI (FTP 1994–2019, OpenDataSUS API 2020–2025)
 
 ## SISAB – Primary care coverage
 
-Primary care coverage indicators from SISAB (REST API, 2007–present)
+Primary care coverage indicators from SISAB (REST API, 2019–present)
 
 - [`sisab_data()`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)
   : Download SISAB Coverage Data
@@ -159,6 +160,43 @@ Primary care coverage indicators from SISAB (REST API, 2007–present)
   : Show SISAB Cache Status
 - [`sisab_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sisab_clear_cache.md)
   : Clear SISAB Cache
+
+## ANS – Supplementary health
+
+Supplementary health data from ANS (HTTP CSV/ZIP, 2007–present)
+
+- [`ans_data()`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)
+  : Download ANS Data
+- [`ans_operators()`](https://sidneybissoli.github.io/healthbR/reference/ans_operators.md)
+  : Download ANS Operators Registry
+- [`ans_years()`](https://sidneybissoli.github.io/healthbR/reference/ans_years.md)
+  : List Available ANS Years
+- [`ans_info()`](https://sidneybissoli.github.io/healthbR/reference/ans_info.md)
+  : ANS Module Information
+- [`ans_variables()`](https://sidneybissoli.github.io/healthbR/reference/ans_variables.md)
+  : List ANS Variables
+- [`ans_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/ans_cache_status.md)
+  : Show ANS Cache Status
+- [`ans_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/ans_clear_cache.md)
+  : Clear ANS Cache
+
+## ANVISA – Health surveillance
+
+Product registrations, pharmacovigilance, and SNGPC (HTTPS CSV,
+2014–2026)
+
+- [`anvisa_data()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_data.md)
+  : Download ANVISA Data
+- [`anvisa_types()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_types.md)
+  : List ANVISA Data Types
+- [`anvisa_info()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_info.md)
+  : ANVISA Module Information
+- [`anvisa_variables()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_variables.md)
+  : List ANVISA Variables
+- [`anvisa_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_cache_status.md)
+  : Show ANVISA Cache Status
+- [`anvisa_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_clear_cache.md)
+  : Clear ANVISA Cache
 
 ## VIGITEL – Telephone survey
 

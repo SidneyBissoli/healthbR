@@ -2,6 +2,8 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  ans-supplementary-health: ans-supplementary-health.html
+  anvisa-health-surveillance: anvisa-health-surveillance.html
   censo-denominadores: censo-denominadores.html
   cnes-health-facilities: cnes-health-facilities.html
   datasus-modules: datasus-modules.html
@@ -10,7 +12,7 @@ articles:
   sinan-notifiable-diseases: sinan-notifiable-diseases.html
   sipni-vaccination: sipni-vaccination.html
   sisab-primary-care: sisab-primary-care.html
-last_built: 2026-02-14T17:17Z
+last_built: 2026-02-15T13:27Z
 urls:
   reference: https://sidneybissoli.github.io/healthbR/reference
   article: https://sidneybissoli.github.io/healthbR/articles

@@ -12,9 +12,14 @@ SINAN (Notifiable Diseases Surveillance), CNES (National Health Facility
 Registry), SI-PNI (National Immunization Program - aggregated 1994-2019
 via FTP, individual-level microdata 2020+ via OpenDataSUS API), SISAB
 (Primary Care Health Information System - coverage indicators via REST
-API), and other health information systems. Data is downloaded from the
-Brazilian Ministry of Health and IBGE repositories. Data is returned in
-tidy format following tidyverse conventions.
+API), ANS (Agencia Nacional de Saude Suplementar - supplementary health
+beneficiaries, consumer complaints, and financial statements), ANVISA
+(Agencia Nacional de Vigilancia Sanitaria - product registrations,
+pharmacovigilance, hemovigilance, technovigilance, and controlled
+substance sales via SNGPC), and other health information systems. Data
+is downloaded from the Brazilian Ministry of Health and IBGE
+repositories. Data is returned in tidy format following tidyverse
+conventions.
 
 ## See also
 
