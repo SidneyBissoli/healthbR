@@ -83,3 +83,31 @@
 
   uf
 }
+
+
+#' Validate quarter parameter
+#'
+#' Returns 1:4 if quarter is NULL (default for quarterly datasets).
+#'
+#' @param quarter Integer vector or NULL.
+#'
+#' @return Validated integer vector of quarters.
+#'
+#' @noRd
+.validate_quarter <- function(quarter) {
+  if (is.null(quarter)) {
+    return(1L:4L)
+  }
+
+  quarter <- as.integer(quarter)
+  invalid <- quarter[quarter < 1L | quarter > 4L | is.na(quarter)]
+
+  if (length(invalid) > 0) {
+    cli::cli_abort(c(
+      "Invalid quarter(s): {.val {invalid}}.",
+      "i" = "Quarter must be between 1 and 4."
+    ))
+  }
+
+  quarter
+}

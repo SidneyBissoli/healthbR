@@ -90,6 +90,42 @@ test_that(".validate_month boundary checks", {
 
 
 # ============================================================================
+# .validate_quarter
+# ============================================================================
+
+test_that(".validate_quarter returns 1:4 for NULL", {
+  expect_equal(.validate_quarter(NULL), 1L:4L)
+})
+
+test_that(".validate_quarter accepts valid quarters", {
+  expect_equal(.validate_quarter(1), 1L)
+  expect_equal(.validate_quarter(4), 4L)
+  expect_equal(.validate_quarter(c(1, 3)), c(1L, 3L))
+})
+
+test_that(".validate_quarter coerces to integer", {
+  expect_equal(.validate_quarter(2.5), 2L)
+})
+
+test_that(".validate_quarter errors on invalid quarters", {
+  expect_error(.validate_quarter(0), "Invalid")
+  expect_error(.validate_quarter(5), "Invalid")
+  expect_error(.validate_quarter(-1), "Invalid")
+})
+
+test_that(".validate_quarter errors on NA", {
+  expect_error(.validate_quarter(NA), "Invalid")
+})
+
+test_that(".validate_quarter boundary checks", {
+  expect_equal(.validate_quarter(1), 1L)
+  expect_equal(.validate_quarter(4), 4L)
+  expect_error(.validate_quarter(0), "Invalid")
+  expect_error(.validate_quarter(5), "Invalid")
+})
+
+
+# ============================================================================
 # .validate_uf
 # ============================================================================
 

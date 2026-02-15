@@ -37,7 +37,8 @@ list_sources <- function() {
       "sinan",
       "cnes",
       "sipni",
-      "sisab"
+      "sisab",
+      "ans"
     ),
     name = c(
       "VIGITEL",
@@ -52,7 +53,8 @@ list_sources <- function() {
       "SINAN - Sistema de Informacao de Agravos de Notificacao",
       "CNES - Cadastro Nacional de Estabelecimentos de Saude",
       "SI-PNI - Sistema de Informacao do Programa Nacional de Imunizacoes",
-      "SISAB - Sistema de Informacao em Saude para a Atencao Basica"
+      "SISAB - Sistema de Informacao em Saude para a Atencao Basica",
+      "ANS - Agencia Nacional de Saude Suplementar"
     ),
     description = c(
       "Telephone survey on chronic disease risk factors",
@@ -67,7 +69,8 @@ list_sources <- function() {
       "Notifiable diseases surveillance",
       "Health facilities registry",
       "Vaccination doses/coverage (aggregated 1994-2019, microdata 2020+)",
-      "Primary care coverage indicators (REST API)"
+      "Primary care coverage indicators (REST API)",
+      "Supplementary health: beneficiaries, complaints, financial statements"
     ),
     years = c(
       "2006-2024",
@@ -82,9 +85,11 @@ list_sources <- function() {
       "2007-2024",
       "2005-2023",
       "1994-2025",
-      "2007-2025"
+      "2007-2025",
+      "2007-2026"
     ),
     status = c(
+      "available",
       "available",
       "available",
       "available",

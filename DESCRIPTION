@@ -16,7 +16,9 @@ Description: Provides easy access to Brazilian public health data from multiple
     SI-PNI (National Immunization Program - aggregated 1994-2019 via FTP,
     individual-level microdata 2020+ via OpenDataSUS API),
     SISAB (Primary Care Health Information System - coverage indicators via
-    REST API), and other health information systems. Data is downloaded
+    REST API), ANS (Agencia Nacional de Saude Suplementar - supplementary
+    health beneficiaries, consumer complaints, and financial statements),
+    and other health information systems. Data is downloaded
     from the Brazilian Ministry of Health and IBGE repositories. Data is returned
     in tidy format following tidyverse conventions.
 License: MIT + file LICENSE
