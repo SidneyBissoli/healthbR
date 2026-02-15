@@ -1,0 +1,350 @@
+---
+title: "Supplementary Health Data with ANS"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Supplementary Health Data with ANS}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Overview
+
+The **ANS (Agencia Nacional de Saude Suplementar)** is Brazil's regulatory agency for private/supplementary health insurance (planos de saude). Its open data portal provides data on beneficiaries, consumer complaints, and operator financial statements.
+
+| Feature | Details |
+|---------|---------|
+| Source | HTTP CSV/ZIP (dadosabertos.ans.gov.br) |
+| Data types | 3 (beneficiaries, complaints, financial) |
+| Beneficiaries | Monthly, per-UF (Apr 2019--present) |
+| Complaints | Annual, national (2011--present) |
+| Financial | Quarterly (2007--present) |
+| Operators | Snapshot registry (separate function) |
+
+## Data types
+
+| Code | Name | Granularity | Availability |
+|------|------|-------------|--------------|
+| **beneficiaries** | Beneficiarios | Monthly, per-UF | Apr 2019--2025 |
+| **complaints** | Demandas NIP | Annual, national | 2011--2026 |
+| **financial** | Demonstracoes contabeis | Quarterly | 2007--2025 |
+
+## Getting started
+
+```{r setup}
+library(healthbR)
+library(dplyr)
+```
+
+### Check available years
+
+```{r}
+# beneficiaries (default)
+ans_years()
+
+# complaints
+ans_years(type = "complaints")
+
+# financial statements
+ans_years(type = "financial")
+```
+
+### Module information
+
+```{r}
+ans_info()
+```
+
+## Beneficiaries
+
+Beneficiary data provides consolidated counts of health plan enrollees broken down by operator, municipality, sex, age group, plan type, and more. Each file covers one state (UF) and one month.
+
+### Basic download
+
+```{r}
+# Acre, December 2023
+ac <- ans_data(year = 2023, month = 12, uf = "AC")
+ac
+```
+
+### Multiple months and states
+
+```{r}
+# first quarter 2024, two states
+ne <- ans_data(year = 2024, month = 1:3, uf = c("CE", "PE"))
+
+# full year (month = NULL downloads all 12 months)
+ac_2023 <- ans_data(year = 2023, uf = "AC")
+```
+
+### Selecting variables
+
+```{r}
+ans_data(
+  year = 2023, month = 12, uf = "AC",
+  vars = c("CD_OPERADORA", "SG_UF", "TP_SEXO",
+           "DE_FAIXA_ETARIA", "QT_BENEFICIARIO_ATIVO")
+)
+```
+
+### Key variables
+
+| Variable | Description |
+|----------|-------------|
+| ID_CMPT_MOVEL | Reference period (YYYY-MM) |
+| CD_OPERADORA | Operator code at ANS |
+| NM_RAZAO_SOCIAL | Operator name |
+| SG_UF | State abbreviation |
+| CD_MUNICIPIO | Municipality (IBGE code) |
+| TP_SEXO | Sex (M/F) |
+| DE_FAIXA_ETARIA | Age group |
+| DE_CONTRATACAO_PLANO | Contract type (Individual, Coletivo Empresarial, etc.) |
+| DE_SEGMENTACAO_PLANO | Plan segment (Ambulatorial, Hospitalar, etc.) |
+| COBERTURA_ASSIST_PLAN | Coverage type (Medico-hospitalar, Odontologica) |
+| TIPO_VINCULO | Beneficiary link (Titular, Dependente) |
+| QT_BENEFICIARIO_ATIVO | Active beneficiary count |
+
+## Consumer complaints (NIP)
+
+Consumer complaints data covers demands filed through ANS's NIP (Notificacao de Intermediacao Preliminar) system. Files are national (not per-UF) and annual.
+
+```{r}
+# complaints filed in 2022
+nip <- ans_data(year = 2022, type = "complaints")
+nip
+
+# multiple years
+nip_multi <- ans_data(year = 2020:2023, type = "complaints")
+```
+
+### Key variables
+
+| Variable | Description |
+|----------|-------------|
+| NUMERO_DA_DEMANDA | Complaint number |
+| ABERTURA_DA_DEMANDA | Filing date |
+| ASSUNTO | Subject |
+| REGISTRO_OPERADORA | Operator registration |
+| NOME_OPERADORA | Operator name |
+| TIPO_DE_PLANO_CONTRATADO | Contract type |
+| SEXO | Sex (M/F) |
+| ESTADO_DO_BENEFICIARIO | Beneficiary state |
+| CLASSIFICACAO_DA_NIP | NIP classification |
+| NATUREZA_DA_NIP | NIP nature |
+| SITUACAO_DA_NIP | NIP status |
+
+## Financial statements
+
+Quarterly financial statements (demonstracoes contabeis) for all health plan operators.
+
+```{r}
+# Q1 2023
+fin_q1 <- ans_data(year = 2023, type = "financial", quarter = 1)
+
+# all 4 quarters of 2023
+fin_2023 <- ans_data(year = 2023, type = "financial")
+
+# specific quarters
+fin_q12 <- ans_data(year = 2023, type = "financial", quarter = 1:2)
+```
+
+### Key variables
+
+| Variable | Description |
+|----------|-------------|
+| DATA | Reference date |
+| REG_ANS | Operator registration |
+| CD_CONTA_CONTABIL | Accounting code |
+| DESCRICAO | Account description |
+| VL_SALDO_INICIAL | Opening balance (R$) |
+| VL_SALDO_FINAL | Closing balance (R$) |
+
+## Operator registry
+
+The operator registry is a separate snapshot (not time-series), so it uses its own function:
+
+```{r}
+# active operators
+active <- ans_operators()
+
+# cancelled operators
+cancelled <- ans_operators(status = "cancelled")
+
+# both combined
+all_ops <- ans_operators(status = "all")
+```
+
+### Key variables
+
+| Variable | Description |
+|----------|-------------|
+| REGISTRO_OPERADORA | ANS registration number |
+| CNPJ | Tax ID |
+| Razao_Social | Legal name |
+| Nome_Fantasia | Trade name |
+| Modalidade | Modality (Medicina de Grupo, Cooperativa, etc.) |
+| UF | State |
+| Data_Registro_ANS | ANS registration date |
+
+## Exploring variables
+
+```{r}
+# beneficiaries variables (default)
+ans_variables()
+
+# complaints variables
+ans_variables(type = "complaints")
+
+# financial variables
+ans_variables(type = "financial")
+
+# search across variables
+ans_variables(search = "operadora")
+ans_variables(search = "beneficiario")
+```
+
+## Example: beneficiaries by state and plan type
+
+```{r}
+# December 2023, all states
+ben <- ans_data(year = 2023, month = 12)
+
+# active beneficiaries by state and coverage type
+ben |>
+  group_by(SG_UF, COBERTURA_ASSIST_PLAN) |>
+  summarize(
+    total = sum(as.integer(QT_BENEFICIARIO_ATIVO), na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(desc(total))
+```
+
+## Example: complaints by subject and operator
+
+```{r}
+nip <- ans_data(year = 2023, type = "complaints")
+
+# top complaint subjects
+nip |>
+  count(ASSUNTO, sort = TRUE) |>
+  head(10)
+
+# operators with most complaints
+nip |>
+  count(NOME_OPERADORA, sort = TRUE) |>
+  head(10)
+```
+
+## Example: operator financial health
+
+```{r}
+# Q4 2023 financial data
+fin <- ans_data(year = 2023, type = "financial", quarter = 4)
+
+# join with operator registry for names
+ops <- ans_operators()
+
+fin |>
+  filter(grepl("^41", CD_CONTA_CONTABIL)) |>  # revenue accounts
+  group_by(REG_ANS) |>
+  summarize(
+    revenue = sum(as.numeric(VL_SALDO_FINAL), na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  left_join(
+    ops |> select(REGISTRO_OPERADORA, Razao_Social),
+    by = c("REG_ANS" = "REGISTRO_OPERADORA")
+  ) |>
+  arrange(desc(revenue)) |>
+  head(10)
+```
+
+## Example: combining ANS with SUS data
+
+ANS beneficiary counts complement SUS data by showing private coverage:
+
+```{r}
+# private coverage (ANS)
+ben <- ans_data(year = 2023, month = 12,
+                vars = c("SG_UF", "QT_BENEFICIARIO_ATIVO"))
+
+private_by_uf <- ben |>
+  group_by(SG_UF) |>
+  summarize(
+    private_beneficiaries = sum(as.integer(QT_BENEFICIARIO_ATIVO), na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# total population (Census 2022)
+pop <- censo_populacao(year = 2022, territorial_level = "state")
+
+# private coverage rate
+# private_by_uf |>
+#   left_join(pop, by = ...) |>
+#   mutate(coverage_pct = (private_beneficiaries / population) * 100) |>
+#   arrange(desc(coverage_pct))
+```
+
+## Parameter routing
+
+`ans_data()` routes parameters based on the `type`:
+
+| Parameter | beneficiaries | complaints | financial |
+|-----------|:---:|:---:|:---:|
+| `year` | required | required | required |
+| `month` | optional (1--12) | ignored | ignored |
+| `uf` | optional (27 UFs + XX) | ignored | ignored |
+| `quarter` | ignored | ignored | optional (1--4) |
+| `vars` | optional | optional | optional |
+
+Unused parameters emit a warning but do not cause errors.
+
+## Lazy evaluation
+
+With the `arrow` package installed, data is cached in Parquet format and can be queried lazily:
+
+```{r}
+# lazy query (requires arrow)
+lazy_ben <- ans_data(year = 2023, uf = "AC", lazy = TRUE)
+lazy_ben |>
+  filter(month == 12L, TP_SEXO == "F") |>
+  select(CD_OPERADORA, DE_FAIXA_ETARIA, QT_BENEFICIARIO_ATIVO) |>
+  collect()
+```
+
+## Cache management
+
+Downloaded data is cached locally for faster future access:
+
+```{r}
+# check cache status
+ans_cache_status()
+
+# clear cache if needed
+ans_clear_cache()
+```
+
+## Differences from DATASUS modules
+
+| Feature | ANS | DATASUS modules |
+|---------|-----|-----------------|
+| Data source | HTTP CSV/ZIP | FTP .dbc/.DBF files |
+| Column names | MixedCase (from CSV) | UPPERCASE |
+| `parse` parameter | Not available | Available |
+| `dictionary()` | Not available | Available |
+| `quarter` parameter | Financial data | Not used |
+| Operator registry | `ans_operators()` | Not applicable |
+
+## Additional resources
+
+- [ANS open data portal](https://dadosabertos.ans.gov.br/)
+- [ANS official website](https://www.gov.br/ans/)
+- [ANS Tabnet](http://www.ans.gov.br/anstabnet/)
+- [Census vignette](censo-denominadores.html) for population denominators
