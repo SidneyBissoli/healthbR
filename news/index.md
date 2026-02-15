@@ -1,5 +1,135 @@
 # Changelog
 
+## healthbR 0.14.0
+
+### Maintenance
+
+- Removed deprecated flat cache fallback code and
+  `healthbR_migrate_cache()` function. All DATASUS modules now use
+  Hive-style partitioned parquet exclusively (with .rds fallback when
+  `arrow` is not installed). Removed 958 lines of legacy compatibility
+  code.
+
+### Bug fixes
+
+- Fixed PNS Arrow expression error:
+  [`pns_data()`](https://sidneybissoli.github.io/healthbR/reference/pns_data.md)
+  used `as.character(year)` for partition filtering, but Arrow infers
+  Hive partition `year=2019` as int32. Changed to `as.integer(year)`
+  (consistent with PNADC). This caused “Expression not supported in
+  Arrow” when reading from partitioned cache.
+
+- Fixed
+  [`pns_sidra_data()`](https://sidneybissoli.github.io/healthbR/reference/pns_sidra_data.md)
+  unknown table warning: changed from
+  [`cli::cli_alert_warning()`](https://cli.r-lib.org/reference/cli_alert.html)
+  to [`cli::cli_warn()`](https://cli.r-lib.org/reference/cli_abort.html)
+  so `expect_warning()` can properly catch it.
+
+- Fixed cache path assertions in PNADC, PNS, and POF integration tests
+  that looked in wrong directories for partitioned/flat cache files.
+
+- Made ANVISA sanitizers and SINAN TUBE integration tests resilient to
+  transient server errors (skip instead of fail).
+
+## healthbR 0.13.0
+
+### New modules
+
+- **ANVISA (Agencia Nacional de Vigilancia Sanitaria)**: Added module
+  for accessing health surveillance data from the ANVISA open data
+  portal.
+  - [`anvisa_types()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_types.md),
+    [`anvisa_info()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_info.md)
+    for module metadata
+  - [`anvisa_variables()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_variables.md)
+    for variable exploration
+  - [`anvisa_data()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_data.md)
+    for downloading surveillance data
+  - [`anvisa_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_cache_status.md),
+    [`anvisa_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_clear_cache.md)
+    for cache management
+  - **12 data types**: medications, cosmetics, foods, sanitizers,
+    biological products, medical devices (product registrations);
+    reference table; pharmacovigilance, hemovigilance, technovigilance
+    (surveillance reports); SNGPC controlled substances and
+    antimicrobials (sales data).
+  - HTTP CSV/ZIP downloads from `dados.anvisa.gov.br`
+  - Automatic delimiter detection (semicolon vs comma)
+  - SSL workaround for ANVISA portal certificate issues
+  - Added vignette: “Health Surveillance Data from ANVISA with healthbR”
+
+## healthbR 0.12.0
+
+### New modules
+
+- **ANS (Agencia Nacional de Saude Suplementar)**: Added module for
+  accessing supplementary health data from the ANS open data portal.
+  - [`ans_years()`](https://sidneybissoli.github.io/healthbR/reference/ans_years.md),
+    [`ans_info()`](https://sidneybissoli.github.io/healthbR/reference/ans_info.md)
+    for module metadata
+  - [`ans_variables()`](https://sidneybissoli.github.io/healthbR/reference/ans_variables.md)
+    for variable exploration
+  - [`ans_data()`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)
+    for downloading beneficiary, complaint, and financial data
+  - [`ans_operators()`](https://sidneybissoli.github.io/healthbR/reference/ans_operators.md)
+    for operator registry snapshot
+  - [`ans_cache_status()`](https://sidneybissoli.github.io/healthbR/reference/ans_cache_status.md),
+    [`ans_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/ans_clear_cache.md)
+    for cache management
+  - **3 data types**: beneficiaries (monthly per-UF, Apr 2019+),
+    complaints (annual national, 2011+), financial statements
+    (quarterly, 2007+).
+  - HTTP CSV/ZIP downloads from `dadosabertos.ans.gov.br`
+  - Added vignette: “Supplementary Health Data from ANS with healthbR”
+
+### Performance improvements
+
+- **Partitioned parquet cache**: All DATASUS modules now use Hive-style
+  partitioned parquet datasets for efficient per-partition reads.
+
+- **Lazy evaluation + DuckDB**: All `*_data()` functions support
+  `lazy=TRUE` with `backend = "arrow"` or `"duckdb"` for out-of-memory
+  queries.
+
+- **Parallel downloads**: All module download loops use
+  `.map_parallel()` (furrr when configured, purrr fallback).
+
+- **Concurrent HTTP downloads**: SI-PNI multi-month CSV requests use
+  [`curl::multi_download()`](https://jeroen.r-universe.dev/curl/reference/multi_download.html)
+  for concurrent fetching.
+
+- **Resumable downloads**: `.http_download_resumable()` resumes partial
+  HTTP downloads via Range headers (used by SI-PNI for large CSV files).
+
+- **Smart type parsing**: All 7 DATASUS modules support `parse = TRUE`
+  (default) to automatically convert numeric and date columns. Use
+  `col_types` for fine-grained control or `parse = FALSE` for
+  all-character.
+
+### Refactoring
+
+- Extracted shared validation helpers (`.validate_year()`,
+  `.validate_month()`, `.validate_uf()`, `.validate_quarter()`) into
+  `utils-validate.R`, eliminating ~300 lines of duplication across 9
+  modules.
+
+- Extracted shared search helpers (`.strip_accents()`,
+  `.search_metadata()`) into `utils-search.R`, eliminating ~190 lines of
+  duplication across 11 modules.
+
+- Extracted shared cache status/clear helpers (`.cache_status()`,
+  `.clear_cache()`) into `utils-cache.R`, eliminating ~340 lines of
+  duplication across 8 modules.
+
+- Extracted shared return helpers (`.try_lazy_cache()`,
+  `.data_return()`) for consistent pre/post-download lazy evaluation
+  across 6 DATASUS modules.
+
+- Removed unused `vroom` from Suggests.
+
+- Moved `readxl` and `haven` from Imports to Suggests.
+
 ## healthbR 0.11.0
 
 ### Extended modules
@@ -311,7 +441,7 @@
   - Added vignette: “Population Denominators from the Census with
     healthbR”
 
-- **POF (Pesquisa de Orçamentos Familiares)**: Added complete module for
+- **POF (Pesquisa de Orcamentos Familiares)**: Added complete module for
   accessing POF microdata from IBGE FTP, covering editions 2002-2003,
   2008-2009, and 2017-2018.
 
@@ -333,11 +463,11 @@
   - Parquet caching when `arrow` is installed
   - Added vignette: “Analyzing Health Data from POF with healthbR”
 
-- **PNADC (PNAD Contínua)**: Added module for health-related
-  supplementary modules from PNAD Contínua (deficiência, habitação,
+- **PNADC (PNAD Continua)**: Added module for health-related
+  supplementary modules from PNAD Continua (deficiencia, habitacao,
   moradores, APS).
 
-- **PNS (Pesquisa Nacional de Saúde)**: Added module for PNS microdata
+- **PNS (Pesquisa Nacional de Saude)**: Added module for PNS microdata
   and SIDRA tabulated data access (2013, 2019).
 
 ### Breaking changes

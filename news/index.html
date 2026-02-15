@@ -52,6 +52,86 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.14.0" id="healthbr-0140">healthbR 0.14.0<a class="anchor" aria-label="anchor" href="#healthbr-0140"></a></h2>
+<div class="section level3">
+<h3 id="maintenance-0-14-0">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-0-14-0"></a></h3>
+<ul><li>Removed deprecated flat cache fallback code and <code>healthbR_migrate_cache()</code> function. All DATASUS modules now use Hive-style partitioned parquet exclusively (with .rds fallback when <code>arrow</code> is not installed). Removed 958 lines of legacy compatibility code.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-14-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-14-0"></a></h3>
+<ul><li><p>Fixed PNS Arrow expression error: <code><a href="../reference/pns_data.html">pns_data()</a></code> used <code>as.character(year)</code> for partition filtering, but Arrow infers Hive partition <code>year=2019</code> as int32. Changed to <code>as.integer(year)</code> (consistent with PNADC). This caused “Expression not supported in Arrow” when reading from partitioned cache.</p></li>
+<li><p>Fixed <code><a href="../reference/pns_sidra_data.html">pns_sidra_data()</a></code> unknown table warning: changed from <code><a href="https://cli.r-lib.org/reference/cli_alert.html" class="external-link">cli::cli_alert_warning()</a></code> to <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_warn()</a></code> so <code>expect_warning()</code> can properly catch it.</p></li>
+<li><p>Fixed cache path assertions in PNADC, PNS, and POF integration tests that looked in wrong directories for partitioned/flat cache files.</p></li>
+<li><p>Made ANVISA sanitizers and SINAN TUBE integration tests resilient to transient server errors (skip instead of fail).</p></li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.13.0" id="healthbr-0130">healthbR 0.13.0<a class="anchor" aria-label="anchor" href="#healthbr-0130"></a></h2>
+<div class="section level3">
+<h3 id="new-modules-0-13-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-13-0"></a></h3>
+<ul><li>
+<strong>ANVISA (Agencia Nacional de Vigilancia Sanitaria)</strong>: Added module for accessing health surveillance data from the ANVISA open data portal.
+<ul><li>
+<code><a href="../reference/anvisa_types.html">anvisa_types()</a></code>, <code><a href="../reference/anvisa_info.html">anvisa_info()</a></code> for module metadata</li>
+<li>
+<code><a href="../reference/anvisa_variables.html">anvisa_variables()</a></code> for variable exploration</li>
+<li>
+<code><a href="../reference/anvisa_data.html">anvisa_data()</a></code> for downloading surveillance data</li>
+<li>
+<code><a href="../reference/anvisa_cache_status.html">anvisa_cache_status()</a></code>, <code><a href="../reference/anvisa_clear_cache.html">anvisa_clear_cache()</a></code> for cache management</li>
+<li>
+<strong>12 data types</strong>: medications, cosmetics, foods, sanitizers, biological products, medical devices (product registrations); reference table; pharmacovigilance, hemovigilance, technovigilance (surveillance reports); SNGPC controlled substances and antimicrobials (sales data).</li>
+<li>HTTP CSV/ZIP downloads from <code>dados.anvisa.gov.br</code>
+</li>
+<li>Automatic delimiter detection (semicolon vs comma)</li>
+<li>SSL workaround for ANVISA portal certificate issues</li>
+<li>Added vignette: “Health Surveillance Data from ANVISA with healthbR”</li>
+</ul></li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.12.0" id="healthbr-0120">healthbR 0.12.0<a class="anchor" aria-label="anchor" href="#healthbr-0120"></a></h2>
+<div class="section level3">
+<h3 id="new-modules-0-12-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-12-0"></a></h3>
+<ul><li>
+<strong>ANS (Agencia Nacional de Saude Suplementar)</strong>: Added module for accessing supplementary health data from the ANS open data portal.
+<ul><li>
+<code><a href="../reference/ans_years.html">ans_years()</a></code>, <code><a href="../reference/ans_info.html">ans_info()</a></code> for module metadata</li>
+<li>
+<code><a href="../reference/ans_variables.html">ans_variables()</a></code> for variable exploration</li>
+<li>
+<code><a href="../reference/ans_data.html">ans_data()</a></code> for downloading beneficiary, complaint, and financial data</li>
+<li>
+<code><a href="../reference/ans_operators.html">ans_operators()</a></code> for operator registry snapshot</li>
+<li>
+<code><a href="../reference/ans_cache_status.html">ans_cache_status()</a></code>, <code><a href="../reference/ans_clear_cache.html">ans_clear_cache()</a></code> for cache management</li>
+<li>
+<strong>3 data types</strong>: beneficiaries (monthly per-UF, Apr 2019+), complaints (annual national, 2011+), financial statements (quarterly, 2007+).</li>
+<li>HTTP CSV/ZIP downloads from <code>dadosabertos.ans.gov.br</code>
+</li>
+<li>Added vignette: “Supplementary Health Data from ANS with healthbR”</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="performance-improvements-0-12-0">Performance improvements<a class="anchor" aria-label="anchor" href="#performance-improvements-0-12-0"></a></h3>
+<ul><li><p><strong>Partitioned parquet cache</strong>: All DATASUS modules now use Hive-style partitioned parquet datasets for efficient per-partition reads.</p></li>
+<li><p><strong>Lazy evaluation + DuckDB</strong>: All <code>*_data()</code> functions support <code>lazy=TRUE</code> with <code>backend = "arrow"</code> or <code>"duckdb"</code> for out-of-memory queries.</p></li>
+<li><p><strong>Parallel downloads</strong>: All module download loops use <code>.map_parallel()</code> (furrr when configured, purrr fallback).</p></li>
+<li><p><strong>Concurrent HTTP downloads</strong>: SI-PNI multi-month CSV requests use <code><a href="https://jeroen.r-universe.dev/curl/reference/multi_download.html" class="external-link">curl::multi_download()</a></code> for concurrent fetching.</p></li>
+<li><p><strong>Resumable downloads</strong>: <code>.http_download_resumable()</code> resumes partial HTTP downloads via Range headers (used by SI-PNI for large CSV files).</p></li>
+<li><p><strong>Smart type parsing</strong>: All 7 DATASUS modules support <code>parse = TRUE</code> (default) to automatically convert numeric and date columns. Use <code>col_types</code> for fine-grained control or <code>parse = FALSE</code> for all-character.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="refactoring-0-12-0">Refactoring<a class="anchor" aria-label="anchor" href="#refactoring-0-12-0"></a></h3>
+<ul><li><p>Extracted shared validation helpers (<code>.validate_year()</code>, <code>.validate_month()</code>, <code>.validate_uf()</code>, <code>.validate_quarter()</code>) into <code>utils-validate.R</code>, eliminating ~300 lines of duplication across 9 modules.</p></li>
+<li><p>Extracted shared search helpers (<code>.strip_accents()</code>, <code>.search_metadata()</code>) into <code>utils-search.R</code>, eliminating ~190 lines of duplication across 11 modules.</p></li>
+<li><p>Extracted shared cache status/clear helpers (<code>.cache_status()</code>, <code>.clear_cache()</code>) into <code>utils-cache.R</code>, eliminating ~340 lines of duplication across 8 modules.</p></li>
+<li><p>Extracted shared return helpers (<code>.try_lazy_cache()</code>, <code>.data_return()</code>) for consistent pre/post-download lazy evaluation across 6 DATASUS modules.</p></li>
+<li><p>Removed unused <code>vroom</code> from Suggests.</p></li>
+<li><p>Moved <code>readxl</code> and <code>haven</code> from Imports to Suggests.</p></li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.11.0" id="healthbr-0110">healthbR 0.11.0<a class="anchor" aria-label="anchor" href="#healthbr-0110"></a></h2>
 <div class="section level3">
 <h3 id="extended-modules-0-11-0">Extended modules<a class="anchor" aria-label="anchor" href="#extended-modules-0-11-0"></a></h3>
@@ -309,7 +389,7 @@
 <li>Added vignette: “Population Denominators from the Census with healthbR”</li>
 </ul></li>
 <li>
-<p><strong>POF (Pesquisa de Orçamentos Familiares)</strong>: Added complete module for accessing POF microdata from IBGE FTP, covering editions 2002-2003, 2008-2009, and 2017-2018.</p>
+<p><strong>POF (Pesquisa de Orcamentos Familiares)</strong>: Added complete module for accessing POF microdata from IBGE FTP, covering editions 2002-2003, 2008-2009, and 2017-2018.</p>
 <ul><li>
 <code><a href="../reference/pof_years.html">pof_years()</a></code>, <code><a href="../reference/pof_info.html">pof_info()</a></code>, <code><a href="../reference/pof_registers.html">pof_registers()</a></code> for survey metadata</li>
 <li>
@@ -323,8 +403,8 @@
 <li>Parquet caching when <code>arrow</code> is installed</li>
 <li>Added vignette: “Analyzing Health Data from POF with healthbR”</li>
 </ul></li>
-<li><p><strong>PNADC (PNAD Contínua)</strong>: Added module for health-related supplementary modules from PNAD Contínua (deficiência, habitação, moradores, APS).</p></li>
-<li><p><strong>PNS (Pesquisa Nacional de Saúde)</strong>: Added module for PNS microdata and SIDRA tabulated data access (2013, 2019).</p></li>
+<li><p><strong>PNADC (PNAD Continua)</strong>: Added module for health-related supplementary modules from PNAD Continua (deficiencia, habitacao, moradores, APS).</p></li>
+<li><p><strong>PNS (Pesquisa Nacional de Saude)</strong>: Added module for PNS microdata and SIDRA tabulated data access (2013, 2019).</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
