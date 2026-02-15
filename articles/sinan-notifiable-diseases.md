@@ -279,9 +279,7 @@ dengue_lazy |>
 
 ## Additional resources
 
-- [SINAN official page (DATASUS)](http://portalsinan.saude.gov.br/)
-- [Notifiable diseases list (Ministry of
-  Health)](https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/l/lista-nacional-de-notificacao-compulsoria-de-doencas)
+- [SINAN official page (DATASUS)](https://portalsinan.saude.gov.br/)
 - [SIM
   vignette](https://sidneybissoli.github.io/healthbR/articles/datasus-modules.md)
   for mortality data

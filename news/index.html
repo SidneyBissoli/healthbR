@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,386 +59,50 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.14.0" id="healthbr-0140">healthbR 0.14.0<a class="anchor" aria-label="anchor" href="#healthbr-0140"></a></h2>
-<div class="section level3">
-<h3 id="maintenance-0-14-0">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-0-14-0"></a></h3>
-<ul><li>Removed deprecated flat cache fallback code and <code>healthbR_migrate_cache()</code> function. All DATASUS modules now use Hive-style partitioned parquet exclusively (with .rds fallback when <code>arrow</code> is not installed). Removed 958 lines of legacy compatibility code.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="bug-fixes-0-14-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-14-0"></a></h3>
-<ul><li><p>Fixed PNS Arrow expression error: <code><a href="../reference/pns_data.html">pns_data()</a></code> used <code>as.character(year)</code> for partition filtering, but Arrow infers Hive partition <code>year=2019</code> as int32. Changed to <code>as.integer(year)</code> (consistent with PNADC). This caused “Expression not supported in Arrow” when reading from partitioned cache.</p></li>
-<li><p>Fixed <code><a href="../reference/pns_sidra_data.html">pns_sidra_data()</a></code> unknown table warning: changed from <code><a href="https://cli.r-lib.org/reference/cli_alert.html" class="external-link">cli::cli_alert_warning()</a></code> to <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_warn()</a></code> so <code>expect_warning()</code> can properly catch it.</p></li>
-<li><p>Fixed cache path assertions in PNADC, PNS, and POF integration tests that looked in wrong directories for partitioned/flat cache files.</p></li>
-<li><p>Made ANVISA sanitizers and SINAN TUBE integration tests resilient to transient server errors (skip instead of fail).</p></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.13.0" id="healthbr-0130">healthbR 0.13.0<a class="anchor" aria-label="anchor" href="#healthbr-0130"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-13-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-13-0"></a></h3>
-<ul><li>
-<strong>ANVISA (Agencia Nacional de Vigilancia Sanitaria)</strong>: Added module for accessing health surveillance data from the ANVISA open data portal.
-<ul><li>
-<code><a href="../reference/anvisa_types.html">anvisa_types()</a></code>, <code><a href="../reference/anvisa_info.html">anvisa_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/anvisa_variables.html">anvisa_variables()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/anvisa_data.html">anvisa_data()</a></code> for downloading surveillance data</li>
-<li>
-<code><a href="../reference/anvisa_cache_status.html">anvisa_cache_status()</a></code>, <code><a href="../reference/anvisa_clear_cache.html">anvisa_clear_cache()</a></code> for cache management</li>
-<li>
-<strong>12 data types</strong>: medications, cosmetics, foods, sanitizers, biological products, medical devices (product registrations); reference table; pharmacovigilance, hemovigilance, technovigilance (surveillance reports); SNGPC controlled substances and antimicrobials (sales data).</li>
-<li>HTTP CSV/ZIP downloads from <code>dados.anvisa.gov.br</code>
-</li>
-<li>Automatic delimiter detection (semicolon vs comma)</li>
-<li>SSL workaround for ANVISA portal certificate issues</li>
-<li>Added vignette: “Health Surveillance Data from ANVISA with healthbR”</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.12.0" id="healthbr-0120">healthbR 0.12.0<a class="anchor" aria-label="anchor" href="#healthbr-0120"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-12-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-12-0"></a></h3>
-<ul><li>
-<strong>ANS (Agencia Nacional de Saude Suplementar)</strong>: Added module for accessing supplementary health data from the ANS open data portal.
-<ul><li>
-<code><a href="../reference/ans_years.html">ans_years()</a></code>, <code><a href="../reference/ans_info.html">ans_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/ans_variables.html">ans_variables()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/ans_data.html">ans_data()</a></code> for downloading beneficiary, complaint, and financial data</li>
-<li>
-<code><a href="../reference/ans_operators.html">ans_operators()</a></code> for operator registry snapshot</li>
-<li>
-<code><a href="../reference/ans_cache_status.html">ans_cache_status()</a></code>, <code><a href="../reference/ans_clear_cache.html">ans_clear_cache()</a></code> for cache management</li>
-<li>
-<strong>3 data types</strong>: beneficiaries (monthly per-UF, Apr 2019+), complaints (annual national, 2011+), financial statements (quarterly, 2007+).</li>
-<li>HTTP CSV/ZIP downloads from <code>dadosabertos.ans.gov.br</code>
-</li>
-<li>Added vignette: “Supplementary Health Data from ANS with healthbR”</li>
-</ul></li>
-</ul></div>
-<div class="section level3">
-<h3 id="performance-improvements-0-12-0">Performance improvements<a class="anchor" aria-label="anchor" href="#performance-improvements-0-12-0"></a></h3>
-<ul><li><p><strong>Partitioned parquet cache</strong>: All DATASUS modules now use Hive-style partitioned parquet datasets for efficient per-partition reads.</p></li>
-<li><p><strong>Lazy evaluation + DuckDB</strong>: All <code>*_data()</code> functions support <code>lazy=TRUE</code> with <code>backend = "arrow"</code> or <code>"duckdb"</code> for out-of-memory queries.</p></li>
-<li><p><strong>Parallel downloads</strong>: All module download loops use <code>.map_parallel()</code> (furrr when configured, purrr fallback).</p></li>
-<li><p><strong>Concurrent HTTP downloads</strong>: SI-PNI multi-month CSV requests use <code><a href="https://jeroen.r-universe.dev/curl/reference/multi_download.html" class="external-link">curl::multi_download()</a></code> for concurrent fetching.</p></li>
-<li><p><strong>Resumable downloads</strong>: <code>.http_download_resumable()</code> resumes partial HTTP downloads via Range headers (used by SI-PNI for large CSV files).</p></li>
-<li><p><strong>Smart type parsing</strong>: All 7 DATASUS modules support <code>parse = TRUE</code> (default) to automatically convert numeric and date columns. Use <code>col_types</code> for fine-grained control or <code>parse = FALSE</code> for all-character.</p></li>
-</ul></div>
-<div class="section level3">
-<h3 id="refactoring-0-12-0">Refactoring<a class="anchor" aria-label="anchor" href="#refactoring-0-12-0"></a></h3>
-<ul><li><p>Extracted shared validation helpers (<code>.validate_year()</code>, <code>.validate_month()</code>, <code>.validate_uf()</code>, <code>.validate_quarter()</code>) into <code>utils-validate.R</code>, eliminating ~300 lines of duplication across 9 modules.</p></li>
-<li><p>Extracted shared search helpers (<code>.strip_accents()</code>, <code>.search_metadata()</code>) into <code>utils-search.R</code>, eliminating ~190 lines of duplication across 11 modules.</p></li>
-<li><p>Extracted shared cache status/clear helpers (<code>.cache_status()</code>, <code>.clear_cache()</code>) into <code>utils-cache.R</code>, eliminating ~340 lines of duplication across 8 modules.</p></li>
-<li><p>Extracted shared return helpers (<code>.try_lazy_cache()</code>, <code>.data_return()</code>) for consistent pre/post-download lazy evaluation across 6 DATASUS modules.</p></li>
-<li><p>Removed unused <code>vroom</code> from Suggests.</p></li>
-<li><p>Moved <code>readxl</code> and <code>haven</code> from Imports to Suggests.</p></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.11.0" id="healthbr-0110">healthbR 0.11.0<a class="anchor" aria-label="anchor" href="#healthbr-0110"></a></h2>
-<div class="section level3">
-<h3 id="extended-modules-0-11-0">Extended modules<a class="anchor" aria-label="anchor" href="#extended-modules-0-11-0"></a></h3>
-<ul><li>
-<strong>SI-PNI post-2019 support via OpenDataSUS CSV</strong>: The SI-PNI module now supports vaccination data from 2020 to 2025 via OpenDataSUS monthly CSV bulk downloads, in addition to the existing DATASUS FTP data (1994-2019).
-<ul><li>
-<code><a href="../reference/sipni_data.html">sipni_data()</a></code> transparently routes by year: FTP for 1994-2019 (aggregated DPNI/CPNI), CSV for 2020+ (individual-level microdata)</li>
-<li>New <code>month</code> parameter for CSV years (selects monthly files to download)</li>
-<li>
-<code>sipni_variables(type = "API")</code> shows 47 microdata variables</li>
-<li>
-<code><a href="../reference/sipni_years.html">sipni_years()</a></code> now returns <code>1994:2025</code> (was <code>1994:2019</code>)</li>
-<li>Memory-efficient chunked CSV reading with UF filtering (national files are ~6 GB uncompressed; only matching UF rows are kept in memory)</li>
-<li>Per-month caching for CSV data (<code>sipni_API_{UF}_{YYYYMM}</code>)</li>
-<li>Microdata includes patient demographics, vaccine details, establishment info, and administration strategy (one row per vaccination dose)</li>
-<li>
-<code><a href="../reference/sipni_info.html">sipni_info()</a></code> updated to show both data sources</li>
-<li>New dependency: <code>readr</code> (for chunked CSV reading with encoding support)</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.10.0" id="healthbr-0100">healthbR 0.10.0<a class="anchor" aria-label="anchor" href="#healthbr-0100"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-10-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-10-0"></a></h3>
-<ul><li>
-<strong>SISAB (Sistema de Informacao em Saude para a Atencao Basica)</strong>: Added module for accessing primary care coverage indicators from the relatorioaps REST API.
-<ul><li>
-<code><a href="../reference/sisab_years.html">sisab_years()</a></code>, <code><a href="../reference/sisab_info.html">sisab_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/sisab_variables.html">sisab_variables()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/sisab_data.html">sisab_data()</a></code> for downloading coverage data</li>
-<li>
-<code><a href="../reference/sisab_cache_status.html">sisab_cache_status()</a></code>, <code><a href="../reference/sisab_clear_cache.html">sisab_clear_cache()</a></code> for cache management</li>
-<li>
-<strong>4 report types</strong>: aps (APS coverage, default), sb (Oral health), acs (Community health agents), pns (PNS coverage). Use <code>type</code> parameter to select.</li>
-<li>
-<strong>4 geographic levels</strong>: brazil, region, uf, municipality. Use <code>level</code> parameter to select.</li>
-<li>
-<strong>REST API access</strong>: Unlike other DATASUS modules, SISAB uses a public REST API (no FTP, no .dbc/.dbf files). No authentication required.</li>
-<li>
-<strong>Aggregated data</strong>: Coverage indicators per geographic unit and period (competencia CNES), not individual-level microdata.</li>
-<li>Output includes <code>year</code> and <code>type</code> columns to identify the source</li>
-<li>Column names preserved from API (camelCase)</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.9.0" id="healthbr-090">healthbR 0.9.0<a class="anchor" aria-label="anchor" href="#healthbr-090"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-9-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-9-0"></a></h3>
-<ul><li>
-<strong>SI-PNI (Sistema de Informacao do Programa Nacional de Imunizacoes)</strong>: Added module for accessing aggregated vaccination data from DATASUS FTP as plain .DBF files (1994-2019).
-<ul><li>
-<code><a href="../reference/sipni_years.html">sipni_years()</a></code>, <code><a href="../reference/sipni_info.html">sipni_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/sipni_variables.html">sipni_variables()</a></code>, <code><a href="../reference/sipni_dictionary.html">sipni_dictionary()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/sipni_data.html">sipni_data()</a></code> for downloading vaccination data per state (UF)</li>
-<li>
-<code><a href="../reference/sipni_cache_status.html">sipni_cache_status()</a></code>, <code><a href="../reference/sipni_clear_cache.html">sipni_clear_cache()</a></code> for cache management</li>
-<li>
-<strong>2 file types</strong>: DPNI (doses applied, default) and CPNI (vaccination coverage). Use <code>type</code> parameter to select.</li>
-<li>
-<strong>Aggregated data</strong>: Unlike other DATASUS modules, SI-PNI contains dose counts and coverage rates per municipality/vaccine/age group, not individual-level microdata.</li>
-<li>
-<strong>Plain .DBF files</strong>: No DBC decompression needed (files are uncompressed).</li>
-<li>Output includes <code>year</code> and <code>uf_source</code> columns</li>
-<li>CPNI coverage field (<code>COBERT</code>) decimal separator automatically converted from comma to dot</li>
-<li>Data on DATASUS FTP frozen at 2019; post-2019 requires SI-PNI web API (future work)</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.8.0" id="healthbr-080">healthbR 0.8.0<a class="anchor" aria-label="anchor" href="#healthbr-080"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-8-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-8-0"></a></h3>
-<ul><li>
-<strong>SINAN (Sistema de Informacao de Agravos de Notificacao)</strong>: Added module for accessing notifiable diseases surveillance microdata from DATASUS FTP as .dbc files (2007-2024).
-<ul><li>
-<code><a href="../reference/sinan_years.html">sinan_years()</a></code>, <code><a href="../reference/sinan_info.html">sinan_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/sinan_diseases.html">sinan_diseases()</a></code> for listing available diseases (agravos)</li>
-<li>
-<code><a href="../reference/sinan_variables.html">sinan_variables()</a></code>, <code><a href="../reference/sinan_dictionary.html">sinan_dictionary()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/sinan_data.html">sinan_data()</a></code> for downloading disease notification microdata</li>
-<li>
-<code><a href="../reference/sinan_cache_status.html">sinan_cache_status()</a></code>, <code><a href="../reference/sinan_clear_cache.html">sinan_clear_cache()</a></code> for cache management</li>
-<li>
-<strong>31 diseases</strong>: DENG (Dengue, default), CHIK, ZIKA, TUBE, HANS, HEPA, MALA, SIFA, SIFC, SIFG, LEIV, LEIT, LEPT, MENI, and more. Use <code>disease</code> parameter to select.</li>
-<li>
-<strong>National files</strong>: SINAN files are national (not per-state). Filter by UF using <code>SG_UF_NOT</code> or <code>ID_MUNICIP</code> columns after download.</li>
-<li>Output includes <code>year</code> and <code>disease</code> columns</li>
-<li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.7.0" id="healthbr-070">healthbR 0.7.0<a class="anchor" aria-label="anchor" href="#healthbr-070"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-7-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-7-0"></a></h3>
-<ul><li>
-<strong>CNES (Cadastro Nacional de Estabelecimentos de Saude)</strong>: Added module for accessing the national health facility registry from DATASUS FTP as .dbc files (2005-2024).
-<ul><li>
-<code><a href="../reference/cnes_years.html">cnes_years()</a></code>, <code><a href="../reference/cnes_info.html">cnes_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/cnes_variables.html">cnes_variables()</a></code>, <code><a href="../reference/cnes_dictionary.html">cnes_dictionary()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/cnes_data.html">cnes_data()</a></code> for downloading health facility data per state (UF)</li>
-<li>
-<code><a href="../reference/cnes_cache_status.html">cnes_cache_status()</a></code>, <code><a href="../reference/cnes_clear_cache.html">cnes_clear_cache()</a></code> for cache management</li>
-<li>
-<strong>13 file types</strong>: ST (default), LT, PF, DC, EQ, SR, HB, EP, RC, IN, EE, EF, GM. Use <code>type</code> parameter to select.</li>
-<li>
-<strong>Monthly data</strong>: CNES data is organized per month (one .dbc file per type/UF/month). Use <code>month</code> parameter to select specific months.</li>
-<li>Output includes <code>year</code>, <code>month</code>, and <code>uf_source</code> columns</li>
-<li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.6.1" id="healthbr-061">healthbR 0.6.1<a class="anchor" aria-label="anchor" href="#healthbr-061"></a></h2>
-<div class="section level3">
-<h3 id="bug-fixes-0-6-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-6-1"></a></h3>
-<ul><li><p>Fixed POF dictionary parsing failure on Linux/Ubuntu. <code><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">utils::unzip()</a></code> creates filenames with invalid UTF-8 bytes on non-Windows systems, which caused <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl()</a></code> and <code><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar()</a></code> to silently fail. Dictionary file lookup now uses byte-level matching (<code>useBytes = TRUE</code>, <code>nchar(type = "bytes")</code>) and renames extracted files to ASCII-safe names to prevent downstream encoding errors.</p></li>
-<li><p>Moved POF register validation before download in <code><a href="../reference/pof_dictionary.html">pof_dictionary()</a></code>, so invalid register names are caught immediately without triggering a download.</p></li>
-</ul></div>
-<div class="section level3">
-<h3 id="documentation-0-6-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-6-1"></a></h3>
-<ul><li><p>Replaced <code>\donttest{}</code> with <code>@examplesIf interactive()</code> across all 9 modules (VIGITEL, PNS, PNADC, POF, Censo, SIM, SINASC, SIH, SIA). Examples that download data now only run in interactive sessions, following current CRAN guidelines.</p></li>
-<li><p>Marked internal <code>utils</code> topic with <code>@keywords internal</code> to fix pkgdown reference index build.</p></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.6.0" id="healthbr-060">healthbR 0.6.0<a class="anchor" aria-label="anchor" href="#healthbr-060"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-6-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-6-0"></a></h3>
-<ul><li>
-<strong>SIA (Sistema de Informacoes Ambulatoriais)</strong>: Added module for accessing outpatient production microdata from DATASUS FTP as .dbc files (2008-2024).
-<ul><li>
-<code><a href="../reference/sia_years.html">sia_years()</a></code>, <code><a href="../reference/sia_info.html">sia_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/sia_variables.html">sia_variables()</a></code>, <code><a href="../reference/sia_dictionary.html">sia_dictionary()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/sia_data.html">sia_data()</a></code> for downloading outpatient production microdata per state (UF)</li>
-<li>
-<code><a href="../reference/sia_cache_status.html">sia_cache_status()</a></code>, <code><a href="../reference/sia_clear_cache.html">sia_clear_cache()</a></code> for cache management</li>
-<li>
-<strong>13 file types</strong>: PA (default), BI, AD, AM, AN, AQ, AR, AB, ACF, ATD, AMP, SAD, PS. Use <code>type</code> parameter to select.</li>
-<li>
-<strong>Monthly data</strong>: SIA data is organized per month (one .dbc file per type/UF/month). Use <code>month</code> parameter to select specific months.</li>
-<li>Procedure filtering by SIGTAP code (<code>procedure</code> parameter)</li>
-<li>Diagnosis filtering by CID-10 code (<code>diagnosis</code> parameter)</li>
-<li>Output includes <code>year</code>, <code>month</code>, and <code>uf_source</code> columns</li>
-<li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.5.0" id="healthbr-050">healthbR 0.5.0<a class="anchor" aria-label="anchor" href="#healthbr-050"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-5-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-5-0"></a></h3>
-<ul><li>
-<strong>SIH (Sistema de Informacoes Hospitalares)</strong>: Added module for accessing hospital admission microdata from DATASUS FTP as .dbc files (2008-2024).
-<ul><li>
-<code><a href="../reference/sih_years.html">sih_years()</a></code>, <code><a href="../reference/sih_info.html">sih_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/sih_variables.html">sih_variables()</a></code>, <code><a href="../reference/sih_dictionary.html">sih_dictionary()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/sih_data.html">sih_data()</a></code> for downloading hospital admission microdata per state (UF)</li>
-<li>
-<code><a href="../reference/sih_cache_status.html">sih_cache_status()</a></code>, <code><a href="../reference/sih_clear_cache.html">sih_clear_cache()</a></code> for cache management</li>
-<li>
-<strong>Monthly data</strong>: SIH data is organized per month (one .dbc file per UF per month). Use <code>month</code> parameter to select specific months.</li>
-<li>Principal diagnosis filtering by CID-10 code (<code>diagnosis</code> parameter)</li>
-<li>Output includes <code>year</code>, <code>month</code>, and <code>uf_source</code> columns</li>
-<li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.4.0" id="healthbr-040">healthbR 0.4.0<a class="anchor" aria-label="anchor" href="#healthbr-040"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-4-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-4-0"></a></h3>
-<ul><li>
-<strong>SINASC (Sistema de Informacoes sobre Nascidos Vivos)</strong>: Added module for accessing live birth microdata from DATASUS FTP as .dbc files (1996-2024).
-<ul><li>
-<code><a href="../reference/sinasc_years.html">sinasc_years()</a></code>, <code><a href="../reference/sinasc_info.html">sinasc_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/sinasc_variables.html">sinasc_variables()</a></code>, <code><a href="../reference/sinasc_dictionary.html">sinasc_dictionary()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/sinasc_data.html">sinasc_data()</a></code> for downloading live birth microdata per state (UF)</li>
-<li>
-<code><a href="../reference/sinasc_cache_status.html">sinasc_cache_status()</a></code>, <code><a href="../reference/sinasc_clear_cache.html">sinasc_clear_cache()</a></code> for cache management</li>
-<li>Congenital anomaly filtering by CID-10 code (<code>anomaly</code> parameter)</li>
-<li>Reuses shared DBC infrastructure (<code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>)</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.3.0" id="healthbr-030">healthbR 0.3.0<a class="anchor" aria-label="anchor" href="#healthbr-030"></a></h2>
-<div class="section level3">
-<h3 id="new-modules-0-3-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-3-0"></a></h3>
-<ul><li>
-<strong>SIM (Sistema de Informacoes sobre Mortalidade)</strong>: Added module for accessing mortality microdata from DATASUS FTP as .dbc files (CID-10, 1996-2024).
-<ul><li>
-<code><a href="../reference/sim_years.html">sim_years()</a></code>, <code><a href="../reference/sim_info.html">sim_info()</a></code> for module metadata</li>
-<li>
-<code><a href="../reference/sim_variables.html">sim_variables()</a></code>, <code><a href="../reference/sim_dictionary.html">sim_dictionary()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/sim_data.html">sim_data()</a></code> for downloading mortality microdata per state (UF)</li>
-<li>
-<code><a href="../reference/sim_cache_status.html">sim_cache_status()</a></code>, <code><a href="../reference/sim_clear_cache.html">sim_clear_cache()</a></code> for cache management</li>
-<li>Automatic age decoding from the IDADE variable (<code>decode_age = TRUE</code>)</li>
-<li>Cause-of-death filtering by CID-10 code (<code>cause</code> parameter)</li>
-<li>Efficient per-state downloads (e.g., ~1 MB for Acre vs ~150 MB for all)</li>
-<li>Parquet caching when <code>arrow</code> is installed, .rds fallback otherwise</li>
-</ul></li>
-</ul></div>
-<div class="section level3">
-<h3 id="new-infrastructure-0-3-0">New infrastructure<a class="anchor" aria-label="anchor" href="#new-infrastructure-0-3-0"></a></h3>
-<ul><li>
-<strong>DBC decompression</strong>: Added shared C infrastructure for reading DATASUS .dbc files (PKWare DCL compressed DBF). This enables future modules for SIH, SINASC, CNES, SIA, and SINAN.
-<ul><li>Vendored <code>blast.c</code>/<code>blast.h</code> from Mark Adler (zlib license)</li>
-<li>
-<code>dbc2dbf.c</code> written from scratch (MIT license)</li>
-<li>Internal functions: <code>.dbc2dbf()</code>, <code>.read_dbc()</code>, <code>.datasus_download()</code>
-</li>
-</ul></li>
-</ul></div>
-<div class="section level3">
-<h3 id="dependencies-0-3-0">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies-0-3-0"></a></h3>
-<ul><li>Added <code>foreign</code> to Imports (for reading .dbf files after decompression).</li>
-</ul></div>
-</div>
-    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="healthbr-020">healthbR 0.2.0<a class="anchor" aria-label="anchor" href="#healthbr-020"></a></h2>
 <div class="section level3">
 <h3 id="new-modules-0-2-0">New modules<a class="anchor" aria-label="anchor" href="#new-modules-0-2-0"></a></h3>
-<ul><li>
-<p><strong>Censo Demografico</strong>: Added module for accessing population denominators from the IBGE SIDRA API, covering Census years 1970-2022 and intercensitary estimates 2001-2021.</p>
-<ul><li>
-<code><a href="../reference/censo_years.html">censo_years()</a></code>, <code><a href="../reference/censo_info.html">censo_info()</a></code> for Census metadata</li>
-<li>
-<code><a href="../reference/censo_populacao.html">censo_populacao()</a></code> for population by sex, age, race, urban/rural</li>
-<li>
-<code><a href="../reference/censo_estimativa.html">censo_estimativa()</a></code> for intercensitary population estimates</li>
-<li>
-<code><a href="../reference/censo_sidra_tables.html">censo_sidra_tables()</a></code>, <code><a href="../reference/censo_sidra_search.html">censo_sidra_search()</a></code> for table discovery</li>
-<li>
-<code><a href="../reference/censo_sidra_data.html">censo_sidra_data()</a></code> for querying any Census SIDRA table</li>
-<li>Shared SIDRA utilities extracted to <code>utils-sidra.R</code> (used by PNS and Census)</li>
-<li>Added vignette: “Population Denominators from the Census with healthbR”</li>
-</ul></li>
-<li>
-<p><strong>POF (Pesquisa de Orcamentos Familiares)</strong>: Added complete module for accessing POF microdata from IBGE FTP, covering editions 2002-2003, 2008-2009, and 2017-2018.</p>
-<ul><li>
-<code><a href="../reference/pof_years.html">pof_years()</a></code>, <code><a href="../reference/pof_info.html">pof_info()</a></code>, <code><a href="../reference/pof_registers.html">pof_registers()</a></code> for survey metadata</li>
-<li>
-<code><a href="../reference/pof_dictionary.html">pof_dictionary()</a></code>, <code><a href="../reference/pof_variables.html">pof_variables()</a></code> for variable exploration</li>
-<li>
-<code><a href="../reference/pof_data.html">pof_data()</a></code> for downloading and importing microdata</li>
-<li>
-<code><a href="../reference/pof_cache_status.html">pof_cache_status()</a></code>, <code><a href="../reference/pof_clear_cache.html">pof_clear_cache()</a></code> for cache management</li>
-<li>Survey design support via <code>as_survey = TRUE</code> (requires <code>srvyr</code>)</li>
-<li>Health-focused data: food security (EBIA), food consumption, anthropometry, and health expenses</li>
-<li>Parquet caching when <code>arrow</code> is installed</li>
-<li>Added vignette: “Analyzing Health Data from POF with healthbR”</li>
-</ul></li>
-<li><p><strong>PNADC (PNAD Continua)</strong>: Added module for health-related supplementary modules from PNAD Continua (deficiencia, habitacao, moradores, APS).</p></li>
-<li><p><strong>PNS (Pesquisa Nacional de Saude)</strong>: Added module for PNS microdata and SIDRA tabulated data access (2013, 2019).</p></li>
+<ul><li><p><strong>CNES (National Health Facility Registry)</strong>: Health facility data from DATASUS FTP as .dbc files (2005-2024). 13 file types (ST, LT, PF, DC, EQ, SR, HB, EP, RC, IN, EE, EF, GM), monthly data per UF.</p></li>
+<li><p><strong>SINAN (Notifiable Diseases Surveillance)</strong>: Disease notification microdata from DATASUS FTP as .dbc files (2007-2024). 31 diseases including DENG, CHIK, ZIKA, TUBE, HANS, HEPA, MALA, and more.</p></li>
+<li><p><strong>SI-PNI (National Immunization Program)</strong>: Aggregated vaccination data from DATASUS FTP as .DBF files (1994-2019), plus individual-level microdata from OpenDataSUS CSV (2020-2025). Transparent year-based routing between sources.</p></li>
+<li><p><strong>SISAB (Primary Care Health Information)</strong>: Coverage indicators from the relatorioaps REST API. 4 report types (aps, sb, acs, pns) at 4 geographic levels (brazil, region, uf, municipality).</p></li>
+<li><p><strong>ANS (Supplementary Health)</strong>: Beneficiary, complaint, and financial data from the ANS open data portal. Plus <code><a href="../reference/ans_operators.html">ans_operators()</a></code> for operator registry.</p></li>
+<li><p><strong>ANVISA (Health Surveillance)</strong>: Product registrations, pharmacovigilance, hemovigilance, technovigilance, and controlled substance sales (SNGPC) from the ANVISA open data portal. 14 data types total.</p></li>
+<li><p><strong>POF (Household Budget Survey)</strong>: Food security, consumption, and health expenditure microdata from IBGE FTP (2002-2003, 2008-2009, 2017-2018).</p></li>
+<li><p><strong>PNADC (PNAD Continua)</strong>: Health-related supplementary modules from PNAD Continua (deficiencia, habitacao, moradores, APS).</p></li>
+<li><p><strong>PNS (National Health Survey)</strong>: Microdata and SIDRA tabulated data (2013, 2019).</p></li>
+<li><p><strong>Censo Demografico</strong>: Population denominators from the IBGE SIDRA API, covering Census years 1970-2022 and intercensitary estimates 2001-2021.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="performance-improvements-0-2-0">Performance improvements<a class="anchor" aria-label="anchor" href="#performance-improvements-0-2-0"></a></h3>
+<ul><li><p>Hive-style partitioned parquet caching for all DATASUS modules.</p></li>
+<li><p>Lazy evaluation with <code>lazy = TRUE</code> and <code>backend = "arrow"</code> or <code>"duckdb"</code> for out-of-memory queries.</p></li>
+<li><p>Parallel downloads via <code>.map_parallel()</code> (furrr when configured, purrr fallback).</p></li>
+<li><p>Concurrent HTTP downloads for SI-PNI multi-month CSV requests via <code><a href="https://jeroen.r-universe.dev/curl/reference/multi_download.html" class="external-link">curl::multi_download()</a></code>.</p></li>
+<li><p>Resumable HTTP downloads via Range headers for large files.</p></li>
+<li><p>Smart type parsing (<code>parse = TRUE</code>) for all 7 DATASUS modules, with automatic numeric and date column conversion. Use <code>col_types</code> for fine-grained control or <code>parse = FALSE</code> for all-character.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="refactoring-0-2-0">Refactoring<a class="anchor" aria-label="anchor" href="#refactoring-0-2-0"></a></h3>
+<ul><li><p>Extracted shared helpers for validation, search, cache management, and return logic, eliminating ~1100 lines of duplication across modules.</p></li>
+<li><p>Removed deprecated flat cache migration infrastructure.</p></li>
+<li><p>Moved <code>readxl</code> and <code>haven</code> from Imports to Suggests.</p></li>
+<li><p>Removed unused <code>vroom</code> from Suggests.</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
 <ul><li><p>Complete refactoring of VIGITEL functions due to Ministry of Health website restructuring. Data is now distributed as a single consolidated file containing all years (2006-2024) instead of separate files per year.</p></li>
 <li>
-<p><code><a href="../reference/vigitel_data.html">vigitel_data()</a></code> API changed:</p>
-<ul><li>New <code>format</code> parameter to choose between Stata (.dta) and CSV formats</li>
-<li>
-<code>year</code> parameter now defaults to NULL (returns all years)</li>
-<li>Removed <code>lazy</code> and <code>parallel</code> parameters (replaced by automatic parquet caching)</li>
-<li>Removed <code>force_download</code> parameter (replaced by <code>force</code>)</li>
-</ul></li>
-<li><p>Removed <code>vigitel_download()</code> and <code>vigitel_convert_to_parquet()</code> functions. These are no longer needed as data processing is handled automatically.</p></li>
-<li><p><code><a href="../reference/vigitel_variables.html">vigitel_variables()</a></code> no longer requires a <code>year</code> parameter. Returns the full data dictionary.</p></li>
-</ul></div>
-<div class="section level3">
-<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
-<ul><li><p>Added 2022 and 2024 data (newly available from Ministry of Health). Available years now span 2006-2024 (19 years).</p></li>
-<li><p><code><a href="../reference/vigitel_data.html">vigitel_data()</a></code> now supports downloading data in Stata (.dta) or CSV format via the <code>format</code> parameter. Stata format is recommended as it preserves variable labels.</p></li>
-<li><p>Automatic partitioned parquet caching: when the <code>arrow</code> package is installed, data is automatically cached in partitioned parquet format. This enables efficient reading of specific years without loading the entire dataset.</p></li>
-<li><p>Performance improvement: reading a single year from cache is now extremely fast as only that year’s partition is loaded.</p></li>
-<li><p>Added <code>haven</code> and <code>readr</code> to Imports for reading Stata and CSV files.</p></li>
-<li><p>Added <code>survey</code> to Suggests for complex survey analysis support.</p></li>
+<p><code><a href="../reference/vigitel_data.html">vigitel_data()</a></code> API changed: new <code>format</code> parameter, <code>year</code> defaults to</p>
+<p>NULL (all years), removed <code>lazy</code>/<code>parallel</code>/<code>force_download</code> parameters.</p>
+</li>
+<li><p>Removed <code>vigitel_download()</code> and <code>vigitel_convert_to_parquet()</code> functions.</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-0-2-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
-<ul><li>Fixed CRAN check issues related to <code>arrow</code> dependency and cache files.</li>
+<ul><li>Fixed PNS Arrow expression error with partition filtering.</li>
+<li>Fixed <code><a href="../reference/pns_sidra_data.html">pns_sidra_data()</a></code> unknown table warning.</li>
+<li>Fixed POF dictionary parsing failure on Linux/Ubuntu.</li>
 </ul></div>
 </div>
     <div class="section level2">

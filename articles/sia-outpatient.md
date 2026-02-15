@@ -207,7 +207,7 @@ lazy |>
 
 - [SIA on
   DATASUS](https://datasus.saude.gov.br/transferencia-de-arquivos/)
-- [SIGTAP procedure table](http://sigtap.datasus.gov.br/)
+- [SIGTAP procedure table](https://wiki.saude.gov.br/sigtap/)
 - [SIH
   vignette](https://sidneybissoli.github.io/healthbR/articles/sih-hospital-admissions.md)
   for hospital admission data
