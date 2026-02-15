@@ -305,11 +305,8 @@ test_that("pnadc_dictionaries uses cache on second call", {
     cache_dir = test_cache
   )
 
-  # verify cache exists
-  cache_files <- list.files(
-    file.path(test_cache, "pnadc"),
-    pattern = "pnadc_dict_deficiencia_2022"
-  )
+  # verify cache exists (flat RDS for dictionaries)
+  cache_files <- list.files(test_cache, pattern = "pnadc_dict_deficiencia_2022")
   expect_true(length(cache_files) > 0)
 
   # second call should use cache
@@ -407,10 +404,10 @@ test_that("pnadc_data uses cache on second call", {
     cache_dir = test_cache
   )
 
-  # verify cache exists
+  # verify partitioned cache exists
   cache_files <- list.files(
-    file.path(test_cache, "pnadc"),
-    pattern = "pnadc_deficiencia_2022"
+    file.path(test_cache, "pnadc_deficiencia_data"),
+    recursive = TRUE, pattern = "\\.parquet$"
   )
   expect_true(length(cache_files) > 0)
 

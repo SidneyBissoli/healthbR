@@ -855,8 +855,12 @@ test_that("anvisa_data sanitizers downloads real data (comma delimiter)", {
   dir.create(temp_dir)
   on.exit(unlink(temp_dir, recursive = TRUE))
 
-  result <- anvisa_data(type = "sanitizers", cache = TRUE,
-                        cache_dir = temp_dir)
+  result <- tryCatch(
+    anvisa_data(type = "sanitizers", cache = TRUE, cache_dir = temp_dir),
+    error = function(e) {
+      skip(paste("ANVISA server unavailable:", conditionMessage(e)))
+    }
+  )
   expect_s3_class(result, "tbl_df")
   expect_true(nrow(result) > 100)
   expect_true("NOME_PRODUTO" %in% names(result))

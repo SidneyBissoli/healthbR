@@ -405,8 +405,9 @@ test_that("pns_data uses cache on second call", {
   # first call downloads
   df1 <- pns_data(year = 2019, cache_dir = test_cache)
 
-  # verify cache exists (files are in pns subdirectory)
-  cache_files <- list.files(file.path(test_cache, "pns"), pattern = "pns_2019")
+  # verify partitioned cache exists
+  cache_files <- list.files(file.path(test_cache, "pns_data"),
+                            recursive = TRUE, pattern = "\\.parquet$")
   expect_true(length(cache_files) > 0)
 
   # second call should use cache

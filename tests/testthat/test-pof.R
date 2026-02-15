@@ -250,8 +250,8 @@ test_that("pof_dictionary uses cache on second call", {
   # first call downloads
   dict1 <- pof_dictionary(year = "2017-2018", cache_dir = test_cache)
 
-  # verify cache exists
-  cache_files <- list.files(file.path(test_cache, "pof"), pattern = "pof_dictionary")
+  # verify cache exists (flat cache for dictionary)
+  cache_files <- list.files(test_cache, pattern = "pof_dictionary")
   expect_true(length(cache_files) > 0)
 
   # second call should use cache
@@ -376,8 +376,9 @@ test_that("pof_data uses cache on second call", {
   # first call downloads
   df1 <- pof_data(year = "2017-2018", register = "morador", cache_dir = test_cache)
 
-  # verify cache exists
-  cache_files <- list.files(file.path(test_cache, "pof"), pattern = "pof_2017-2018_morador")
+  # verify partitioned cache exists
+  cache_files <- list.files(file.path(test_cache, "pof_morador_data"),
+                            recursive = TRUE, pattern = "\\.parquet$")
   expect_true(length(cache_files) > 0)
 
   # second call should use cache

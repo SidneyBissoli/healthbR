@@ -361,7 +361,7 @@ pns_read_microdata <- function(zip_path, year) {
 
   # add year column
   data <- data |>
-    dplyr::mutate(year = as.character(year), .before = 1)
+    dplyr::mutate(year = as.integer(year), .before = 1)
 
   tibble::as_tibble(data)
 }
@@ -768,7 +768,7 @@ pns_dictionary <- function(year = 2019,
   # clean and standardize
   names(dict_df) <- .clean_names(names(dict_df))
   dict_df <- dict_df |>
-    dplyr::mutate(year = as.character(year), .before = 1)
+    dplyr::mutate(year = as.integer(year), .before = 1)
 
   dict_df <- tibble::as_tibble(dict_df)
 
@@ -947,7 +947,7 @@ pns_data <- function(year = NULL,
   if (isTRUE(lazy)) {
     backend <- match.arg(backend)
     cache_dir_resolved <- .module_cache_dir("pns", cache_dir)
-    year_filter <- if (!is.null(year)) as.character(year) else NULL
+    year_filter <- if (!is.null(year)) as.integer(year) else NULL
     select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
     ds <- .lazy_return(cache_dir_resolved, "pns_data", backend,
                        filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
@@ -959,7 +959,7 @@ pns_data <- function(year = NULL,
   dataset_name <- "pns_data"
 
   data_list <- .map_parallel(year, function(y) {
-    target_year <- as.character(y)
+    target_year <- as.integer(y)
 
     # 1. check partitioned cache first (preferred path)
     if (!refresh && .has_arrow() &&
@@ -991,7 +991,7 @@ pns_data <- function(year = NULL,
   if (isTRUE(lazy)) {
     backend <- match.arg(backend)
     cache_dir_resolved <- .module_cache_dir("pns", cache_dir)
-    year_filter <- if (!is.null(year)) as.character(year) else NULL
+    year_filter <- if (!is.null(year)) as.integer(year) else NULL
     select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
     ds <- .lazy_return(cache_dir_resolved, "pns_data", backend,
                        filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
@@ -1201,7 +1201,7 @@ pns_sidra_data <- function(table,
 
   # check if table exists in catalog (soft warning)
   if (!table %in% pns_sidra_catalog_internal$table_code) {
-    cli::cli_alert_warning(
+    cli::cli_warn(
       "Table {.val {table}} not found in internal catalog. Proceeding with API call."
     )
   }

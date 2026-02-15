@@ -384,8 +384,12 @@ test_that("sinan_data selects variables", {
 test_that("sinan_data works with different disease", {
   skip_if_no_integration()
 
-  data <- sinan_data(year = 2022, disease = "TUBE",
-                     cache_dir = tempdir())
+  data <- tryCatch(
+    sinan_data(year = 2022, disease = "TUBE", cache_dir = tempdir()),
+    error = function(e) {
+      skip(paste("DATASUS FTP unavailable for TUBE:", conditionMessage(e)))
+    }
+  )
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_equal(unique(data$disease), "TUBE")
