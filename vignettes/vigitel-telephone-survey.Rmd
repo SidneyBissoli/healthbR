@@ -1,0 +1,171 @@
+---
+title: "Chronic Disease Risk Factors from VIGITEL with healthbR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chronic Disease Risk Factors from VIGITEL with healthbR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Overview
+
+**VIGITEL (Vigilancia de Fatores de Risco e Protecao para Doencas Cronicas por Inquerito Telefonico)** is an annual telephone survey conducted by the Brazilian Ministry of Health since 2006. It monitors risk and protective factors for chronic non-communicable diseases among adults (18+) in all 26 state capitals and the Federal District.
+
+| Topic | Examples |
+|-------|----------|
+| **Tobacco** | Smoking prevalence, cessation |
+| **Alcohol** | Consumption patterns, binge drinking |
+| **Diet** | Fruit/vegetable intake, ultra-processed foods |
+| **Physical activity** | Leisure, commuting, sedentary behavior |
+| **Chronic diseases** | Diabetes, hypertension, obesity self-report |
+| **Preventive exams** | Mammography, Pap smear, colonoscopy |
+
+Each annual edition interviews approximately 54,000 adults via landline telephone, with post-stratification weighting (`pesorake`) to match the adult population of each city.
+
+## Getting started
+
+```{r setup}
+library(healthbR)
+library(dplyr)
+```
+
+### Check available years
+
+```{r}
+vigitel_years()
+#> [1] 2006 2007 2008 ... 2023 2024
+```
+
+### Survey information
+
+```{r}
+vigitel_info()
+```
+
+## Downloading data
+
+### All years at once
+
+VIGITEL is distributed as a single consolidated file covering 2006--2024. By default, all years are downloaded:
+
+```{r}
+df <- vigitel_data()
+```
+
+### Specific years
+
+```{r}
+df <- vigitel_data(year = 2020:2024)
+```
+
+### Select variables
+
+```{r}
+df <- vigitel_data(year = 2024, vars = c("cidade", "sexo", "idade", "pesorake",
+                                          "q6", "q7", "q9"))
+```
+
+### Data format
+
+Two formats are available: Stata (`.dta`, default) and CSV. The Stata format preserves variable labels:
+
+```{r}
+df_dta <- vigitel_data(format = "dta")  # default, with labels
+df_csv <- vigitel_data(format = "csv")  # alternative
+```
+
+## Exploring variables
+
+### Data dictionary
+
+```{r}
+vigitel_dictionary()
+```
+
+### Search variables
+
+```{r}
+vigitel_variables()
+```
+
+## Example: Smoking prevalence over time
+
+```{r}
+# Download smoking-related variables
+df <- vigitel_data(
+  year = 2006:2024,
+  vars = c("ano", "cidade", "sexo", "pesorake", "q6")
+)
+
+# q6: "Atualmente, o(a) sr(a) fuma?" (1 = sim, 2 = nao)
+smoking <- df |>
+  filter(q6 %in% c("1", "2")) |>
+  group_by(ano) |>
+  summarise(
+    smokers = sum(pesorake[q6 == "1"], na.rm = TRUE),
+    total = sum(pesorake, na.rm = TRUE),
+    prevalence = smokers / total * 100
+  )
+```
+
+## Example: Obesity by capital city
+
+```{r}
+df <- vigitel_data(
+  year = 2024,
+  vars = c("cidade", "sexo", "pesorake", "q8", "q9")
+)
+
+# q8 = weight (kg), q9 = height (cm)
+# BMI >= 30 = obesity
+obesity <- df |>
+  filter(!is.na(q8), !is.na(q9), q9 > 0) |>
+  mutate(
+    bmi = as.numeric(q8) / (as.numeric(q9) / 100)^2,
+    obese = bmi >= 30
+  ) |>
+  group_by(cidade) |>
+  summarise(
+    prevalence = weighted.mean(obese, as.numeric(pesorake), na.rm = TRUE) * 100
+  ) |>
+  arrange(desc(prevalence))
+```
+
+## Cache and performance
+
+Data is automatically cached in partitioned parquet format (when `arrow` is installed). Subsequent calls load instantly from cache:
+
+```{r}
+# First call downloads (~30 seconds)
+df <- vigitel_data(year = 2024)
+
+# Second call loads from cache (instant)
+df <- vigitel_data(year = 2024)
+
+# Check cache status
+vigitel_cache_status()
+
+# Clear cache if needed
+vigitel_clear_cache()
+```
+
+### Lazy evaluation
+
+For large analyses, use lazy evaluation to query without loading all data into memory:
+
+```{r}
+lazy_df <- vigitel_data(lazy = TRUE, backend = "arrow")
+```
+
+## Further reading
+
+- [VIGITEL official page](https://svs.aids.gov.br/daent/cgdnt/vigitel/)
+- [Ministry of Health VIGITEL reports (PDF)](https://svs.aids.gov.br/daent/cgdnt/vigitel/publicacoes/)

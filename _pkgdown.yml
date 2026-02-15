@@ -25,11 +25,17 @@ navbar:
         - text: "SISAB -- Primary care"
           href: articles/sisab-primary-care.html
         - text: "---"
-        - text: "IBGE surveys"
-        - text: "Censo -- Population denominators"
-          href: articles/censo-denominadores.html
+        - text: "Surveys"
+        - text: "VIGITEL -- Telephone survey"
+          href: articles/vigitel-telephone-survey.html
+        - text: "PNS -- National health survey"
+          href: articles/pns-health-survey.html
+        - text: "PNAD Continua -- Household survey"
+          href: articles/pnadc-household-survey.html
         - text: "POF -- Household budgets"
           href: articles/pof-health-data.html
+        - text: "Censo -- Population denominators"
+          href: articles/censo-denominadores.html
         - text: "---"
         - text: "Regulatory agencies"
         - text: "ANS -- Supplementary health"
@@ -226,10 +232,13 @@ articles:
       - sipni-vaccination
       - sisab-primary-care
 
-  - title: "IBGE surveys"
+  - title: "Surveys"
     contents:
-      - censo-denominadores
+      - vigitel-telephone-survey
+      - pns-health-survey
+      - pnadc-household-survey
       - pof-health-data
+      - censo-denominadores
 
   - title: "Regulatory agencies"
     contents:
