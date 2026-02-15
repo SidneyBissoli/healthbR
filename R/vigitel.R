@@ -267,7 +267,7 @@ vigitel_years <- function() {
 #'
 #' @section Data source:
 #' Data is downloaded from the Ministry of Health website:
-#' \url{https://svs.aids.gov.br/daent/cgdnt/vigitel/}
+#' \verb{https://svs.aids.gov.br/daent/cgdnt/vigitel/}
 #'
 #' @export
 #'

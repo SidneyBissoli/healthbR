@@ -78,7 +78,7 @@ data, installing \code{arrow} is highly recommended:
 \section{Data source}{
 
 Data is downloaded from the Ministry of Health website:
-\url{https://svs.aids.gov.br/daent/cgdnt/vigitel/}
+\verb{https://svs.aids.gov.br/daent/cgdnt/vigitel/}
 }
 
 \examples{

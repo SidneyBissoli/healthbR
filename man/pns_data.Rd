@@ -64,7 +64,7 @@ weight variables with the \code{srvyr} or \code{survey} packages:
 \section{Data source}{
 
 Data is downloaded from the IBGE FTP server:
-\url{https://ftp.ibge.gov.br/PNS/}
+\verb{https://ftp.ibge.gov.br/PNS/}
 }
 
 \examples{

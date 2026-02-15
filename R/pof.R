@@ -1178,7 +1178,7 @@ pof_variables <- function(year = "2017-2018",
 #'
 #' @section Data source:
 #' Data is downloaded from the IBGE FTP server:
-#' \url{https://ftp.ibge.gov.br/Orcamentos_Familiares/}
+#' \verb{https://ftp.ibge.gov.br/Orcamentos_Familiares/}
 #'
 #' @export
 #'

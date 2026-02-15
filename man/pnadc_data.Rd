@@ -85,7 +85,7 @@ for analysis with the \code{srvyr} package.
 \section{Data source}{
 
 Data is downloaded from the IBGE FTP server:
-\url{https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/}
+\verb{https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/}
 }
 
 \examples{

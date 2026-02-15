@@ -182,5 +182,5 @@ lazy_df <- pns_data(year = 2019, lazy = TRUE, backend = "arrow")
 
 ## Further reading
 
-- [PNS on IBGE](https://www.ibge.gov.br/estatisticas/sociais/saude/9160-pesquisa-nacional-de-saude.html)
-- [PNS SIDRA tables](https://sidra.ibge.gov.br/pesquisa/pns)
+- PNS on IBGE (`www.ibge.gov.br/estatisticas/sociais/saude/9160-pesquisa-nacional-de-saude`)
+- PNS SIDRA tables (`sidra.ibge.gov.br/pesquisa/pns`)

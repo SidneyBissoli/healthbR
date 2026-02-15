@@ -198,6 +198,6 @@ lazy |>
 
 ## Further reading
 
-- [SINASC on DATASUS](https://datasus.saude.gov.br/nascidos-vivos-desde-1994)
+- SINASC on DATASUS (`datasus.saude.gov.br`)
 - [SIM vignette](sim-mortality.html) for mortality data
 - [Census vignette](censo-denominadores.html) for population denominators

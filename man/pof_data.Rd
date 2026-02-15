@@ -83,7 +83,7 @@ For proper statistical analysis with complex survey design, use
 \section{Data source}{
 
 Data is downloaded from the IBGE FTP server:
-\url{https://ftp.ibge.gov.br/Orcamentos_Familiares/}
+\verb{https://ftp.ibge.gov.br/Orcamentos_Familiares/}
 }
 
 \examples{

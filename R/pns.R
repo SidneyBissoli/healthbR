@@ -644,7 +644,7 @@ pns_modules <- function(year = NULL) {
 #'
 #' @section Data source:
 #' Dictionaries are downloaded from the IBGE FTP server:
-#' \url{https://ftp.ibge.gov.br/PNS/}
+#' \verb{https://ftp.ibge.gov.br/PNS/}
 #'
 #' @export
 #'
@@ -914,7 +914,7 @@ pns_variables <- function(year = 2019,
 #'
 #' @section Data source:
 #' Data is downloaded from the IBGE FTP server:
-#' \url{https://ftp.ibge.gov.br/PNS/}
+#' \verb{https://ftp.ibge.gov.br/PNS/}
 #'
 #' @export
 #'

@@ -283,6 +283,6 @@ dengue_lazy |>
 
 ## Additional resources
 
-- [SINAN official page (DATASUS)](https://portalsinan.saude.gov.br/)
+- SINAN official page (`portalsinan.saude.gov.br`)
 - [SIM vignette](datasus-modules.html) for mortality data
 - [Census vignette](censo-denominadores.html) for population denominators

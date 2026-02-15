@@ -723,7 +723,7 @@ ans_variables <- function(type = "beneficiaries", search = NULL) {
 #'
 #' @details
 #' Data is downloaded from the ANS open data portal at
-#' \url{https://dadosabertos.ans.gov.br/}.
+#' \verb{https://dadosabertos.ans.gov.br/}.
 #'
 #' \strong{Beneficiaries}: Monthly per-state ZIP files containing CSV data
 #' with consolidated beneficiary counts by operator, plan type, sex, age

@@ -300,7 +300,7 @@ install.packages("arrow")
 
 ## Additional resources
 
-- [POF official page (IBGE)](https://www.ibge.gov.br/estatisticas/sociais/saude/24786-pesquisa-de-orcamentos-familiares-2.html)
-- [POF 2017-2018 Food Security publication](https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&id=2101749)
-- [POF 2017-2018 Food Consumption publication](https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&id=2101742)
+- POF official page (`www.ibge.gov.br/estatisticas/sociais/saude/24786-pesquisa-de-orcamentos-familiares-2`)
+- POF 2017-2018 Food Security publication (`biblioteca.ibge.gov.br`)
+- POF 2017-2018 Food Consumption publication (`biblioteca.ibge.gov.br`)
 - [srvyr package documentation](https://cran.r-project.org/package=srvyr)

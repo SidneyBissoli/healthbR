@@ -520,7 +520,7 @@ censo_info <- function(year = NULL) {
 #'
 #' @section Data source:
 #' Data is retrieved from IBGE SIDRA API:
-#' \url{https://sidra.ibge.gov.br/}
+#' \verb{https://sidra.ibge.gov.br/}
 #'
 #' @export
 #'
@@ -618,7 +618,7 @@ censo_populacao <- function(year,
 #'
 #' @section Data source:
 #' Data is retrieved from IBGE SIDRA API, table 6579:
-#' \url{https://sidra.ibge.gov.br/tabela/6579}
+#' \verb{https://sidra.ibge.gov.br/tabela/6579}
 #'
 #' @export
 #'

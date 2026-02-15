@@ -31,7 +31,7 @@ of the data returned by \code{\link{pns_data}}.
 \section{Data source}{
 
 Dictionaries are downloaded from the IBGE FTP server:
-\url{https://ftp.ibge.gov.br/PNS/}
+\verb{https://ftp.ibge.gov.br/PNS/}
 }
 
 \examples{

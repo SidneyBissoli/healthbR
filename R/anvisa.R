@@ -439,7 +439,7 @@ anvisa_variables <- function(type = "medicines", search = NULL) {
 #'
 #' @details
 #' Data is downloaded from the ANVISA open data portal at
-#' \url{https://dados.anvisa.gov.br/dados/}.
+#' \verb{https://dados.anvisa.gov.br/dados/}.
 #'
 #' \strong{Snapshot types}: Download a single CSV file representing the
 #' current state of the registry/database. No time dimension. Cached as

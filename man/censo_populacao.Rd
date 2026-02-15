@@ -61,7 +61,7 @@ with custom parameters.
 \section{Data source}{
 
 Data is retrieved from IBGE SIDRA API:
-\url{https://sidra.ibge.gov.br/}
+\verb{https://sidra.ibge.gov.br/}
 }
 
 \examples{

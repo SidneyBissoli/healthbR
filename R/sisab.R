@@ -407,7 +407,7 @@ sisab_variables <- function(type = "aps", search = NULL) {
 #'
 #' @details
 #' Data is fetched from the relatorioaps REST API
-#' (\url{https://relatorioaps.saude.gov.br}), the public reporting portal
+#' (\verb{https://relatorioaps.saude.gov.br}), the public reporting portal
 #' for primary care in Brazil.
 #'
 #' Four report types are available:

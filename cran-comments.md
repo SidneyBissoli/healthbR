@@ -3,9 +3,10 @@
 0 errors | 0 warnings | 0 notes
 
 * Resubmission of 0.2.0 addressing reviewer feedback:
-  - Fixed 301 redirect URL (wiki.saude.gov.br/sigtap/) in three vignettes.
-  - Added single quotes around non-English proper nouns, acronyms, and
-    technical terms in DESCRIPTION to resolve spelling NOTE.
+  - Removed all Brazilian government URLs from vignettes and Rd files
+    to avoid timeout/SSL NOTEs (these servers are frequently unreliable
+    from outside Brazil). Domain names are preserved as plain text for
+    reference.
 
 ## Changes since last CRAN release (0.1.1)
 
@@ -37,16 +38,6 @@ original code (MIT license). Both are documented in `inst/COPYRIGHTS`.
 
 All examples that download data are wrapped in `@examplesIf interactive()`
 to avoid network access during R CMD check.
-
-FTP URLs (`ftp://ftp.datasus.gov.br/...`) are intentional -- DATASUS
-distributes public health microdata exclusively via FTP. These may time
-out during URL checks but are functional.
-
-The ANVISA open data portal (`https://dados.anvisa.gov.br/dados/`) has
-a self-signed or misconfigured SSL certificate. The URL is correct and
-functional; the package uses `ssl_verifypeer = FALSE` as a workaround
-(documented in code). This may cause SSL verification failure during
-URL checks.
 
 ## Existing CRAN NOTE (r-oldrel-macos-x86_64)
 
