@@ -297,7 +297,5 @@ sipni_lazy |>
 
 ## Additional resources
 
-- [SI-PNI official page (DATASUS)](http://pni.datasus.gov.br/)
-- [OpenDataSUS vaccination data](https://opendatasus.saude.gov.br/dataset/covid-19-vacinacao)
-- [National Immunization Program (PNI)](https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/c/calendario-nacional-de-vacinacao)
+- [OpenDataSUS](https://dadosabertos.saude.gov.br/)
 - [Census vignette](censo-denominadores.html) for population denominators
