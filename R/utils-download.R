@@ -74,13 +74,15 @@
 #' @param retries Integer. Number of retry attempts. Default: 3.
 #' @param timeout Integer. Download timeout in seconds. Default: 300.
 #' @param quiet Logical. Suppress download progress. Default: TRUE.
+#' @param ssl_verifypeer Logical. Verify SSL certificates. Default: TRUE.
+#'   Set to FALSE for servers with certificate issues (e.g., ANVISA portal).
 #'
 #' @return The destfile path (invisibly) on success.
 #'   Throws an error on failure.
 #'
 #' @noRd
 .http_download <- function(url, destfile, retries = 3L, timeout = 300L,
-                           quiet = TRUE) {
+                           quiet = TRUE, ssl_verifypeer = TRUE) {
   for (i in seq_len(retries)) {
     result <- tryCatch({
       curl::curl_download(
@@ -88,7 +90,8 @@
         handle = curl::new_handle(
           connecttimeout = 30,
           timeout = timeout,
-          followlocation = TRUE
+          followlocation = TRUE,
+          ssl_verifypeer = ssl_verifypeer
         ),
         quiet = quiet
       )

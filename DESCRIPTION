@@ -1,6 +1,6 @@
 Package: healthbR
 Title: Access Brazilian Public Health Data
-Version: 0.12.0
+Version: 0.13.0
 Authors@R: 
     person("Sidney", "Bissoli", , "sbissoli76@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-0442-3700"))
@@ -18,6 +18,9 @@ Description: Provides easy access to Brazilian public health data from multiple
     SISAB (Primary Care Health Information System - coverage indicators via
     REST API), ANS (Agencia Nacional de Saude Suplementar - supplementary
     health beneficiaries, consumer complaints, and financial statements),
+    ANVISA (Agencia Nacional de Vigilancia Sanitaria - product registrations,
+    pharmacovigilance, hemovigilance, technovigilance, and controlled
+    substance sales via SNGPC),
     and other health information systems. Data is downloaded
     from the Brazilian Ministry of Health and IBGE repositories. Data is returned
     in tidy format following tidyverse conventions.
