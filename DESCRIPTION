@@ -54,7 +54,9 @@ Suggests:
     duckdb,
     piggyback,
     survey,
-    srvyr
+    srvyr,
+    withr,
+    writexl
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://github.com/SidneyBissoli/healthbR, https://sidneybissoli.github.io/healthbR/

@@ -382,3 +382,276 @@ test_that("sisab_data reports partial download failures", {
   expect_false(is.null(failures))
   expect_true(any(grepl("9999", failures)))
 })
+
+
+# ============================================================================
+# ADDITIONAL COVERAGE TESTS
+# ============================================================================
+
+# --- sisab_info --- additional coverage ---
+
+test_that("sisab_info returns invisible result", {
+  result <- sisab_info()
+  expect_type(result, "list")
+  expect_equal(result$source, "API REST relatorioaps")
+  expect_equal(result$n_types, 4)
+  expect_true(result$n_variables_aps > 0)
+})
+
+# --- .sisab_resolve_params --- test param resolution ---
+
+test_that(".sisab_resolve_params resolves defaults correctly", {
+  params <- .sisab_resolve_params(2024, "aps", "uf", NULL, NULL, NULL)
+
+  expect_equal(params$year, 2024L)
+  expect_equal(params$type, "aps")
+  expect_equal(params$level, "uf")
+  expect_equal(params$month, 1L:12L)
+  expect_null(params$uf)
+  expect_equal(params$target_ufs, list(NULL))
+})
+
+test_that(".sisab_resolve_params with specific month", {
+  params <- .sisab_resolve_params(2024, "aps", "uf", 3, NULL, NULL)
+  expect_equal(params$month, 3L)
+})
+
+test_that(".sisab_resolve_params with uf at uf level", {
+  params <- .sisab_resolve_params(2024, "aps", "uf", 1, "SP", NULL)
+  expect_equal(params$uf, "SP")
+  expect_equal(params$target_ufs, list("SP"))
+})
+
+test_that(".sisab_resolve_params with multiple UFs", {
+  params <- .sisab_resolve_params(2024, "aps", "uf", 1, c("SP", "RJ"), NULL)
+  expect_equal(params$uf, c("SP", "RJ"))
+  expect_equal(params$target_ufs, list("SP", "RJ"))
+})
+
+test_that(".sisab_resolve_params with uf at municipality level", {
+  params <- .sisab_resolve_params(2024, "aps", "municipality", 1, "SP", NULL)
+  expect_equal(params$target_ufs, list("SP"))
+})
+
+test_that(".sisab_resolve_params with uf at brazil level ignores uf filter", {
+  params <- .sisab_resolve_params(2024, "aps", "brazil", 1, "SP", NULL)
+  # at brazil level, target_ufs should be list(NULL)
+  expect_equal(params$target_ufs, list(NULL))
+})
+
+test_that(".sisab_resolve_params warns for municipality without uf filter", {
+  expect_warning(
+    .sisab_resolve_params(2024, "aps", "municipality", NULL, NULL, NULL),
+    "may be slow"
+  )
+})
+
+test_that(".sisab_resolve_params municipality with uf no warning for few months", {
+  # With uf specified, no warning even with all 12 months
+  expect_no_warning(
+    .sisab_resolve_params(2024, "aps", "municipality", NULL, "SP", NULL)
+  )
+})
+
+test_that(".sisab_resolve_params municipality no uf but few months no warning", {
+  # <= 3 months should not trigger warning
+  expect_no_warning(
+    .sisab_resolve_params(2024, "aps", "municipality", c(1, 2, 3), NULL, NULL)
+  )
+})
+
+test_that(".sisab_resolve_params validates vars with warning", {
+  expect_warning(
+    .sisab_resolve_params(2024, "aps", "uf", 1, NULL, "NONEXISTENT"),
+    "not in known"
+  )
+})
+
+test_that(".sisab_resolve_params accepts valid vars silently", {
+  expect_no_warning(
+    .sisab_resolve_params(2024, "aps", "uf", 1, NULL, "qtPopulacao")
+  )
+})
+
+test_that(".sisab_resolve_params validates multiple years", {
+  params <- .sisab_resolve_params(c(2023, 2024), "aps", "uf", 1, NULL, NULL)
+  expect_equal(params$year, c(2023L, 2024L))
+})
+
+# --- .sisab_download_loop --- mocked tests ---
+
+test_that(".sisab_download_loop binds results from multiple years", {
+  local_mocked_bindings(
+    .sisab_download_and_read = function(year, months, type, level, uf, ...) {
+      tibble::tibble(
+        qtCobertura = runif(1),
+        nuComp = sprintf("%04d%02d", year, min(months))
+      )
+    }
+  )
+
+  result <- .sisab_download_loop(
+    year = c(2023L, 2024L), type = "aps", level = "uf",
+    month = 1L, target_ufs = list(NULL), cache = FALSE, cache_dir = NULL
+  )
+
+  expect_true(is.list(result))
+  expect_s3_class(result$data, "data.frame")
+  expect_equal(nrow(result$data), 2)
+  expect_true("year" %in% names(result$data))
+  expect_true("type" %in% names(result$data))
+  expect_equal(sort(unique(result$data$year)), c(2023L, 2024L))
+  expect_equal(length(result$failed_labels), 0)
+})
+
+test_that(".sisab_download_loop tracks failures", {
+  local_mocked_bindings(
+    .sisab_download_and_read = function(year, months, type, level, uf, ...) {
+      if (year == 9999L) stop("API error")
+      tibble::tibble(qtCobertura = 0.5)
+    }
+  )
+
+  result <- .sisab_download_loop(
+    year = c(2024L, 9999L), type = "aps", level = "uf",
+    month = 1L, target_ufs = list(NULL), cache = FALSE, cache_dir = NULL
+  )
+
+  expect_equal(nrow(result$data), 1)
+  expect_equal(length(result$failed_labels), 1)
+  expect_true(grepl("9999", result$failed_labels))
+})
+
+test_that(".sisab_download_loop aborts when all downloads fail", {
+  local_mocked_bindings(
+    .sisab_download_and_read = function(year, ...) stop("API error")
+  )
+
+  expect_error(
+    .sisab_download_loop(
+      year = 2024L, type = "aps", level = "uf",
+      month = 1L, target_ufs = list(NULL), cache = FALSE, cache_dir = NULL
+    ),
+    "No data could be downloaded"
+  )
+})
+
+test_that(".sisab_download_loop with multiple UFs", {
+  local_mocked_bindings(
+    .sisab_download_and_read = function(year, months, type, level, uf, ...) {
+      tibble::tibble(qtCobertura = runif(1), sgUf = ifelse(is.null(uf), "ALL", uf))
+    }
+  )
+
+  result <- .sisab_download_loop(
+    year = 2024L, type = "aps", level = "uf",
+    month = 1L, target_ufs = list("SP", "RJ"),
+    cache = FALSE, cache_dir = NULL
+  )
+
+  expect_equal(nrow(result$data), 2)
+  expect_equal(length(result$failed_labels), 0)
+})
+
+test_that(".sisab_download_loop skips NULL results", {
+  local_mocked_bindings(
+    .sisab_download_and_read = function(year, months, type, level, uf, ...) {
+      if (!is.null(uf) && uf == "RJ") return(NULL)
+      tibble::tibble(qtCobertura = 0.5)
+    }
+  )
+
+  result <- .sisab_download_loop(
+    year = 2024L, type = "aps", level = "uf",
+    month = 1L, target_ufs = list("SP", "RJ"),
+    cache = FALSE, cache_dir = NULL
+  )
+
+  expect_equal(nrow(result$data), 1)
+  expect_equal(length(result$failed_labels), 1)
+})
+
+# --- .sisab_build_url --- additional coverage ---
+
+test_that(".sisab_build_url returns correct URL for acs", {
+  url_acs <- .sisab_build_url("acs")
+  expect_true(grepl("relatorioaps-prd.saude.gov.br/cobertura/acs", url_acs))
+})
+
+test_that(".sisab_build_url returns correct URL for pns", {
+  url_pns <- .sisab_build_url("pns")
+  expect_true(grepl("relatorioaps-prd.saude.gov.br/cobertura/pns", url_pns))
+})
+
+# --- .sisab_validate_type --- additional coverage ---
+
+test_that(".sisab_validate_type error message mentions valid types", {
+  expect_error(.sisab_validate_type("xyz"), "aps")
+})
+
+# --- .sisab_validate_level --- additional coverage ---
+
+test_that(".sisab_validate_level accepts region level", {
+  expect_equal(.sisab_validate_level("region"), "region")
+  expect_equal(.sisab_validate_level("Region"), "region")
+})
+
+# --- .sisab_validate_year --- additional coverage ---
+
+test_that(".sisab_validate_year rejects future years", {
+  far_future <- as.integer(format(Sys.Date(), "%Y")) + 5L
+  expect_error(.sisab_validate_year(far_future), "not available")
+})
+
+test_that(".sisab_validate_year rejects NA", {
+  expect_error(.sisab_validate_year(NA), "not available")
+})
+
+test_that(".sisab_validate_year rejects zero-length input", {
+  expect_error(.sisab_validate_year(integer(0)), "required")
+})
+
+# --- .sisab_get_variables_meta --- additional coverage ---
+
+test_that(".sisab_get_variables_meta defaults to aps for unknown type", {
+  # The switch fallback returns sisab_variables_aps for unknown types
+  result <- .sisab_get_variables_meta("unknown_type")
+  expect_s3_class(result, "tbl_df")
+  expect_true("qtCobertura" %in% result$variable)
+})
+
+# --- sisab_data --- mocked end-to-end ---
+
+test_that("sisab_data with vars selects columns", {
+  local_mocked_bindings(
+    .sisab_download_and_read = function(year, months, type, level, uf, ...) {
+      tibble::tibble(
+        qtPopulacao = "100000",
+        qtCobertura = "0.85",
+        qtEsf = "10",
+        nuComp = "202401"
+      )
+    }
+  )
+
+  result <- sisab_data(2024, month = 1, vars = c("qtPopulacao", "qtCobertura"))
+  expect_true("qtPopulacao" %in% names(result))
+  expect_true("qtCobertura" %in% names(result))
+  expect_true("year" %in% names(result))
+  expect_true("type" %in% names(result))
+})
+
+test_that("sisab_data type parameter works with different types", {
+  local_mocked_bindings(
+    .sisab_download_and_read = function(year, months, type, level, uf, ...) {
+      tibble::tibble(
+        pcCoberturaSbAps = "0.5",
+        nuComp = "202401"
+      )
+    }
+  )
+
+  result <- sisab_data(2024, type = "sb", month = 1)
+  expect_s3_class(result, "tbl_df")
+  expect_equal(unique(result$type), "sb")
+})

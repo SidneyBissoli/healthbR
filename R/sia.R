@@ -318,6 +318,83 @@ sia_dictionary <- function(variable = NULL) {
 }
 
 
+#' @noRd
+.sia_download_loop <- function(year, month, target_ufs, type, cache, cache_dir) {
+  combinations <- expand.grid(
+    year = year, month = month, uf = target_ufs,
+    stringsAsFactors = FALSE
+  )
+
+  n_combos <- nrow(combinations)
+  if (n_combos > 1) {
+    cli::cli_inform(c(
+      "i" = "Downloading {n_combos} file(s) ({length(unique(combinations$uf))} UF(s) x {length(unique(combinations$year))} year(s) x {length(unique(combinations$month))} month(s))..."
+    ))
+  }
+
+  labels <- paste(type, combinations$uf,
+                  paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
+
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+    yr <- combinations$year[i]
+    mo <- combinations$month[i]
+    st <- combinations$uf[i]
+
+    tryCatch({
+      .sia_download_and_read(yr, mo, st, type = type,
+                             cache = cache, cache_dir = cache_dir)
+    }, error = function(e) {
+      NULL
+    })
+  })
+
+  succeeded <- !vapply(results, is.null, logical(1))
+  failed_labels <- labels[!succeeded]
+  results <- results[succeeded]
+
+  if (length(results) == 0) {
+    cli::cli_abort(
+      "No data could be downloaded for the requested year(s)/month(s)/UF(s)."
+    )
+  }
+
+  list(data = dplyr::bind_rows(results), failed_labels = failed_labels)
+}
+
+
+#' Apply procedure and diagnosis filters to SIA data
+#' @noRd
+.sia_apply_filters <- function(results, procedure, diagnosis) {
+  if (!is.null(procedure)) {
+    proc_pattern <- stringr::str_c(
+      "^(", stringr::str_c(procedure, collapse = "|"), ")"
+    )
+    if ("PA_PROC_ID" %in% names(results)) {
+      results <- results[grepl(proc_pattern, results$PA_PROC_ID), ]
+    } else {
+      cli::cli_warn(
+        "Column {.var PA_PROC_ID} not found in data. Cannot filter by procedure."
+      )
+    }
+  }
+
+  if (!is.null(diagnosis)) {
+    diag_pattern <- stringr::str_c(
+      "^(", stringr::str_c(diagnosis, collapse = "|"), ")"
+    )
+    if ("PA_CIDPRI" %in% names(results)) {
+      results <- results[grepl(diag_pattern, results$PA_CIDPRI), ]
+    } else {
+      cli::cli_warn(
+        "Column {.var PA_CIDPRI} not found in data. Cannot filter by diagnosis."
+      )
+    }
+  }
+
+  results
+}
+
+
 #' Download SIA Outpatient Production Microdata
 #'
 #' Downloads and returns outpatient production microdata from DATASUS FTP.
@@ -434,48 +511,10 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
                         lazy_filters, lazy_select, parse = parse)
   if (!is.null(ds)) return(ds)
 
-  # build all year x month x UF combinations
-  combinations <- expand.grid(
-    year = year, month = month, uf = target_ufs,
-    stringsAsFactors = FALSE
-  )
-
-  n_combos <- nrow(combinations)
-  if (n_combos > 1) {
-    cli::cli_inform(c(
-      "i" = "Downloading {n_combos} file(s) ({length(unique(combinations$uf))} UF(s) x {length(unique(combinations$year))} year(s) x {length(unique(combinations$month))} month(s))..."
-    ))
-  }
-
-  # download and read each combination
-  labels <- paste(type, combinations$uf,
-                  paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
-
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
-    yr <- combinations$year[i]
-    mo <- combinations$month[i]
-    st <- combinations$uf[i]
-
-    tryCatch({
-      .sia_download_and_read(yr, mo, st, type = type,
-                             cache = cache, cache_dir = cache_dir)
-    }, error = function(e) {
-      NULL
-    })
-  })
-
-  # remove NULLs and bind
-  succeeded <- !vapply(results, is.null, logical(1))
-  failed_labels <- labels[!succeeded]
-  results <- results[succeeded]
-
-  if (length(results) == 0) {
-    cli::cli_abort(
-      "No data could be downloaded for the requested year(s)/month(s)/UF(s)."
-    )
-  }
-
-  results <- dplyr::bind_rows(results)
+  # download, bind, and collect failures
+  dl <- .sia_download_loop(year, month, target_ufs, type, cache, cache_dir)
+  results <- dl$data
+  failed_labels <- dl$failed_labels
 
   # parse column types
   if (isTRUE(parse) && !isTRUE(lazy)) {
@@ -483,33 +522,8 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
     results <- .parse_columns(results, type_spec, col_types = col_types)
   }
 
-  # filter by procedure if requested
-  if (!is.null(procedure)) {
-    proc_pattern <- stringr::str_c(
-      "^(", stringr::str_c(procedure, collapse = "|"), ")"
-    )
-    if ("PA_PROC_ID" %in% names(results)) {
-      results <- results[grepl(proc_pattern, results$PA_PROC_ID), ]
-    } else {
-      cli::cli_warn(
-        "Column {.var PA_PROC_ID} not found in data. Cannot filter by procedure."
-      )
-    }
-  }
-
-  # filter by diagnosis if requested
-  if (!is.null(diagnosis)) {
-    diag_pattern <- stringr::str_c(
-      "^(", stringr::str_c(diagnosis, collapse = "|"), ")"
-    )
-    if ("PA_CIDPRI" %in% names(results)) {
-      results <- results[grepl(diag_pattern, results$PA_CIDPRI), ]
-    } else {
-      cli::cli_warn(
-        "Column {.var PA_CIDPRI} not found in data. Cannot filter by diagnosis."
-      )
-    }
-  }
+  # apply procedure/diagnosis filters
+  results <- .sia_apply_filters(results, procedure, diagnosis)
 
   .data_return(results, lazy, backend, cache_dir_resolved, "sia_data",
                lazy_filters, lazy_select, failed_labels, "SIA")

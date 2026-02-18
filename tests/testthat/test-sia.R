@@ -547,3 +547,248 @@ test_that("sia_data reports partial download failures", {
   expect_false(is.null(failures))
   expect_equal(failures, "PA XX 2022/01")
 })
+
+
+# ============================================================================
+# ADDITIONAL COVERAGE TESTS
+# ============================================================================
+
+# --- sia_info --- additional coverage ---
+
+test_that("sia_info returns invisible list with all expected fields", {
+  result <- sia_info()
+  expect_type(result, "list")
+  expect_equal(result$source, "DATASUS FTP")
+  expect_true(length(result$final_years) > 0)
+  expect_true(result$n_variables > 0)
+  expect_equal(result$n_types, 13)
+  expect_true(grepl("SIA", result$name))
+  expect_true(grepl("ftp://", result$url))
+})
+
+# --- .sia_download_loop --- mocked tests ---
+
+test_that(".sia_download_loop binds results from multiple combos", {
+  local_mocked_bindings(
+    .sia_download_and_read = function(year, month, uf, type, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf, PA_PROC_ID = "0301"
+      )
+    }
+  )
+
+  result <- .sia_download_loop(
+    year = 2022L, month = c(1L, 2L), target_ufs = c("AC", "RJ"),
+    type = "PA", cache = FALSE, cache_dir = NULL
+  )
+
+  expect_true(is.list(result))
+  expect_s3_class(result$data, "data.frame")
+  expect_equal(nrow(result$data), 4)
+  expect_equal(sort(unique(result$data$uf_source)), c("AC", "RJ"))
+  expect_equal(sort(unique(result$data$month)), c(1L, 2L))
+  expect_equal(length(result$failed_labels), 0)
+})
+
+test_that(".sia_download_loop tracks failures", {
+  local_mocked_bindings(
+    .sia_download_and_read = function(year, month, uf, ...) {
+      if (uf == "ZZ") stop("FTP error")
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf, PA_PROC_ID = "0301"
+      )
+    }
+  )
+
+  result <- .sia_download_loop(
+    year = 2022L, month = 1L, target_ufs = c("AC", "ZZ"),
+    type = "PA", cache = FALSE, cache_dir = NULL
+  )
+
+  expect_equal(nrow(result$data), 1)
+  expect_equal(length(result$failed_labels), 1)
+  expect_true(grepl("ZZ", result$failed_labels))
+})
+
+test_that(".sia_download_loop aborts when all downloads fail", {
+  local_mocked_bindings(
+    .sia_download_and_read = function(year, month, uf, ...) stop("FTP error")
+  )
+
+  expect_error(
+    .sia_download_loop(
+      year = 2022L, month = 1L, target_ufs = "AC",
+      type = "PA", cache = FALSE, cache_dir = NULL
+    ),
+    "No data could be downloaded"
+  )
+})
+
+test_that(".sia_download_loop generates labels with type prefix", {
+  call_log <- character()
+  local_mocked_bindings(
+    .sia_download_and_read = function(year, month, uf, type, ...) {
+      call_log <<- c(call_log, paste(type, uf, year, month))
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf, PA_PROC_ID = "0301"
+      )
+    }
+  )
+
+  result <- .sia_download_loop(
+    year = 2022L, month = 1L, target_ufs = "AC",
+    type = "BI", cache = FALSE, cache_dir = NULL
+  )
+
+  expect_equal(nrow(result$data), 1)
+})
+
+# --- .sia_apply_filters --- test procedure and diagnosis filters ---
+
+test_that(".sia_apply_filters filters by procedure prefix", {
+  mock_data <- tibble::tibble(
+    PA_PROC_ID = c("0301010010", "0301020034", "0404050032", "0301010025"),
+    PA_CIDPRI = c("J180", "I219", "C509", "J181")
+  )
+
+  result <- .sia_apply_filters(mock_data, procedure = "0301", diagnosis = NULL)
+  expect_equal(nrow(result), 3)
+  expect_true(all(grepl("^0301", result$PA_PROC_ID)))
+})
+
+test_that(".sia_apply_filters filters by multiple procedure prefixes", {
+  mock_data <- tibble::tibble(
+    PA_PROC_ID = c("0301010010", "0404050032", "0201010010", "0301020034"),
+    PA_CIDPRI = c("J180", "C509", "I219", "J181")
+  )
+
+  result <- .sia_apply_filters(mock_data, procedure = c("0301", "0201"), diagnosis = NULL)
+  expect_equal(nrow(result), 3)
+  expect_true(all(grepl("^(0301|0201)", result$PA_PROC_ID)))
+})
+
+test_that(".sia_apply_filters filters by diagnosis prefix", {
+  mock_data <- tibble::tibble(
+    PA_PROC_ID = c("0301010010", "0301020034", "0404050032", "0301010025"),
+    PA_CIDPRI = c("J180", "I219", "C509", "J181")
+  )
+
+  result <- .sia_apply_filters(mock_data, procedure = NULL, diagnosis = "J18")
+  expect_equal(nrow(result), 2)
+  expect_true(all(grepl("^J18", result$PA_CIDPRI)))
+})
+
+test_that(".sia_apply_filters filters by multiple diagnosis prefixes", {
+  mock_data <- tibble::tibble(
+    PA_PROC_ID = c("0301010010", "0301020034", "0404050032", "0301010025"),
+    PA_CIDPRI = c("J180", "I219", "C509", "J181")
+  )
+
+  result <- .sia_apply_filters(mock_data, procedure = NULL, diagnosis = c("J18", "C50"))
+  expect_equal(nrow(result), 3)
+  expect_true(all(grepl("^(J18|C50)", result$PA_CIDPRI)))
+})
+
+test_that(".sia_apply_filters combines procedure and diagnosis filters", {
+  mock_data <- tibble::tibble(
+    PA_PROC_ID = c("0301010010", "0301020034", "0404050032", "0301010025"),
+    PA_CIDPRI = c("J180", "I219", "C509", "J181")
+  )
+
+  result <- .sia_apply_filters(mock_data, procedure = "0301", diagnosis = "J18")
+  expect_equal(nrow(result), 2)
+  expect_true(all(grepl("^0301", result$PA_PROC_ID)))
+  expect_true(all(grepl("^J18", result$PA_CIDPRI)))
+})
+
+test_that(".sia_apply_filters warns when PA_PROC_ID column missing", {
+  mock_data <- tibble::tibble(PA_CIDPRI = c("J180", "I219"))
+
+  expect_warning(
+    .sia_apply_filters(mock_data, procedure = "0301", diagnosis = NULL),
+    "PA_PROC_ID"
+  )
+})
+
+test_that(".sia_apply_filters warns when PA_CIDPRI column missing", {
+  mock_data <- tibble::tibble(PA_PROC_ID = c("0301010010", "0404050032"))
+
+  expect_warning(
+    .sia_apply_filters(mock_data, procedure = NULL, diagnosis = "J18"),
+    "PA_CIDPRI"
+  )
+})
+
+test_that(".sia_apply_filters returns all rows when both filters are NULL", {
+  mock_data <- tibble::tibble(
+    PA_PROC_ID = c("0301010010", "0404050032"),
+    PA_CIDPRI = c("J180", "C509")
+  )
+
+  result <- .sia_apply_filters(mock_data, procedure = NULL, diagnosis = NULL)
+  expect_equal(nrow(result), 2)
+})
+
+# --- sia_data --- additional mocked end-to-end ---
+
+test_that("sia_data with vars selects columns", {
+  local_mocked_bindings(
+    .sia_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf,
+        PA_PROC_ID = "0301010010", PA_SEXO = "1",
+        PA_CIDPRI = "J180", PA_VALAPR = "100.50"
+      )
+    }
+  )
+
+  result <- sia_data(2022, month = 1, uf = "AC",
+                     vars = c("PA_PROC_ID", "PA_SEXO"), parse = FALSE)
+
+  expect_true("PA_PROC_ID" %in% names(result))
+  expect_true("PA_SEXO" %in% names(result))
+  expect_true("year" %in% names(result))
+  expect_true("month" %in% names(result))
+  expect_true("uf_source" %in% names(result))
+  expect_false("PA_CIDPRI" %in% names(result))
+})
+
+test_that("sia_data applies procedure filter", {
+  local_mocked_bindings(
+    .sia_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf,
+        PA_PROC_ID = c("0301010010", "0404050032"),
+        PA_SEXO = c("1", "2")
+      )
+    }
+  )
+
+  result <- sia_data(2022, month = 1, uf = "AC",
+                     procedure = "0301", parse = FALSE)
+  expect_equal(nrow(result), 1)
+  expect_true(grepl("^0301", result$PA_PROC_ID))
+})
+
+test_that("sia_data applies diagnosis filter", {
+  local_mocked_bindings(
+    .sia_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf,
+        PA_PROC_ID = c("0301010010", "0404050032"),
+        PA_CIDPRI = c("J180", "C509")
+      )
+    }
+  )
+
+  result <- sia_data(2022, month = 1, uf = "AC",
+                     diagnosis = "J", parse = FALSE)
+  expect_equal(nrow(result), 1)
+  expect_true(grepl("^J", result$PA_CIDPRI))
+})

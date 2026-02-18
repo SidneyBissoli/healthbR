@@ -1123,6 +1123,73 @@ pof_variables <- function(year = "2017-2018",
 # public api functions - data
 # ============================================================================
 
+# --------------------------------------------------------------------------
+# internal helpers for pof_data() (extracted to reduce cyclomatic complexity)
+# --------------------------------------------------------------------------
+
+#' Try lazy return for POF data
+#' @noRd
+.pof_try_lazy_return <- function(lazy, backend, register, vars, year,
+                                 cache_dir) {
+  if (!isTRUE(lazy)) return(NULL)
+  backend <- match.arg(backend, c("arrow", "duckdb"))
+  cache_dir_resolved <- .module_cache_dir("pof", cache_dir)
+  ds_name <- stringr::str_c("pof_", register, "_data")
+  select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
+  .lazy_return(cache_dir_resolved, ds_name, backend,
+               filters = list(year = year),
+               select_cols = select_cols)
+}
+
+#' Check partitioned cache for POF data
+#' @noRd
+.pof_check_cache <- function(cache_dir, dataset_name, year, register,
+                             refresh) {
+  if (refresh || !.has_arrow() ||
+      !.has_partitioned_cache(cache_dir, dataset_name)) {
+    return(NULL)
+  }
+  ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+  cached <- ds |>
+    dplyr::filter(.data$year == !!year) |>
+    dplyr::collect()
+  if (nrow(cached) == 0) return(NULL)
+  cli::cli_inform("Loading {register} data from cache...")
+  cached
+}
+
+#' Download, read, and cache a POF register
+#' @noRd
+.pof_download_register <- function(year, register, cache_dir, dataset_name) {
+  cli::cli_inform("Downloading POF {year} {register} data...")
+  zip_path <- .pof_download_data(year, cache_dir)
+  dict <- pof_dictionary(year, register, cache_dir)
+  df <- .pof_read_fwf(zip_path, register, dict, year)
+  df <- df |> dplyr::mutate(year = year, .before = 1)
+  .cache_append_partitioned(df, cache_dir, dataset_name, c("year"))
+  df
+}
+
+#' Select variables from POF data (case-insensitive, always keeps design vars)
+#' @noRd
+.pof_select_vars <- function(df, vars) {
+  if (is.null(vars)) return(df)
+  design_vars <- c("COD_UPA", "ESTRATO_POF", "PESO_FINAL", "UF")
+  all_vars <- unique(c(design_vars, toupper(vars)))
+  year_col <- if ("year" %in% names(df)) "year" else NULL
+
+  col_names_upper <- toupper(names(df))
+  available_vars <- names(df)[col_names_upper %in% all_vars]
+
+  missing <- setdiff(all_vars, col_names_upper)
+  if (length(missing) > 0) {
+    cli::cli_warn("Variables not found: {.val {missing}}")
+  }
+
+  available_vars <- unique(c(year_col, available_vars))
+  df |> dplyr::select(dplyr::all_of(available_vars))
+}
+
 #' Download and import POF microdata
 #'
 #' Downloads POF microdata from IBGE FTP and returns as a tibble.
@@ -1216,106 +1283,42 @@ pof_data <- function(year = "2017-2018",
   .pof_validate_register(register, year)
 
   # 2. check if srvyr is available when as_survey = TRUE
-  if (as_survey) {
-    if (!requireNamespace("srvyr", quietly = TRUE)) {
-      cli::cli_abort(c(
-        "Package {.pkg srvyr} is required for survey analysis.",
-        "i" = "Install with: {.code install.packages('srvyr')}"
-      ))
-    }
+  if (as_survey && !requireNamespace("srvyr", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "Package {.pkg srvyr} is required for survey analysis.",
+      "i" = "Install with: {.code install.packages('srvyr')}"
+    ))
   }
 
-  # 3. set cache directory
+  # 3. set cache directory and dataset name
   cache_dir <- pof_cache_dir(cache_dir)
   dataset_name <- stringr::str_c("pof_", register, "_data")
-  df <- NULL
 
-  # lazy evaluation: return from partitioned cache if available
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .module_cache_dir("pof", cache_dir)
-    ds_name <- stringr::str_c("pof_", register, "_data")
-    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
-                       filters = list(year = year),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
+  # 4. pre-download lazy return (if cache already exists)
+  ds <- .pof_try_lazy_return(lazy, backend, register, vars, year, cache_dir)
+  if (!is.null(ds)) return(ds)
 
-  # 4. check partitioned cache first (preferred path)
-  if (!refresh && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
-    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
-    cached <- ds |>
-      dplyr::filter(.data$year == !!year) |>
-      dplyr::collect()
-    if (nrow(cached) > 0) {
-      cli::cli_inform("Loading {register} data from cache...")
-      df <- cached
-    }
-  }
+  # 5. check partitioned cache
+  df <- .pof_check_cache(cache_dir, dataset_name, year, register, refresh)
 
-  # 5. download data if not cached
+  # 6. download if not cached
   if (is.null(df)) {
-    cli::cli_inform("Downloading POF {year} {register} data...")
-
-    # download zip file
-    zip_path <- .pof_download_data(year, cache_dir)
-
-    # get dictionary for this register
-    dict <- pof_dictionary(year, register, cache_dir)
-
-    # read fixed-width file
-    df <- .pof_read_fwf(zip_path, register, dict, year)
-
-    # add year column
-    df <- df |>
-      dplyr::mutate(year = year, .before = 1)
-
-    # write to partitioned cache
-    .cache_append_partitioned(df, cache_dir, dataset_name, c("year"))
+    df <- .pof_download_register(year, register, cache_dir, dataset_name)
   }
 
-  # if lazy was requested, return from cache after download
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .module_cache_dir("pof", cache_dir)
-    ds_name <- stringr::str_c("pof_", register, "_data")
-    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
-                       filters = list(year = year),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
+  # 7. post-download lazy return
+  ds <- .pof_try_lazy_return(lazy, backend, register, vars, year, cache_dir)
+  if (!is.null(ds)) return(ds)
 
-  # 7. select specific variables if requested
-  if (!is.null(vars)) {
-    # always include design variables and year
-    design_vars <- c("COD_UPA", "ESTRATO_POF", "PESO_FINAL", "UF")
-    all_vars <- unique(c(design_vars, toupper(vars)))
-    # also include year column if present (lowercase)
-    year_col <- if ("year" %in% names(df)) "year" else NULL
+  # 8. select variables
+  df <- .pof_select_vars(df, vars)
 
-    # find matching columns (case-insensitive)
-    col_names_upper <- toupper(names(df))
-    available_vars <- names(df)[col_names_upper %in% all_vars]
-
-    missing <- setdiff(all_vars, col_names_upper)
-    if (length(missing) > 0) {
-      cli::cli_warn("Variables not found: {.val {missing}}")
-    }
-
-    available_vars <- unique(c(year_col, available_vars))
-    df <- df |>
-      dplyr::select(dplyr::all_of(available_vars))
-  }
-
-  # 8. report
+  # 9. report
   cli::cli_alert_success(
     "Loaded {.val {nrow(df)}} observations from POF {year} {register}"
   )
 
-  # 9. apply survey design if requested
+  # 10. apply survey design if requested
   if (as_survey) {
     df <- .pof_create_survey_design(df, year, cache_dir)
   }

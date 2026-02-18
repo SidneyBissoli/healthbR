@@ -697,6 +697,107 @@ pnadc_variables <- function(module,
 }
 
 # ============================================================================
+# internal subfunctions for pnadc_data (reduce cyclomatic complexity)
+# ============================================================================
+
+#' Try lazy return from partitioned cache
+#' @noRd
+.pnadc_try_lazy <- function(module, year, vars, lazy, backend, cache_dir) {
+  if (!isTRUE(lazy)) return(NULL)
+  cache_dir_resolved <- .module_cache_dir("pnadc", cache_dir)
+  ds_name <- paste0("pnadc_", module, "_data")
+  year_filter <- if (!is.null(year)) as.integer(year) else NULL
+  select_cols <- if (!is.null(vars)) {
+    unique(c("year", "pnadc_module", vars))
+  } else {
+    NULL
+  }
+  .lazy_return(
+    cache_dir_resolved, ds_name, backend,
+    filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
+    select_cols = select_cols
+  )
+}
+
+#' Download and cache loop for each year
+#' @noRd
+.pnadc_download_loop <- function(module, years, cache_dir, refresh,
+                                 dataset_name) {
+  .map_parallel(years, function(y) {
+    target_year <- as.integer(y)
+
+    # 1. check partitioned cache first (preferred path)
+    if (!refresh && .has_arrow() &&
+        .has_partitioned_cache(cache_dir, dataset_name)) {
+      ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+      cached <- ds |>
+        dplyr::filter(.data$year == target_year) |>
+        dplyr::collect()
+      if (nrow(cached) > 0) {
+        cli::cli_inform("Loading PNADC {module} {y} from cache...")
+        return(cached)
+      }
+    }
+
+    # 2. download and read
+    url_info <- pnadc_find_data_url(module, y)
+    zip_path <- file.path(cache_dir, url_info$data_filename)
+
+    # download data file
+    pnadc_download_file(url_info$data_url, zip_path, refresh)
+
+    # download input file (required for reading fixed-width format)
+    if (is.null(url_info$input_url)) {
+      cli::cli_abort(c(
+        "Could not find input specification file for {module} {y}",
+        "i" = "Documentation URL: {.url {url_info$doc_dir_url}}"
+      ))
+    }
+    input_path <- file.path(cache_dir, url_info$input_filename)
+    pnadc_download_file(url_info$input_url, input_path, refresh)
+
+    # read data
+    data <- pnadc_read_zip(zip_path, input_path, module, y)
+
+    # add module identifier and year partition column
+    data <- data |>
+      dplyr::mutate(year = target_year, pnadc_module = module, .before = 1)
+
+    # write to partitioned cache
+    .cache_append_partitioned(data, cache_dir, dataset_name, c("year"))
+
+    data
+  })
+}
+
+#' Select variables with required vars always included
+#' @noRd
+.pnadc_select_vars <- function(combined_data, vars) {
+  if (is.null(vars)) return(combined_data)
+
+  vars <- toupper(vars)
+  # always include required variables
+  required <- pnadc_required_vars()
+  vars_to_select <- unique(c("pnadc_module", required, vars))
+
+  available_vars <- names(combined_data)
+  missing_vars <- setdiff(vars_to_select, available_vars)
+
+  if (length(missing_vars) > 0) {
+    # only warn about user-requested vars, not required ones
+    user_missing <- setdiff(missing_vars, c("pnadc_module", required))
+    if (length(user_missing) > 0) {
+      missing_str <- paste(user_missing, collapse = ", ")
+      cli::cli_warn("Variables not found: {missing_str}")
+    }
+  }
+
+  vars_to_select <- intersect(vars_to_select, available_vars)
+  combined_data |>
+    dplyr::select(dplyr::all_of(vars_to_select))
+}
+
+# ============================================================================
 # public api functions - microdata
 # ============================================================================
 
@@ -791,112 +892,27 @@ pnadc_data <- function(module,
   # validate parameters
   module <- validate_pnadc_module(module)
   years <- validate_pnadc_year(year, module)
-
-  # set cache directory
   cache_dir <- pnadc_cache_dir(cache_dir)
+  backend <- match.arg(backend)
 
-  # lazy evaluation: return from partitioned cache if available
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .module_cache_dir("pnadc", cache_dir)
-    ds_name <- paste0("pnadc_", module, "_data")
-    year_filter <- if (!is.null(year)) as.integer(year) else NULL
-    select_cols <- if (!is.null(vars)) unique(c("year", "pnadc_module", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
-                       filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
+  # try lazy return from existing cache
+  ds <- .pnadc_try_lazy(module, year, vars, lazy, backend, cache_dir)
+  if (!is.null(ds)) return(ds)
 
   # download and load data for each year
   dataset_name <- paste0("pnadc_", module, "_data")
-
-  data_list <- .map_parallel(years, function(y) {
-    target_year <- as.integer(y)
-
-    # 1. check partitioned cache first (preferred path)
-    if (!refresh && .has_arrow() &&
-        .has_partitioned_cache(cache_dir, dataset_name)) {
-      ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
-      cached <- ds |>
-        dplyr::filter(.data$year == target_year) |>
-        dplyr::collect()
-      if (nrow(cached) > 0) {
-        cli::cli_inform("Loading PNADC {module} {y} from cache...")
-        return(cached)
-      }
-    }
-
-    # 2. download and read
-    # find the correct URL for this module and year
-    url_info <- pnadc_find_data_url(module, y)
-    zip_path <- file.path(cache_dir, url_info$data_filename)
-
-    # download data file
-    pnadc_download_file(url_info$data_url, zip_path, refresh)
-
-    # download input file (required for reading fixed-width format)
-    if (is.null(url_info$input_url)) {
-      cli::cli_abort(c(
-        "Could not find input specification file for {module} {y}",
-        "i" = "Documentation URL: {.url {url_info$doc_dir_url}}"
-      ))
-    }
-    input_path <- file.path(cache_dir, url_info$input_filename)
-    pnadc_download_file(url_info$input_url, input_path, refresh)
-
-    # read data
-    data <- pnadc_read_zip(zip_path, input_path, module, y)
-
-    # add module identifier and year partition column
-    data <- data |>
-      dplyr::mutate(year = target_year, pnadc_module = module, .before = 1)
-
-    # 4. write to partitioned cache
-    .cache_append_partitioned(data, cache_dir, dataset_name, c("year"))
-
-    data
-  })
-
-  # combine all years
+  data_list <- .pnadc_download_loop(module, years, cache_dir, refresh,
+                                    dataset_name)
   combined_data <- dplyr::bind_rows(data_list)
 
-  # if lazy was requested, return from cache after download
+  # try lazy return after download
   if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .module_cache_dir("pnadc", cache_dir)
-    ds_name <- paste0("pnadc_", module, "_data")
-    year_filter <- if (!is.null(year)) as.integer(year) else NULL
-    select_cols <- if (!is.null(vars)) unique(c("year", "pnadc_module", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
-                       filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
-                       select_cols = select_cols)
+    ds <- .pnadc_try_lazy(module, year, vars, lazy, backend, cache_dir)
     if (!is.null(ds)) return(ds)
   }
 
-  # select variables if specified
-  if (!is.null(vars)) {
-    vars <- toupper(vars)
-    # always include required variables
-    required <- pnadc_required_vars()
-    vars_to_select <- unique(c("pnadc_module", required, vars))
-
-    available_vars <- names(combined_data)
-    missing_vars <- setdiff(vars_to_select, available_vars)
-
-    if (length(missing_vars) > 0) {
-      # only warn about user-requested vars, not required ones
-      user_missing <- setdiff(missing_vars, c("pnadc_module", required))
-      if (length(user_missing) > 0) {
-        missing_str <- paste(user_missing, collapse = ", ")
-        cli::cli_warn("Variables not found: {missing_str}")
-      }
-    }
-
-    vars_to_select <- intersect(vars_to_select, available_vars)
-    combined_data <- combined_data |>
-      dplyr::select(dplyr::all_of(vars_to_select))
-  }
+  # select variables
+  combined_data <- .pnadc_select_vars(combined_data, vars)
 
   # report
   n_years <- length(years)

@@ -622,6 +622,89 @@ pns_modules <- function(year = NULL) {
     dplyr::select("module", "name", "name_en")
 }
 
+#' Download and extract PNS dictionary ZIP to temp directory
+#' @param year Integer. Validated PNS year.
+#' @param cache_dir Character. Resolved cache directory path.
+#' @param refresh Logical. Force re-download.
+#' @return A list with `extracted_files` (character vector of paths).
+#' @noRd
+.pns_download_dictionary <- function(year, cache_dir, refresh) {
+  year_char <- as.character(year)
+  url_info <- pns_url_patterns[[year_char]]
+
+  if (is.null(url_info) || is.null(url_info$dict)) {
+    cli::cli_abort("No dictionary URL found for year {year}")
+  }
+
+  zip_filename <- basename(url_info$dict)
+  zip_path <- file.path(cache_dir, zip_filename)
+
+  # download if needed
+  if (!file.exists(zip_path) || refresh) {
+    cli::cli_inform("Downloading PNS {year} dictionary from IBGE...")
+    cli::cli_inform("URL: {.url {url_info$dict}}")
+
+    tryCatch(
+      {
+        curl::curl_download(url_info$dict, zip_path, quiet = FALSE)
+        cli::cli_alert_success("Download complete: {.file {zip_path}}")
+      },
+      error = function(e) {
+        if (file.exists(zip_path)) file.remove(zip_path)
+        cli::cli_abort("Download failed: {e$message}")
+      }
+    )
+  }
+
+  # extract
+  cli::cli_inform("Extracting dictionary...")
+  temp_dir <- file.path(tempdir(), paste0("pns_dict_", year))
+  if (dir.exists(temp_dir)) unlink(temp_dir, recursive = TRUE)
+  dir.create(temp_dir)
+  utils::unzip(zip_path, exdir = temp_dir)
+
+  extracted_files <- list.files(temp_dir, recursive = TRUE, full.names = TRUE)
+  list(extracted_files = extracted_files, temp_dir = temp_dir)
+}
+
+#' Parse PNS dictionary from extracted files (xlsx or txt)
+#' @param extracted_files Character vector of extracted file paths.
+#' @param year Integer. PNS year (added as column).
+#' @return A tibble or NULL if parsing fails.
+#' @noRd
+.pns_parse_dictionary <- function(extracted_files, year) {
+  xlsx_files <- extracted_files[grepl("\\.xlsx?$", extracted_files, ignore.case = TRUE)]
+  txt_files <- extracted_files[grepl("dicionario.*\\.txt$|dicion.*\\.txt$",
+                                      extracted_files, ignore.case = TRUE)]
+
+  dict_df <- NULL
+
+  if (length(xlsx_files) > 0) {
+    rlang::check_installed("readxl", reason = "to read PNS dictionary Excel files")
+    cli::cli_inform("Reading Excel dictionary...")
+    dict_df <- tryCatch(
+      readxl::read_excel(xlsx_files[1]),
+      error = function(e) {
+        cli::cli_warn("Could not read Excel file: {e$message}")
+        NULL
+      }
+    )
+  }
+
+  if (is.null(dict_df) && length(txt_files) > 0) {
+    cli::cli_inform("Reading TXT dictionary...")
+    dict_df <- tryCatch(
+      readr::read_delim(txt_files[1], delim = ";", show_col_types = FALSE),
+      error = function(e) {
+        cli::cli_warn("Could not read TXT file: {e$message}")
+        NULL
+      }
+    )
+  }
+
+  dict_df
+}
+
 #' Download PNS variable dictionary
 #'
 #' Downloads and returns the variable dictionary for PNS microdata.
@@ -668,100 +751,24 @@ pns_dictionary <- function(year = 2019,
   # set cache directory
   cache_dir <- pns_cache_dir(cache_dir)
 
-  # get dictionary URL
-  year_char <- as.character(year)
-  url_info <- pns_url_patterns[[year_char]]
-
-  if (is.null(url_info) || is.null(url_info$dict)) {
-    cli::cli_abort("No dictionary URL found for year {year}")
-  }
-
-  # define file paths
-  zip_filename <- basename(url_info$dict)
-  zip_path <- file.path(cache_dir, zip_filename)
+  # check RDS cache
   dict_cache_file <- file.path(cache_dir, paste0("pns_dictionary_", year, ".rds"))
-
-  # check if already processed
   if (file.exists(dict_cache_file) && !refresh) {
     cli::cli_inform("Loading PNS {year} dictionary from cache...")
     return(readRDS(dict_cache_file))
   }
 
-  # download if needed
-  if (!file.exists(zip_path) || refresh) {
-    cli::cli_inform("Downloading PNS {year} dictionary from IBGE...")
-    cli::cli_inform("URL: {.url {url_info$dict}}")
+  # download and extract
+  dl <- .pns_download_dictionary(year, cache_dir, refresh)
+  on.exit(unlink(dl$temp_dir, recursive = TRUE), add = TRUE)
 
-    tryCatch(
-      {
-        curl::curl_download(url_info$dict, zip_path, quiet = FALSE)
-        cli::cli_alert_success("Download complete: {.file {zip_path}}")
-      },
-      error = function(e) {
-        if (file.exists(zip_path)) file.remove(zip_path)
-        cli::cli_abort("Download failed: {e$message}")
-      }
-    )
-  }
-
-  # extract and read dictionary
-  cli::cli_inform("Extracting dictionary...")
-
-  temp_dir <- file.path(tempdir(), paste0("pns_dict_", year))
-  if (dir.exists(temp_dir)) {
-    unlink(temp_dir, recursive = TRUE)
-  }
-  dir.create(temp_dir)
-
-  utils::unzip(zip_path, exdir = temp_dir)
-
-  # find dictionary file (usually Excel or TXT)
-  extracted_files <- list.files(temp_dir, recursive = TRUE, full.names = TRUE)
-
-  xlsx_files <- extracted_files[grepl("\\.xlsx?$", extracted_files, ignore.case = TRUE)]
-  txt_files <- extracted_files[grepl("dicionario.*\\.txt$|dicion.*\\.txt$",
-                                      extracted_files, ignore.case = TRUE)]
-
-  dict_df <- NULL
-
-  if (length(xlsx_files) > 0) {
-    # read Excel dictionary
-    rlang::check_installed("readxl", reason = "to read PNS dictionary Excel files")
-    cli::cli_inform("Reading Excel dictionary...")
-    dict_file <- xlsx_files[1]
-    dict_df <- tryCatch(
-      {
-        readxl::read_excel(dict_file)
-      },
-      error = function(e) {
-        cli::cli_warn("Could not read Excel file: {e$message}")
-        NULL
-      }
-    )
-  }
-
-  if (is.null(dict_df) && length(txt_files) > 0) {
-    # try reading TXT dictionary
-    cli::cli_inform("Reading TXT dictionary...")
-    dict_file <- txt_files[1]
-    dict_df <- tryCatch(
-      {
-        readr::read_delim(dict_file, delim = ";", show_col_types = FALSE)
-      },
-      error = function(e) {
-        cli::cli_warn("Could not read TXT file: {e$message}")
-        NULL
-      }
-    )
-  }
-
-  # cleanup temp directory
-  unlink(temp_dir, recursive = TRUE)
+  # parse dictionary file
+  dict_df <- .pns_parse_dictionary(dl$extracted_files, year)
 
   if (is.null(dict_df)) {
     cli::cli_abort(c(
       "Could not find or read dictionary file for PNS {year}",
-      "i" = "Files found: {.val {basename(extracted_files)}}"
+      "i" = "Files found: {.val {basename(dl$extracted_files)}}"
     ))
   }
 
@@ -769,7 +776,6 @@ pns_dictionary <- function(year = 2019,
   names(dict_df) <- .clean_names(names(dict_df))
   dict_df <- dict_df |>
     dplyr::mutate(year = as.integer(year), .before = 1)
-
   dict_df <- tibble::as_tibble(dict_df)
 
   # save to cache
@@ -871,6 +877,79 @@ pns_variables <- function(year = 2019,
 # public api functions - microdata
 # ============================================================================
 
+#' Try lazy evaluation for PNS data
+#' @param year Integer vector. Validated PNS years.
+#' @param vars Character vector or NULL. Variable selection.
+#' @param lazy Logical. Whether lazy mode is requested.
+#' @param backend Character. "arrow" or "duckdb".
+#' @param cache_dir Character. Resolved cache directory.
+#' @return Lazy query object or NULL.
+#' @noRd
+.pns_try_lazy <- function(year, vars, lazy, backend, cache_dir) {
+  if (!isTRUE(lazy)) return(NULL)
+  cache_dir_resolved <- .module_cache_dir("pns", cache_dir)
+  year_filter <- if (!is.null(year)) as.integer(year) else NULL
+  select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
+  .lazy_return(cache_dir_resolved, "pns_data", backend,
+               filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
+               select_cols = select_cols)
+}
+
+#' Download/cache loop for PNS microdata years
+#' @param year Integer vector. Years to download.
+#' @param cache_dir Character. Resolved cache directory.
+#' @param refresh Logical. Force re-download.
+#' @param dataset_name Character. Partitioned dataset name.
+#' @return List of tibbles, one per year.
+#' @noRd
+.pns_download_loop <- function(year, cache_dir, refresh, dataset_name) {
+  .map_parallel(year, function(y) {
+    target_year <- as.integer(y)
+
+    # check partitioned cache first
+    if (!refresh && .has_arrow() &&
+        .has_partitioned_cache(cache_dir, dataset_name)) {
+      ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+      cached <- ds |>
+        dplyr::filter(.data$year == target_year) |>
+        dplyr::collect()
+      if (nrow(cached) > 0) {
+        cli::cli_inform("Loading PNS {y} from cache...")
+        return(cached)
+      }
+    }
+
+    # download and read
+    zip_path <- pns_download_data(y, cache_dir, refresh)
+    data <- pns_read_microdata(zip_path, y)
+
+    # write to partitioned cache
+    .cache_append_partitioned(data, cache_dir, dataset_name, c("year"))
+
+    data
+  })
+}
+
+#' Select variables from combined PNS data
+#' @param combined_data Tibble. Combined PNS microdata.
+#' @param vars Character vector or NULL. Variables to select.
+#' @return Filtered tibble.
+#' @noRd
+.pns_select_vars <- function(combined_data, vars) {
+  if (is.null(vars)) return(combined_data)
+
+  vars <- toupper(vars)
+  vars_to_select <- unique(c("year", vars))
+  available_vars <- names(combined_data)
+  missing_vars <- setdiff(vars_to_select, available_vars)
+  if (length(missing_vars) > 0) {
+    cli::cli_warn("Variable{?s} not found: {.val {missing_vars}}")
+  }
+  vars_to_select <- intersect(vars_to_select, available_vars)
+  combined_data |>
+    dplyr::select(dplyr::all_of(vars_to_select))
+}
+
 #' Download PNS microdata
 #'
 #' Downloads and returns PNS microdata for specified years from the IBGE FTP.
@@ -937,82 +1016,26 @@ pns_data <- function(year = NULL,
                      refresh = FALSE,
                      lazy = FALSE, backend = c("arrow", "duckdb")) {
 
-  # validate year
+  # validate inputs
   year <- validate_pns_year(year)
-
-  # set cache directory
   cache_dir <- pns_cache_dir(cache_dir)
+  backend <- match.arg(backend)
 
   # lazy evaluation: return from partitioned cache if available
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .module_cache_dir("pns", cache_dir)
-    year_filter <- if (!is.null(year)) as.integer(year) else NULL
-    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, "pns_data", backend,
-                       filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
+  ds <- .pns_try_lazy(year, vars, lazy, backend, cache_dir)
+  if (!is.null(ds)) return(ds)
 
   # download and load data for each year
   dataset_name <- "pns_data"
-
-  data_list <- .map_parallel(year, function(y) {
-    target_year <- as.integer(y)
-
-    # 1. check partitioned cache first (preferred path)
-    if (!refresh && .has_arrow() &&
-        .has_partitioned_cache(cache_dir, dataset_name)) {
-      ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
-      cached <- ds |>
-        dplyr::filter(.data$year == target_year) |>
-        dplyr::collect()
-      if (nrow(cached) > 0) {
-        cli::cli_inform("Loading PNS {y} from cache...")
-        return(cached)
-      }
-    }
-
-    # 2. download and read
-    zip_path <- pns_download_data(y, cache_dir, refresh)
-    data <- pns_read_microdata(zip_path, y)
-
-    # 4. write to partitioned cache
-    .cache_append_partitioned(data, cache_dir, dataset_name, c("year"))
-
-    data
-  })
-
-  # combine all years
+  data_list <- .pns_download_loop(year, cache_dir, refresh, dataset_name)
   combined_data <- dplyr::bind_rows(data_list)
 
   # if lazy was requested, return from cache after download
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .module_cache_dir("pns", cache_dir)
-    year_filter <- if (!is.null(year)) as.integer(year) else NULL
-    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, "pns_data", backend,
-                       filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
+  ds <- .pns_try_lazy(year, vars, lazy, backend, cache_dir)
+  if (!is.null(ds)) return(ds)
 
   # select variables if specified
-  if (!is.null(vars)) {
-    vars <- toupper(vars)
-    # always keep year column
-    vars_to_select <- unique(c("year", vars))
-    available_vars <- names(combined_data)
-    missing_vars <- setdiff(vars_to_select, available_vars)
-    if (length(missing_vars) > 0) {
-      cli::cli_warn("Variable{?s} not found: {.val {missing_vars}}")
-    }
-    vars_to_select <- intersect(vars_to_select, available_vars)
-    combined_data <- combined_data |>
-      dplyr::select(dplyr::all_of(vars_to_select))
-  }
+  combined_data <- .pns_select_vars(combined_data, vars)
 
   # report
   years_in_data <- unique(combined_data$year)
@@ -1142,6 +1165,55 @@ pns_sidra_search <- function(keyword, year = NULL) {
     dplyr::arrange(.data$table_code)
 }
 
+#' Build SIDRA API URL for PNS query
+#' @param table Character. SIDRA table code.
+#' @param territorial_level Character. Geographic level name.
+#' @param geo_code Character. IBGE geo code(s).
+#' @param variable Numeric/character or NULL. Variable ID(s).
+#' @param year Numeric or NULL. Year(s).
+#' @param classifications Named list or NULL. Classification filters.
+#' @return Character URL string.
+#' @noRd
+.pns_sidra_build_url <- function(table, territorial_level, geo_code,
+                                 variable, year, classifications) {
+  # validate territorial level
+  if (!territorial_level %in% names(sidra_level_map)) {
+    cli::cli_abort(c(
+      "Invalid territorial_level: {.val {territorial_level}}",
+      "i" = "Available: {.val {names(sidra_level_map)}}"
+    ))
+  }
+  level_code <- sidra_level_map[[territorial_level]]
+
+  base_url <- "https://apisidra.ibge.gov.br/values"
+  url <- stringr::str_c(base_url, "/t/", table)
+  url <- stringr::str_c(url, "/n", level_code, "/", geo_code)
+
+  if (!is.null(variable)) {
+    url <- stringr::str_c(url, "/v/", stringr::str_c(variable, collapse = ","))
+  } else {
+    url <- stringr::str_c(url, "/v/allxp")
+  }
+
+  if (!is.null(year)) {
+    url <- stringr::str_c(url, "/p/", stringr::str_c(year, collapse = ","))
+  } else {
+    url <- stringr::str_c(url, "/p/all")
+  }
+
+  if (!is.null(classifications)) {
+    for (class_id in names(classifications)) {
+      class_values <- classifications[[class_id]]
+      url <- stringr::str_c(
+        url, "/c", class_id, "/",
+        stringr::str_c(class_values, collapse = ",")
+      )
+    }
+  }
+
+  url
+}
+
 #' Get PNS tabulated data from SIDRA API
 #'
 #' Queries the IBGE SIDRA API to retrieve tabulated PNS indicators.
@@ -1206,42 +1278,9 @@ pns_sidra_data <- function(table,
     )
   }
 
-  # validate territorial level
-  if (!territorial_level %in% names(sidra_level_map)) {
-    cli::cli_abort(c(
-      "Invalid territorial_level: {.val {territorial_level}}",
-      "i" = "Available: {.val {names(sidra_level_map)}}"
-    ))
-  }
-  level_code <- sidra_level_map[[territorial_level]]
-
   # build SIDRA API URL
-  base_url <- "https://apisidra.ibge.gov.br/values"
-
-  url <- stringr::str_c(base_url, "/t/", table)
-  url <- stringr::str_c(url, "/n", level_code, "/", geo_code)
-
-  if (!is.null(variable)) {
-    url <- stringr::str_c(url, "/v/", stringr::str_c(variable, collapse = ","))
-  } else {
-    url <- stringr::str_c(url, "/v/allxp")
-  }
-
-  if (!is.null(year)) {
-    url <- stringr::str_c(url, "/p/", stringr::str_c(year, collapse = ","))
-  } else {
-    url <- stringr::str_c(url, "/p/all")
-  }
-
-  if (!is.null(classifications)) {
-    for (class_id in names(classifications)) {
-      class_values <- classifications[[class_id]]
-      url <- stringr::str_c(
-        url, "/c", class_id, "/",
-        stringr::str_c(class_values, collapse = ",")
-      )
-    }
-  }
+  url <- .pns_sidra_build_url(table, territorial_level, geo_code,
+                              variable, year, classifications)
 
   # make API request
   cli::cli_alert_info("Querying SIDRA API for table {.val {table}}...")

@@ -147,6 +147,146 @@ vigitel_identify_year_column_from_schema <- function(dataset) {
   found[1]
 }
 
+# ============================================================================
+# vigitel_data subfunctions (reduce cyclomatic complexity)
+# ============================================================================
+
+#' Validate year parameter for VIGITEL
+#' @param year Integer vector or NULL.
+#' @return Validated integer vector or NULL. Errors on invalid years.
+#' @noRd
+.vigitel_validate_year <- function(year) {
+  if (is.null(year)) return(invisible(NULL))
+
+  available_years <- vigitel_years()
+  year <- as.integer(year)
+
+  invalid_years <- setdiff(year, available_years)
+  if (length(invalid_years) > 0) {
+    cli::cli_abort(
+      c(
+        "Year{?s} {.val {invalid_years}} not available.",
+        "i" = "Available years: {.val {min(available_years)}}-{.val {max(available_years)}}.",
+        "i" = "Use {.fn vigitel_years} to see all available years."
+      )
+    )
+  }
+
+  invisible(year)
+}
+
+#' Try lazy evaluation return for VIGITEL
+#' @param lazy Logical.
+#' @param force Logical.
+#' @param backend Character.
+#' @param cache_dir Character.
+#' @param year Integer vector or NULL.
+#' @param vars Character vector or NULL.
+#' @return Lazy query object or NULL.
+#' @noRd
+.vigitel_try_lazy <- function(lazy, force, backend, cache_dir, year, vars) {
+  if (!isTRUE(lazy) || force) return(NULL)
+
+  backend_choice <- match.arg(backend, c("arrow", "duckdb"))
+  .lazy_return(cache_dir, "vigitel_data", backend_choice,
+               filters = if (!is.null(year)) list(ano = as.integer(year)) else list(),
+               select_cols = vars)
+}
+
+#' Read VIGITEL data from partitioned Arrow cache
+#' @param year Integer vector or NULL.
+#' @param vars Character vector or NULL.
+#' @param cache_dir Character.
+#' @return A tibble, or NULL if cache cannot be read.
+#' @noRd
+.vigitel_read_from_cache <- function(year, vars, cache_dir) {
+  parquet_dir <- file.path(cache_dir, "vigitel_data")
+
+  cli::cli_inform("Reading from partitioned cache...")
+  ds <- arrow::open_dataset(parquet_dir)
+
+  # identify year column
+  year_col <- vigitel_identify_year_column_from_schema(ds)
+
+  # filter by year BEFORE loading into memory
+  if (!is.null(year)) {
+    ds <- ds |> dplyr::filter(.data[[year_col]] %in% !!year)
+  }
+
+  # select variables BEFORE loading (if specified)
+  if (!is.null(vars)) {
+    vars_to_select <- unique(c(year_col, vars))
+    available_vars <- names(ds)
+    missing_vars <- setdiff(vars_to_select, available_vars)
+    if (length(missing_vars) > 0) {
+      cli::cli_warn("Variable{?s} not found: {.val {missing_vars}}")
+      vars_to_select <- intersect(vars_to_select, available_vars)
+    }
+    if (length(vars_to_select) > 0) {
+      ds <- ds |> dplyr::select(dplyr::all_of(vars_to_select))
+    }
+  }
+
+  ds |> dplyr::collect()
+}
+
+#' Download, extract, read and cache VIGITEL data
+#' @param format Character. "dta" or "csv".
+#' @param cache_dir Character.
+#' @param force Logical.
+#' @return A tibble with full VIGITEL data.
+#' @noRd
+.vigitel_download_and_cache <- function(format, cache_dir, force) {
+  zip_filename <- str_c("vigitel-2006-2024-peso-rake-", format, ".zip")
+  zip_path <- file.path(cache_dir, zip_filename)
+  data_filename <- str_c("vigitel-2006-2024-peso-rake.", format)
+  data_path <- file.path(cache_dir, data_filename)
+
+  # download if necessary
+  if (force || !file.exists(data_path)) {
+    if (force || !file.exists(zip_path)) {
+      vigitel_download_data(format, zip_path)
+    }
+    vigitel_extract_zip(zip_path, cache_dir)
+  }
+
+  # read full file
+  df <- vigitel_read_data(data_path, format)
+
+  # create partitioned cache for future reads
+  if (.has_arrow()) {
+    create_partitioned_cache(df, cache_dir)
+  }
+
+  df
+}
+
+#' Filter by year and select variables on an in-memory VIGITEL tibble
+#' @param df A data frame.
+#' @param year Integer vector or NULL.
+#' @param vars Character vector or NULL.
+#' @return Filtered/selected tibble.
+#' @noRd
+.vigitel_filter_and_select <- function(df, year, vars) {
+  if (!is.null(year)) {
+    year_col <- vigitel_identify_year_column(df)
+    df <- df |> dplyr::filter(.data[[year_col]] %in% !!year)
+  }
+
+  if (!is.null(vars)) {
+    year_col <- vigitel_identify_year_column(df)
+    vars_to_select <- unique(c(year_col, vars))
+    missing_vars <- setdiff(vars_to_select, names(df))
+    if (length(missing_vars) > 0) {
+      cli::cli_warn("Variable{?s} not found: {.val {missing_vars}}")
+    }
+    vars_to_select <- intersect(vars_to_select, names(df))
+    df <- df |> dplyr::select(dplyr::all_of(vars_to_select))
+  }
+
+  df
+}
+
 #' Get all available columns from Arrow dataset
 #'
 #' @param dataset An Arrow Dataset
@@ -296,130 +436,30 @@ vigitel_data <- function(year = NULL,
 
   format <- match.arg(format)
   cache_dir <- vigitel_cache_dir(cache_dir)
+  .vigitel_validate_year(year)
+  if (!is.null(year)) year <- as.integer(year)
 
-  # validate year parameter
-  available_years <- vigitel_years()
-  if (!is.null(year)) {
-    # accepts integer, vector, or sequence
-    year <- as.integer(year)
-    invalid_years <- setdiff(year, available_years)
-    if (length(invalid_years) > 0) {
-      cli::cli_abort(
-        c(
-          "Year{?s} {.val {invalid_years}} not available.",
-          "i" = "Available years: {.val {min(available_years)}}-{.val {max(available_years)}}.",
-          "i" = "Use {.fn vigitel_years} to see all available years."
-        )
-      )
-    }
-  }
+  # try lazy return from existing cache
+  ds <- .vigitel_try_lazy(lazy, force, backend, cache_dir, year, vars)
+  if (!is.null(ds)) return(ds)
 
-  # paths
-  parquet_dir <- file.path(cache_dir, "vigitel_data")
-  zip_filename <- str_c("vigitel-2006-2024-peso-rake-", format, ".zip")
-  zip_path <- file.path(cache_dir, zip_filename)
-  data_filename <- str_c("vigitel-2006-2024-peso-rake.", format)
-  data_path <- file.path(cache_dir, data_filename)
-
-  # check cache status
-  use_arrow <- .has_arrow()
-  cache_exists <- has_partitioned_cache(cache_dir)
-
-  # lazy evaluation: return lazy query object if available
-  if (isTRUE(lazy) && !force) {
-    backend_choice <- match.arg(backend)
-    ds <- .lazy_return(cache_dir, "vigitel_data", backend_choice,
-                       filters = if (!is.null(year)) list(ano = as.integer(year)) else list(),
-                       select_cols = vars)
-    if (!is.null(ds)) return(ds)
-  }
-
-  # FAST PATH: read from partitioned cache if available
-  if (!force && cache_exists && use_arrow) {
-    cli::cli_inform("Reading from partitioned cache...")
-
-    ds <- arrow::open_dataset(parquet_dir)
-
-    # identify year column
-    year_col <- vigitel_identify_year_column_from_schema(ds)
-
-    # filter by year BEFORE loading into memory
-    if (!is.null(year)) {
-      ds <- ds |> dplyr::filter(.data[[year_col]] %in% !!year)
-    }
-
-    # select variables BEFORE loading (if specified)
-    if (!is.null(vars)) {
-      # always include year column for consistency
-      vars_to_select <- unique(c(year_col, vars))
-      available_vars <- names(ds)
-      missing_vars <- setdiff(vars_to_select, available_vars)
-      if (length(missing_vars) > 0) {
-        cli::cli_warn("Variable{?s} not found: {.val {missing_vars}}")
-        vars_to_select <- intersect(vars_to_select, available_vars)
-      }
-      if (length(vars_to_select) > 0) {
-        ds <- ds |> dplyr::select(dplyr::all_of(vars_to_select))
-      }
-    }
-
-    # collect filtered data
-    df <- ds |> dplyr::collect()
-
+  # read from partitioned cache or download
+  if (!force && has_partitioned_cache(cache_dir) && .has_arrow()) {
+    df <- .vigitel_read_from_cache(year, vars, cache_dir)
   } else {
-    # FULL PATH: download and process
+    df <- .vigitel_download_and_cache(format, cache_dir, force)
 
-    # download if necessary
-    if (force || !file.exists(data_path)) {
-      if (force || !file.exists(zip_path)) {
-        vigitel_download_data(format, zip_path)
-      }
-      vigitel_extract_zip(zip_path, cache_dir)
-    }
-
-    # read full file
-    df <- vigitel_read_data(data_path, format)
-
-    # create partitioned cache for future reads
-    if (use_arrow) {
-      create_partitioned_cache(df, cache_dir)
-
-      # optionally delete source file to save space
-      # unlink(data_path)
-    }
-
-    # if lazy was requested, return from cache after creation
+    # try lazy return after creating cache
     if (isTRUE(lazy)) {
-      backend_choice <- match.arg(backend)
-      ds <- .lazy_return(cache_dir, "vigitel_data", backend_choice,
-                         filters = if (!is.null(year)) list(ano = as.integer(year)) else list(),
-                         select_cols = vars)
+      ds <- .vigitel_try_lazy(lazy, FALSE, backend, cache_dir, year, vars)
       if (!is.null(ds)) return(ds)
     }
 
-    # filter by year
-    if (!is.null(year)) {
-      year_col <- vigitel_identify_year_column(df)
-      df <- df |> dplyr::filter(.data[[year_col]] %in% !!year)
-    }
-
-    # select variables
-    if (!is.null(vars)) {
-      year_col <- vigitel_identify_year_column(df)
-      vars_to_select <- unique(c(year_col, vars))
-      missing_vars <- setdiff(vars_to_select, names(df))
-      if (length(missing_vars) > 0) {
-        cli::cli_warn("Variable{?s} not found: {.val {missing_vars}}")
-      }
-      vars_to_select <- intersect(vars_to_select, names(df))
-      df <- df |> dplyr::select(dplyr::all_of(vars_to_select))
-    }
+    df <- .vigitel_filter_and_select(df, year, vars)
   }
 
-  # inform user about the result
+  # report result
   result_df <- tibble::as_tibble(df)
-
-  # try to identify year column for reporting
   tryCatch(
     {
       year_col <- vigitel_identify_year_column(result_df)

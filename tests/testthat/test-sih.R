@@ -417,3 +417,219 @@ test_that("sih_data reports partial download failures", {
   expect_false(is.null(failures))
   expect_equal(failures, "XX 2022/01")
 })
+
+
+# ============================================================================
+# ADDITIONAL COVERAGE TESTS
+# ============================================================================
+
+# --- sih_info --- additional coverage ---
+
+test_that("sih_info returns invisible list with all expected fields", {
+  result <- sih_info()
+  expect_type(result, "list")
+  expect_equal(result$source, "DATASUS FTP")
+  expect_true(length(result$final_years) > 0)
+  expect_true(result$n_variables > 0)
+  expect_true(grepl("SIH", result$name))
+  expect_true(grepl("ftp://", result$url))
+})
+
+# --- .sih_download_loop --- mocked tests ---
+
+test_that(".sih_download_loop binds results from multiple combos", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf, DIAG_PRINC = "I21", SEXO = "1"
+      )
+    }
+  )
+
+  result <- .sih_download_loop(
+    year = 2022L, month = c(1L, 2L), target_ufs = c("AC", "RJ"),
+    cache = FALSE, cache_dir = NULL
+  )
+
+  expect_true(is.list(result))
+  expect_s3_class(result$data, "data.frame")
+  expect_equal(nrow(result$data), 4)
+  expect_equal(sort(unique(result$data$uf_source)), c("AC", "RJ"))
+  expect_equal(sort(unique(result$data$month)), c(1L, 2L))
+  expect_equal(length(result$failed_labels), 0)
+})
+
+test_that(".sih_download_loop tracks failures", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) {
+      if (uf == "ZZ") stop("FTP error")
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf, DIAG_PRINC = "I21"
+      )
+    }
+  )
+
+  result <- .sih_download_loop(
+    year = 2022L, month = 1L, target_ufs = c("AC", "ZZ"),
+    cache = FALSE, cache_dir = NULL
+  )
+
+  expect_equal(nrow(result$data), 1)
+  expect_equal(length(result$failed_labels), 1)
+  expect_true(grepl("ZZ", result$failed_labels))
+})
+
+test_that(".sih_download_loop aborts when all downloads fail", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) stop("FTP error")
+  )
+
+  expect_error(
+    .sih_download_loop(
+      year = 2022L, month = 1L, target_ufs = "AC",
+      cache = FALSE, cache_dir = NULL
+    ),
+    "No data could be downloaded"
+  )
+})
+
+test_that(".sih_download_loop with multiple years and months", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf, DIAG_PRINC = "I21"
+      )
+    }
+  )
+
+  result <- .sih_download_loop(
+    year = c(2020L, 2021L), month = c(1L, 6L), target_ufs = "AC",
+    cache = FALSE, cache_dir = NULL
+  )
+
+  expect_equal(nrow(result$data), 4)
+  expect_equal(sort(unique(result$data$year)), c(2020L, 2021L))
+  expect_equal(sort(unique(result$data$month)), c(1L, 6L))
+})
+
+test_that(".sih_download_loop single combo does not print progress message", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf, DIAG_PRINC = "I21"
+      )
+    }
+  )
+
+  # Single combination should not trigger the "Downloading N file(s)" message
+  result <- .sih_download_loop(
+    year = 2022L, month = 6L, target_ufs = "SP",
+    cache = FALSE, cache_dir = NULL
+  )
+
+  expect_equal(nrow(result$data), 1)
+  expect_equal(result$data$uf_source, "SP")
+  expect_equal(result$data$month, 6L)
+})
+
+# --- sih_data --- diagnosis filter ---
+
+test_that("sih_data applies diagnosis filter via mock", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf,
+        DIAG_PRINC = c("I210", "J180", "C509", "I219"),
+        SEXO = rep("1", 4)
+      )
+    }
+  )
+
+  result <- sih_data(2022, month = 1, uf = "AC",
+                     diagnosis = "I21", parse = FALSE)
+  expect_equal(nrow(result), 2)
+  expect_true(all(grepl("^I21", result$DIAG_PRINC)))
+})
+
+test_that("sih_data with multiple diagnosis codes", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf,
+        DIAG_PRINC = c("I210", "J180", "C509", "I219"),
+        SEXO = rep("1", 4)
+      )
+    }
+  )
+
+  result <- sih_data(2022, month = 1, uf = "AC",
+                     diagnosis = c("I21", "J18"), parse = FALSE)
+  expect_equal(nrow(result), 3)
+  expect_true(all(grepl("^(I21|J18)", result$DIAG_PRINC)))
+})
+
+test_that("sih_data warns when DIAG_PRINC column missing for diagnosis filter", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf, SEXO = "1"
+      )
+    }
+  )
+
+  expect_warning(
+    sih_data(2022, month = 1, uf = "AC",
+             diagnosis = "I21", parse = FALSE),
+    "DIAG_PRINC"
+  )
+})
+
+test_that("sih_data with vars selects columns", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf,
+        DIAG_PRINC = "I210", SEXO = "1",
+        VAL_TOT = "1500.50", MORTE = "0", MUNIC_RES = "120040"
+      )
+    }
+  )
+
+  result <- sih_data(2022, month = 1, uf = "AC",
+                     vars = c("DIAG_PRINC", "SEXO"), parse = FALSE)
+
+  expect_true("DIAG_PRINC" %in% names(result))
+  expect_true("SEXO" %in% names(result))
+  expect_true("year" %in% names(result))
+  expect_true("month" %in% names(result))
+  expect_true("uf_source" %in% names(result))
+  expect_false("VAL_TOT" %in% names(result))
+  expect_false("MORTE" %in% names(result))
+})
+
+test_that("sih_data parse=TRUE converts types via mock", {
+  local_mocked_bindings(
+    .sih_download_and_read = function(year, month, uf, ...) {
+      tibble::tibble(
+        year = as.integer(year), month = as.integer(month),
+        uf_source = uf,
+        DT_INTER = "20220115", VAL_TOT = "1500.50",
+        DIAS_PERM = "5", SEXO = "1"
+      )
+    }
+  )
+
+  result <- sih_data(2022, month = 1, uf = "AC", parse = TRUE)
+  expect_s3_class(result$DT_INTER, "Date")
+  expect_type(result$VAL_TOT, "double")
+  expect_type(result$DIAS_PERM, "integer")
+  expect_type(result$SEXO, "character")
+})

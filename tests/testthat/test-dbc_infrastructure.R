@@ -71,3 +71,42 @@ test_that(".datasus_download errors on bad URL (integration)", {
     "Failed to download"
   )
 })
+
+
+# ============================================================================
+# ADDITIONAL COVERAGE TESTS
+# ============================================================================
+
+# --- .dbc2dbf --- error paths ---
+
+test_that(".dbc2dbf errors with descriptive message for nonexistent file", {
+  expect_error(.dbc2dbf("/tmp/does_not_exist_xyz.dbc", "out.dbf"),
+               "not found")
+})
+
+test_that(".read_dbc errors with descriptive message for nonexistent file", {
+  expect_error(.read_dbc("/tmp/does_not_exist_xyz.dbc"),
+               "not found")
+})
+
+test_that(".dbc2dbf returns FALSE on corrupt/invalid file", {
+  # Create a tiny file that is not a valid DBC
+  temp_corrupt <- tempfile(fileext = ".dbc")
+  on.exit(if (file.exists(temp_corrupt)) file.remove(temp_corrupt))
+  writeBin(charToRaw("this is not a dbc file"), temp_corrupt)
+
+  # .dbc2dbf should return FALSE (warning about decompression failure)
+  result <- suppressWarnings(.dbc2dbf(temp_corrupt, tempfile(fileext = ".dbf")))
+  expect_false(result)
+})
+
+test_that(".read_dbc errors on corrupt file", {
+  temp_corrupt <- tempfile(fileext = ".dbc")
+  on.exit(if (file.exists(temp_corrupt)) file.remove(temp_corrupt))
+  writeBin(charToRaw("this is not a dbc file"), temp_corrupt)
+
+  expect_error(
+    suppressWarnings(.read_dbc(temp_corrupt)),
+    "Failed to decompress"
+  )
+})

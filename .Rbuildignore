@@ -16,3 +16,8 @@
 ^screenshot.*\.png$
 ^healthbR_.*\.tar\.gz$
 ^CRAN-SUBMISSION$
+^CONTRIBUTING\.md$
+^CODE_OF_CONDUCT\.md$
+^instructions-claude\.md$
+^healthbR-rjournal-submission\.zip$
+^r-journal$

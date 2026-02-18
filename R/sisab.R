@@ -375,6 +375,89 @@ sisab_variables <- function(type = "aps", search = NULL) {
 }
 
 
+# -- internal helpers for sisab_data() ------------------------------------
+
+#' Validate and resolve all sisab_data parameters
+#' @noRd
+.sisab_resolve_params <- function(year, type, level, month, uf, vars) {
+  year  <- .sisab_validate_year(year)
+  type  <- .sisab_validate_type(type)
+  level <- .sisab_validate_level(level)
+  month <- .validate_month(month)
+  if (!is.null(uf))   uf <- .sisab_validate_uf(uf)
+  if (!is.null(vars))  .sisab_validate_vars(vars, type = type)
+
+  if (level == "municipality" && is.null(uf) && length(month) > 3) {
+    cli::cli_warn(c(
+      "!" = "Downloading municipality-level data for all UFs may be slow.",
+      "i" = "Consider specifying {.arg uf} to filter by state."
+    ))
+  }
+
+  if (!is.null(uf) && level %in% c("uf", "municipality")) {
+    target_ufs <- as.list(uf)
+  } else {
+    target_ufs <- list(NULL)
+  }
+
+  list(year = year, type = type, level = level,
+       month = month, uf = uf, target_ufs = target_ufs)
+}
+
+#' Download loop for sisab_data: expand grid, download, bind
+#' @noRd
+.sisab_download_loop <- function(year, type, level, month,
+                                 target_ufs, cache, cache_dir) {
+  combinations <- expand.grid(
+    year = year, uf_idx = seq_along(target_ufs),
+    stringsAsFactors = FALSE
+  )
+
+  n_combos <- nrow(combinations)
+  if (n_combos > 1 || length(year) > 1) {
+    cli::cli_inform(c(
+      "i" = "Downloading {n_combos} request(s) ({length(year)} year(s))..."
+    ))
+  }
+
+  labels <- vapply(seq_len(n_combos), function(i) {
+    uf_val  <- target_ufs[[combinations$uf_idx[i]]]
+    uf_part <- if (!is.null(uf_val)) uf_val else "ALL"
+    paste(type, level, uf_part, combinations$year[i])
+  }, character(1))
+
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+    yr     <- combinations$year[i]
+    uf_val <- target_ufs[[combinations$uf_idx[i]]]
+    tryCatch({
+      data <- .sisab_download_and_read(
+        yr, month, type, level, uf = uf_val,
+        cache = cache, cache_dir = cache_dir
+      )
+      if (is.null(data) || nrow(data) == 0) return(NULL)
+      data$year <- as.integer(yr)
+      data$type <- type
+      cols <- names(data)
+      data <- data[, c("year", "type", setdiff(cols, c("year", "type")))]
+      data
+    }, error = function(e) NULL)
+  })
+
+  succeeded     <- !vapply(results, is.null, logical(1))
+  failed_labels <- labels[!succeeded]
+  results       <- results[succeeded]
+
+  if (length(results) == 0) {
+    cli::cli_abort(
+      "No data could be downloaded for the requested parameters."
+    )
+  }
+
+  list(data = dplyr::bind_rows(results), failed_labels = failed_labels)
+}
+
+# -- main orchestrator ----------------------------------------------------
+
 #' Download SISAB Coverage Data
 #'
 #' Downloads and returns primary care coverage data from the SISAB
@@ -448,94 +531,22 @@ sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
                        uf = NULL, vars = NULL,
                        cache = TRUE, cache_dir = NULL) {
 
-  # validate inputs
-  year <- .sisab_validate_year(year)
-  type <- .sisab_validate_type(type)
-  level <- .sisab_validate_level(level)
-  month <- .validate_month(month)
-  if (!is.null(uf)) uf <- .sisab_validate_uf(uf)
-  if (!is.null(vars)) .sisab_validate_vars(vars, type = type)
+  params <- .sisab_resolve_params(year, type, level, month, uf, vars)
 
-  # for municipality level, require uf if downloading all months
-  if (level == "municipality" && is.null(uf) && length(month) > 3) {
-    cli::cli_warn(c(
-      "!" = "Downloading municipality-level data for all UFs may be slow.",
-      "i" = "Consider specifying {.arg uf} to filter by state."
-    ))
-  }
-
-  # determine target UFs for municipality level
-  target_ufs <- if (!is.null(uf)) uf else list(NULL)
-  if (!is.null(uf) && level %in% c("uf", "municipality")) {
-    target_ufs <- as.list(uf)
-  } else {
-    target_ufs <- list(NULL)
-  }
-
-  # build combinations: year x uf
-  combinations <- expand.grid(
-    year = year, uf_idx = seq_along(target_ufs),
-    stringsAsFactors = FALSE
+  dl <- .sisab_download_loop(
+    year       = params$year,
+    type       = params$type,
+    level      = params$level,
+    month      = params$month,
+    target_ufs = params$target_ufs,
+    cache      = cache,
+    cache_dir  = cache_dir
   )
-
-  n_combos <- nrow(combinations)
-  if (n_combos > 1 || length(year) > 1) {
-    cli::cli_inform(c(
-      "i" = "Downloading {n_combos} request(s) ({length(year)} year(s))..."
-    ))
-  }
-
-  # download each combination
-  labels <- vapply(seq_len(n_combos), function(i) {
-    uf_val <- target_ufs[[combinations$uf_idx[i]]]
-    uf_part <- if (!is.null(uf_val)) uf_val else "ALL"
-    paste(type, level, uf_part, combinations$year[i])
-  }, character(1))
-
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
-    yr <- combinations$year[i]
-    uf_val <- target_ufs[[combinations$uf_idx[i]]]
-
-    tryCatch({
-      data <- .sisab_download_and_read(
-        yr, month, type, level, uf = uf_val,
-        cache = cache, cache_dir = cache_dir
-      )
-
-      if (is.null(data) || nrow(data) == 0) {
-        return(NULL)
-      }
-
-      # add source columns
-      data$year <- as.integer(yr)
-      data$type <- type
-      # move year and type to front
-      cols <- names(data)
-      data <- data[, c("year", "type",
-                        setdiff(cols, c("year", "type")))]
-      data
-    }, error = function(e) {
-      NULL
-    })
-  })
-
-  # remove NULLs and bind
-  succeeded <- !vapply(results, is.null, logical(1))
-  failed_labels <- labels[!succeeded]
-  results <- results[succeeded]
-
-  if (length(results) == 0) {
-    cli::cli_abort(
-      "No data could be downloaded for the requested parameters."
-    )
-  }
-
-  results <- dplyr::bind_rows(results)
 
   lazy_select <- if (!is.null(vars)) unique(c("year", "type", vars)) else NULL
 
-  .data_return(results, select_cols = lazy_select,
-               failed_labels = failed_labels, module_name = "SISAB")
+  .data_return(dl$data, select_cols = lazy_select,
+               failed_labels = dl$failed_labels, module_name = "SISAB")
 }
 
 

@@ -647,6 +647,251 @@ sipni_dictionary <- function(variable = NULL) {
 }
 
 
+# ============================================================================
+# internal subfunctions for sipni_data (cyclomatic complexity reduction)
+# ============================================================================
+
+#' Resolve and validate all sipni_data parameters
+#' @return Named list with ftp_years, api_years, type, month_vals,
+#'   target_ufs, effective_type
+#' @noRd
+.sipni_resolve_params <- function(year, type, uf, month, vars, missing_type) {
+  year <- .sipni_validate_year(year)
+  if (!is.null(uf)) uf <- .sipni_validate_uf(uf)
+
+  ftp_years <- year[year %in% sipni_ftp_years]
+  api_years <- year[year %in% sipni_api_years]
+
+  if (length(ftp_years) > 0) {
+    type <- .sipni_validate_type(type)
+  }
+
+  if (length(api_years) > 0 && !missing_type && toupper(type) %in%
+      c("DPNI", "CPNI")) {
+    cli::cli_warn(c(
+      "!" = "{.arg type} is ignored for years >= 2020 (API microdata).",
+      "i" = "API data is always individual-level microdata (no DPNI/CPNI)."
+    ))
+  }
+
+  month_vals <- .validate_month(month)
+
+  effective_type <- if (length(api_years) > 0) "API" else type
+  if (!is.null(vars)) {
+    .sipni_validate_vars(vars, type = effective_type)
+  }
+
+  target_ufs <- if (!is.null(uf)) toupper(uf) else sipni_uf_list
+
+  list(
+    year = year, ftp_years = ftp_years, api_years = api_years,
+    type = type, month_vals = month_vals, target_ufs = target_ufs,
+    uf = uf
+  )
+}
+
+
+#' Pre-download lazy evaluation check for sipni_data
+#' @return Lazy query object or NULL
+#' @noRd
+.sipni_try_lazy_pre <- function(params, lazy, backend, cache_dir, parse) {
+  if (!isTRUE(lazy)) return(NULL)
+
+  if (isTRUE(parse)) {
+    cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
+  }
+
+  cache_dir_resolved <- .sipni_cache_dir(cache_dir)
+
+  # try FTP partitioned cache (years <= 2019)
+  ftp_years <- params$ftp_years
+  if (length(ftp_years) > 0) {
+    ftp_ds_name <- stringr::str_c("sipni_", tolower(params$type), "_data")
+    ftp_cols <- NULL
+    ds <- .lazy_return(cache_dir_resolved, ftp_ds_name, backend,
+                       filters = list(year = ftp_years,
+                                      uf_source = params$target_ufs),
+                       select_cols = ftp_cols)
+    if (!is.null(ds) && length(params$api_years) == 0) return(ds)
+  }
+
+  # try CSV partitioned cache (years >= 2020)
+  api_years <- params$api_years
+  if (length(api_years) > 0) {
+    csv_filters <- list(year = api_years, uf_source = params$target_ufs)
+    if (!is.null(params$month_vals) && length(params$month_vals) < 12) {
+      csv_filters$month <- as.integer(params$month_vals)
+    }
+    ds <- .lazy_return(cache_dir_resolved, "sipni_csv_data", backend,
+                       filters = csv_filters, select_cols = NULL)
+    if (!is.null(ds) && length(ftp_years) == 0) return(ds)
+  }
+
+  NULL
+}
+
+
+#' Download FTP batch for sipni_data
+#' @return Named list with results (list of tibbles) and failed_labels (char)
+#' @noRd
+.sipni_download_ftp <- function(ftp_years, target_ufs, type,
+                                cache, cache_dir) {
+  if (length(ftp_years) == 0) {
+    return(list(results = list(), failed_labels = character(0)))
+  }
+
+  ftp_combos <- expand.grid(
+    year = ftp_years, uf = target_ufs,
+    stringsAsFactors = FALSE
+  )
+
+  n_ftp <- nrow(ftp_combos)
+  if (n_ftp > 1) {
+    cli::cli_inform(c(
+      "i" = "Downloading {n_ftp} FTP file(s) ({length(unique(ftp_combos$uf))} UF(s) x {length(unique(ftp_combos$year))} year(s))..."
+    ))
+  }
+
+  ftp_labels <- paste(ftp_combos$uf, ftp_combos$year)
+
+  ftp_results <- .map_parallel(seq_len(n_ftp), .delay = 0.5, function(i) {
+    tryCatch({
+      .sipni_download_and_read(ftp_combos$year[i], ftp_combos$uf[i],
+                               type = type,
+                               cache = cache, cache_dir = cache_dir)
+    }, error = function(e) NULL)
+  })
+
+  ftp_succeeded <- !vapply(ftp_results, is.null, logical(1))
+
+  list(
+    results = ftp_results[ftp_succeeded],
+    failed_labels = ftp_labels[!ftp_succeeded]
+  )
+}
+
+
+#' Download API/CSV batch for sipni_data
+#' @return Named list with results (list of tibbles) and failed_labels (char)
+#' @noRd
+.sipni_download_api <- function(api_years, target_ufs, month_vals,
+                                cache, cache_dir) {
+  if (length(api_years) == 0) {
+    return(list(results = list(), failed_labels = character(0)))
+  }
+
+  api_combos <- expand.grid(
+    year = api_years, uf = target_ufs,
+    stringsAsFactors = FALSE
+  )
+
+  n_api <- nrow(api_combos)
+  if (n_api > 0) {
+    cli::cli_inform(c(
+      "i" = "Downloading {n_api} CSV request(s) ({length(unique(api_combos$uf))} UF(s) x {length(unique(api_combos$year))} year(s))..."
+    ))
+  }
+
+  api_labels <- paste(api_combos$uf, api_combos$year)
+
+  api_results <- .map_parallel(seq_len(n_api), function(i) {
+    tryCatch({
+      data <- .sipni_api_download_and_read(
+        api_combos$year[i], api_combos$uf[i], month = month_vals,
+        cache = cache, cache_dir = cache_dir
+      )
+      if (nrow(data) == 0) return(NULL)
+      data
+    }, error = function(e) NULL)
+  })
+
+  api_succeeded <- !vapply(api_results, is.null, logical(1))
+
+  list(
+    results = api_results[api_succeeded],
+    failed_labels = api_labels[!api_succeeded]
+  )
+}
+
+
+#' Bind FTP and API results separately then combine
+#' @return Combined tibble
+#' @noRd
+.sipni_bind_results <- function(ftp_results, api_results) {
+  all_results <- c(ftp_results, api_results)
+
+  if (length(all_results) == 0) {
+    cli::cli_abort(
+      "No data could be downloaded for the requested year(s)/UF(s)."
+    )
+  }
+
+  # bind within groups (same schema), then across groups if both present
+  bound_parts <- list()
+  if (length(ftp_results) > 0) {
+    bound_parts <- c(bound_parts, list(dplyr::bind_rows(ftp_results)))
+  }
+  if (length(api_results) > 0) {
+    bound_parts <- c(bound_parts, list(dplyr::bind_rows(api_results)))
+  }
+
+  dplyr::bind_rows(bound_parts)
+}
+
+
+#' Post-download lazy return for sipni_data
+#' @return Lazy query object or NULL
+#' @noRd
+.sipni_try_lazy_post <- function(lazy, backend, year, type, uf, month, vars,
+                                 cache_dir) {
+  if (!isTRUE(lazy)) return(NULL)
+
+  cache_dir_resolved <- .sipni_cache_dir(cache_dir)
+  target_ufs <- if (!is.null(uf)) toupper(uf) else sipni_uf_list
+
+  if (all(year <= 2019)) {
+    ds_name <- stringr::str_c("sipni_", tolower(type), "_data")
+    select_cols <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
+                       filters = list(year = year, uf_source = target_ufs),
+                       select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  } else if (all(year > 2019)) {
+    csv_filters <- list(year = year, uf_source = target_ufs)
+    if (!is.null(month)) csv_filters$month <- as.integer(month)
+    select_cols <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
+    ds <- .lazy_return(cache_dir_resolved, "sipni_csv_data", backend,
+                       filters = csv_filters, select_cols = select_cols)
+    if (!is.null(ds)) return(ds)
+  }
+
+  NULL
+}
+
+
+#' Apply type parsing for sipni_data
+#' @return Parsed tibble
+#' @noRd
+.sipni_apply_parsing <- function(combined, has_ftp, has_api, type,
+                                 parse, col_types, lazy) {
+  if (!isTRUE(parse) || isTRUE(lazy)) return(combined)
+
+  all_specs <- c()
+  if (has_ftp) {
+    ftp_meta <- if (toupper(type) == "CPNI") sipni_variables_cpni else sipni_variables_dpni
+    all_specs <- c(all_specs, .build_type_spec(ftp_meta))
+  }
+  if (has_api) {
+    all_specs <- c(all_specs, .build_type_spec(sipni_variables_api))
+  }
+  if (length(all_specs) > 0) {
+    combined <- .parse_columns(combined, all_specs, col_types = col_types)
+  }
+
+  combined
+}
+
+
 #' Download SI-PNI Vaccination Data
 #'
 #' Downloads and returns vaccination data from SI-PNI. For years 1994--2019,
@@ -743,233 +988,47 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
                        cache = TRUE, cache_dir = NULL,
                        lazy = FALSE, backend = c("arrow", "duckdb")) {
 
-  # validate inputs
-  year <- .sipni_validate_year(year)
-  if (!is.null(uf)) uf <- .sipni_validate_uf(uf)
+  # 1. resolve and validate all parameters
+  params <- .sipni_resolve_params(year, type, uf, month, vars,
+                                  missing_type = missing(type))
+  backend <- match.arg(backend)
 
-  # split years into FTP and API groups
-  ftp_years <- year[year %in% sipni_ftp_years]
-  api_years <- year[year %in% sipni_api_years]
+  # 2. try lazy return (pre-download)
+  lazy_result <- .sipni_try_lazy_pre(params, lazy, backend, cache_dir, parse)
+  if (!is.null(lazy_result)) return(lazy_result)
 
-  # validate type for FTP years
-  if (length(ftp_years) > 0) {
-    type <- .sipni_validate_type(type)
-  }
+  # 3. download FTP data (1994-2019)
+  ftp <- .sipni_download_ftp(params$ftp_years, params$target_ufs,
+                             params$type, cache, cache_dir)
 
-  # warn if type specified for API years
-  if (length(api_years) > 0 && !missing(type) && toupper(type) %in%
-      c("DPNI", "CPNI")) {
-    cli::cli_warn(c(
-      "!" = "{.arg type} is ignored for years >= 2020 (API microdata).",
-      "i" = "API data is always individual-level microdata (no DPNI/CPNI)."
-    ))
-  }
+  # 4. download API data (2020+)
+  api <- .sipni_download_api(params$api_years, params$target_ufs,
+                             params$month_vals, cache, cache_dir)
 
-  # validate month (applies to API years; ignored for FTP)
-  month_vals <- .validate_month(month)
+  # 5. bind results (FTP + API separately, then combine)
+  combined <- .sipni_bind_results(ftp$results, api$results)
 
-  # validate vars
-  if (!is.null(vars)) {
-    effective_type <- if (length(api_years) > 0) "API" else type
-    .sipni_validate_vars(vars, type = effective_type)
-  }
+  # 6. try lazy return (post-download)
+  lazy_result <- .sipni_try_lazy_post(lazy, backend, params$year, params$type,
+                                      params$uf, month, vars, cache_dir)
+  if (!is.null(lazy_result)) return(lazy_result)
 
-  # lazy evaluation: return from partitioned cache if available
-  if (isTRUE(lazy)) {
-    if (isTRUE(parse)) {
-      cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
-    }
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .sipni_cache_dir(cache_dir)
-    target_ufs <- if (!is.null(uf)) toupper(uf) else sipni_uf_list
+  # 7. parse column types
+  combined <- .sipni_apply_parsing(
+    combined, has_ftp = length(ftp$results) > 0,
+    has_api = length(api$results) > 0,
+    type = params$type, parse = parse, col_types = col_types, lazy = lazy
+  )
 
-    # try FTP partitioned cache (years <= 2019)
-    ftp_years <- year[year <= 2019]
-    if (length(ftp_years) > 0) {
-      ftp_ds_name <- stringr::str_c("sipni_", tolower(type), "_data")
-      ftp_cols <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
-      ds <- .lazy_return(cache_dir_resolved, ftp_ds_name, backend,
-                         filters = list(year = ftp_years, uf_source = target_ufs),
-                         select_cols = ftp_cols)
-      if (!is.null(ds) && length(year[year > 2019]) == 0) return(ds)
-    }
-
-    # try CSV partitioned cache (years >= 2020)
-    csv_years <- year[year > 2019]
-    if (length(csv_years) > 0) {
-      csv_filters <- list(year = csv_years, uf_source = target_ufs)
-      if (!is.null(month)) csv_filters$month <- as.integer(month)
-      csv_cols <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
-      ds <- .lazy_return(cache_dir_resolved, "sipni_csv_data", backend,
-                         filters = csv_filters, select_cols = csv_cols)
-      if (!is.null(ds) && length(ftp_years) == 0) return(ds)
-    }
-
-    # if request spans both FTP and CSV years, fall through to eager path
-  }
-
-  # determine UFs to download
-  target_ufs <- if (!is.null(uf)) toupper(uf) else sipni_uf_list
-
-  results <- list()
-  ftp_failed_labels <- character(0)
-  api_failed_labels <- character(0)
-
-  # --- FTP path (1994-2019) ---
-  if (length(ftp_years) > 0) {
-    ftp_combos <- expand.grid(
-      year = ftp_years, uf = target_ufs,
-      stringsAsFactors = FALSE
-    )
-
-    n_ftp <- nrow(ftp_combos)
-    if (n_ftp > 1) {
-      cli::cli_inform(c(
-        "i" = "Downloading {n_ftp} FTP file(s) ({length(unique(ftp_combos$uf))} UF(s) x {length(unique(ftp_combos$year))} year(s))..."
-      ))
-    }
-
-    ftp_labels <- paste(ftp_combos$uf, ftp_combos$year)
-
-    ftp_results <- .map_parallel(seq_len(n_ftp), .delay = 0.5, function(i) {
-      yr <- ftp_combos$year[i]
-      st <- ftp_combos$uf[i]
-
-      tryCatch({
-        .sipni_download_and_read(yr, st, type = type,
-                                 cache = cache, cache_dir = cache_dir)
-      }, error = function(e) {
-        NULL
-      })
-    })
-
-    ftp_succeeded <- !vapply(ftp_results, is.null, logical(1))
-    ftp_failed_labels <- ftp_labels[!ftp_succeeded]
-    results <- c(results, ftp_results[ftp_succeeded])
-  }
-
-  # --- API path (2020+) ---
-  if (length(api_years) > 0) {
-    api_combos <- expand.grid(
-      year = api_years, uf = target_ufs,
-      stringsAsFactors = FALSE
-    )
-
-    n_api <- nrow(api_combos)
-    if (n_api > 0) {
-      cli::cli_inform(c(
-        "i" = "Downloading {n_api} CSV request(s) ({length(unique(api_combos$uf))} UF(s) x {length(unique(api_combos$year))} year(s))..."
-      ))
-    }
-
-    api_labels <- paste(api_combos$uf, api_combos$year)
-
-    api_results <- .map_parallel(seq_len(n_api), function(i) {
-      yr <- api_combos$year[i]
-      st <- api_combos$uf[i]
-
-      tryCatch({
-        data <- .sipni_api_download_and_read(
-          yr, st, month = month_vals,
-          cache = cache, cache_dir = cache_dir
-        )
-        if (nrow(data) == 0) return(NULL)
-        data
-      }, error = function(e) {
-        NULL
-      })
-    })
-
-    api_succeeded <- !vapply(api_results, is.null, logical(1))
-    api_failed_labels <- api_labels[!api_succeeded]
-    results <- c(results, api_results[api_succeeded])
-  }
-
-  # combine results
-  if (length(results) == 0) {
-    cli::cli_abort(
-      "No data could be downloaded for the requested year(s)/UF(s)."
-    )
-  }
-
-  # bind FTP and API results separately to avoid column mismatch issues
-  ftp_count <- length(ftp_years) * length(target_ufs)
-  ftp_results_final <- if (ftp_count > 0 && length(results) > 0) {
-    results[seq_len(min(ftp_count, length(results)))]
-  } else {
-    list()
-  }
-  ftp_results_final <- ftp_results_final[!vapply(ftp_results_final, is.null,
-                                                  logical(1))]
-
-  api_start <- ftp_count + 1
-  api_results_final <- if (api_start <= length(results)) {
-    results[api_start:length(results)]
-  } else {
-    list()
-  }
-  api_results_final <- api_results_final[!vapply(api_results_final, is.null,
-                                                  logical(1))]
-
-  # bind within groups (same schema), then across groups if both present
-  bound_parts <- list()
-  if (length(ftp_results_final) > 0) {
-    bound_parts <- c(bound_parts, list(dplyr::bind_rows(ftp_results_final)))
-  }
-  if (length(api_results_final) > 0) {
-    bound_parts <- c(bound_parts, list(dplyr::bind_rows(api_results_final)))
-  }
-
-  combined <- dplyr::bind_rows(bound_parts)
-
-  # if lazy was requested, return from cache after download
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .sipni_cache_dir(cache_dir)
-    target_ufs <- if (!is.null(uf)) toupper(uf) else sipni_uf_list
-
-    # try appropriate cache based on year range
-    if (all(year <= 2019)) {
-      ds_name <- stringr::str_c("sipni_", tolower(type), "_data")
-      select_cols <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
-      ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
-                         filters = list(year = year, uf_source = target_ufs),
-                         select_cols = select_cols)
-      if (!is.null(ds)) return(ds)
-    } else if (all(year > 2019)) {
-      csv_filters <- list(year = year, uf_source = target_ufs)
-      if (!is.null(month)) csv_filters$month <- as.integer(month)
-      select_cols <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
-      ds <- .lazy_return(cache_dir_resolved, "sipni_csv_data", backend,
-                         filters = csv_filters, select_cols = select_cols)
-      if (!is.null(ds)) return(ds)
-    }
-    # mixed FTP+CSV years: fall through to eager tibble
-  }
-
-  # parse column types
-  if (isTRUE(parse) && !isTRUE(lazy)) {
-    all_specs <- c()
-    if (length(ftp_results_final) > 0) {
-      ftp_meta <- if (toupper(type) == "CPNI") sipni_variables_cpni else sipni_variables_dpni
-      all_specs <- c(all_specs, .build_type_spec(ftp_meta))
-    }
-    if (length(api_results_final) > 0) {
-      all_specs <- c(all_specs, .build_type_spec(sipni_variables_api))
-    }
-    if (length(all_specs) > 0) {
-      combined <- .parse_columns(combined, all_specs, col_types = col_types)
-    }
-  }
-
-  # select variables if requested
+  # 8. select variables if requested
   if (!is.null(vars)) {
     keep_cols <- unique(c("year", "uf_source", vars))
     keep_cols <- intersect(keep_cols, names(combined))
     combined <- combined[, keep_cols, drop = FALSE]
   }
 
-  all_failed <- c(ftp_failed_labels, api_failed_labels)
+  # 9. report failures and return
+  all_failed <- c(ftp$failed_labels, api$failed_labels)
   combined <- .report_download_failures(combined, all_failed, "SI-PNI")
 
   tibble::as_tibble(combined)

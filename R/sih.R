@@ -290,6 +290,48 @@ sih_dictionary <- function(variable = NULL) {
 }
 
 
+#' @noRd
+.sih_download_loop <- function(year, month, target_ufs, cache, cache_dir) {
+  combinations <- expand.grid(
+    year = year, month = month, uf = target_ufs,
+    stringsAsFactors = FALSE
+  )
+
+  n_combos <- nrow(combinations)
+  if (n_combos > 1) {
+    cli::cli_inform(c(
+      "i" = "Downloading {n_combos} file(s) ({length(unique(combinations$uf))} UF(s) x {length(unique(combinations$year))} year(s) x {length(unique(combinations$month))} month(s))..."
+    ))
+  }
+
+  labels <- paste(combinations$uf,
+                  paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
+
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+    yr <- combinations$year[i]
+    mo <- combinations$month[i]
+    st <- combinations$uf[i]
+
+    tryCatch({
+      .sih_download_and_read(yr, mo, st, cache = cache,
+                             cache_dir = cache_dir)
+    }, error = function(e) {
+      NULL
+    })
+  })
+
+  succeeded <- !vapply(results, is.null, logical(1))
+  failed_labels <- labels[!succeeded]
+  results <- results[succeeded]
+
+  if (length(results) == 0) {
+    cli::cli_abort("No data could be downloaded for the requested year(s)/month(s)/UF(s).")
+  }
+
+  list(data = dplyr::bind_rows(results), failed_labels = failed_labels)
+}
+
+
 #' Download SIH Hospital Admission Microdata
 #'
 #' Downloads and returns hospital admission microdata from DATASUS FTP.
@@ -387,46 +429,10 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
                         lazy_filters, lazy_select, parse = parse)
   if (!is.null(ds)) return(ds)
 
-  # build all year x month x UF combinations
-  combinations <- expand.grid(
-    year = year, month = month, uf = target_ufs,
-    stringsAsFactors = FALSE
-  )
-
-  n_combos <- nrow(combinations)
-  if (n_combos > 1) {
-    cli::cli_inform(c(
-      "i" = "Downloading {n_combos} file(s) ({length(unique(combinations$uf))} UF(s) x {length(unique(combinations$year))} year(s) x {length(unique(combinations$month))} month(s))..."
-    ))
-  }
-
-  # download and read each combination
-  labels <- paste(combinations$uf,
-                  paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
-
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
-    yr <- combinations$year[i]
-    mo <- combinations$month[i]
-    st <- combinations$uf[i]
-
-    tryCatch({
-      .sih_download_and_read(yr, mo, st, cache = cache,
-                             cache_dir = cache_dir)
-    }, error = function(e) {
-      NULL
-    })
-  })
-
-  # remove NULLs and bind
-  succeeded <- !vapply(results, is.null, logical(1))
-  failed_labels <- labels[!succeeded]
-  results <- results[succeeded]
-
-  if (length(results) == 0) {
-    cli::cli_abort("No data could be downloaded for the requested year(s)/month(s)/UF(s).")
-  }
-
-  results <- dplyr::bind_rows(results)
+  # download, bind, and collect failures
+  dl <- .sih_download_loop(year, month, target_ufs, cache, cache_dir)
+  results <- dl$data
+  failed_labels <- dl$failed_labels
 
   # parse column types
   if (isTRUE(parse) && !isTRUE(lazy)) {

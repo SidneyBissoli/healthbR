@@ -329,6 +329,88 @@ sim_dictionary <- function(variable = NULL) {
 }
 
 
+# --- internal helpers for sim_data() -----------------------------------------
+
+#' Download and bind SIM data for all year x UF combinations
+#' @return List with `data` (data.frame) and `failed_labels` (character).
+#' @noRd
+.sim_download_loop <- function(year, target_ufs, cache, cache_dir) {
+  combinations <- expand.grid(
+    year = year, uf = target_ufs,
+    stringsAsFactors = FALSE
+  )
+
+  n_combos <- nrow(combinations)
+  if (n_combos > 1) {
+    cli::cli_inform(c(
+      "i" = "Downloading {n_combos} file(s) ({length(unique(combinations$uf))} UF(s) x {length(unique(combinations$year))} year(s))..."
+    ))
+  }
+
+  labels <- paste(combinations$uf, combinations$year)
+
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+    yr <- combinations$year[i]
+    st <- combinations$uf[i]
+    tryCatch(
+      .sim_download_and_read(yr, st, cache = cache, cache_dir = cache_dir),
+      error = function(e) NULL
+    )
+  })
+
+  succeeded <- !vapply(results, is.null, logical(1))
+  failed_labels <- labels[!succeeded]
+  results <- results[succeeded]
+
+  if (length(results) == 0) {
+    cli::cli_abort("No data could be downloaded for the requested year(s)/UF(s).")
+  }
+
+  list(data = dplyr::bind_rows(results), failed_labels = failed_labels)
+}
+
+#' Post-process SIM data (cause filter, parse, age decode)
+#' @return List with `data` (data.frame) and `lazy_select` (character or NULL).
+#' @noRd
+.sim_post_process <- function(data, cause, decode_age, parse, col_types,
+                              lazy, vars, lazy_select) {
+  # filter by cause
+  if (!is.null(cause)) {
+    cause_pattern <- stringr::str_c("^(", stringr::str_c(cause, collapse = "|"), ")")
+    if ("CAUSABAS" %in% names(data)) {
+      data <- data[grepl(cause_pattern, data$CAUSABAS), ]
+    } else {
+      cli::cli_warn("Column {.var CAUSABAS} not found in data. Cannot filter by cause.")
+    }
+  }
+
+  # parse column types
+  if (isTRUE(parse) && !isTRUE(lazy)) {
+    type_spec <- .build_type_spec(sim_variables_metadata)
+    data <- .parse_columns(data, type_spec, col_types = col_types)
+  }
+
+  # decode age
+  if (isTRUE(decode_age) && "IDADE" %in% names(data)) {
+    age_col <- .sim_decode_age(data$IDADE)
+    idade_pos <- which(names(data) == "IDADE")
+    if (length(idade_pos) == 1) {
+      data <- tibble::add_column(data, age_years = age_col, .after = idade_pos)
+    } else {
+      data$age_years <- age_col
+    }
+  }
+
+  # include age_years in select_cols for eager path
+  if (isTRUE(decode_age) && "IDADE" %in% (vars %||% character(0))) {
+    lazy_select <- unique(c(lazy_select, "age_years"))
+  }
+
+  list(data = data, lazy_select = lazy_select)
+}
+
+# --- main sim_data() function ------------------------------------------------
+
 #' Download SIM Mortality Microdata
 #'
 #' Downloads and returns mortality microdata from DATASUS FTP.
@@ -415,7 +497,7 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sim_uf_list
 
-  # compute lazy args once
+  # compute lazy args
   cache_dir_resolved <- .sim_cache_dir(cache_dir)
   lazy_filters <- list(year = year, uf_source = target_ufs)
   lazy_select <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
@@ -425,80 +507,13 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
                         lazy_filters, lazy_select, parse = parse)
   if (!is.null(ds)) return(ds)
 
-  # build all year x UF combinations
-  combinations <- expand.grid(
-    year = year, uf = target_ufs,
-    stringsAsFactors = FALSE
-  )
+  # download, post-process, return
+  dl <- .sim_download_loop(year, target_ufs, cache, cache_dir)
+  pp <- .sim_post_process(dl$data, cause, decode_age, parse, col_types,
+                          lazy, vars, lazy_select)
 
-  n_combos <- nrow(combinations)
-  if (n_combos > 1) {
-    cli::cli_inform(c(
-      "i" = "Downloading {n_combos} file(s) ({length(unique(combinations$uf))} UF(s) x {length(unique(combinations$year))} year(s))..."
-    ))
-  }
-
-  # download and read each combination
-  labels <- paste(combinations$uf, combinations$year)
-
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
-    yr <- combinations$year[i]
-    st <- combinations$uf[i]
-
-    tryCatch({
-      .sim_download_and_read(yr, st, cache = cache, cache_dir = cache_dir)
-    }, error = function(e) {
-      NULL
-    })
-  })
-
-  # remove NULLs and bind
-  succeeded <- !vapply(results, is.null, logical(1))
-  failed_labels <- labels[!succeeded]
-  results <- results[succeeded]
-
-  if (length(results) == 0) {
-    cli::cli_abort("No data could be downloaded for the requested year(s)/UF(s).")
-  }
-
-  results <- dplyr::bind_rows(results)
-
-  # filter by cause if requested
-  if (!is.null(cause)) {
-    cause_pattern <- stringr::str_c("^(", stringr::str_c(cause, collapse = "|"), ")")
-    if ("CAUSABAS" %in% names(results)) {
-      results <- results[grepl(cause_pattern, results$CAUSABAS), ]
-    } else {
-      cli::cli_warn("Column {.var CAUSABAS} not found in data. Cannot filter by cause.")
-    }
-  }
-
-  # parse column types
-  if (isTRUE(parse) && !isTRUE(lazy)) {
-    type_spec <- .build_type_spec(sim_variables_metadata)
-    results <- .parse_columns(results, type_spec, col_types = col_types)
-  }
-
-  # decode age if requested
-  if (isTRUE(decode_age) && "IDADE" %in% names(results)) {
-    age_col <- .sim_decode_age(results$IDADE)
-    # insert after IDADE column
-    idade_pos <- which(names(results) == "IDADE")
-    if (length(idade_pos) == 1) {
-      results <- tibble::add_column(results, age_years = age_col,
-                                    .after = idade_pos)
-    } else {
-      results$age_years <- age_col
-    }
-  }
-
-  # include age_years in select_cols for eager path
-  if (isTRUE(decode_age) && "IDADE" %in% (vars %||% character(0))) {
-    lazy_select <- unique(c(lazy_select, "age_years"))
-  }
-
-  .data_return(results, lazy, backend, cache_dir_resolved, "sim_data",
-               lazy_filters, lazy_select, failed_labels, "SIM")
+  .data_return(pp$data, lazy, backend, cache_dir_resolved, "sim_data",
+               lazy_filters, pp$lazy_select, dl$failed_labels, "SIM")
 }
 
 
