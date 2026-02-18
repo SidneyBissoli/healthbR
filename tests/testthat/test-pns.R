@@ -1391,10 +1391,7 @@ test_that("pns_read_microdata errors when no data files found", {
   dir.create(zip_dir)
   writeLines("readme", file.path(zip_dir, "readme.pdf"))
   zip_path <- file.path(temp, "test.zip")
-  old_wd <- getwd()
-  setwd(zip_dir)
-  utils::zip(zip_path, files = "readme.pdf")
-  setwd(old_wd)
+  withr::with_dir(zip_dir, utils::zip(zip_path, files = "readme.pdf"))
 
   expect_error(
     healthbR:::pns_read_microdata(zip_path, 2019),
@@ -1410,10 +1407,7 @@ test_that("pns_read_microdata reads CSV data from zip", {
   csv_content <- "V0001,C006,C008\n11,1,25\n33,2,30"
   writeLines(csv_content, file.path(zip_dir, "PNS_2019.csv"))
   zip_path <- file.path(temp, "PNS_2019.zip")
-  old_wd <- getwd()
-  setwd(zip_dir)
-  utils::zip(zip_path, files = "PNS_2019.csv")
-  setwd(old_wd)
+  withr::with_dir(zip_dir, utils::zip(zip_path, files = "PNS_2019.csv"))
 
   result <- healthbR:::pns_read_microdata(zip_path, 2019)
   expect_s3_class(result, "tbl_df")
@@ -1568,10 +1562,7 @@ test_that("pns_read_microdata reads delimited txt when no csv and no input file"
   txt_content <- "V0001;C006;C008\n11;1;25\n33;2;30"
   writeLines(txt_content, file.path(zip_dir, "PNS_2019_dados.txt"))
   zip_path <- file.path(temp, "PNS_2019_txt.zip")
-  old_wd <- getwd()
-  setwd(zip_dir)
-  utils::zip(zip_path, files = "PNS_2019_dados.txt")
-  setwd(old_wd)
+  withr::with_dir(zip_dir, utils::zip(zip_path, files = "PNS_2019_dados.txt"))
 
   result <- healthbR:::pns_read_microdata(zip_path, 2019)
   expect_s3_class(result, "tbl_df")
@@ -1593,10 +1584,7 @@ test_that("pns_read_microdata reads fwf when input file present", {
   writeLines(data_content, file.path(zip_dir, "PNS_2019_dados.txt"))
 
   zip_path <- file.path(temp, "PNS_fwf.zip")
-  old_wd <- getwd()
-  setwd(zip_dir)
-  utils::zip(zip_path, files = c("input_PNS2019.txt", "PNS_2019_dados.txt"))
-  setwd(old_wd)
+  withr::with_dir(zip_dir, utils::zip(zip_path, files = c("input_PNS2019.txt", "PNS_2019_dados.txt")))
 
   result <- healthbR:::pns_read_microdata(zip_path, 2019)
   expect_s3_class(result, "tbl_df")
