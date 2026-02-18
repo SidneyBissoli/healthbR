@@ -1661,18 +1661,32 @@ test_that(".sipni_csv_download_months returns empty for all failures", {
 # ADDITIONAL COVERAGE: .sipni_download_and_read (mocked success path)
 # ============================================================================
 
-test_that(".sipni_download_and_read reads DBF and adds partition cols", {
-  temp_dir <- withr::local_tempdir()
-  cache_dir <- withr::local_tempdir()
+# Pre-computed DBF bytes (base64-encoded) — avoids foreign::write.dbf on CI
+# Test 1: IMUNO=c("09","10"), QT_DOSE=c("100","200") — 2 rows, 2 cols
+.dbf_b64_2rows <- paste0(
+  "A18HGgIAAABhAA0AAAAAAAAAAAAAAAAAAAAAAAAAAABJTVVOTwAAAAAAAEMAAAAABQAAAAAA",
+  "AAAAAAAAAAAAAFFUX0RPU0UAAAAAQwAAAAAHAAAAAAAAAAAAAAAAAAAADSAwOSAgIDEwMCAg",
+  "ICAgMTAgICAyMDAgICAg"
+)
+# Test 2: IMUNO/QT_DOSE/MUNIC — 10 rows, 3 cols (>100 bytes)
+.dbf_b64_10rows <- paste0(
+  "A18HGgoAAACBABMAAAAAAAAAAAAAAAAAAAAAAAAAAABJTVVOTwAAAAAAAEMAAAAABQAAAAAA",
+  "AAAAAAAAAAAAAFFUX0RPU0UAAAAAQwAAAAAHAAAAAAAAAAAAAAAAAAAATVVOSUMAAAAAAABD",
+  "AAAAAAYAAAAAAAAAAAAAAAAAAAANIDA5ICAgMTAwICAgIDEyMDA0MCAwOSAgIDEwMCAgICAx",
+  "MjAwNDAgMDkgICAxMDAgICAgMTIwMDQwIDA5ICAgMTAwICAgIDEyMDA0MCAwOSAgIDEwMCAg",
+  "ICAxMjAwNDAgMDkgICAxMDAgICAgMTIwMDQwIDA5ICAgMTAwICAgIDEyMDA0MCAwOSAgIDEw",
+  "MCAgICAxMjAwNDAgMDkgICAxMDAgICAgMTIwMDQwIDA5ICAgMTAwICAgIDEyMDA0MA=="
+)
+# Test 3: IMUNO/QT_DOSE/COBERT="85,5" — 1 row, 3 cols (CPNI comma fix)
+.dbf_b64_cobert <- paste0(
+  "A18HGgEAAACBABMAAAAAAAAAAAAAAAAAAAAAAAAAAABJTVVOTwAAAAAAAEMAAAAABQAAAAAA",
+  "AAAAAAAAAAAAAFFUX0RPU0UAAAAAQwAAAAAHAAAAAAAAAAAAAAAAAAAAQ09CRVJUAAAAAABD",
+  "AAAAAAYAAAAAAAAAAAAAAAAAAAANIDA5ICAgMTAwICAgIDg1LDUgIA=="
+)
 
-  # create a minimal DBF and capture as raw bytes
-  dbf_path <- file.path(temp_dir, "DPNIAC19.DBF")
-  df <- data.frame(
-    IMUNO = c("09", "10"), QT_DOSE = c("100", "200"),
-    stringsAsFactors = FALSE
-  )
-  foreign::write.dbf(df, dbf_path)
-  dbf_bytes <- readBin(dbf_path, "raw", n = file.size(dbf_path))
+test_that(".sipni_download_and_read reads DBF and adds partition cols", {
+  cache_dir <- withr::local_tempdir()
+  dbf_bytes <- jsonlite::base64_dec(.dbf_b64_2rows)
 
   local_mocked_bindings(
     .datasus_download = function(url, destfile, ...) {
@@ -1697,18 +1711,8 @@ test_that(".sipni_download_and_read reads DBF and adds partition cols", {
 })
 
 test_that(".sipni_download_and_read falls back to lowercase .dbf extension", {
-  temp_dir <- withr::local_tempdir()
   cache_dir <- withr::local_tempdir()
-
-  # create a DBF with multiple rows so file size exceeds 100 bytes
-  dbf_path <- file.path(temp_dir, "DPNIAC19.DBF")
-  df <- data.frame(
-    IMUNO = rep("09", 10), QT_DOSE = rep("100", 10),
-    MUNIC = rep("120040", 10),
-    stringsAsFactors = FALSE
-  )
-  foreign::write.dbf(df, dbf_path)
-  dbf_bytes <- readBin(dbf_path, "raw", n = file.size(dbf_path))
+  dbf_bytes <- jsonlite::base64_dec(.dbf_b64_10rows)
 
   call_count <- 0L
   local_mocked_bindings(
@@ -1732,16 +1736,8 @@ test_that(".sipni_download_and_read falls back to lowercase .dbf extension", {
 })
 
 test_that(".sipni_download_and_read fixes CPNI comma in COBERT", {
-  temp_dir <- withr::local_tempdir()
   cache_dir <- withr::local_tempdir()
-
-  dbf_path <- file.path(temp_dir, "CPNIAC19.DBF")
-  df <- data.frame(
-    IMUNO = "09", QT_DOSE = "100", COBERT = "85,5",
-    stringsAsFactors = FALSE
-  )
-  foreign::write.dbf(df, dbf_path)
-  dbf_bytes <- readBin(dbf_path, "raw", n = file.size(dbf_path))
+  dbf_bytes <- jsonlite::base64_dec(.dbf_b64_cobert)
 
   local_mocked_bindings(
     .datasus_download = function(url, destfile, ...) {
