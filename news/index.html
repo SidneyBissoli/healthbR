@@ -85,9 +85,15 @@
 <div class="section level3">
 <h3 id="refactoring-0-2-0">Refactoring<a class="anchor" aria-label="anchor" href="#refactoring-0-2-0"></a></h3>
 <ul><li><p>Extracted shared helpers for validation, search, cache management, and return logic, eliminating ~1100 lines of duplication across modules.</p></li>
+<li><p>Reduced cyclomatic complexity across 11 high-complexity functions by extracting internal subfunctions. All exported and internal functions now have cyclomatic complexity below 15.</p></li>
 <li><p>Removed deprecated flat cache migration infrastructure.</p></li>
 <li><p>Moved <code>readxl</code> and <code>haven</code> from Imports to Suggests.</p></li>
 <li><p>Removed unused <code>vroom</code> from Suggests.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="governance-0-2-0">Governance<a class="anchor" aria-label="anchor" href="#governance-0-2-0"></a></h3>
+<ul><li><p>Added <code>CONTRIBUTING.md</code> with contributor guidelines.</p></li>
+<li><p>Added <code>CODE_OF_CONDUCT.md</code> (Contributor Covenant v2.1).</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
@@ -103,6 +109,7 @@
 <ul><li>Fixed PNS Arrow expression error with partition filtering.</li>
 <li>Fixed <code><a href="../reference/pns_sidra_data.html">pns_sidra_data()</a></code> unknown table warning.</li>
 <li>Fixed POF dictionary parsing failure on Linux/Ubuntu.</li>
+<li>Fixed SI-PNI download crash when DATASUS FTP file is missing or corrupted (added defensive <code><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists()</a></code> guard before <code><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.size()</a></code> check).</li>
 </ul></div>
 </div>
     <div class="section level2">

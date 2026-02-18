@@ -164,12 +164,68 @@
 <tr class="even">
 <td><strong>SIA</strong></td>
 <td>Outpatient Information System (13 file types)</td>
-<td>Monthly/type/UF</td>
+<td>Monthly/UF</td>
 <td>2008–2024</td>
+</tr>
+<tr class="odd">
+<td><strong>SINAN</strong></td>
+<td>Notifiable Diseases Surveillance (31 diseases)</td>
+<td>Annual/UF</td>
+<td>2007–2024</td>
+</tr>
+<tr class="even">
+<td><strong>CNES</strong></td>
+<td>National Health Facility Registry (13 file types)</td>
+<td>Monthly/UF</td>
+<td>2005–2024</td>
+</tr>
+<tr class="odd">
+<td><strong>SI-PNI</strong></td>
+<td>National Immunization Program (FTP 1994–2019, CSV 2020+)</td>
+<td>Annual or Monthly/UF</td>
+<td>1994–2025</td>
 </tr>
 </tbody>
 </table>
 <p>DATASUS modules download <code>.dbc</code> files (compressed DBF) and decompress them internally using vendored C code – no external dependencies required.</p>
+</div>
+<div class="section level3">
+<h3 id="primary-care--regulatory-agencies">Primary Care &amp; Regulatory Agencies<a class="anchor" aria-label="anchor" href="#primary-care--regulatory-agencies"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="22%">
+<col width="22%">
+<col width="36%">
+<col width="19%">
+</colgroup>
+<thead><tr class="header">
+<th>Module</th>
+<th>Source</th>
+<th>Description</th>
+<th>Years</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>SISAB</strong></td>
+<td>Ministry of Health REST API</td>
+<td>Primary Care coverage indicators (APS, oral health, community agents, PNS)</td>
+<td>2007–present</td>
+</tr>
+<tr class="even">
+<td><strong>ANS</strong></td>
+<td>ANS Open Data Portal</td>
+<td>Supplementary health beneficiaries, consumer complaints, financial statements</td>
+<td>2007–present</td>
+</tr>
+<tr class="odd">
+<td><strong>ANVISA</strong></td>
+<td>ANVISA Open Data Portal</td>
+<td>Product registrations, pharmacovigilance, hemovigilance, technovigilance, SNGPC</td>
+<td>snapshot + 2014–present</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section level2">
@@ -215,9 +271,22 @@
 <span><span class="va">medicamentos</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sia_data.html">sia_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, type <span class="op">=</span> <span class="st">"AM"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="survey-modules">Survey modules<a class="anchor" aria-label="anchor" href="#survey-modules"></a>
+<h3 id="additional-datasus-modules">Additional DATASUS modules<a class="anchor" aria-label="anchor" href="#additional-datasus-modules"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># disease notifications -- dengue, 2022</span></span>
+<span><span class="va">dengue</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sinan_data.html">sinan_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, disease <span class="op">=</span> <span class="st">"DENG"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># health facilities in Acre, January 2023</span></span>
+<span><span class="va">cnes</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cnes_data.html">cnes_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># vaccination data -- Acre, 2019 (FTP) or 2024 (CSV)</span></span>
+<span><span class="va">vacinas</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="survey-modules">Survey modules<a class="anchor" aria-label="anchor" href="#survey-modules"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># VIGITEL telephone survey</span></span>
 <span><span class="va">vigitel</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vigitel_data.html">vigitel_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span></span>
@@ -234,12 +303,26 @@
 <span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/censo_populacao.html">censo_populacao</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, territorial_level <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
+<h3 id="primary-care--regulatory-agencies-1">Primary care &amp; regulatory agencies<a class="anchor" aria-label="anchor" href="#primary-care--regulatory-agencies-1"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># SISAB -- primary care coverage by state, January 2024</span></span>
+<span><span class="va">sisab</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sisab_data.html">sisab_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># ANS -- health plan beneficiaries in Acre, December 2023</span></span>
+<span><span class="va">ans</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ans_data.html">ans_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">12</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># ANVISA -- registered medicines</span></span>
+<span><span class="va">med</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/anvisa_data.html">anvisa_data</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"medicines"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
 <h3 id="explore-variables-and-dictionaries">Explore variables and dictionaries<a class="anchor" aria-label="anchor" href="#explore-variables-and-dictionaries"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># list variables for any module</span></span>
 <span><span class="fu"><a href="reference/sim_variables.html">sim_variables</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/sia_variables.html">sia_variables</a></span><span class="op">(</span>search <span class="op">=</span> <span class="st">"sexo"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/sinan_diseases.html">sinan_diseases</a></span><span class="op">(</span>search <span class="op">=</span> <span class="st">"dengue"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># data dictionary with category labels</span></span>
 <span><span class="fu"><a href="reference/sim_dictionary.html">sim_dictionary</a></span><span class="op">(</span><span class="st">"SEXO"</span><span class="op">)</span></span>
@@ -250,10 +333,10 @@
 <h2 id="caching">Caching<a class="anchor" aria-label="anchor" href="#caching"></a>
 </h2>
 <p>All modules cache downloaded data automatically. Install <code>arrow</code> for optimized Parquet caching:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
 <p>Each module provides cache management functions:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check what is cached</span></span>
 <span><span class="fu"><a href="reference/sim_cache_status.html">sim_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/sih_cache_status.html">sih_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -268,33 +351,35 @@
 <p>All data is downloaded from official Brazilian government repositories:</p>
 <ul>
 <li>
-<strong>VIGITEL</strong>: <a href="https://svs.aids.gov.br/daent/cgdnt/vigitel/" class="external-link uri">https://svs.aids.gov.br/daent/cgdnt/vigitel/</a>
-</li>
+<strong>VIGITEL</strong>: Ministry of Health</li>
 <li>
-<strong>PNS / PNAD Continua / POF</strong>: <a href="https://www.ibge.gov.br/" class="external-link uri">https://www.ibge.gov.br/</a>
-</li>
+<strong>PNS / PNAD Continua / POF / Censo</strong>: IBGE</li>
 <li>
-<strong>Censo</strong>: SIDRA API (<a href="https://apisidra.ibge.gov.br/" class="external-link uri">https://apisidra.ibge.gov.br/</a>)</li>
+<strong>SIM / SINASC / SIH / SIA / SINAN / CNES / SI-PNI</strong>: DATASUS FTP</li>
 <li>
-<strong>SIM / SINASC / SIH / SIA</strong>: DATASUS FTP (<code>ftp://ftp.datasus.gov.br/dissemin/publicos/</code>)</li>
+<strong>SISAB</strong>: Ministry of Health REST API</li>
+<li>
+<strong>ANS</strong>: ANS Open Data Portal</li>
+<li>
+<strong>ANVISA</strong>: ANVISA Open Data Portal</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use healthbR in your research, please cite it:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"healthbR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
 </h2>
-<p>Contributions are welcome! Please open an issue to discuss proposed changes or submit a pull request.</p>
+<p>Please see <a href="CONTRIBUTING.html">CONTRIBUTING.md</a> for guidelines on how to contribute to this project.</p>
 </div>
 <div class="section level2">
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
 </h2>
-<p>Please note that the healthbR project is released with a <a href="https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+<p>Please note that the healthbR project is released with a <a href="CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
