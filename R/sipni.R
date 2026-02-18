@@ -99,6 +99,28 @@
 }
 
 
+#' Check FTP partitioned cache for SI-PNI data
+#' @return Cached tibble or NULL if not found.
+#' @noRd
+.sipni_ftp_check_cache <- function(uf, year, type, cache, cache_dir) {
+  dataset_name <- stringr::str_c("sipni_", tolower(type), "_data")
+  target_year <- as.integer(year)
+
+  if (!isTRUE(cache) || !.has_arrow() ||
+      !.has_partitioned_cache(cache_dir, dataset_name)) {
+    return(NULL)
+  }
+
+  ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+  cached <- ds |>
+    dplyr::filter(.data$uf_source == uf,
+                   .data$year == target_year) |>
+    dplyr::collect()
+
+  if (nrow(cached) > 0) cached else NULL
+}
+
+
 #' Download and read a SI-PNI .DBF file for one UF/year/type (FTP, 1994-2019)
 #' @noRd
 .sipni_download_and_read <- function(year, uf, type = "DPNI",
@@ -109,15 +131,8 @@
   target_uf <- uf
 
   # 1. check partitioned cache first (preferred path)
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
-    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
-    cached <- ds |>
-      dplyr::filter(.data$uf_source == target_uf,
-                     .data$year == target_year) |>
-      dplyr::collect()
-    if (nrow(cached) > 0) return(cached)
-  }
+  cached <- .sipni_ftp_check_cache(uf, year, type, cache, cache_dir)
+  if (!is.null(cached)) return(cached)
 
   # 2. download from FTP
   url <- .sipni_build_ftp_url(year, uf, type)
@@ -188,46 +203,37 @@
 }
 
 
-#' Process national SI-PNI CSV for one month, caching ALL UFs
-#'
-#' Downloads the national monthly CSV ZIP from OpenDataSUS, reads it in
-#' chunks splitting by UF, and caches ALL 27 states. This means a second
-#' request for a different UF from the same month is instant from cache.
-#'
-#' @param year Integer. Year.
-#' @param month Integer. Month (1-12).
-#' @param uf Character. The UF to return (all 27 are cached regardless).
-#' @param cache Logical. Whether to use caching.
-#' @param cache_dir Character or NULL. Cache directory.
-#' @param zip_path Character or NULL. Path to an already-downloaded ZIP file.
-#'   If provided, skips downloading. Used by `.sipni_csv_download_months()`
-#'   for concurrent download + sequential processing.
-#'
-#' @return A tibble with data for the requested UF.
+#' Check partitioned cache for SI-PNI CSV data
+#' @return Cached tibble or NULL if not found.
 #' @noRd
-.sipni_csv_process_national <- function(year, month, uf,
-                                        cache = TRUE, cache_dir = NULL,
-                                        zip_path = NULL) {
-  cache_dir <- .sipni_cache_dir(cache_dir)
+.sipni_csv_check_cache <- function(uf, year, month, cache, cache_dir) {
   dataset_name <- "sipni_csv_data"
   target_year <- as.integer(year)
   target_month <- as.integer(month)
-  month_name <- sipni_month_names[month]
 
-  # 1. check partitioned cache first (preferred path)
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
-    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
-    cached <- ds |>
-      dplyr::filter(.data$uf_source == uf,
-                     .data$year == target_year,
-                     .data$month == target_month) |>
-      dplyr::collect()
-    if (nrow(cached) > 0) return(cached)
+  if (!isTRUE(cache) || !.has_arrow() ||
+      !.has_partitioned_cache(cache_dir, dataset_name)) {
+    return(NULL)
   }
 
-  # 2. download ZIP (unless pre-downloaded)
+  ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+  cached <- ds |>
+    dplyr::filter(.data$uf_source == uf,
+                   .data$year == target_year,
+                   .data$month == target_month) |>
+    dplyr::collect()
+
+  if (nrow(cached) > 0) cached else NULL
+}
+
+
+#' Download ZIP and extract CSV for SI-PNI
+#' @return A list with csv_path and temp_dir (caller must clean up temp_dir).
+#' @noRd
+.sipni_csv_download_zip <- function(year, month, zip_path) {
+  month_name <- sipni_month_names[month]
   own_zip <- is.null(zip_path)
+
   if (own_zip) {
     url <- .sipni_csv_build_url(year, month)
     cli::cli_inform(c(
@@ -236,14 +242,9 @@
     zip_path <- tempfile(fileext = ".zip")
     .http_download_resumable(url, zip_path, retries = 3L, timeout = 600L)
   }
-  if (own_zip) {
-    on.exit(if (file.exists(zip_path)) file.remove(zip_path), add = TRUE)
-  }
 
-  # 4. extract CSV from ZIP
   temp_dir <- tempfile("sipni_csv")
   dir.create(temp_dir, recursive = TRUE)
-  on.exit(unlink(temp_dir, recursive = TRUE), add = TRUE)
 
   utils::unzip(zip_path, exdir = temp_dir)
   # remove ZIP immediately to free disk space (only if we own it)
@@ -254,9 +255,16 @@
   if (length(csv_files) == 0) {
     cli::cli_abort("No CSV file found inside the downloaded ZIP.")
   }
-  csv_path <- csv_files[1]
 
-  # 5. read CSV in chunks, buffering ALL UFs (not just the requested one)
+  list(csv_path = csv_files[1], temp_dir = temp_dir, own_zip = own_zip,
+       zip_path = zip_path)
+}
+
+
+#' Read SI-PNI CSV in chunks, splitting by UF
+#' @return A named list of chunk lists, keyed by UF code.
+#' @noRd
+.sipni_csv_read_chunked <- function(csv_path, month_name, year) {
   cli::cli_inform(c(
     "i" = "Reading and caching all UFs for {month_name} {year}..."
   ))
@@ -293,7 +301,19 @@
     progress = FALSE
   )
 
-  # 6. bind and cache each UF
+  uf_buffers
+}
+
+
+#' Bind UF buffers, cache all UFs, and extract the requested UF
+#' @return A tibble for the requested UF, or an empty tibble with a warning.
+#' @noRd
+.sipni_csv_cache_and_extract <- function(uf_buffers, uf, year, month,
+                                         cache, cache_dir) {
+  dataset_name <- "sipni_csv_data"
+  target_year <- as.integer(year)
+  target_month <- as.integer(month)
+  month_name <- sipni_month_names[month]
   requested_data <- NULL
 
   for (u in names(uf_buffers)) {
@@ -317,9 +337,6 @@
     }
   }
 
-  # free memory
-  rm(uf_buffers)
-
   if (is.null(requested_data) || nrow(requested_data) == 0) {
     cli::cli_warn(c(
       "!" = "No data found for UF={uf} in {month_name} {year}.",
@@ -329,6 +346,132 @@
   }
 
   requested_data
+}
+
+
+#' Process national SI-PNI CSV for one month, caching ALL UFs
+#'
+#' Downloads the national monthly CSV ZIP from OpenDataSUS, reads it in
+#' chunks splitting by UF, and caches ALL 27 states. This means a second
+#' request for a different UF from the same month is instant from cache.
+#'
+#' @param year Integer. Year.
+#' @param month Integer. Month (1-12).
+#' @param uf Character. The UF to return (all 27 are cached regardless).
+#' @param cache Logical. Whether to use caching.
+#' @param cache_dir Character or NULL. Cache directory.
+#' @param zip_path Character or NULL. Path to an already-downloaded ZIP file.
+#'   If provided, skips downloading. Used by `.sipni_csv_download_months()`
+#'   for concurrent download + sequential processing.
+#'
+#' @return A tibble with data for the requested UF.
+#' @noRd
+.sipni_csv_process_national <- function(year, month, uf,
+                                        cache = TRUE, cache_dir = NULL,
+                                        zip_path = NULL) {
+  cache_dir <- .sipni_cache_dir(cache_dir)
+  month_name <- sipni_month_names[month]
+
+  # 1. check partitioned cache first (preferred path)
+  cached <- .sipni_csv_check_cache(uf, year, month, cache, cache_dir)
+  if (!is.null(cached)) return(cached)
+
+  # 2. download ZIP and extract CSV
+  zip_info <- .sipni_csv_download_zip(year, month, zip_path)
+  if (zip_info$own_zip) {
+    on.exit(if (file.exists(zip_info$zip_path)) file.remove(zip_info$zip_path),
+            add = TRUE)
+  }
+  on.exit(unlink(zip_info$temp_dir, recursive = TRUE), add = TRUE)
+
+  # 3. read CSV in chunks, buffering ALL UFs
+  uf_buffers <- .sipni_csv_read_chunked(zip_info$csv_path, month_name, year)
+
+  # 4. bind, cache all UFs, and extract the requested one
+  result <- .sipni_csv_cache_and_extract(uf_buffers, uf, year, month,
+                                          cache, cache_dir)
+  rm(uf_buffers)
+
+  result
+}
+
+
+#' Check cache for multiple months, return cached results and months needing download
+#' @return A list with cached_results (list of tibbles) and needs_download (integer).
+#' @noRd
+.sipni_csv_collect_cached <- function(months, uf, year, cache, cache_dir) {
+  needs_download <- integer(0)
+  cached_results <- list()
+
+  for (m in months) {
+    cached <- .sipni_csv_check_cache(uf, year, m, cache, cache_dir)
+    if (!is.null(cached)) {
+      cached_results <- c(cached_results, list(cached))
+    } else {
+      needs_download <- c(needs_download, m)
+    }
+  }
+
+  list(cached_results = cached_results, needs_download = needs_download)
+}
+
+
+#' Download and process months that are not cached
+#' @return A list of tibbles with downloaded data.
+#' @noRd
+.sipni_csv_fetch_needed <- function(needs_download, year, uf,
+                                     cache, cache_dir) {
+  downloaded_results <- list()
+  if (length(needs_download) == 0) return(downloaded_results)
+
+  if (length(needs_download) > 1) {
+    urls <- vapply(needs_download, function(m) {
+      .sipni_csv_build_url(year, m)
+    }, character(1))
+
+    zip_paths <- vapply(needs_download, function(m) {
+      tempfile(fileext = ".zip")
+    }, character(1))
+
+    cli::cli_inform(c(
+      "i" = "Downloading {length(needs_download)} SI-PNI CSV file(s) concurrently..."
+    ))
+    dl_results <- .multi_download(urls, zip_paths, max_concurrent = 6L,
+                                   timeout = 600L)
+
+    for (idx in seq_along(needs_download)) {
+      m <- needs_download[idx]
+      if (dl_results$success[idx]) {
+        tryCatch({
+          data <- .sipni_csv_process_national(
+            year, m, uf, cache = cache, cache_dir = cache_dir,
+            zip_path = zip_paths[idx]
+          )
+          if (nrow(data) > 0) {
+            downloaded_results <- c(downloaded_results, list(data))
+          }
+        }, error = function(e) {
+          NULL
+        })
+      }
+      # clean up ZIP
+      if (file.exists(zip_paths[idx])) file.remove(zip_paths[idx])
+    }
+  } else {
+    # single month: use .sipni_csv_process_national directly (it downloads)
+    tryCatch({
+      data <- .sipni_csv_process_national(
+        year, needs_download[1], uf, cache = cache, cache_dir = cache_dir
+      )
+      if (nrow(data) > 0) {
+        downloaded_results <- c(downloaded_results, list(data))
+      }
+    }, error = function(e) {
+      NULL
+    })
+  }
+
+  downloaded_results
 }
 
 
@@ -349,87 +492,15 @@
                                        cache = TRUE, cache_dir = NULL) {
   cache_dir <- .sipni_cache_dir(cache_dir)
 
-  # check which months need downloading (not already fully cached)
-  needs_download <- integer(0)
-  cached_results <- list()
-  dataset_name <- "sipni_csv_data"
-  target_year <- as.integer(year)
+  # check which months are cached vs need downloading
+  cache_info <- .sipni_csv_collect_cached(months, uf, year, cache, cache_dir)
 
-  for (m in months) {
-    target_month <- as.integer(m)
-    got_cache <- FALSE
+  # download months that are not cached
+  downloaded_results <- .sipni_csv_fetch_needed(
+    cache_info$needs_download, year, uf, cache, cache_dir
+  )
 
-    if (isTRUE(cache) && .has_arrow() &&
-        .has_partitioned_cache(cache_dir, dataset_name)) {
-      ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
-      cached <- ds |>
-        dplyr::filter(.data$uf_source == uf,
-                       .data$year == target_year,
-                       .data$month == target_month) |>
-        dplyr::collect()
-      if (nrow(cached) > 0) {
-        cached_results <- c(cached_results, list(cached))
-        got_cache <- TRUE
-      }
-    }
-
-    if (!got_cache) {
-      needs_download <- c(needs_download, m)
-    }
-  }
-
-  # download needed months concurrently
-  downloaded_results <- list()
-  if (length(needs_download) > 0) {
-    urls <- vapply(needs_download, function(m) {
-      .sipni_csv_build_url(year, m)
-    }, character(1))
-
-    zip_paths <- vapply(needs_download, function(m) {
-      tempfile(fileext = ".zip")
-    }, character(1))
-
-    if (length(needs_download) > 1) {
-      cli::cli_inform(c(
-        "i" = "Downloading {length(needs_download)} SI-PNI CSV file(s) concurrently..."
-      ))
-      dl_results <- .multi_download(urls, zip_paths, max_concurrent = 6L,
-                                     timeout = 600L)
-
-      for (idx in seq_along(needs_download)) {
-        m <- needs_download[idx]
-        if (dl_results$success[idx]) {
-          tryCatch({
-            data <- .sipni_csv_process_national(
-              year, m, uf, cache = cache, cache_dir = cache_dir,
-              zip_path = zip_paths[idx]
-            )
-            if (nrow(data) > 0) {
-              downloaded_results <- c(downloaded_results, list(data))
-            }
-          }, error = function(e) {
-            NULL
-          })
-        }
-        # clean up ZIP
-        if (file.exists(zip_paths[idx])) file.remove(zip_paths[idx])
-      }
-    } else {
-      # single month: use .sipni_csv_process_national directly (it downloads)
-      tryCatch({
-        data <- .sipni_csv_process_national(
-          year, needs_download[1], uf, cache = cache, cache_dir = cache_dir
-        )
-        if (nrow(data) > 0) {
-          downloaded_results <- c(downloaded_results, list(data))
-        }
-      }, error = function(e) {
-        NULL
-      })
-    }
-  }
-
-  all_results <- c(cached_results, downloaded_results)
+  all_results <- c(cache_info$cached_results, downloaded_results)
 
   if (length(all_results) == 0) {
     return(tibble::tibble())
@@ -691,6 +762,35 @@ sipni_dictionary <- function(variable = NULL) {
 }
 
 
+#' Try lazy return from FTP partitioned cache
+#' @return Lazy query object or NULL.
+#' @noRd
+.sipni_lazy_ftp <- function(ftp_years, type, target_ufs, backend, cache_dir) {
+  if (length(ftp_years) == 0) return(NULL)
+
+  ftp_ds_name <- stringr::str_c("sipni_", tolower(type), "_data")
+  .lazy_return(cache_dir, ftp_ds_name, backend,
+               filters = list(year = ftp_years, uf_source = target_ufs),
+               select_cols = NULL)
+}
+
+
+#' Try lazy return from CSV partitioned cache
+#' @return Lazy query object or NULL.
+#' @noRd
+.sipni_lazy_csv <- function(api_years, target_ufs, month_vals,
+                             backend, cache_dir) {
+  if (length(api_years) == 0) return(NULL)
+
+  csv_filters <- list(year = api_years, uf_source = target_ufs)
+  if (!is.null(month_vals) && length(month_vals) < 12) {
+    csv_filters$month <- as.integer(month_vals)
+  }
+  .lazy_return(cache_dir, "sipni_csv_data", backend,
+               filters = csv_filters, select_cols = NULL)
+}
+
+
 #' Pre-download lazy evaluation check for sipni_data
 #' @return Lazy query object or NULL
 #' @noRd
@@ -704,28 +804,14 @@ sipni_dictionary <- function(variable = NULL) {
   cache_dir_resolved <- .sipni_cache_dir(cache_dir)
 
   # try FTP partitioned cache (years <= 2019)
-  ftp_years <- params$ftp_years
-  if (length(ftp_years) > 0) {
-    ftp_ds_name <- stringr::str_c("sipni_", tolower(params$type), "_data")
-    ftp_cols <- NULL
-    ds <- .lazy_return(cache_dir_resolved, ftp_ds_name, backend,
-                       filters = list(year = ftp_years,
-                                      uf_source = params$target_ufs),
-                       select_cols = ftp_cols)
-    if (!is.null(ds) && length(params$api_years) == 0) return(ds)
-  }
+  ftp_ds <- .sipni_lazy_ftp(params$ftp_years, params$type,
+                             params$target_ufs, backend, cache_dir_resolved)
+  if (!is.null(ftp_ds) && length(params$api_years) == 0) return(ftp_ds)
 
   # try CSV partitioned cache (years >= 2020)
-  api_years <- params$api_years
-  if (length(api_years) > 0) {
-    csv_filters <- list(year = api_years, uf_source = params$target_ufs)
-    if (!is.null(params$month_vals) && length(params$month_vals) < 12) {
-      csv_filters$month <- as.integer(params$month_vals)
-    }
-    ds <- .lazy_return(cache_dir_resolved, "sipni_csv_data", backend,
-                       filters = csv_filters, select_cols = NULL)
-    if (!is.null(ds) && length(ftp_years) == 0) return(ds)
-  }
+  csv_ds <- .sipni_lazy_csv(params$api_years, params$target_ufs,
+                             params$month_vals, backend, cache_dir_resolved)
+  if (!is.null(csv_ds) && length(params$ftp_years) == 0) return(csv_ds)
 
   NULL
 }

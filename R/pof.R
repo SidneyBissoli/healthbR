@@ -228,24 +228,27 @@ pof_cache_dir <- function(cache_dir = NULL) {
   zip_file
 }
 
-#' Find dictionary file in extracted documentation
+#' Find dictionary file by direct grep pattern matching
+#' @param xls_files Character vector of .xls file paths.
+#' @param patterns Character vector of patterns to try.
+#' @return Matched file path or NULL.
 #' @noRd
-.pof_find_dictionary_file <- function(extracted_files, year) {
-  # look for dictionary Excel file
-  # use flexible patterns to handle encoding issues with Portuguese characters
-  xls_files <- extracted_files[grepl("\\.xls", extracted_files, ignore.case = TRUE, useBytes = TRUE)]
-
-  # approach 1: direct pattern matching
-  dict_patterns <- c("dicion", "variav", "variaveis")
-  for (pattern in dict_patterns) {
+.pof_match_xls_by_pattern <- function(xls_files, patterns) {
+  for (pattern in patterns) {
     for (f in xls_files) {
       if (grepl(pattern, f, ignore.case = TRUE, useBytes = TRUE)) {
         return(f)
       }
     }
   }
+  NULL
+}
 
-  # approach 2: check raw bytes for "Dicion" (handles encoding issues)
+#' Find dictionary file by raw byte comparison for "Dicion"
+#' @param xls_files Character vector of .xls file paths.
+#' @return Matched file path or NULL.
+#' @noRd
+.pof_match_xls_by_bytes <- function(xls_files) {
   dicion_raw <- charToRaw("Dicion")
   for (f in xls_files) {
     bn <- basename(f)
@@ -256,15 +259,99 @@ pof_cache_dir <- function(cache_dir = NULL) {
       }
     }
   }
+  NULL
+}
 
-  # approach 3: look for files with "variav" in accent-stripped name
+#' Find dictionary file by accent-stripped name matching
+#' @param xls_files Character vector of .xls file paths.
+#' @return Matched file path or NULL.
+#' @noRd
+.pof_match_xls_by_stripped <- function(xls_files) {
   for (f in xls_files) {
     bn_ascii <- .strip_accents(basename(f))
     if (grepl("dicion|variav", bn_ascii, ignore.case = TRUE, useBytes = TRUE)) {
       return(f)
     }
   }
+  NULL
+}
 
+#' Find dictionary file in extracted documentation
+#' @noRd
+.pof_find_dictionary_file <- function(extracted_files, year) {
+  # look for dictionary Excel file
+  # use flexible patterns to handle encoding issues with Portuguese characters
+  xls_files <- extracted_files[grepl("\\.xls", extracted_files, ignore.case = TRUE, useBytes = TRUE)]
+
+  # approach 1: direct pattern matching
+  result <- .pof_match_xls_by_pattern(xls_files, c("dicion", "variav", "variaveis"))
+  if (!is.null(result)) return(result)
+
+  # approach 2: check raw bytes for "Dicion" (handles encoding issues)
+  result <- .pof_match_xls_by_bytes(xls_files)
+  if (!is.null(result)) return(result)
+
+  # approach 3: look for files with "dicion" or "variav" in accent-stripped name
+  .pof_match_xls_by_stripped(xls_files)
+}
+
+#' Standardize dictionary column names to canonical format
+#'
+#' Renames columns from the raw Excel dictionary to standard names:
+#' position, length, variable, description, decimals, categories.
+#' @param df Data frame with raw column names from readxl.
+#' @return The same data frame with standardized column names.
+#' @noRd
+.pof_standardize_dict_columns <- function(df) {
+  col_names <- names(df)
+
+  # mapping: standard_name -> grep pattern
+  rename_map <- list(
+    position    = "posicao|inicio|start|pos",
+    length      = "tamanho|length|tam|size",
+    variable    = "codigo|variavel|variable|var|nome",
+    description = "descricao|description|desc|rotulo|label",
+    decimals    = "decimais|decimal|dec",
+    categories  = "categor|categ"
+  )
+
+  for (std_name in names(rename_map)) {
+    matched <- col_names[grepl(rename_map[[std_name]], col_names, ignore.case = TRUE)]
+    if (length(matched) > 0) {
+      names(df)[names(df) == matched[1]] <- std_name
+    }
+  }
+
+  df
+}
+
+#' Map an accent-stripped sheet name to a standard register name
+#'
+#' Uses a fixed register_map with more-specific patterns first to avoid
+#' partial matches (e.g. "outros rendimentos" before "rendimento").
+#' @param sheet_ascii Lowercase, accent-stripped sheet name.
+#' @return Matched register name (character) or NULL.
+#' @noRd
+.pof_match_register_name <- function(sheet_ascii) {
+  register_map <- list(
+    "outros rendimentos" = "outros_rendimentos",
+    "rendimento" = "rendimento",
+    "consumo alimentar" = "consumo_alimentar",
+    "consumo" = "consumo_alimentar",
+    "despesa individual" = "despesa_individual",
+    "despesa coletiva" = "despesa_coletiva",
+    "aluguel estimado" = "aluguel_estimado",
+    "caderneta" = "caderneta_coletiva",
+    "inventario" = "inventario",
+    "domicilio" = "domicilio",
+    "morador" = "morador"
+  )
+
+  for (pattern in names(register_map)) {
+    if (grepl(pattern, sheet_ascii, ignore.case = TRUE)) {
+      return(register_map[[pattern]])
+    }
+  }
   NULL
 }
 
@@ -323,69 +410,10 @@ pof_cache_dir <- function(cache_dir = NULL) {
         df <- df |> dplyr::filter(!dplyr::if_all(dplyr::everything(), is.na))
 
         # standardize column names to expected format
-        col_names <- names(df)
-
-        # position column
-        pos_col <- col_names[grepl("posicao|inicio|start|pos", col_names, ignore.case = TRUE)]
-        if (length(pos_col) > 0) {
-          names(df)[names(df) == pos_col[1]] <- "position"
-        }
-
-        # length column
-        len_col <- col_names[grepl("tamanho|length|tam|size", col_names, ignore.case = TRUE)]
-        if (length(len_col) > 0) {
-          names(df)[names(df) == len_col[1]] <- "length"
-        }
-
-        # variable column
-        var_col <- col_names[grepl("codigo|variavel|variable|var|nome", col_names, ignore.case = TRUE)]
-        if (length(var_col) > 0) {
-          names(df)[names(df) == var_col[1]] <- "variable"
-        }
-
-        # description column
-        desc_col <- col_names[grepl("descricao|description|desc|rotulo|label", col_names, ignore.case = TRUE)]
-        if (length(desc_col) > 0) {
-          names(df)[names(df) == desc_col[1]] <- "description"
-        }
-
-        # decimals column
-        dec_col <- col_names[grepl("decimais|decimal|dec", col_names, ignore.case = TRUE)]
-        if (length(dec_col) > 0) {
-          names(df)[names(df) == dec_col[1]] <- "decimals"
-        }
-
-        # categories column
-        cat_col <- col_names[grepl("categor|categ", col_names, ignore.case = TRUE)]
-        if (length(cat_col) > 0) {
-          names(df)[names(df) == cat_col[1]] <- "categories"
-        }
+        df <- .pof_standardize_dict_columns(df)
 
         # map sheet name to standard register name
-        # sheet_ascii already computed above (accent-stripped, lowercase)
-
-        # more specific patterns first to avoid partial matches
-        register_map <- list(
-          "outros rendimentos" = "outros_rendimentos",
-          "rendimento" = "rendimento",
-          "consumo alimentar" = "consumo_alimentar",
-          "consumo" = "consumo_alimentar",
-          "despesa individual" = "despesa_individual",
-          "despesa coletiva" = "despesa_coletiva",
-          "aluguel estimado" = "aluguel_estimado",
-          "caderneta" = "caderneta_coletiva",
-          "inventario" = "inventario",
-          "domicilio" = "domicilio",
-          "morador" = "morador"
-        )
-
-        matched_register <- NULL
-        for (pattern in names(register_map)) {
-          if (grepl(pattern, sheet_ascii, ignore.case = TRUE)) {
-            matched_register <- register_map[[pattern]]
-            break
-          }
-        }
+        matched_register <- .pof_match_register_name(sheet_ascii)
 
         # skip sheets that don't match any known register
         if (is.null(matched_register)) {
@@ -695,6 +723,21 @@ pof_cache_dir <- function(cache_dir = NULL) {
   pos_strat
 }
 
+#' Find a design variable in data by matching column name patterns
+#' @param data Data frame.
+#' @param patterns Character vector of candidate column names (uppercase).
+#' @return The original column name (preserving case) or NULL if not found.
+#' @noRd
+.pof_find_design_var <- function(data, patterns) {
+  col_names <- toupper(names(data))
+  for (pattern in patterns) {
+    if (pattern %in% col_names) {
+      return(names(data)[col_names == pattern])
+    }
+  }
+  NULL
+}
+
 #' Create survey design object with post-stratification
 #' @noRd
 .pof_create_survey_design <- function(data, year, cache_dir) {
@@ -708,37 +751,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
   # identify design variables in data
   # POF uses different variable names across years
-  col_names <- toupper(names(data))
-
-  # find weight variable
-  weight_patterns <- c("PESO_FINAL", "PESO", "FATOR_ANUALIZACAO", "V9001")
-  weight_var <- NULL
-  for (pattern in weight_patterns) {
-    if (pattern %in% col_names) {
-      weight_var <- names(data)[toupper(names(data)) == pattern]
-      break
-    }
-  }
-
-  # find stratum variable
-  strata_patterns <- c("ESTRATO_POF", "ESTRATO", "V0024")
-  strata_var <- NULL
-  for (pattern in strata_patterns) {
-    if (pattern %in% col_names) {
-      strata_var <- names(data)[toupper(names(data)) == pattern]
-      break
-    }
-  }
-
-  # find PSU variable
-  psu_patterns <- c("COD_UPA", "UPA", "V0001")
-  psu_var <- NULL
-  for (pattern in psu_patterns) {
-    if (pattern %in% col_names) {
-      psu_var <- names(data)[toupper(names(data)) == pattern]
-      break
-    }
-  }
+  weight_var <- .pof_find_design_var(data, c("PESO_FINAL", "PESO", "FATOR_ANUALIZACAO", "V9001"))
+  strata_var <- .pof_find_design_var(data, c("ESTRATO_POF", "ESTRATO", "V0024"))
+  psu_var    <- .pof_find_design_var(data, c("COD_UPA", "UPA", "V0001"))
 
   # check if required variables are found
   if (is.null(weight_var) || is.null(strata_var) || is.null(psu_var)) {
