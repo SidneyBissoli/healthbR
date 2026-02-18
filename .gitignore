@@ -30,6 +30,9 @@ CRAN-SUBMISSION
 .claude/
 improvements/
 prompts/
+instructions-claude.md
+r-journal/
+healthbR-rjournal-submission.zip
 
 # OS files
 .DS_Store
