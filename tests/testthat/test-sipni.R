@@ -1665,17 +1665,18 @@ test_that(".sipni_download_and_read reads DBF and adds partition cols", {
   temp_dir <- withr::local_tempdir()
   cache_dir <- withr::local_tempdir()
 
-  # create a minimal DBF
+  # create a minimal DBF and capture as raw bytes
   dbf_path <- file.path(temp_dir, "DPNIAC19.DBF")
   df <- data.frame(
     IMUNO = c("09", "10"), QT_DOSE = c("100", "200"),
     stringsAsFactors = FALSE
   )
   foreign::write.dbf(df, dbf_path)
+  dbf_bytes <- readBin(dbf_path, "raw", n = file.size(dbf_path))
 
   local_mocked_bindings(
     .datasus_download = function(url, destfile, ...) {
-      file.copy(dbf_path, destfile, overwrite = TRUE)
+      writeBin(dbf_bytes, destfile)
       invisible(destfile)
     }
   )
@@ -1707,6 +1708,7 @@ test_that(".sipni_download_and_read falls back to lowercase .dbf extension", {
     stringsAsFactors = FALSE
   )
   foreign::write.dbf(df, dbf_path)
+  dbf_bytes <- readBin(dbf_path, "raw", n = file.size(dbf_path))
 
   call_count <- 0L
   local_mocked_bindings(
@@ -1714,7 +1716,7 @@ test_that(".sipni_download_and_read falls back to lowercase .dbf extension", {
       call_count <<- call_count + 1L
       if (call_count == 1L) stop("Not found (.DBF)")
       # second call (lowercase .dbf) succeeds
-      file.copy(dbf_path, destfile, overwrite = TRUE)
+      writeBin(dbf_bytes, destfile)
       invisible(destfile)
     }
   )
@@ -1739,10 +1741,11 @@ test_that(".sipni_download_and_read fixes CPNI comma in COBERT", {
     stringsAsFactors = FALSE
   )
   foreign::write.dbf(df, dbf_path)
+  dbf_bytes <- readBin(dbf_path, "raw", n = file.size(dbf_path))
 
   local_mocked_bindings(
     .datasus_download = function(url, destfile, ...) {
-      file.copy(dbf_path, destfile, overwrite = TRUE)
+      writeBin(dbf_bytes, destfile)
       invisible(destfile)
     }
   )

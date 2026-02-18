@@ -156,11 +156,12 @@
     .datasus_download(url_lower, temp_dbf)
   }
 
-  # check file size
-  if (file.size(temp_dbf) < 100) {
+  # check file exists and size
+  if (!file.exists(temp_dbf) || file.size(temp_dbf) < 100) {
+    size_info <- if (file.exists(temp_dbf)) file.size(temp_dbf) else 0
     cli::cli_abort(c(
       "Downloaded file appears corrupted (too small).",
-      "x" = "File size: {file.size(temp_dbf)} bytes",
+      "x" = "File size: {size_info} bytes",
       "i" = "The DATASUS FTP may be experiencing issues. Try again later."
     ))
   }
