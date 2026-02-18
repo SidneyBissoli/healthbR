@@ -27,9 +27,20 @@ healthbR provides easy access to Brazilian public health data directly from R. T
 | **SIM** | Mortality Information System (deaths) | Annual/UF | 1996--2024 |
 | **SINASC** | Live Birth Information System | Annual/UF | 1996--2024 |
 | **SIH** | Hospital Information System (admissions) | Monthly/UF | 2008--2024 |
-| **SIA** | Outpatient Information System (13 file types) | Monthly/type/UF | 2008--2024 |
+| **SIA** | Outpatient Information System (13 file types) | Monthly/UF | 2008--2024 |
+| **SINAN** | Notifiable Diseases Surveillance (31 diseases) | Annual/UF | 2007--2024 |
+| **CNES** | National Health Facility Registry (13 file types) | Monthly/UF | 2005--2024 |
+| **SI-PNI** | National Immunization Program (FTP 1994--2019, CSV 2020+) | Annual or Monthly/UF | 1994--2025 |
 
 DATASUS modules download `.dbc` files (compressed DBF) and decompress them internally using vendored C code -- no external dependencies required.
+
+### Primary Care & Regulatory Agencies
+
+| Module | Source | Description | Years |
+|--------|--------|-------------|-------|
+| **SISAB** | Ministry of Health REST API | Primary Care coverage indicators (APS, oral health, community agents, PNS) | 2007--present |
+| **ANS** | ANS Open Data Portal | Supplementary health beneficiaries, consumer complaints, financial statements | 2007--present |
+| **ANVISA** | ANVISA Open Data Portal | Product registrations, pharmacovigilance, hemovigilance, technovigilance, SNGPC | snapshot + 2014--present |
 
 ## Installation
 
@@ -76,6 +87,19 @@ ambulatorial <- sia_data(year = 2022, month = 1, uf = "AC")
 medicamentos <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
 ```
 
+### Additional DATASUS modules
+
+```r
+# disease notifications -- dengue, 2022
+dengue <- sinan_data(year = 2022, disease = "DENG")
+
+# health facilities in Acre, January 2023
+cnes <- cnes_data(year = 2023, month = 1, uf = "AC")
+
+# vaccination data -- Acre, 2019 (FTP) or 2024 (CSV)
+vacinas <- sipni_data(year = 2019, uf = "AC")
+```
+
 ### Survey modules
 
 ```r
@@ -95,12 +119,26 @@ pof <- pof_data(year = 2018, register = "morador")
 pop <- censo_populacao(year = 2022, territorial_level = "state")
 ```
 
+### Primary care & regulatory agencies
+
+```r
+# SISAB -- primary care coverage by state, January 2024
+sisab <- sisab_data(year = 2024, month = 1)
+
+# ANS -- health plan beneficiaries in Acre, December 2023
+ans <- ans_data(year = 2023, month = 12, uf = "AC")
+
+# ANVISA -- registered medicines
+med <- anvisa_data(type = "medicines")
+```
+
 ### Explore variables and dictionaries
 
 ```r
 # list variables for any module
 sim_variables()
 sia_variables(search = "sexo")
+sinan_diseases(search = "dengue")
 
 # data dictionary with category labels
 sim_dictionary("SEXO")
@@ -131,10 +169,12 @@ sim_clear_cache()
 
 All data is downloaded from official Brazilian government repositories:
 
-- **VIGITEL**: <https://svs.aids.gov.br/daent/cgdnt/vigitel/>
-- **PNS / PNAD Continua / POF**: <https://www.ibge.gov.br/>
-- **Censo**: SIDRA API (<https://apisidra.ibge.gov.br/>)
-- **SIM / SINASC / SIH / SIA**: DATASUS FTP (`ftp://ftp.datasus.gov.br/dissemin/publicos/`)
+- **VIGITEL**: Ministry of Health
+- **PNS / PNAD Continua / POF / Censo**: IBGE
+- **SIM / SINASC / SIH / SIA / SINAN / CNES / SI-PNI**: DATASUS FTP
+- **SISAB**: Ministry of Health REST API
+- **ANS**: ANS Open Data Portal
+- **ANVISA**: ANVISA Open Data Portal
 
 ## Citation
 
@@ -146,11 +186,11 @@ citation("healthbR")
 
 ## Contributing
 
-Contributions are welcome! Please open an issue to discuss proposed changes or submit a pull request.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
 
 ## Code of Conduct
 
-Please note that the healthbR project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+Please note that the healthbR project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
 
 ## License
 

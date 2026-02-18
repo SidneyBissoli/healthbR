@@ -61,11 +61,21 @@
 * Extracted shared helpers for validation, search, cache management, and
   return logic, eliminating ~1100 lines of duplication across modules.
 
+* Reduced cyclomatic complexity across 11 high-complexity functions by
+  extracting internal subfunctions. All exported and internal functions now
+  have cyclomatic complexity below 15.
+
 * Removed deprecated flat cache migration infrastructure.
 
 * Moved `readxl` and `haven` from Imports to Suggests.
 
 * Removed unused `vroom` from Suggests.
+
+## Governance
+
+* Added `CONTRIBUTING.md` with contributor guidelines.
+
+* Added `CODE_OF_CONDUCT.md` (Contributor Covenant v2.1).
 
 ## Breaking changes
 
@@ -84,6 +94,8 @@
 * Fixed PNS Arrow expression error with partition filtering.
 * Fixed `pns_sidra_data()` unknown table warning.
 * Fixed POF dictionary parsing failure on Linux/Ubuntu.
+* Fixed SI-PNI download crash when DATASUS FTP file is missing or corrupted
+  (added defensive `file.exists()` guard before `file.size()` check).
 
 # healthbR 0.1.1
 
