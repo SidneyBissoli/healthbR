@@ -2,6 +2,8 @@
 
 ## healthbR 0.2.0
 
+CRAN release: 2026-02-15
+
 ### New modules
 
 - **CNES (National Health Facility Registry)**: Health facility data
