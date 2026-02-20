@@ -22,7 +22,7 @@ The package downloads, caches, and processes data from official sources
 (Ministry of Health, IBGE, DATASUS), returning clean, analysis-ready tibbles
 following tidyverse conventions.
 
-The package currently supports **13 data sources** organized in two groups:
+The package currently supports **16 data sources** organized in three groups:
 
 **Surveys (IBGE / Ministry of Health)**
 
@@ -47,6 +47,13 @@ The package currently supports **13 data sources** organized in two groups:
 | SI-PNI | Vaccination (aggregated FTP + microdata API) | Annual/UF | 1994--2025 |
 | SISAB | Primary care coverage indicators (REST API) | Monthly | 2007--present |
 
+**Regulatory agencies**
+
+| Module | Source | Granularity | Years |
+|--------|--------|-------------|-------|
+| ANS | Supplementary health (beneficiaries, complaints, financial) | Monthly/UF | 2007--present |
+| ANVISA | Medicines, devices, pharmacovigilance, SNGPC | National | 2014--present |
+
 ## Getting started
 
 ```{r setup}
@@ -58,7 +65,7 @@ To see all available data sources at a glance:
 
 ```{r}
 list_sources()
-#> # A tibble: 13 x 5
+#> # A tibble: 16 x 5
 #>    source  name                         description                    years       status
 #>    <chr>   <chr>                        <chr>                          <chr>       <chr>
 #>  1 vigitel VIGITEL                      Telephone survey on chronic... 2006-2024   available
@@ -359,6 +366,60 @@ sisab_variables()
 sisab_variables(type = "sb")
 ```
 
+## ANS -- Supplementary health
+
+ANS (Agencia Nacional de Saude Suplementar) provides open data on private
+health insurance in Brazil, including beneficiary counts, consumer complaints,
+and operator financial statements.
+
+```{r}
+# module overview
+ans_info()
+
+# beneficiaries by state, January 2024
+benef <- ans_data(type = "beneficiaries", year = 2024, month = 1, uf = "SP")
+
+# consumer complaints, 2023
+reclamacoes <- ans_data(type = "complaints", year = 2023)
+
+# operator financial data, 2024 Q1
+financeiro <- ans_data(type = "financial", year = 2024, quarter = 1)
+
+# health plan operator registry
+operadoras <- ans_operators()
+
+# explore variables
+ans_variables(type = "beneficiaries")
+```
+
+See `vignette("ans-supplementary-health")` for detailed examples.
+
+## ANVISA -- Medicines and pharmacovigilance
+
+ANVISA (Agencia Nacional de Vigilancia Sanitaria) publishes open data on
+regulated products (medicines, medical devices, food, cosmetics) and
+pharmacovigilance reports (VigiMed). The SNGPC module provides controlled
+substance dispensing data.
+
+```{r}
+# see all available data types
+anvisa_types()
+
+# registered medicines
+medicamentos <- anvisa_data(type = "medicines")
+
+# pharmacovigilance notifications (VigiMed)
+vigimed <- anvisa_data(type = "vigimed_notifications")
+
+# controlled substance dispensing (SNGPC), monthly time-series
+sngpc <- anvisa_data(type = "sngpc", year = 2024, month = 1:6)
+
+# explore variables
+anvisa_variables(type = "medicines")
+```
+
+See `vignette("anvisa-regulatory-data")` for detailed examples.
+
 ## Caching
 
 All modules cache downloaded data automatically to avoid repeated downloads.
@@ -382,6 +443,46 @@ sim_clear_cache()
 sim_data(year = 2022, uf = "AC", cache_dir = tempdir())
 ```
 
+## Parallel downloads
+
+When downloading data for multiple years, months, or states, healthbR processes
+each file sequentially by default. You can enable parallel downloads by
+installing `furrr` and `future` and setting a parallel plan before calling any
+`*_data()` function:
+
+```{r}
+install.packages(c("furrr", "future"))
+```
+
+```{r}
+library(future)
+
+# use multiple R sessions (e.g., 4 workers)
+plan(multisession, workers = 4)
+
+# downloads now run in parallel across workers
+df <- sih_data(year = 2020:2023, month = 1:6, uf = "SP")
+
+# return to sequential mode when done
+plan(sequential)
+```
+
+This works with every module that downloads multiple files, including SIM,
+SINASC, SIH, SIA, SINAN, CNES, SI-PNI, SISAB, ANS, ANVISA, PNS, and PNADC.
+No code changes are needed beyond setting the plan -- healthbR detects the
+active `future` plan automatically.
+
+A few practical notes:
+
+- **FTP sources** (DATASUS modules) include a small delay between requests to
+  avoid overwhelming the server. Parallel workers respect this delay
+  independently, so 4 workers download roughly 4x faster.
+- **SI-PNI CSV** (2020+) uses an additional concurrent HTTP strategy
+  (`curl::multi_download()`) that works without `furrr`, downloading multiple
+  months simultaneously within a single R session.
+- Choose the number of workers based on your connection and the server. 2--4
+  workers is usually a good balance between speed and politeness.
+
 ## Combining modules
 
 healthbR's real power comes from combining data across modules. For example,
@@ -404,8 +505,12 @@ deaths$deaths / pop$valor * 100000
 
 ## Additional resources
 
-- `vignette("pof-health-data")` -- Analyzing food security and nutrition from POF
-- `vignette("censo-denominadores")` -- Population denominators for epidemiology
 - `vignette("datasus-modules")` -- SIM, SINASC, SIH, SIA, SINAN, and CNES in depth
+- `vignette("censo-denominadores")` -- Population denominators for epidemiology
+- `vignette("pof-health-data")` -- Analyzing food security and nutrition from POF
+- `vignette("sipni-vaccination")` -- SI-PNI vaccination data (FTP + API)
+- `vignette("sisab-primary-care")` -- SISAB primary care coverage indicators
+- `vignette("ans-supplementary-health")` -- ANS supplementary health data
+- `vignette("anvisa-regulatory-data")` -- ANVISA medicines and pharmacovigilance
 - [Package website](https://sidneybissoli.github.io/healthbR/)
 - [GitHub repository](https://github.com/SidneyBissoli/healthbR)
