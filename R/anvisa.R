@@ -249,7 +249,8 @@
   labels <- paste0(combinations$year, "/",
                    sprintf("%02d", combinations$month))
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     tryCatch({
       .anvisa_download_sngpc(
         type, combinations$year[i], combinations$month[i],

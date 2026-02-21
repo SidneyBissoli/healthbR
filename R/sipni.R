@@ -841,7 +841,8 @@ sipni_dictionary <- function(variable = NULL) {
 
   ftp_labels <- paste(ftp_combos$uf, ftp_combos$year)
 
-  ftp_results <- .map_parallel(seq_len(n_ftp), .delay = 0.5, function(i) {
+  ftp_results <- .map_parallel(seq_len(n_ftp), .delay = 0.5,
+                                .progress = "Downloading", function(i) {
     tryCatch({
       .sipni_download_and_read(ftp_combos$year[i], ftp_combos$uf[i],
                                type = type,
@@ -881,7 +882,8 @@ sipni_dictionary <- function(variable = NULL) {
 
   api_labels <- paste(api_combos$uf, api_combos$year)
 
-  api_results <- .map_parallel(seq_len(n_api), function(i) {
+  api_results <- .map_parallel(seq_len(n_api),
+                                .progress = "Downloading", function(i) {
     tryCatch({
       data <- .sipni_api_download_and_read(
         api_combos$year[i], api_combos$uf[i], month = month_vals,

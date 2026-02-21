@@ -349,7 +349,8 @@ sim_dictionary <- function(variable = NULL) {
 
   labels <- paste(combinations$uf, combinations$year)
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     yr <- combinations$year[i]
     st <- combinations$uf[i]
     tryCatch(

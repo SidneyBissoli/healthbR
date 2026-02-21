@@ -450,7 +450,8 @@ sinan_data <- function(year, disease = "DENG", vars = NULL,
   # download and read each year
   labels <- paste(disease, year)
 
-  results <- .map_parallel(year, .delay = 0.5, function(yr) {
+  results <- .map_parallel(year, .delay = 0.5,
+                            .progress = "Downloading", function(yr) {
     tryCatch({
       .sinan_download_and_read(yr, disease, cache = cache,
                                cache_dir = cache_dir)

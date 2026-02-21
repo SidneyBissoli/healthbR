@@ -426,7 +426,8 @@ sisab_variables <- function(type = "aps", search = NULL) {
     paste(type, level, uf_part, combinations$year[i])
   }, character(1))
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     yr     <- combinations$year[i]
     uf_val <- target_ufs[[combinations$uf_idx[i]]]
     tryCatch({

@@ -47,6 +47,10 @@
 * Parallel downloads via `.map_parallel()` (furrr when configured, purrr
   fallback).
 
+* Download progress bars for all modules using `cli::cli_progress_bar()`.
+  Shows spinner, current/total count, progress bar, and estimated time
+  remaining (ETA) during multi-file downloads.
+
 * Concurrent HTTP downloads for SI-PNI multi-month CSV requests via
   `curl::multi_download()`.
 

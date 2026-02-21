@@ -422,7 +422,8 @@
                   paste0(combinations$year, "/",
                          sprintf("%02d", combinations$month)))
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     tryCatch({
       .ans_download_beneficiaries(
         combinations$year[i], combinations$month[i], combinations$uf[i],
@@ -471,7 +472,8 @@
 
   labels <- as.character(year)
 
-  results <- .map_parallel(seq_along(year), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_along(year), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     tryCatch({
       .ans_download_complaints(year[i], cache = cache, cache_dir = cache_dir)
     }, error = function(e) NULL)
@@ -528,7 +530,8 @@
 
   labels <- paste0(combinations$year, " Q", combinations$quarter)
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     tryCatch({
       .ans_download_financial(
         combinations$year[i], combinations$quarter[i],

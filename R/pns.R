@@ -903,7 +903,7 @@ pns_variables <- function(year = 2019,
 #' @return List of tibbles, one per year.
 #' @noRd
 .pns_download_loop <- function(year, cache_dir, refresh, dataset_name) {
-  .map_parallel(year, function(y) {
+  .map_parallel(year, .progress = "Downloading", function(y) {
     target_year <- as.integer(y)
 
     # check partitioned cache first

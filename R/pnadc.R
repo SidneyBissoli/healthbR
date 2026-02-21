@@ -723,7 +723,7 @@ pnadc_variables <- function(module,
 #' @noRd
 .pnadc_download_loop <- function(module, years, cache_dir, refresh,
                                  dataset_name) {
-  .map_parallel(years, function(y) {
+  .map_parallel(years, .progress = "Downloading", function(y) {
     target_year <- as.integer(y)
 
     # 1. check partitioned cache first (preferred path)
