@@ -81,6 +81,14 @@ variables are always included:
 Use \code{as_survey = TRUE} to get a properly weighted survey design object
 for analysis with the \code{srvyr} package.
 }
+
+\subsection{Parallel downloads}{
+
+When downloading multiple years, install \pkg{furrr} and \pkg{future} and
+set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \section{Data source}{
 

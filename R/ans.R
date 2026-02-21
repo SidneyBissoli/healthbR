@@ -737,6 +737,12 @@ ans_variables <- function(type = "beneficiaries", search = NULL) {
 #' health plan operators (balance sheets, income statements).
 #' Available from 2007.
 #'
+#' ## Parallel downloads
+#' When downloading multiple files (e.g., several months or quarters), install
+#' \pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family ans
 #'

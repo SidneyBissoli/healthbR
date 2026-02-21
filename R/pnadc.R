@@ -857,6 +857,12 @@ pnadc_variables <- function(module,
 #' Use `as_survey = TRUE` to get a properly weighted survey design object
 #' for analysis with the `srvyr` package.
 #'
+#' ## Parallel downloads
+#' When downloading multiple years, install \pkg{furrr} and \pkg{future} and
+#' set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @section Data source:
 #' Data is downloaded from the IBGE FTP server:
 #' \verb{https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/}

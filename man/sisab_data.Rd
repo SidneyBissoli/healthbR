@@ -73,6 +73,13 @@ National Health Survey. Available 2020--2023.
 
 For municipality-level data, it is recommended to filter by UF using the
 \code{uf} parameter to avoid large downloads.
+\subsection{Parallel downloads}{
+
+When downloading multiple months, install \pkg{furrr} and \pkg{future} and
+set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

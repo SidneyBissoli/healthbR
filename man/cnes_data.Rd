@@ -84,6 +84,13 @@ to limit downloads.
 
 The CNES has 13 file types. The default \code{"ST"} (establishments) is
 the most commonly used. Use \code{\link{cnes_info}()} to see all types.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several months or states), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

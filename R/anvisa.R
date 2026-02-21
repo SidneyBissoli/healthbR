@@ -452,6 +452,12 @@ anvisa_variables <- function(type = "medicines", search = NULL) {
 #' The three VigiMed types share the \code{IDENTIFICACAO_NOTIFICACAO} key
 #' for linking notifications, medicines, and reactions.
 #'
+#' ## Parallel downloads
+#' When downloading multiple SNGPC months, install \pkg{furrr} and \pkg{future}
+#' and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family anvisa
 #'

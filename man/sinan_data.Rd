@@ -73,6 +73,13 @@ To filter by state, use the \code{SG_UF_NOT} (UF of notification) or
 Data is downloaded from DATASUS FTP as .dbc files. The .dbc format is
 decompressed internally using vendored C code from the blast library.
 No external dependencies are required.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several years or diseases), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

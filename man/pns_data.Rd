@@ -60,6 +60,14 @@ weight variables with the \code{srvyr} or \code{survey} packages:
 \item \code{V0024}: stratum
 }
 }
+
+\subsection{Parallel downloads}{
+
+When downloading multiple years, install \pkg{furrr} and \pkg{future} and
+set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \section{Data source}{
 

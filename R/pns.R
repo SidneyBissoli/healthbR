@@ -991,6 +991,12 @@ pns_variables <- function(year = 2019,
 #' - `UPA_PNS`: primary sampling unit
 #' - `V0024`: stratum
 #'
+#' ## Parallel downloads
+#' When downloading multiple years, install \pkg{furrr} and \pkg{future} and
+#' set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @section Data source:
 #' Data is downloaded from the IBGE FTP server:
 #' \verb{https://ftp.ibge.gov.br/PNS/}

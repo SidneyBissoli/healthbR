@@ -459,6 +459,12 @@ sia_dictionary <- function(variable = NULL) {
 #' The SIA has 13 file types. The default \code{"PA"} (outpatient production)
 #' is the most commonly used. Use \code{\link{sia_info}()} to see all types.
 #'
+#' ## Parallel downloads
+#' When downloading multiple files (e.g., several months or states), install
+#' \pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family sia
 #'

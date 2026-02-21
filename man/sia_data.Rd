@@ -96,6 +96,13 @@ to limit downloads.
 
 The SIA has 13 file types. The default \code{"PA"} (outpatient production)
 is the most commonly used. Use \code{\link{sia_info}()} to see all types.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several months or states), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

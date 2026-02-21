@@ -145,6 +145,27 @@ sim_dictionary("SEXO")
 sia_dictionary("PA_RACACOR")
 ```
 
+## Parallel downloads
+
+When downloading multiple files (e.g., several years, months, or states), you
+can speed up downloads by enabling parallel processing. Install `furrr` and
+`future`, then set a parallel plan before calling any `*_data()` function:
+
+```r
+install.packages(c("furrr", "future"))
+
+library(future)
+plan(multisession, workers = 4)
+
+# downloads 4 states in parallel
+df <- sih_data(year = 2022, month = 1:6, uf = c("SP", "RJ", "MG", "BA"))
+
+# reset to sequential when done
+plan(sequential)
+```
+
+All 12 download-based modules support parallel downloads: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, SISAB, ANS, ANVISA, PNS, and PNADC.
+
 ## Caching
 
 All modules cache downloaded data automatically. Install `arrow` for optimized Parquet caching:

@@ -98,6 +98,13 @@ This is \strong{individual-level microdata} (one row per vaccination dose,
 ~47 fields per record). The \code{type} parameter is ignored for CSV
 years. Data is filtered by UF during chunked reading to avoid loading
 the full national file into memory.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several years or states), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

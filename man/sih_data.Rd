@@ -81,6 +81,13 @@ blast library. No external dependencies are required.
 
 SIH data is monthly, so downloading an entire year for all states requires
 324 files (27 UFs x 12 months). Use \code{uf} and \code{month} to limit downloads.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several months or states), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

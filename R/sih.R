@@ -385,6 +385,12 @@ sih_dictionary <- function(variable = NULL) {
 #' SIH data is monthly, so downloading an entire year for all states requires
 #' 324 files (27 UFs x 12 months). Use `uf` and `month` to limit downloads.
 #'
+#' ## Parallel downloads
+#' When downloading multiple files (e.g., several months or states), install
+#' \pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family sih
 #'

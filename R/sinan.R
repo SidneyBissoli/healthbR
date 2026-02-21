@@ -400,6 +400,12 @@ sinan_dictionary <- function(variable = NULL) {
 #' decompressed internally using vendored C code from the blast library.
 #' No external dependencies are required.
 #'
+#' ## Parallel downloads
+#' When downloading multiple files (e.g., several years or diseases), install
+#' \pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family sinan
 #'

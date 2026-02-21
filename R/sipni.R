@@ -1049,6 +1049,12 @@ sipni_dictionary <- function(variable = NULL) {
 #' years. Data is filtered by UF during chunked reading to avoid loading
 #' the full national file into memory.
 #'
+#' ## Parallel downloads
+#' When downloading multiple files (e.g., several years or states), install
+#' \pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family sipni
 #'

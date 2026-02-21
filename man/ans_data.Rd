@@ -82,6 +82,13 @@ Available from 2011.
 \strong{Financial}: Quarterly ZIP files with financial statements of
 health plan operators (balance sheets, income statements).
 Available from 2007.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several months or quarters), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

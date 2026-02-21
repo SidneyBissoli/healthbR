@@ -71,6 +71,14 @@
 
 * Removed unused `vroom` from Suggests.
 
+## Documentation
+
+* Added "Parallel downloads" section to all 12 `*_data()` help pages
+  (`?sim_data`, `?sih_data`, etc.) explaining how to enable parallel
+  processing via `future::plan()`.
+
+* Added "Parallel downloads" section to README with a working example.
+
 ## Governance
 
 * Added `CONTRIBUTING.md` with contributor guidelines.

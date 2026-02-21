@@ -466,6 +466,12 @@ sim_dictionary <- function(variable = NULL) {
 #' When `uf` is specified, only the requested state(s) are downloaded,
 #' making the operation much faster than downloading the entire country.
 #'
+#' ## Parallel downloads
+#' When downloading multiple files (e.g., several years or states), install
+#' \pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family sim
 #'

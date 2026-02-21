@@ -509,6 +509,12 @@ sisab_variables <- function(type = "aps", search = NULL) {
 #' For municipality-level data, it is recommended to filter by UF using the
 #' \code{uf} parameter to avoid large downloads.
 #'
+#' ## Parallel downloads
+#' When downloading multiple months, install \pkg{furrr} and \pkg{future} and
+#' set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family sisab
 #'
