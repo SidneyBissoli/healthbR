@@ -78,6 +78,7 @@
 <ul><li><p>Hive-style partitioned parquet caching for all DATASUS modules.</p></li>
 <li><p>Lazy evaluation with <code>lazy = TRUE</code> and <code>backend = "arrow"</code> or <code>"duckdb"</code> for out-of-memory queries.</p></li>
 <li><p>Parallel downloads via <code>.map_parallel()</code> (furrr when configured, purrr fallback).</p></li>
+<li><p>Download progress bars for all modules using <code><a href="https://cli.r-lib.org/reference/cli_progress_bar.html" class="external-link">cli::cli_progress_bar()</a></code>. Shows spinner, current/total count, progress bar, and estimated time remaining (ETA) during multi-file downloads.</p></li>
 <li><p>Concurrent HTTP downloads for SI-PNI multi-month CSV requests via <code><a href="https://jeroen.r-universe.dev/curl/reference/multi_download.html" class="external-link">curl::multi_download()</a></code>.</p></li>
 <li><p>Resumable HTTP downloads via Range headers for large files.</p></li>
 <li><p>Smart type parsing (<code>parse = TRUE</code>) for all 7 DATASUS modules, with automatic numeric and date column conversion. Use <code>col_types</code> for fine-grained control or <code>parse = FALSE</code> for all-character.</p></li>

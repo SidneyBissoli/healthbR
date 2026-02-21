@@ -57,6 +57,11 @@ CRAN release: 2026-02-15
 - Parallel downloads via `.map_parallel()` (furrr when configured, purrr
   fallback).
 
+- Download progress bars for all modules using
+  [`cli::cli_progress_bar()`](https://cli.r-lib.org/reference/cli_progress_bar.html).
+  Shows spinner, current/total count, progress bar, and estimated time
+  remaining (ETA) during multi-file downloads.
+
 - Concurrent HTTP downloads for SI-PNI multi-month CSV requests via
   [`curl::multi_download()`](https://jeroen.r-universe.dev/curl/reference/multi_download.html).
 
