@@ -330,13 +330,30 @@
 </div>
 </div>
 <div class="section level2">
+<h2 id="parallel-downloads">Parallel downloads<a class="anchor" aria-label="anchor" href="#parallel-downloads"></a>
+</h2>
+<p>When downloading multiple files (e.g., several years, months, or states), you can speed up downloads by enabling parallel processing. Install <code>furrr</code> and <code>future</code>, then set a parallel plan before calling any <code>*_data()</code> function:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"furrr"</span>, <span class="st">"future"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># downloads 4 states in parallel</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, uf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SP"</span>, <span class="st">"RJ"</span>, <span class="st">"MG"</span>, <span class="st">"BA"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># reset to sequential when done</span></span>
+<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">sequential</span><span class="op">)</span></span></code></pre></div>
+<p>All 12 download-based modules support parallel downloads: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, SISAB, ANS, ANVISA, PNS, and PNADC.</p>
+</div>
+<div class="section level2">
 <h2 id="caching">Caching<a class="anchor" aria-label="anchor" href="#caching"></a>
 </h2>
 <p>All modules cache downloaded data automatically. Install <code>arrow</code> for optimized Parquet caching:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"arrow"</span><span class="op">)</span></span></code></pre></div>
 <p>Each module provides cache management functions:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check what is cached</span></span>
 <span><span class="fu"><a href="reference/sim_cache_status.html">sim_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/sih_cache_status.html">sih_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -368,7 +385,7 @@
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use healthbR in your research, please cite it:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"healthbR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">

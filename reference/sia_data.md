@@ -129,6 +129,14 @@ the most commonly used. Use
 [`sia_info()`](https://sidneybissoli.github.io/healthbR/reference/sia_info.md)
 to see all types.
 
+### Parallel downloads
+
+When downloading multiple files (e.g., several months or states),
+install furrr and future and set a parallel plan to speed up downloads:
+`future::plan(future::multisession, workers = 4)`. See
+[`vignette("healthbR")`](https://sidneybissoli.github.io/healthbR/articles/healthbR.md)
+for details.
+
 ## See also
 
 [`sia_info()`](https://sidneybissoli.github.io/healthbR/reference/sia_info.md)

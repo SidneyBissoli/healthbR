@@ -165,6 +165,16 @@ variables are always included:</p><ul><li><p><code>UPA</code>: Primary sampling 
 for analysis with the <code>srvyr</code> package.</p>
 </div>
 
+<div class="section">
+<h3 id="parallel-downloads">Parallel downloads<a class="anchor" aria-label="anchor" href="#parallel-downloads"></a></h3>
+
+
+<p>When downloading multiple years, install <span class="pkg">furrr</span> and <span class="pkg">future</span> and
+set a parallel plan to speed up downloads:
+<code>future::plan(future::multisession, workers = 4)</code>. See
+<code><a href="../articles/healthbR.html">vignette("healthbR")</a></code> for details.</p>
+</div>
+
     </div>
     <div class="section level2">
     <h2 id="data-source">Data source<a class="anchor" aria-label="anchor" href="#data-source"></a></h2>

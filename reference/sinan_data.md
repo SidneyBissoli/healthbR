@@ -97,6 +97,14 @@ Data is downloaded from DATASUS FTP as .dbc files. The .dbc format is
 decompressed internally using vendored C code from the blast library. No
 external dependencies are required.
 
+### Parallel downloads
+
+When downloading multiple files (e.g., several years or diseases),
+install furrr and future and set a parallel plan to speed up downloads:
+`future::plan(future::multisession, workers = 4)`. See
+[`vignette("healthbR")`](https://sidneybissoli.github.io/healthbR/articles/healthbR.md)
+for details.
+
 ## See also
 
 Other sinan:

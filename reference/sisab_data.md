@@ -95,6 +95,14 @@ Four report types are available:
 For municipality-level data, it is recommended to filter by UF using the
 `uf` parameter to avoid large downloads.
 
+### Parallel downloads
+
+When downloading multiple months, install furrr and future and set a
+parallel plan to speed up downloads:
+`future::plan(future::multisession, workers = 4)`. See
+[`vignette("healthbR")`](https://sidneybissoli.github.io/healthbR/articles/healthbR.md)
+for details.
+
 ## See also
 
 [`sisab_info()`](https://sidneybissoli.github.io/healthbR/reference/sisab_info.md)

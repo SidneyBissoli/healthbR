@@ -151,7 +151,16 @@ and population coverage. Available from 2007.</p></li>
 <li><p><code>"pns"</code>: PNS coverage – coverage estimates from the
 National Health Survey. Available 2020–2023.</p></li>
 </ul><p>For municipality-level data, it is recommended to filter by UF using the
-<code>uf</code> parameter to avoid large downloads.</p>
+<code>uf</code> parameter to avoid large downloads.</p><div class="section">
+<h3 id="parallel-downloads">Parallel downloads<a class="anchor" aria-label="anchor" href="#parallel-downloads"></a></h3>
+
+
+<p>When downloading multiple months, install <span class="pkg">furrr</span> and <span class="pkg">future</span> and
+set a parallel plan to speed up downloads:
+<code>future::plan(future::multisession, workers = 4)</code>. See
+<code><a href="../articles/healthbR.html">vignette("healthbR")</a></code> for details.</p>
+</div>
+
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

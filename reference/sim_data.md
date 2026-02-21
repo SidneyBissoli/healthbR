@@ -107,6 +107,14 @@ from the blast library. No external dependencies are required.
 When `uf` is specified, only the requested state(s) are downloaded,
 making the operation much faster than downloading the entire country.
 
+### Parallel downloads
+
+When downloading multiple files (e.g., several years or states), install
+furrr and future and set a parallel plan to speed up downloads:
+`future::plan(future::multisession, workers = 4)`. See
+[`vignette("healthbR")`](https://sidneybissoli.github.io/healthbR/articles/healthbR.md)
+for details.
+
 ## See also
 
 [`censo_populacao()`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)

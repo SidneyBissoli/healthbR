@@ -172,7 +172,16 @@ are combined.</p>
 The .dbc format is decompressed internally using vendored C code from the
 blast library. No external dependencies are required.</p>
 <p>When <code>uf</code> is specified, only the requested state(s) are downloaded,
-making the operation much faster than downloading the entire country.</p>
+making the operation much faster than downloading the entire country.</p><div class="section">
+<h3 id="parallel-downloads">Parallel downloads<a class="anchor" aria-label="anchor" href="#parallel-downloads"></a></h3>
+
+
+<p>When downloading multiple files (e.g., several years or states), install
+<span class="pkg">furrr</span> and <span class="pkg">future</span> and set a parallel plan to speed up downloads:
+<code>future::plan(future::multisession, workers = 4)</code>. See
+<code><a href="../articles/healthbR.html">vignette("healthbR")</a></code> for details.</p>
+</div>
+
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

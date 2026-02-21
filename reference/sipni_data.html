@@ -184,7 +184,16 @@ semicolon-delimited, latin1 encoding). Each monthly ZIP is ~1.4 GB.
 This is <strong>individual-level microdata</strong> (one row per vaccination dose,
 ~47 fields per record). The <code>type</code> parameter is ignored for CSV
 years. Data is filtered by UF during chunked reading to avoid loading
-the full national file into memory.</p>
+the full national file into memory.</p><div class="section">
+<h3 id="parallel-downloads">Parallel downloads<a class="anchor" aria-label="anchor" href="#parallel-downloads"></a></h3>
+
+
+<p>When downloading multiple files (e.g., several years or states), install
+<span class="pkg">furrr</span> and <span class="pkg">future</span> and set a parallel plan to speed up downloads:
+<code>future::plan(future::multisession, workers = 4)</code>. See
+<code><a href="../articles/healthbR.html">vignette("healthbR")</a></code> for details.</p>
+</div>
+
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

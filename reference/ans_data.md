@@ -105,6 +105,14 @@ from 2011.
 **Financial**: Quarterly ZIP files with financial statements of health
 plan operators (balance sheets, income statements). Available from 2007.
 
+### Parallel downloads
+
+When downloading multiple files (e.g., several months or quarters),
+install furrr and future and set a parallel plan to speed up downloads:
+`future::plan(future::multisession, workers = 4)`. See
+[`vignette("healthbR")`](https://sidneybissoli.github.io/healthbR/articles/healthbR.md)
+for details.
+
 ## See also
 
 [`ans_operators()`](https://sidneybissoli.github.io/healthbR/reference/ans_operators.md)

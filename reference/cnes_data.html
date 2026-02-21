@@ -171,7 +171,16 @@ blast library. No external dependencies are required.</p>
 324 files (27 UFs x 12 months) per type. Use <code>uf</code> and <code>month</code>
 to limit downloads.</p>
 <p>The CNES has 13 file types. The default <code>"ST"</code> (establishments) is
-the most commonly used. Use <code><a href="cnes_info.html">cnes_info()</a></code> to see all types.</p>
+the most commonly used. Use <code><a href="cnes_info.html">cnes_info()</a></code> to see all types.</p><div class="section">
+<h3 id="parallel-downloads">Parallel downloads<a class="anchor" aria-label="anchor" href="#parallel-downloads"></a></h3>
+
+
+<p>When downloading multiple files (e.g., several months or states), install
+<span class="pkg">furrr</span> and <span class="pkg">future</span> and set a parallel plan to speed up downloads:
+<code>future::plan(future::multisession, workers = 4)</code>. See
+<code><a href="../articles/healthbR.html">vignette("healthbR")</a></code> for details.</p>
+</div>
+
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

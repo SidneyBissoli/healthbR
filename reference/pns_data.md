@@ -81,6 +81,14 @@ following weight variables with the `srvyr` or `survey` packages:
 
 - `V0024`: stratum
 
+### Parallel downloads
+
+When downloading multiple years, install furrr and future and set a
+parallel plan to speed up downloads:
+`future::plan(future::multisession, workers = 4)`. See
+[`vignette("healthbR")`](https://sidneybissoli.github.io/healthbR/articles/healthbR.md)
+for details.
+
 ## Data source
 
 Data is downloaded from the IBGE FTP server:

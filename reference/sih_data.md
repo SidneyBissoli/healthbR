@@ -108,6 +108,14 @@ SIH data is monthly, so downloading an entire year for all states
 requires 324 files (27 UFs x 12 months). Use `uf` and `month` to limit
 downloads.
 
+### Parallel downloads
+
+When downloading multiple files (e.g., several months or states),
+install furrr and future and set a parallel plan to speed up downloads:
+`future::plan(future::multisession, workers = 4)`. See
+[`vignette("healthbR")`](https://sidneybissoli.github.io/healthbR/articles/healthbR.md)
+for details.
+
 ## See also
 
 [`censo_populacao()`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)

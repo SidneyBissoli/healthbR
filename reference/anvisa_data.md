@@ -95,6 +95,14 @@ January 2026. Cached as Hive-style partitioned parquet datasets.
 The three VigiMed types share the `IDENTIFICACAO_NOTIFICACAO` key for
 linking notifications, medicines, and reactions.
 
+### Parallel downloads
+
+When downloading multiple SNGPC months, install furrr and future and set
+a parallel plan to speed up downloads:
+`future::plan(future::multisession, workers = 4)`. See
+[`vignette("healthbR")`](https://sidneybissoli.github.io/healthbR/articles/healthbR.md)
+for details.
+
 ## See also
 
 [`anvisa_types()`](https://sidneybissoli.github.io/healthbR/reference/anvisa_types.md)
