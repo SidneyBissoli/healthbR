@@ -18,6 +18,7 @@ characteristics.
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -25,6 +26,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 sinasc_years()
 
 # include preliminary data
@@ -34,6 +36,7 @@ sinasc_years(status = "all")
 ### Module information
 
 ``` r
+
 sinasc_info()
 ```
 
@@ -42,12 +45,14 @@ sinasc_info()
 ### Basic download
 
 ``` r
+
 births <- sinasc_data(year = 2022, uf = "AC")
 ```
 
 ### Multiple states and years
 
 ``` r
+
 births <- sinasc_data(year = 2020:2022, uf = c("SP", "RJ"))
 ```
 
@@ -56,6 +61,7 @@ births <- sinasc_data(year = 2020:2022, uf = c("SP", "RJ"))
 Use CID-10 code prefixes to filter births with congenital anomalies:
 
 ``` r
+
 # Down syndrome (Q90)
 down <- sinasc_data(year = 2022, uf = "SP", anomaly = "Q90")
 
@@ -66,6 +72,7 @@ anomalies <- sinasc_data(year = 2022, uf = "SP", anomaly = "Q")
 ### Select variables
 
 ``` r
+
 births <- sinasc_data(
   year = 2022,
   uf = "SP",
@@ -94,6 +101,7 @@ births <- sinasc_data(
 ### Data dictionary
 
 ``` r
+
 sinasc_dictionary()
 sinasc_dictionary("PARTO")
 sinasc_dictionary("GESTACAO")
@@ -102,6 +110,7 @@ sinasc_dictionary("GESTACAO")
 ### Explore variables
 
 ``` r
+
 sinasc_variables()
 sinasc_variables(search = "mae")
 sinasc_variables(search = "peso")
@@ -110,6 +119,7 @@ sinasc_variables(search = "peso")
 ## Example: Low birth weight by state
 
 ``` r
+
 births <- sinasc_data(year = 2022, uf = c("SP", "RJ", "MG", "BA", "RS"))
 
 lbw <- births |>
@@ -129,6 +139,7 @@ lbw <- births |>
 ## Example: Cesarean rates over time
 
 ``` r
+
 births <- sinasc_data(year = 2018:2022, uf = "SP",
                       vars = c("PARTO", "CODMUNRES"))
 
@@ -145,6 +156,7 @@ cesarean <- births |>
 ## Example: Teen pregnancy
 
 ``` r
+
 births <- sinasc_data(year = 2022, uf = "SP")
 
 teen <- births |>
@@ -163,6 +175,7 @@ teen <- births |>
 ## Smart type parsing
 
 ``` r
+
 # parsed types (default)
 births <- sinasc_data(year = 2022, uf = "AC")
 class(births$DTNASC)  # Date
@@ -175,6 +188,7 @@ births_raw <- sinasc_data(year = 2022, uf = "AC", parse = FALSE)
 ## Cache and lazy evaluation
 
 ``` r
+
 sinasc_cache_status()
 sinasc_clear_cache()
 

@@ -24,6 +24,7 @@ adult population of each city.
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -31,6 +32,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 vigitel_years()
 #> [1] 2006 2007 2008 ... 2023 2024
 ```
@@ -38,6 +40,7 @@ vigitel_years()
 ### Survey information
 
 ``` r
+
 vigitel_info()
 ```
 
@@ -49,18 +52,21 @@ VIGITEL is distributed as a single consolidated file covering 2006–2024.
 By default, all years are downloaded:
 
 ``` r
+
 df <- vigitel_data()
 ```
 
 ### Specific years
 
 ``` r
+
 df <- vigitel_data(year = 2020:2024)
 ```
 
 ### Select variables
 
 ``` r
+
 df <- vigitel_data(year = 2024, vars = c("cidade", "sexo", "idade", "pesorake",
                                           "q6", "q7", "q9"))
 ```
@@ -71,6 +77,7 @@ Two formats are available: Stata (`.dta`, default) and CSV. The Stata
 format preserves variable labels:
 
 ``` r
+
 df_dta <- vigitel_data(format = "dta")  # default, with labels
 df_csv <- vigitel_data(format = "csv")  # alternative
 ```
@@ -80,18 +87,21 @@ df_csv <- vigitel_data(format = "csv")  # alternative
 ### Data dictionary
 
 ``` r
+
 vigitel_dictionary()
 ```
 
 ### Search variables
 
 ``` r
+
 vigitel_variables()
 ```
 
 ## Example: Smoking prevalence over time
 
 ``` r
+
 # Download smoking-related variables
 df <- vigitel_data(
   year = 2006:2024,
@@ -112,6 +122,7 @@ smoking <- df |>
 ## Example: Obesity by capital city
 
 ``` r
+
 df <- vigitel_data(
   year = 2024,
   vars = c("cidade", "sexo", "pesorake", "q8", "q9")
@@ -138,6 +149,7 @@ Data is automatically cached in partitioned parquet format (when `arrow`
 is installed). Subsequent calls load instantly from cache:
 
 ``` r
+
 # First call downloads (~30 seconds)
 df <- vigitel_data(year = 2024)
 
@@ -157,6 +169,7 @@ For large analyses, use lazy evaluation to query without loading all
 data into memory:
 
 ``` r
+
 lazy_df <- vigitel_data(lazy = TRUE, backend = "arrow")
 ```
 

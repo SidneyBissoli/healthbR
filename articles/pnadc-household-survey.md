@@ -20,6 +20,7 @@ modules:
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -27,12 +28,14 @@ library(dplyr)
 ### Module information
 
 ``` r
+
 pnadc_info()
 ```
 
 ### Available modules and years
 
 ``` r
+
 pnadc_modules()
 #> # A tibble: 4 x 4
 #>   module       name_pt                            name_en                years
@@ -52,6 +55,7 @@ pnadc_years("deficiencia")
 ### Basic download
 
 ``` r
+
 # Disability module, 2022
 df <- pnadc_data(module = "deficiencia", year = 2022)
 ```
@@ -59,6 +63,7 @@ df <- pnadc_data(module = "deficiencia", year = 2022)
 ### Select variables
 
 ``` r
+
 df <- pnadc_data(
   module = "deficiencia",
   year = 2022,
@@ -69,6 +74,7 @@ df <- pnadc_data(
 ### Multiple years
 
 ``` r
+
 # Housing conditions across all available years
 df <- pnadc_data(module = "habitacao")
 ```
@@ -76,6 +82,7 @@ df <- pnadc_data(module = "habitacao")
 ## Exploring variables
 
 ``` r
+
 # List variable names
 pnadc_variables(module = "deficiencia", year = 2022)
 
@@ -90,6 +97,7 @@ PNAD Continua uses a complex sample design. Survey design variables
 `as_survey = TRUE` to create a survey design object:
 
 ``` r
+
 # Requires srvyr package
 svy <- pnadc_data(
   module = "deficiencia",
@@ -107,6 +115,7 @@ svy |>
 ## Example: Disability prevalence
 
 ``` r
+
 df <- pnadc_data(module = "deficiencia", year = 2022)
 
 # G001: "Tem dificuldade permanente de enxergar" (vision difficulty)
@@ -123,6 +132,7 @@ vision <- df |>
 ## Example: Housing sanitation over time
 
 ``` r
+
 df <- pnadc_data(module = "habitacao", year = c(2016, 2019, 2022))
 
 # Analyze water supply and sanitation trends
@@ -132,6 +142,7 @@ df <- pnadc_data(module = "habitacao", year = c(2016, 2019, 2022))
 ## Example: Primary health care access
 
 ``` r
+
 # APS module only available for 2022 Q2
 df <- pnadc_data(module = "aps", year = 2022)
 ```
@@ -139,6 +150,7 @@ df <- pnadc_data(module = "aps", year = 2022)
 ## Cache and performance
 
 ``` r
+
 # Check cache
 pnadc_cache_status()
 

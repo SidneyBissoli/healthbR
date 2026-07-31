@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Access Brazilian Public Health Data • healthbR</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Access Brazilian Public Health Data">
 <meta name="description" content="Provides easy access to Brazilian public health data from multiple sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases by Telephone Survey), PNS (National Health Survey), PNAD Continua (Continuous National Household Sample Survey), POF (Household Budget Survey with food security and consumption data), Censo Demografico (population denominators via SIDRA API), SIM (Mortality Information System), SINASC (Live Birth Information System), SIH (Hospital Information System), SIA (Outpatient Information System), SINAN (Notifiable Diseases Surveillance), CNES (National Health Facility Registry), SI-PNI (National Immunization Program - aggregated 1994-2019 via FTP, individual-level microdata 2020+ via OpenDataSUS API), SISAB (Primary Care Health Information System - coverage indicators via REST API), ANS (Agencia Nacional de Saude Suplementar - supplementary health beneficiaries, consumer complaints, and financial statements), ANVISA (Agencia Nacional de Vigilancia Sanitaria - product registrations, pharmacovigilance, hemovigilance, technovigilance, and controlled substance sales via SNGPC), and other health information systems. Data is downloaded from the Brazilian Ministry of Health and IBGE repositories. Data is returned in tidy format following tidyverse conventions.">
@@ -92,33 +92,33 @@
 <col width="46%">
 <col width="25%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Module</th>
 <th>Description</th>
 <th>Years</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><strong>VIGITEL</strong></td>
 <td>Surveillance of Risk Factors for Chronic Diseases by Telephone Survey</td>
 <td>2006–2024</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>PNS</strong></td>
 <td>National Health Survey (microdata + SIDRA API)</td>
 <td>2013, 2019</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>PNAD Continua</strong></td>
 <td>Continuous National Household Sample Survey</td>
 <td>2012–2024</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>POF</strong></td>
 <td>Household Budget Survey (food security, consumption, anthropometry)</td>
 <td>2002–2018</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>Censo</strong></td>
 <td>Population denominators via SIDRA API</td>
 <td>1970–2022</td>
@@ -136,50 +136,50 @@
 <col width="31%">
 <col width="17%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Module</th>
 <th>Description</th>
 <th>Granularity</th>
 <th>Years</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><strong>SIM</strong></td>
 <td>Mortality Information System (deaths)</td>
 <td>Annual/UF</td>
 <td>1996–2024</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>SINASC</strong></td>
 <td>Live Birth Information System</td>
 <td>Annual/UF</td>
 <td>1996–2024</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>SIH</strong></td>
 <td>Hospital Information System (admissions)</td>
 <td>Monthly/UF</td>
 <td>2008–2024</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>SIA</strong></td>
 <td>Outpatient Information System (13 file types)</td>
 <td>Monthly/UF</td>
 <td>2008–2024</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>SINAN</strong></td>
 <td>Notifiable Diseases Surveillance (31 diseases)</td>
 <td>Annual/UF</td>
 <td>2007–2024</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>CNES</strong></td>
 <td>National Health Facility Registry (13 file types)</td>
 <td>Monthly/UF</td>
 <td>2005–2024</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>SI-PNI</strong></td>
 <td>National Immunization Program (FTP 1994–2019, CSV 2020+)</td>
 <td>Annual or Monthly/UF</td>
@@ -199,26 +199,26 @@
 <col width="36%">
 <col width="19%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Module</th>
 <th>Source</th>
 <th>Description</th>
 <th>Years</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><strong>SISAB</strong></td>
 <td>Ministry of Health REST API</td>
 <td>Primary Care coverage indicators (APS, oral health, community agents, PNS)</td>
 <td>2007–present</td>
 </tr>
-<tr class="even">
+<tr>
 <td><strong>ANS</strong></td>
 <td>ANS Open Data Portal</td>
 <td>Supplementary health beneficiaries, consumer complaints, financial statements</td>
 <td>2007–present</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><strong>ANVISA</strong></td>
 <td>ANVISA Open Data Portal</td>
 <td>Product registrations, pharmacovigilance, hemovigilance, technovigilance, SNGPC</td>
@@ -462,7 +462,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

@@ -27,6 +27,7 @@ complaints, and operator financial statements.
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -34,6 +35,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 # beneficiaries (default)
 ans_years()
 
@@ -47,6 +49,7 @@ ans_years(type = "financial")
 ### Module information
 
 ``` r
+
 ans_info()
 ```
 
@@ -59,6 +62,7 @@ more. Each file covers one state (UF) and one month.
 ### Basic download
 
 ``` r
+
 # Acre, December 2023
 ac <- ans_data(year = 2023, month = 12, uf = "AC")
 ac
@@ -67,6 +71,7 @@ ac
 ### Multiple months and states
 
 ``` r
+
 # first quarter 2024, two states
 ne <- ans_data(year = 2024, month = 1:3, uf = c("CE", "PE"))
 
@@ -77,6 +82,7 @@ ac_2023 <- ans_data(year = 2023, uf = "AC")
 ### Selecting variables
 
 ``` r
+
 ans_data(
   year = 2023, month = 12, uf = "AC",
   vars = c("CD_OPERADORA", "SG_UF", "TP_SEXO",
@@ -86,20 +92,20 @@ ans_data(
 
 ### Key variables
 
-| Variable              | Description                                            |
-|-----------------------|--------------------------------------------------------|
-| ID_CMPT_MOVEL         | Reference period (YYYY-MM)                             |
-| CD_OPERADORA          | Operator code at ANS                                   |
-| NM_RAZAO_SOCIAL       | Operator name                                          |
-| SG_UF                 | State abbreviation                                     |
-| CD_MUNICIPIO          | Municipality (IBGE code)                               |
-| TP_SEXO               | Sex (M/F)                                              |
-| DE_FAIXA_ETARIA       | Age group                                              |
-| DE_CONTRATACAO_PLANO  | Contract type (Individual, Coletivo Empresarial, etc.) |
-| DE_SEGMENTACAO_PLANO  | Plan segment (Ambulatorial, Hospitalar, etc.)          |
-| COBERTURA_ASSIST_PLAN | Coverage type (Medico-hospitalar, Odontologica)        |
-| TIPO_VINCULO          | Beneficiary link (Titular, Dependente)                 |
-| QT_BENEFICIARIO_ATIVO | Active beneficiary count                               |
+| Variable | Description |
+|----|----|
+| ID_CMPT_MOVEL | Reference period (YYYY-MM) |
+| CD_OPERADORA | Operator code at ANS |
+| NM_RAZAO_SOCIAL | Operator name |
+| SG_UF | State abbreviation |
+| CD_MUNICIPIO | Municipality (IBGE code) |
+| TP_SEXO | Sex (M/F) |
+| DE_FAIXA_ETARIA | Age group |
+| DE_CONTRATACAO_PLANO | Contract type (Individual, Coletivo Empresarial, etc.) |
+| DE_SEGMENTACAO_PLANO | Plan segment (Ambulatorial, Hospitalar, etc.) |
+| COBERTURA_ASSIST_PLAN | Coverage type (Medico-hospitalar, Odontologica) |
+| TIPO_VINCULO | Beneficiary link (Titular, Dependente) |
+| QT_BENEFICIARIO_ATIVO | Active beneficiary count |
 
 ## Consumer complaints (NIP)
 
@@ -108,6 +114,7 @@ Consumer complaints data covers demands filed through ANS’s NIP
 (not per-UF) and annual.
 
 ``` r
+
 # complaints filed in 2022
 nip <- ans_data(year = 2022, type = "complaints")
 nip
@@ -138,6 +145,7 @@ Quarterly financial statements (demonstracoes contabeis) for all health
 plan operators.
 
 ``` r
+
 # Q1 2023
 fin_q1 <- ans_data(year = 2023, type = "financial", quarter = 1)
 
@@ -150,13 +158,14 @@ fin_q12 <- ans_data(year = 2023, type = "financial", quarter = 1:2)
 
 ### Key variables
 
-| Variable          | Description                                                   |
-|-------------------|---------------------------------------------------------------|
-| DATA              | Reference date                                                |
-| REG_ANS           | Operator registration                                         |
-| CD_CONTA_CONTABIL | Accounting code                                               |
-| DESCRICAO         | Account description                                           |
-| VL_SALDO_INICIAL  | Opening balance (R$){||}VL_{S}ALDO_{F}INAL|Closingbalance(R$) |
+| Variable          | Description                              |
+|-------------------|------------------------------------------|
+| DATA              | Reference date                           |
+| REG_ANS           | Operator registration                    |
+| CD_CONTA_CONTABIL | Accounting code                          |
+| DESCRICAO         | Account description                      |
+| VL_SALDO_INICIAL  | Opening balance (R$`) |                  
+                     | VL_SALDO_FINAL | Closing balance (R`$)  |
 
 ## Operator registry
 
@@ -164,6 +173,7 @@ The operator registry is a separate snapshot (not time-series), so it
 uses its own function:
 
 ``` r
+
 # active operators
 active <- ans_operators()
 
@@ -189,6 +199,7 @@ all_ops <- ans_operators(status = "all")
 ## Exploring variables
 
 ``` r
+
 # beneficiaries variables (default)
 ans_variables()
 
@@ -206,6 +217,7 @@ ans_variables(search = "beneficiario")
 ## Example: beneficiaries by state and plan type
 
 ``` r
+
 # December 2023, all states
 ben <- ans_data(year = 2023, month = 12)
 
@@ -222,6 +234,7 @@ ben |>
 ## Example: complaints by subject and operator
 
 ``` r
+
 nip <- ans_data(year = 2023, type = "complaints")
 
 # top complaint subjects
@@ -238,6 +251,7 @@ nip |>
 ## Example: operator financial health
 
 ``` r
+
 # Q4 2023 financial data
 fin <- ans_data(year = 2023, type = "financial", quarter = 4)
 
@@ -264,6 +278,7 @@ fin |>
 ANS beneficiary counts complement SUS data by showing private coverage:
 
 ``` r
+
 # private coverage (ANS)
 ben <- ans_data(year = 2023, month = 12,
                 vars = c("SG_UF", "QT_BENEFICIARIO_ATIVO"))
@@ -306,6 +321,7 @@ With the `arrow` package installed, data is cached in Parquet format and
 can be queried lazily:
 
 ``` r
+
 # lazy query (requires arrow)
 lazy_ben <- ans_data(year = 2023, uf = "AC", lazy = TRUE)
 lazy_ben |>
@@ -319,6 +335,7 @@ lazy_ben |>
 Downloaded data is cached locally for faster future access:
 
 ``` r
+
 # check cache status
 ans_cache_status()
 
@@ -328,14 +345,14 @@ ans_clear_cache()
 
 ## Differences from DATASUS modules
 
-| Feature             | ANS                                                                                      | DATASUS modules     |
-|---------------------|------------------------------------------------------------------------------------------|---------------------|
-| Data source         | HTTP CSV/ZIP                                                                             | FTP .dbc/.DBF files |
-| Column names        | MixedCase (from CSV)                                                                     | UPPERCASE           |
-| `parse` parameter   | Not available                                                                            | Available           |
-| `dictionary()`      | Not available                                                                            | Available           |
-| `quarter` parameter | Financial data                                                                           | Not used            |
-| Operator registry   | [`ans_operators()`](https://sidneybissoli.github.io/healthbR/reference/ans_operators.md) | Not applicable      |
+| Feature | ANS | DATASUS modules |
+|----|----|----|
+| Data source | HTTP CSV/ZIP | FTP .dbc/.DBF files |
+| Column names | MixedCase (from CSV) | UPPERCASE |
+| `parse` parameter | Not available | Available |
+| `dictionary()` | Not available | Available |
+| `quarter` parameter | Financial data | Not used |
+| Operator registry | [`ans_operators()`](https://sidneybissoli.github.io/healthbR/reference/ans_operators.md) | Not applicable |
 
 ## Additional resources
 

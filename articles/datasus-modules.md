@@ -7,16 +7,16 @@ systems, covering mortality, live births, hospital admissions,
 outpatient production, notifiable diseases, the health facility
 registry, vaccination data, and primary care coverage:
 
-| Module | Function                                                                             | Source document                            | Granularity     | Years        |
-|--------|--------------------------------------------------------------------------------------|--------------------------------------------|-----------------|--------------|
-| SIM    | [`sim_data()`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)       | Declaracao de Obito (DO)                   | Annual/UF       | 1996–2024    |
-| SINASC | [`sinasc_data()`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md) | Declaracao de Nascido Vivo (DN)            | Annual/UF       | 1996–2024    |
-| SIH    | [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)       | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF      | 2008–2024    |
-| SIA    | [`sia_data()`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)       | BPA / APAC                                 | Monthly/type/UF | 2008–2024    |
-| SINAN  | [`sinan_data()`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)   | Ficha de Notificacao                       | Annual/National | 2007–2024    |
-| CNES   | [`cnes_data()`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)     | Cadastro de Estabelecimentos               | Monthly/type/UF | 2005–2024    |
-| SI-PNI | [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)   | PNI (doses, cobertura, microdados)         | Annual/UF       | 1994–2025    |
-| SISAB  | [`sisab_data()`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)   | Cobertura da Atencao Primaria              | Monthly         | 2007–present |
+| Module | Function | Source document | Granularity | Years |
+|----|----|----|----|----|
+| SIM | [`sim_data()`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md) | Declaracao de Obito (DO) | Annual/UF | 1996–2024 |
+| SINASC | [`sinasc_data()`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md) | Declaracao de Nascido Vivo (DN) | Annual/UF | 1996–2024 |
+| SIH | [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md) | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF | 2008–2024 |
+| SIA | [`sia_data()`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md) | BPA / APAC | Monthly/type/UF | 2008–2024 |
+| SINAN | [`sinan_data()`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md) | Ficha de Notificacao | Annual/National | 2007–2024 |
+| CNES | [`cnes_data()`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md) | Cadastro de Estabelecimentos | Monthly/type/UF | 2005–2024 |
+| SI-PNI | [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md) | PNI (doses, cobertura, microdados) | Annual/UF | 1994–2025 |
+| SISAB | [`sisab_data()`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md) | Cobertura da Atencao Primaria | Monthly | 2007–present |
 
 All seven modules share the same infrastructure:
 
@@ -33,6 +33,7 @@ All seven modules share the same infrastructure:
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -43,6 +44,7 @@ Each module provides the same set of helper functions. Here is a quick
 tour using SIM as an example:
 
 ``` r
+
 # available years
 sim_years()
 #> [1] 1996 1997 1998 ... 2023
@@ -71,6 +73,7 @@ death records based on the Declaracao de Obito (DO).
 ### Basic download
 
 ``` r
+
 # all deaths in Acre, 2022
 obitos_ac <- sim_data(year = 2022, uf = "AC")
 obitos_ac
@@ -82,6 +85,7 @@ The `cause` parameter filters by underlying cause of death (CAUSABAS)
 using CID-10 prefix matching:
 
 ``` r
+
 # deaths from acute myocardial infarction (I21)
 obitos_iam <- sim_data(year = 2022, uf = "AC", cause = "I21")
 
@@ -102,6 +106,7 @@ obitos_cardio <- sim_data(year = 2022, uf = "AC", cause = "I")
 ### Example: deaths by cause chapter
 
 ``` r
+
 obitos_ac <- sim_data(year = 2022, uf = "AC")
 
 obitos_ac |>
@@ -117,6 +122,7 @@ individual live birth records from the Declaracao de Nascido Vivo (DN).
 ### Basic download
 
 ``` r
+
 nasc_ac <- sinasc_data(year = 2022, uf = "AC")
 nasc_ac
 ```
@@ -127,6 +133,7 @@ The `anomaly` parameter filters by the CODANOMAL variable using CID-10
 prefix matching:
 
 ``` r
+
 # births with any congenital anomaly (chapter Q)
 anomalias <- sinasc_data(year = 2022, uf = "AC", anomaly = "Q")
 ```
@@ -145,6 +152,7 @@ anomalias <- sinasc_data(year = 2022, uf = "AC", anomaly = "Q")
 ### Example: birth weight distribution
 
 ``` r
+
 nasc_ac <- sinasc_data(year = 2022, uf = "AC")
 
 nasc_ac |>
@@ -168,6 +176,7 @@ Hospitalar). Unlike SIM and SINASC, data is organized **monthly**.
 ### Basic download
 
 ``` r
+
 # admissions in Acre, January 2022
 intern_jan <- sih_data(year = 2022, month = 1, uf = "AC")
 intern_jan
@@ -179,6 +188,7 @@ SIH data is monthly – one file per UF per month. Use `month` to control
 which months to download:
 
 ``` r
+
 # single month
 sih_data(year = 2022, month = 6, uf = "AC")
 
@@ -195,6 +205,7 @@ The `diagnosis` parameter filters by the principal diagnosis
 (DIAG_PRINC) using CID-10 prefix matching:
 
 ``` r
+
 # respiratory admissions (chapter J)
 resp <- sih_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
 
@@ -217,6 +228,7 @@ pneum <- sih_data(year = 2022, month = 1, uf = "AC",
 ### Example: admissions by diagnosis chapter
 
 ``` r
+
 intern <- sih_data(year = 2022, month = 1, uf = "AC")
 
 intern |>
@@ -251,6 +263,7 @@ file types** covering different categories of outpatient care.
 ### Basic download
 
 ``` r
+
 # outpatient production in Acre, January 2022 (default type = "PA")
 ambul_jan <- sia_data(year = 2022, month = 1, uf = "AC")
 ambul_jan
@@ -262,6 +275,7 @@ med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
 ### Filter by procedure and diagnosis
 
 ``` r
+
 # filter by SIGTAP procedure code (prefix match on PA_PROC_ID)
 consult <- sia_data(year = 2022, month = 1, uf = "AC", procedure = "0301")
 
@@ -283,6 +297,7 @@ resp <- sia_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
 ### Example: production by procedure group
 
 ``` r
+
 ambul <- sia_data(year = 2022, month = 1, uf = "AC")
 
 ambul |>
@@ -304,6 +319,7 @@ SINAN covers 31 diseases. Use
 to see all available codes:
 
 ``` r
+
 sinan_diseases()
 #> # A tibble: 31 x 3
 #>    code  name                      description
@@ -321,6 +337,7 @@ sinan_diseases(search = "sifilis")
 ### Basic download
 
 ``` r
+
 # dengue notifications, 2022 (default disease)
 dengue <- sinan_data(year = 2022)
 
@@ -338,6 +355,7 @@ sinan_data(year = 2022, disease = "DENG",
 Since files are national, filter by UF after download:
 
 ``` r
+
 dengue <- sinan_data(year = 2022)
 
 # filter by state of notification
@@ -364,6 +382,7 @@ dengue_rio <- dengue |>
 ### Example: confirmed dengue by month
 
 ``` r
+
 dengue <- sinan_data(year = 2022, disease = "DENG")
 
 dengue |>
@@ -400,6 +419,7 @@ are **13 file types** covering different aspects of the registry.
 ### Basic download
 
 ``` r
+
 # establishments in Acre, January 2023
 estab <- cnes_data(year = 2023, month = 1, uf = "AC")
 
@@ -424,6 +444,7 @@ prof <- cnes_data(year = 2023, month = 1, uf = "AC", type = "PF")
 ### Example: facility types in a state
 
 ``` r
+
 estab <- cnes_data(year = 2023, month = 1, uf = "AC")
 
 estab |>
@@ -450,15 +471,16 @@ transparently routes to the correct source based on the requested year.
 
 ### File types
 
-| Code | Name              | Description                                                                      |
-|------|-------------------|----------------------------------------------------------------------------------|
-| DPNI | Doses Aplicadas   | Doses applied per municipality, age group, vaccine, and dose type (FTP, default) |
-| CPNI | Cobertura Vacinal | Vaccination coverage per municipality and vaccine (FTP)                          |
-| API  | Microdados        | Individual-level microdata via OpenDataSUS (2020+, automatic)                    |
+| Code | Name | Description |
+|----|----|----|
+| DPNI | Doses Aplicadas | Doses applied per municipality, age group, vaccine, and dose type (FTP, default) |
+| CPNI | Cobertura Vacinal | Vaccination coverage per municipality and vaccine (FTP) |
+| API | Microdados | Individual-level microdata via OpenDataSUS (2020+, automatic) |
 
 ### Basic download
 
 ``` r
+
 # FTP: doses applied in Acre, 2019 (default type = "DPNI")
 doses_ac <- sipni_data(year = 2019, uf = "AC")
 doses_ac
@@ -495,6 +517,7 @@ micro_ac
 ### Example: doses by vaccine
 
 ``` r
+
 doses <- sipni_data(year = 2019, uf = "AC")
 
 doses |>
@@ -519,6 +542,7 @@ Calculate the crude cardiovascular mortality rate per 100,000
 population:
 
 ``` r
+
 # step 1: count cardiovascular deaths in Sao Paulo, 2022
 obitos_cardio <- sim_data(year = 2022, uf = "SP", cause = "I")
 n_obitos <- nrow(obitos_cardio)
@@ -537,6 +561,7 @@ taxa_mortalidade
 Compare the number of live births and deaths in a state:
 
 ``` r
+
 # births and deaths in Acre, 2022
 nascimentos <- sinasc_data(year = 2022, uf = "AC")
 obitos <- sim_data(year = 2022, uf = "AC")
@@ -552,6 +577,7 @@ Compare volumes and costs of respiratory care (CID-10 chapter J) between
 hospital and outpatient settings:
 
 ``` r
+
 # hospital admissions for respiratory diseases, January 2022
 intern_resp <- sih_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
 
@@ -582,6 +608,7 @@ All DATASUS modules cache downloaded data automatically. When the
 compact); otherwise, .rds is used as fallback.
 
 ``` r
+
 # install arrow for optimized caching (recommended)
 install.packages("arrow")
 ```
@@ -591,6 +618,7 @@ install.packages("arrow")
 Each module provides `*_cache_status()` and `*_clear_cache()`:
 
 ``` r
+
 # check what is cached
 sim_cache_status()
 sih_cache_status()

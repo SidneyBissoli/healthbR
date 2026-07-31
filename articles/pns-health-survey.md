@@ -12,14 +12,15 @@ approximately 100,000+ respondents.
 
 The `healthbR` package provides two complementary access paths:
 
-| Access path      | Function                                                                                   | Description                           |
-|------------------|--------------------------------------------------------------------------------------------|---------------------------------------|
-| **Microdata**    | [`pns_data()`](https://sidneybissoli.github.io/healthbR/reference/pns_data.md)             | Individual-level records via IBGE FTP |
+| Access path | Function | Description |
+|----|----|----|
+| **Microdata** | [`pns_data()`](https://sidneybissoli.github.io/healthbR/reference/pns_data.md) | Individual-level records via IBGE FTP |
 | **SIDRA tables** | [`pns_sidra_data()`](https://sidneybissoli.github.io/healthbR/reference/pns_sidra_data.md) | Pre-tabulated indicators via IBGE API |
 
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -27,6 +28,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 pns_years()
 #> [1] "2013" "2019"
 ```
@@ -34,6 +36,7 @@ pns_years()
 ### Survey information
 
 ``` r
+
 pns_info(2019)
 ```
 
@@ -44,6 +47,7 @@ PNS organizes questions into thematic modules (A through Z). Use
 to see what’s available:
 
 ``` r
+
 pns_modules(year = 2019)
 #> # A tibble: 20 x 3
 #>    code  name_pt                          name_en
@@ -58,6 +62,7 @@ pns_modules(year = 2019)
 ### Download microdata
 
 ``` r
+
 # All modules for 2019
 df <- pns_data(year = 2019)
 
@@ -68,6 +73,7 @@ df <- pns_data(year = 2019, vars = c("C006", "C008", "C009", "Q002", "Q00201"))
 ### Explore variables
 
 ``` r
+
 # List all variables
 pns_variables(year = 2019)
 
@@ -89,6 +95,7 @@ microdata.
 PNS has 69 SIDRA tables organized by 14 health themes:
 
 ``` r
+
 # Browse all tables
 pns_sidra_tables()
 
@@ -103,6 +110,7 @@ pns_sidra_search("tabagismo")
 ### Query a SIDRA table
 
 ``` r
+
 # Table 7666: Self-reported diabetes prevalence
 diabetes <- pns_sidra_data(
   table = 7666,
@@ -114,6 +122,7 @@ diabetes <- pns_sidra_data(
 ### Geographic levels
 
 ``` r
+
 # National level
 pns_sidra_data(table = 7666, territorial_level = "brazil")
 
@@ -132,6 +141,7 @@ pns_sidra_data(table = 7666, territorial_level = "state", geo_code = "35")
 Using SIDRA for quick tabulated results:
 
 ``` r
+
 # Self-reported hypertension by state
 hypertension <- pns_sidra_data(
   table = 7659,
@@ -143,6 +153,7 @@ hypertension <- pns_sidra_data(
 ## Example: Health service access from microdata
 
 ``` r
+
 df <- pns_data(
   year = 2019,
   vars = c("C006", "C008", "C009", "J001", "J007", "J009", "V0024", "UPA_PNS")
@@ -163,6 +174,7 @@ access <- df |>
 ## Cache and performance
 
 ``` r
+
 # Check cache
 pns_cache_status()
 

@@ -10,9 +10,9 @@ and coverage rates across the country.
 The `healthbR` package provides access to SI-PNI data from **two
 sources**:
 
-| Source              | Years     | Data type                  | Granularity      | Format             |
-|---------------------|-----------|----------------------------|------------------|--------------------|
-| **FTP DATASUS**     | 1994–2019 | Aggregated counts          | Annual per UF    | .DBF files         |
+| Source | Years | Data type | Granularity | Format |
+|----|----|----|----|----|
+| **FTP DATASUS** | 1994–2019 | Aggregated counts | Annual per UF | .DBF files |
 | **OpenDataSUS CSV** | 2020–2025 | Individual-level microdata | Monthly national | CSV bulk downloads |
 
 [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
@@ -20,17 +20,18 @@ automatically routes to the correct source based on the requested year.
 
 ## Data sources comparison
 
-| Feature     | FTP (1994–2019)                                       | CSV (2020–2025)                           |
-|-------------|-------------------------------------------------------|-------------------------------------------|
+| Feature | FTP (1994–2019) | CSV (2020–2025) |
+|----|----|----|
 | Record type | Aggregated (dose counts per municipality/vaccine/age) | Individual (one row per vaccination dose) |
-| File types  | DPNI (doses) or CPNI (coverage)                       | Single type (microdata)                   |
-| Variables   | 7–12 per type                                         | ~47 per record                            |
-| File size   | Small (~100 KB per UF/year)                           | Large (~1.4 GB ZIP per month, national)   |
-| Naming      | UPPERCASE column names                                | snake_case column names                   |
+| File types | DPNI (doses) or CPNI (coverage) | Single type (microdata) |
+| Variables | 7–12 per type | ~47 per record |
+| File size | Small (~100 KB per UF/year) | Large (~1.4 GB ZIP per month, national) |
+| Naming | UPPERCASE column names | snake_case column names |
 
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -38,6 +39,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 sipni_years()
 #> [1] 1994 1995 ... 2024 2025
 ```
@@ -45,6 +47,7 @@ sipni_years()
 ### Module information
 
 ``` r
+
 sipni_info()
 ```
 
@@ -53,6 +56,7 @@ sipni_info()
 The default type downloads aggregated dose counts (1994–2019):
 
 ``` r
+
 # doses applied in Acre, 2019
 ac_doses <- sipni_data(year = 2019, uf = "AC")
 ac_doses
@@ -73,6 +77,7 @@ ac_doses
 ### Using the dictionary
 
 ``` r
+
 # vaccine codes
 sipni_dictionary("IMUNO")
 
@@ -88,6 +93,7 @@ sipni_dictionary("FX_ETARIA")
 The CPNI type provides coverage rates per municipality:
 
 ``` r
+
 # vaccination coverage in Acre, 2019
 ac_coverage <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
 ac_coverage
@@ -112,6 +118,7 @@ For years 2020 and later, SI-PNI provides individual-level microdata
 these years:
 
 ``` r
+
 # microdata for Acre, January 2024
 ac_micro <- sipni_data(year = 2024, uf = "AC", month = 1)
 ac_micro
@@ -133,6 +140,7 @@ ac_micro
 ### Exploring variables
 
 ``` r
+
 # DPNI variables (FTP)
 sipni_variables()
 
@@ -152,6 +160,7 @@ For years \>= 2020, each month is a separate ~1.4 GB national CSV file.
 Use `month` to select specific months:
 
 ``` r
+
 # single month
 jan <- sipni_data(year = 2024, uf = "AC", month = 1)
 
@@ -168,6 +177,7 @@ files are annual.
 ## Example: vaccine doses by immunobiological (FTP)
 
 ``` r
+
 ac_2019 <- sipni_data(year = 2019, uf = "AC")
 
 # decode immunobiological names
@@ -187,6 +197,7 @@ doses_by_vaccine
 ## Example: coverage trends over time
 
 ``` r
+
 # coverage data for Sao Paulo, 2015-2019
 sp_cov <- sipni_data(
   year = 2015:2019,
@@ -206,6 +217,7 @@ sp_cov |>
 ## Example: individual-level analysis (2020+)
 
 ``` r
+
 # COVID-19 vaccinations in Acre, January 2024
 ac_jan <- sipni_data(year = 2024, uf = "AC", month = 1)
 
@@ -235,6 +247,7 @@ fetches from FTP and CSV respectively and combines the results. Note
 that column names and structure differ between sources:
 
 ``` r
+
 # this downloads FTP (2019) + CSV (2024)
 mixed <- sipni_data(year = c(2019, 2024), uf = "AC", month = 1)
 
@@ -256,6 +269,7 @@ names(mixed)
 ## Smart type parsing
 
 ``` r
+
 # parsed types (default)
 ac <- sipni_data(year = 2019, uf = "AC")
 class(ac$QT_DOSE)  # integer
@@ -269,6 +283,7 @@ ac_raw <- sipni_data(year = 2019, uf = "AC", parse = FALSE)
 Downloaded data is cached locally for faster future access:
 
 ``` r
+
 # check cache status
 sipni_cache_status()
 
@@ -280,6 +295,7 @@ If the `arrow` package is installed, data is cached in Parquet format.
 You can also use lazy evaluation:
 
 ``` r
+
 # lazy query for FTP data (requires arrow)
 sipni_lazy <- sipni_data(year = 2019, uf = "AC", lazy = TRUE)
 sipni_lazy |>

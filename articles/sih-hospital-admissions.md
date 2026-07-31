@@ -18,6 +18,7 @@ Ministry of Health through DATASUS.
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -25,6 +26,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 sih_years()
 sih_years(status = "all")
 ```
@@ -32,6 +34,7 @@ sih_years(status = "all")
 ### Module information
 
 ``` r
+
 sih_info()
 ```
 
@@ -40,6 +43,7 @@ sih_info()
 ### Basic download
 
 ``` r
+
 # All months of 2022 for Acre
 admissions <- sih_data(year = 2022, uf = "AC")
 ```
@@ -47,6 +51,7 @@ admissions <- sih_data(year = 2022, uf = "AC")
 ### Specific months
 
 ``` r
+
 # First semester only
 admissions <- sih_data(year = 2022, uf = "SP", month = 1:6)
 
@@ -59,6 +64,7 @@ admissions <- sih_data(year = 2022, uf = "SP", month = 3)
 Use CID-10 code prefixes to filter the principal diagnosis:
 
 ``` r
+
 # Acute myocardial infarction (I21)
 mi <- sih_data(year = 2022, uf = "SP", diagnosis = "I21")
 
@@ -72,6 +78,7 @@ dengue_hosp <- sih_data(year = 2022, uf = "SP", diagnosis = "A9")
 ### Select variables
 
 ``` r
+
 admissions <- sih_data(
   year = 2022,
   uf = "SP",
@@ -104,6 +111,7 @@ Note: Sex codes in SIH differ from SIM/SINASC (0=Unknown, 1=Male,
 ### Data dictionary
 
 ``` r
+
 sih_dictionary()
 sih_dictionary("SEXO")
 sih_dictionary("MORTE")
@@ -112,6 +120,7 @@ sih_dictionary("MORTE")
 ### Explore variables
 
 ``` r
+
 sih_variables()
 sih_variables(search = "diag")
 sih_variables(search = "valor")
@@ -120,6 +129,7 @@ sih_variables(search = "valor")
 ## Example: Hospital mortality by diagnosis chapter
 
 ``` r
+
 admissions <- sih_data(year = 2022, uf = "SP", month = 1:6)
 
 mortality <- admissions |>
@@ -136,6 +146,7 @@ mortality <- admissions |>
 ## Example: Hospitalization costs
 
 ``` r
+
 admissions <- sih_data(year = 2022, uf = "SP", month = 1)
 
 costs <- admissions |>
@@ -155,6 +166,7 @@ costs <- admissions |>
 ## Example: Seasonal patterns
 
 ``` r
+
 # respiratory admissions across all months
 resp <- sih_data(year = 2022, uf = "SP", diagnosis = "J")
 
@@ -166,6 +178,7 @@ seasonal <- resp |>
 ## Smart type parsing
 
 ``` r
+
 # parsed types (default)
 admissions <- sih_data(year = 2022, uf = "AC", month = 1)
 class(admissions$DT_INTER)  # Date
@@ -178,6 +191,7 @@ admissions_raw <- sih_data(year = 2022, uf = "AC", month = 1, parse = FALSE)
 ## Cache and lazy evaluation
 
 ``` r
+
 sih_cache_status()
 sih_clear_cache()
 

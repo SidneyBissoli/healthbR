@@ -23,6 +23,7 @@ Use
 to see all available types:
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 
@@ -65,6 +66,7 @@ These require a `year` parameter and optionally a `month` parameter.
 Download the complete registry of medicines approved by ANVISA:
 
 ``` r
+
 medicines <- anvisa_data(type = "medicines")
 
 # explore the data
@@ -83,6 +85,7 @@ active |>
 ### Medical devices
 
 ``` r
+
 devices <- anvisa_data(type = "medical_devices")
 
 # count by risk class
@@ -93,6 +96,7 @@ devices |>
 ### Food and cosmetics
 
 ``` r
+
 food <- anvisa_data(type = "food")
 cosmetics <- anvisa_data(type = "cosmetics")
 ```
@@ -100,6 +104,7 @@ cosmetics <- anvisa_data(type = "cosmetics")
 ### Select specific variables
 
 ``` r
+
 # only keep product name and active ingredient
 med_slim <- anvisa_data(
   type = "medicines",
@@ -113,6 +118,7 @@ Pesticide monographs list authorized active ingredients and their
 maximum residue limits (LMR):
 
 ``` r
+
 pesticides <- anvisa_data(type = "pesticides")
 
 # search for a specific substance
@@ -130,6 +136,7 @@ coffee <- pesticides |>
 Adverse events related to blood transfusions:
 
 ``` r
+
 hemo <- anvisa_data(type = "hemovigilance")
 
 # count by reaction type
@@ -146,6 +153,7 @@ hemo |>
 Adverse events related to medical devices:
 
 ``` r
+
 techno <- anvisa_data(type = "technovigilance")
 
 # count by notification type
@@ -159,6 +167,7 @@ Drug/vaccine adverse event reports are split into three linked datasets
 sharing the `IDENTIFICACAO_NOTIFICACAO` key:
 
 ``` r
+
 # notifications (patient info + event summary)
 notif <- anvisa_data(type = "vigimed_notifications")
 
@@ -188,6 +197,7 @@ pharmacies across Brazil.
 ### Industrialized medicines
 
 ``` r
+
 # download January 2020 data
 sngpc_jan <- anvisa_data(type = "sngpc", year = 2020, month = 1)
 
@@ -204,6 +214,7 @@ sngpc_jan |>
 ### Multiple months
 
 ``` r
+
 # download Q1 2020 (Jan-Mar)
 sngpc_q1 <- anvisa_data(type = "sngpc", year = 2020, month = 1:3)
 
@@ -215,6 +226,7 @@ sngpc_q1 |>
 ### Compounded medicines
 
 ``` r
+
 # compounded (manipulated) controlled substances
 manip <- anvisa_data(type = "sngpc_compounded", year = 2020, month = 1)
 
@@ -230,6 +242,7 @@ For large SNGPC queries spanning many months, use lazy evaluation to
 defer computation:
 
 ``` r
+
 # lazy query (requires arrow package)
 lazy_sngpc <- anvisa_data(
   type = "sngpc", year = 2020, month = 1:12,
@@ -249,6 +262,7 @@ Use
 to see available variables for any type:
 
 ``` r
+
 # all medicines variables
 anvisa_variables(type = "medicines")
 
@@ -264,6 +278,7 @@ anvisa_variables(type = "sngpc")
 Downloaded data is cached locally for faster subsequent access:
 
 ``` r
+
 # check cache status
 anvisa_cache_status()
 
@@ -274,6 +289,7 @@ anvisa_clear_cache()
 ## Module information
 
 ``` r
+
 # full module overview
 anvisa_info()
 ```

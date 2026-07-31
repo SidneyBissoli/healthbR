@@ -17,6 +17,7 @@ de Obito*) with cause of death coded by ICD-10.
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -24,6 +25,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 sim_years()
 
 # include preliminary data
@@ -33,6 +35,7 @@ sim_years(status = "all")
 ### Module information
 
 ``` r
+
 sim_info()
 ```
 
@@ -41,18 +44,21 @@ sim_info()
 ### Basic download (one state, one year)
 
 ``` r
+
 deaths_ac <- sim_data(year = 2022, uf = "AC")
 ```
 
 ### Multiple states and years
 
 ``` r
+
 deaths_se <- sim_data(year = 2020:2022, uf = c("SP", "RJ", "MG"))
 ```
 
 ### All states (default)
 
 ``` r
+
 # downloads all 27 states -- may take several minutes
 deaths_all <- sim_data(year = 2022)
 ```
@@ -62,6 +68,7 @@ deaths_all <- sim_data(year = 2022)
 Use CID-10 code prefixes to filter by cause:
 
 ``` r
+
 # Acute myocardial infarction (I21)
 mi <- sim_data(year = 2022, uf = "SP", cause = "I21")
 
@@ -75,6 +82,7 @@ cancer <- sim_data(year = 2022, uf = "SP", cause = "C")
 ### Select variables
 
 ``` r
+
 deaths <- sim_data(
   year = 2022,
   uf = "SP",
@@ -99,6 +107,7 @@ indicates the unit and the remaining two indicate the value:
 By default, `decode_age = TRUE` adds an `age_years` column:
 
 ``` r
+
 deaths <- sim_data(year = 2022, uf = "AC")
 deaths$age_years  # numeric age in years
 
@@ -123,6 +132,7 @@ deaths_raw <- sim_data(year = 2022, uf = "AC", decode_age = FALSE)
 ### Data dictionary
 
 ``` r
+
 sim_dictionary()
 sim_dictionary("SEXO")
 sim_dictionary("RACACOR")
@@ -131,6 +141,7 @@ sim_dictionary("RACACOR")
 ### Explore variables
 
 ``` r
+
 sim_variables()
 sim_variables(search = "causa")
 ```
@@ -138,6 +149,7 @@ sim_variables(search = "causa")
 ## Example: Mortality by cause chapter
 
 ``` r
+
 deaths <- sim_data(year = 2022, uf = "SP")
 
 deaths |>
@@ -150,6 +162,7 @@ deaths |>
 Combine SIM data with Census population denominators:
 
 ``` r
+
 # deaths by age group
 deaths <- sim_data(year = 2022, uf = "SP") |>
   filter(!is.na(age_years)) |>
@@ -168,6 +181,7 @@ pop <- censo_populacao(year = 2022, territorial_level = "state", geo_code = "35"
 ## Smart type parsing
 
 ``` r
+
 # parsed types (default)
 deaths <- sim_data(year = 2022, uf = "AC")
 class(deaths$DTOBITO)  # Date
@@ -179,6 +193,7 @@ deaths_raw <- sim_data(year = 2022, uf = "AC", parse = FALSE)
 ## Cache and lazy evaluation
 
 ``` r
+
 sim_cache_status()
 sim_clear_cache()
 

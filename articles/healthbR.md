@@ -12,37 +12,38 @@ groups:
 
 **Surveys (IBGE / Ministry of Health)**
 
-| Module        | Source                                             | Years      |
-|---------------|----------------------------------------------------|------------|
-| VIGITEL       | Telephone survey on chronic disease risk factors   | 2006–2024  |
-| PNS           | National Health Survey (microdata + SIDRA API)     | 2013, 2019 |
-| PNAD Continua | Continuous household survey (health supplements)   | 2012–2024  |
-| POF           | Household budget survey (food security, nutrition) | 2002–2018  |
-| Censo         | Population denominators via SIDRA API              | 1970–2022  |
+| Module | Source | Years |
+|----|----|----|
+| VIGITEL | Telephone survey on chronic disease risk factors | 2006–2024 |
+| PNS | National Health Survey (microdata + SIDRA API) | 2013, 2019 |
+| PNAD Continua | Continuous household survey (health supplements) | 2012–2024 |
+| POF | Household budget survey (food security, nutrition) | 2002–2018 |
+| Censo | Population denominators via SIDRA API | 1970–2022 |
 
 **DATASUS (Ministry of Health FTP)**
 
-| Module | Source                                       | Granularity     | Years        |
-|--------|----------------------------------------------|-----------------|--------------|
-| SIM    | Mortality (death certificates)               | Annual/UF       | 1996–2024    |
-| SINASC | Live births                                  | Annual/UF       | 1996–2024    |
-| SIH    | Hospital admissions (AIH)                    | Monthly/UF      | 2008–2024    |
-| SIA    | Outpatient procedures (13 file types)        | Monthly/UF      | 2008–2024    |
-| SINAN  | Notifiable diseases (31 diseases)            | Annual/National | 2007–2024    |
-| CNES   | Health facility registry (13 file types)     | Monthly/UF      | 2005–2024    |
-| SI-PNI | Vaccination (aggregated FTP + microdata API) | Annual/UF       | 1994–2025    |
-| SISAB  | Primary care coverage indicators (REST API)  | Monthly         | 2007–present |
+| Module | Source | Granularity | Years |
+|----|----|----|----|
+| SIM | Mortality (death certificates) | Annual/UF | 1996–2024 |
+| SINASC | Live births | Annual/UF | 1996–2024 |
+| SIH | Hospital admissions (AIH) | Monthly/UF | 2008–2024 |
+| SIA | Outpatient procedures (13 file types) | Monthly/UF | 2008–2024 |
+| SINAN | Notifiable diseases (31 diseases) | Annual/National | 2007–2024 |
+| CNES | Health facility registry (13 file types) | Monthly/UF | 2005–2024 |
+| SI-PNI | Vaccination (aggregated FTP + microdata API) | Annual/UF | 1994–2025 |
+| SISAB | Primary care coverage indicators (REST API) | Monthly | 2007–present |
 
 **Regulatory agencies**
 
-| Module | Source                                                      | Granularity | Years        |
-|--------|-------------------------------------------------------------|-------------|--------------|
-| ANS    | Supplementary health (beneficiaries, complaints, financial) | Monthly/UF  | 2007–present |
-| ANVISA | Medicines, devices, pharmacovigilance, SNGPC                | National    | 2014–present |
+| Module | Source | Granularity | Years |
+|----|----|----|----|
+| ANS | Supplementary health (beneficiaries, complaints, financial) | Monthly/UF | 2007–present |
+| ANVISA | Medicines, devices, pharmacovigilance, SNGPC | National | 2014–present |
 
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -50,6 +51,7 @@ library(dplyr)
 To see all available data sources at a glance:
 
 ``` r
+
 list_sources()
 #> # A tibble: 16 x 5
 #>    source  name                         description                    years       status
@@ -74,6 +76,7 @@ capitals, monitoring risk and protective factors for chronic
 non-communicable diseases.
 
 ``` r
+
 # check available years
 vigitel_years()
 
@@ -91,6 +94,7 @@ Key variables include `pesorake` (survey weight), `diab` (diabetes),
 `hart` (hypertension), `fumante` (smoker), and `imc` (BMI).
 
 ``` r
+
 # weighted prevalence of diabetes by city using srvyr
 library(srvyr)
 
@@ -109,6 +113,7 @@ The PNS provides comprehensive data on health conditions, lifestyle, and
 healthcare access from ~100,000 households.
 
 ``` r
+
 # microdata
 pns <- pns_data(year = 2019)
 
@@ -128,6 +133,7 @@ disability, housing conditions, primary health care (APS), and household
 characteristics.
 
 ``` r
+
 # list available modules
 pnadc_modules()
 
@@ -144,6 +150,7 @@ The POF (Household Budget Survey) contains data on food insecurity
 (EBIA), individual food consumption, anthropometry, and health expenses.
 
 ``` r
+
 # list available registers
 pof_registers(year = 2018)
 
@@ -168,6 +175,7 @@ denominators, essential for calculating mortality rates, incidence, and
 other epidemiological indicators.
 
 ``` r
+
 # population by state, sex, and age group (2022 Census)
 pop <- censo_populacao(year = 2022, territorial_level = "state")
 
@@ -189,6 +197,7 @@ SIM contains individual death records from death certificates (CID-10,
 1996+).
 
 ``` r
+
 # deaths in Acre, 2022
 obitos <- sim_data(year = 2022, uf = "AC")
 
@@ -206,6 +215,7 @@ SINASC contains individual birth records including birth weight,
 gestational age, prenatal care, and congenital anomalies.
 
 ``` r
+
 # births in Acre, 2022
 nascimentos <- sinasc_data(year = 2022, uf = "AC")
 
@@ -222,6 +232,7 @@ SIH contains hospital admission records (AIH) with diagnosis,
 procedures, length of stay, and costs. Data is organized monthly.
 
 ``` r
+
 # admissions in Acre, January 2022
 internacoes <- sih_data(year = 2022, month = 1, uf = "AC")
 
@@ -238,6 +249,7 @@ SIA covers outpatient production data with 13 file types (BPA, APAC,
 RAAS).
 
 ``` r
+
 # outpatient production in Acre, January 2022 (default type: PA)
 ambulatorial <- sia_data(year = 2022, month = 1, uf = "AC")
 
@@ -257,6 +269,7 @@ syphilis, and others. Files are **national** (not per-state), so each
 download covers all of Brazil for a given disease and year.
 
 ``` r
+
 # list available diseases
 sinan_diseases()
 
@@ -278,6 +291,7 @@ Since SINAN files are national, filter by state after download using
 `SG_UF_NOT` (UF of notification) or `ID_MUNICIP` (municipality code):
 
 ``` r
+
 dengue |>
   filter(SG_UF_NOT == "35")  # Sao Paulo
 ```
@@ -289,6 +303,7 @@ clinics, primary care units, and all other health establishments. Data
 is organized monthly with 13 file types.
 
 ``` r
+
 # see all file types
 cnes_info()
 
@@ -319,6 +334,7 @@ with individual-level microdata (one row per vaccination dose).
 routes transparently based on the requested year.
 
 ``` r
+
 # module overview
 sipni_info()
 
@@ -344,6 +360,7 @@ Primaria) via a public REST API. Unlike other DATASUS modules, no FTP
 download or .dbc decompression is needed.
 
 ``` r
+
 # module overview
 sisab_info()
 
@@ -371,6 +388,7 @@ private health insurance in Brazil, including beneficiary counts,
 consumer complaints, and operator financial statements.
 
 ``` r
+
 # module overview
 ans_info()
 
@@ -402,6 +420,7 @@ pharmacovigilance reports (VigiMed). The SNGPC module provides
 controlled substance dispensing data.
 
 ``` r
+
 # see all available data types
 anvisa_types()
 
@@ -426,12 +445,14 @@ All modules cache downloaded data automatically to avoid repeated
 downloads. Install `arrow` for optimized Parquet caching (recommended):
 
 ``` r
+
 install.packages("arrow")
 ```
 
 Cache management works the same across all modules:
 
 ``` r
+
 # check what is cached
 sim_cache_status()
 vigitel_cache_status()
@@ -451,10 +472,12 @@ downloads by installing `furrr` and `future` and setting a parallel plan
 before calling any `*_data()` function:
 
 ``` r
+
 install.packages(c("furrr", "future"))
 ```
 
 ``` r
+
 library(future)
 
 # use multiple R sessions (e.g., 4 workers)
@@ -491,6 +514,7 @@ example, calculating mortality rates requires deaths (SIM) and
 population (Censo):
 
 ``` r
+
 library(dplyr)
 
 # deaths by state

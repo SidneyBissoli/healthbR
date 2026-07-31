@@ -10,16 +10,17 @@ It is conducted in partnership with the Ministry of Health.
 The `healthbR` package provides access to POF microdata with a focus on
 **health-related data**:
 
-| Module                   | Description                           | Available editions   |
-|--------------------------|---------------------------------------|----------------------|
-| **Food Security (EBIA)** | Brazilian Food Insecurity Scale       | 2017-2018            |
-| **Food Consumption**     | Detailed personal food intake         | 2008-2009, 2017-2018 |
-| **Anthropometry**        | Weight, height, BMI                   | 2008-2009            |
-| **Health Expenses**      | Medications, insurance, consultations | All editions         |
+| Module | Description | Available editions |
+|----|----|----|
+| **Food Security (EBIA)** | Brazilian Food Insecurity Scale | 2017-2018 |
+| **Food Consumption** | Detailed personal food intake | 2008-2009, 2017-2018 |
+| **Anthropometry** | Weight, height, BMI | 2008-2009 |
+| **Health Expenses** | Medications, insurance, consultations | All editions |
 
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -27,6 +28,7 @@ library(dplyr)
 ### Check available editions
 
 ``` r
+
 pof_years()
 #> [1] "2002-2003" "2008-2009" "2017-2018"
 ```
@@ -38,6 +40,7 @@ Use
 to see which health modules are available for each edition:
 
 ``` r
+
 pof_info("2017-2018")
 ```
 
@@ -48,6 +51,7 @@ Each POF edition contains multiple data registers. Use
 to see them:
 
 ``` r
+
 # all registers
 pof_registers("2017-2018")
 
@@ -60,6 +64,7 @@ pof_registers("2017-2018", health_only = TRUE)
 Before downloading data, you can browse available variables:
 
 ``` r
+
 # list all variables in the domicilio register
 pof_variables("2017-2018", "domicilio")
 
@@ -79,6 +84,7 @@ in the 2017-2018 edition through the `domicilio` register. The variable
 ### Download domicilio data
 
 ``` r
+
 domicilio <- pof_data("2017-2018", "domicilio")
 ```
 
@@ -96,6 +102,7 @@ The EBIA classifies households into four levels:
 ### Create EBIA categories
 
 ``` r
+
 domicilio <- domicilio |>
   mutate(
     ebia = factor(
@@ -121,6 +128,7 @@ domicilio |>
 For proper population estimates, use the survey design:
 
 ``` r
+
 library(srvyr)
 
 domicilio_svy <- pof_data("2017-2018", "domicilio", as_survey = TRUE)
@@ -152,6 +160,7 @@ domicilio_svy |>
 ### EBIA by region (UF)
 
 ``` r
+
 # food insecurity by state
 domicilio_svy |>
   group_by(UF, ebia) |>
@@ -172,6 +181,7 @@ data from a subsample. This data is available for the 2008-2009 and
 ### Download food consumption data
 
 ``` r
+
 consumo <- pof_data("2017-2018", "consumo_alimentar")
 ```
 
@@ -190,6 +200,7 @@ consumo <- pof_data("2017-2018", "consumo_alimentar")
 ### Average caloric intake
 
 ``` r
+
 # total daily caloric intake per person
 consumo |>
   group_by(COD_UPA, NUM_DOM, NUM_UC, COD_INFORMANTE) |>
@@ -217,6 +228,7 @@ and medical consultations.
 ### Download expense data
 
 ``` r
+
 despesas <- pof_data("2017-2018", "despesa_individual")
 ```
 
@@ -225,6 +237,7 @@ despesas <- pof_data("2017-2018", "despesa_individual")
 Health-related expenses can be identified by product group codes:
 
 ``` r
+
 # explore expense categories
 despesas |>
   count(QUADRO) |>
@@ -238,6 +251,7 @@ the household identifier variables (`COD_UPA`, `NUM_DOM`, `NUM_UC`) to
 merge:
 
 ``` r
+
 # download morador (demographic data) and domicilio (household data)
 morador <- pof_data("2017-2018", "morador")
 domicilio <- pof_data("2017-2018", "domicilio")
@@ -277,6 +291,7 @@ vary. Use
 to check what is available in each edition:
 
 ``` r
+
 # check health modules by edition
 pof_info("2017-2018")  # EBIA + food consumption
 pof_info("2008-2009")  # anthropometry + food consumption
@@ -289,6 +304,7 @@ POF data files are large. healthbR caches downloaded files locally so
 you only download once:
 
 ``` r
+
 # check cached files
 pof_cache_status()
 
@@ -300,6 +316,7 @@ If the `arrow` package is installed, data is cached in Parquet format
 for faster loading:
 
 ``` r
+
 # install arrow for optimized caching (recommended)
 install.packages("arrow")
 ```

@@ -66,6 +66,7 @@ Want to contribute code? Great! Here is how:
 ### Development Workflow
 
 ``` r
+
 # install development dependencies
 devtools::install_dev_deps()
 

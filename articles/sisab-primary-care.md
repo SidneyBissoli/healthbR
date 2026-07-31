@@ -36,6 +36,7 @@ SISAB data is fetched from a public REST API.
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -43,12 +44,14 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 sisab_years()
 ```
 
 ### Module information
 
 ``` r
+
 sisab_info()
 ```
 
@@ -57,6 +60,7 @@ sisab_info()
 ### APS coverage by state (default)
 
 ``` r
+
 # APS coverage by state, January 2024
 aps_jan <- sisab_data(year = 2024, month = 1)
 aps_jan
@@ -65,6 +69,7 @@ aps_jan
 ### Full year
 
 ``` r
+
 # APS coverage, all months of 2023
 aps_2023 <- sisab_data(year = 2023)
 aps_2023
@@ -75,6 +80,7 @@ aps_2023
 ### Oral health coverage
 
 ``` r
+
 sb <- sisab_data(year = 2024, type = "sb", month = 6)
 sb
 ```
@@ -82,6 +88,7 @@ sb
 ### Community health agents
 
 ``` r
+
 acs <- sisab_data(year = 2023, type = "acs")
 acs
 ```
@@ -89,6 +96,7 @@ acs
 ### PNS coverage
 
 ``` r
+
 pns <- sisab_data(year = 2022, type = "pns")
 pns
 ```
@@ -98,6 +106,7 @@ pns
 ### National total
 
 ``` r
+
 national <- sisab_data(year = 2024, level = "brazil", month = 1)
 national
 ```
@@ -105,6 +114,7 @@ national
 ### By region
 
 ``` r
+
 regions <- sisab_data(year = 2024, level = "region", month = 1)
 regions
 ```
@@ -112,6 +122,7 @@ regions
 ### By state (default)
 
 ``` r
+
 states <- sisab_data(year = 2024, level = "uf", month = 1)
 states
 ```
@@ -119,6 +130,7 @@ states
 ### By municipality
 
 ``` r
+
 # filter by UF to avoid large downloads
 sp_munic <- sisab_data(
   year = 2024,
@@ -132,6 +144,7 @@ sp_munic
 ## Filtering by state and month
 
 ``` r
+
 # single state, single month
 sp_jan <- sisab_data(year = 2024, uf = "SP", month = 1)
 
@@ -145,6 +158,7 @@ sp_multi <- sisab_data(year = 2022:2024, uf = "SP", month = 6)
 ## Exploring variables
 
 ``` r
+
 # APS variables (default)
 sisab_variables()
 
@@ -165,6 +179,7 @@ sisab_variables(search = "equipe")
 ## Example: APS coverage by state
 
 ``` r
+
 aps <- sisab_data(year = 2024, level = "uf", month = 6)
 
 # coverage by state
@@ -176,6 +191,7 @@ aps |>
 ## Example: coverage trends over time
 
 ``` r
+
 # monthly APS coverage, national level, 2020-2024
 trend <- sisab_data(
   year = 2020:2024,
@@ -190,6 +206,7 @@ trend |>
 ## Example: municipal-level analysis
 
 ``` r
+
 # municipality-level APS coverage in Minas Gerais
 mg_munic <- sisab_data(
   year = 2024,
@@ -233,6 +250,7 @@ to explore them.
 Downloaded data is cached locally for faster future access:
 
 ``` r
+
 # check cache status
 sisab_cache_status()
 

@@ -18,6 +18,7 @@ It is managed by the Ministry of Health through DATASUS.
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -25,6 +26,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 sia_years()
 sia_years(status = "all")
 ```
@@ -32,6 +34,7 @@ sia_years(status = "all")
 ### Module information
 
 ``` r
+
 sia_info()
 ```
 
@@ -61,12 +64,14 @@ production):
 ### Basic download (PA type)
 
 ``` r
+
 outpatient <- sia_data(year = 2022, uf = "AC")
 ```
 
 ### Specific type
 
 ``` r
+
 # chemotherapy/radiotherapy APAC records
 chemo <- sia_data(year = 2022, uf = "SP", type = "AM")
 ```
@@ -74,6 +79,7 @@ chemo <- sia_data(year = 2022, uf = "SP", type = "AM")
 ### Specific months
 
 ``` r
+
 outpatient <- sia_data(year = 2022, uf = "SP", month = 1:3)
 ```
 
@@ -82,6 +88,7 @@ outpatient <- sia_data(year = 2022, uf = "SP", month = 1:3)
 Use SIGTAP procedure code prefixes:
 
 ``` r
+
 # Medical consultations (group 03.01)
 consults <- sia_data(year = 2022, uf = "SP", month = 1, procedure = "0301")
 
@@ -92,6 +99,7 @@ imaging <- sia_data(year = 2022, uf = "SP", month = 1, procedure = "0204")
 ### Filter by diagnosis
 
 ``` r
+
 # Diabetes-related outpatient care (E10-E14)
 diabetes <- sia_data(year = 2022, uf = "SP", month = 1, diagnosis = "E1")
 ```
@@ -99,6 +107,7 @@ diabetes <- sia_data(year = 2022, uf = "SP", month = 1, diagnosis = "E1")
 ### Select variables
 
 ``` r
+
 outpatient <- sia_data(
   year = 2022,
   uf = "SP",
@@ -126,6 +135,7 @@ outpatient <- sia_data(
 ### Data dictionary
 
 ``` r
+
 sia_dictionary()
 sia_dictionary("PA_SEXO")
 ```
@@ -133,6 +143,7 @@ sia_dictionary("PA_SEXO")
 ### Explore variables
 
 ``` r
+
 sia_variables()
 sia_variables(search = "valor")
 
@@ -143,6 +154,7 @@ sia_variables(type = "AM")
 ## Example: Top procedures by volume
 
 ``` r
+
 outpatient <- sia_data(year = 2022, uf = "SP", month = 1)
 
 top_procedures <- outpatient |>
@@ -153,6 +165,7 @@ top_procedures <- outpatient |>
 ## Example: Outpatient spending by diagnosis
 
 ``` r
+
 outpatient <- sia_data(year = 2022, uf = "SP", month = 1)
 
 spending <- outpatient |>
@@ -172,6 +185,7 @@ spending <- outpatient |>
 ## Example: Chemotherapy APAC records
 
 ``` r
+
 chemo <- sia_data(year = 2022, uf = "SP", type = "AM", month = 1:6)
 
 chemo |>
@@ -182,6 +196,7 @@ chemo |>
 ## Smart type parsing
 
 ``` r
+
 # parsed types (default)
 outpatient <- sia_data(year = 2022, uf = "AC", month = 1)
 class(outpatient$PA_VALAPR)  # double
@@ -193,6 +208,7 @@ outpatient_raw <- sia_data(year = 2022, uf = "AC", month = 1, parse = FALSE)
 ## Cache and lazy evaluation
 
 ``` r
+
 sia_cache_status()
 sia_clear_cache()
 

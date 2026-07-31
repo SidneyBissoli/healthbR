@@ -42,6 +42,7 @@ CNES data is organized into 13 file types:
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -49,6 +50,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 cnes_years()
 #> [1] 2005 2006 ... 2023
 
@@ -59,6 +61,7 @@ cnes_years(status = "all")
 ### Module information
 
 ``` r
+
 cnes_info()
 ```
 
@@ -67,6 +70,7 @@ cnes_info()
 ### Basic download (establishments)
 
 ``` r
+
 # all establishments in Acre, January 2023
 ac_jan <- cnes_data(year = 2023, month = 1, uf = "AC")
 ac_jan
@@ -75,6 +79,7 @@ ac_jan
 ### Hospital beds
 
 ``` r
+
 leitos <- cnes_data(year = 2023, month = 1, uf = "AC", type = "LT")
 leitos
 ```
@@ -82,6 +87,7 @@ leitos
 ### Health professionals
 
 ``` r
+
 prof <- cnes_data(year = 2023, month = 1, uf = "AC", type = "PF")
 prof
 ```
@@ -91,6 +97,7 @@ prof
 The `month` parameter controls which monthly snapshots to download:
 
 ``` r
+
 # single month
 jan <- cnes_data(year = 2023, month = 1, uf = "AC")
 
@@ -107,6 +114,7 @@ full_year <- cnes_data(year = 2023, uf = "AC")
 ### Selecting variables
 
 ``` r
+
 # only key variables (faster)
 cnes_data(
   year = 2023, month = 1, uf = "AC",
@@ -116,24 +124,25 @@ cnes_data(
 
 ## Key variables (ST type)
 
-| Variable  | Description                                                        |
-|-----------|--------------------------------------------------------------------|
-| CNES      | Facility CNES code                                                 |
-| CODUFMUN  | Municipality (UF + IBGE 6 digits)                                  |
-| TP_UNID   | Facility type (22 categories)                                      |
-| VINC_SUS  | SUS-linked (0=No, 1=Yes)                                           |
-| TP_GESTAO | Management type (M=Municipal, E=State, D=Dual)                     |
-| ESFERA_A  | Administrative sphere (1=Federal, 2=State, 3=Municipal, 4=Private) |
-| TURNO_AT  | Operating hours                                                    |
-| NIV_HIER  | Hierarchy level                                                    |
-| ATV_AMBUL | Outpatient care (0/1)                                              |
-| ATV_HOSP  | Hospital care (0/1)                                                |
-| ATV_URG   | Emergency care (0/1)                                               |
-| COMPETEN  | Reference period (YYYYMM)                                          |
+| Variable | Description |
+|----|----|
+| CNES | Facility CNES code |
+| CODUFMUN | Municipality (UF + IBGE 6 digits) |
+| TP_UNID | Facility type (22 categories) |
+| VINC_SUS | SUS-linked (0=No, 1=Yes) |
+| TP_GESTAO | Management type (M=Municipal, E=State, D=Dual) |
+| ESFERA_A | Administrative sphere (1=Federal, 2=State, 3=Municipal, 4=Private) |
+| TURNO_AT | Operating hours |
+| NIV_HIER | Hierarchy level |
+| ATV_AMBUL | Outpatient care (0/1) |
+| ATV_HOSP | Hospital care (0/1) |
+| ATV_URG | Emergency care (0/1) |
+| COMPETEN | Reference period (YYYYMM) |
 
 ### Using the dictionary
 
 ``` r
+
 # all coded variables
 cnes_dictionary()
 
@@ -147,6 +156,7 @@ cnes_dictionary("ESFERA_A")
 ### Joining dictionary labels
 
 ``` r
+
 # get facility type labels
 tp_unid_labels <- cnes_dictionary("TP_UNID") |>
   select(code, label)
@@ -163,6 +173,7 @@ ac_facilities |>
 ## Example: SUS-linked facilities by type
 
 ``` r
+
 ac <- cnes_data(year = 2023, month = 1, uf = "AC")
 
 sus_by_type <- ac |>
@@ -182,6 +193,7 @@ sus_by_type |>
 Combine CNES bed data with Census population:
 
 ``` r
+
 # step 1: count beds by UF (December snapshot)
 beds <- cnes_data(year = 2023, month = 12, type = "LT") |>
   group_by(uf_source) |>
@@ -200,6 +212,7 @@ pop <- censo_populacao(year = 2022, territorial_level = "state")
 ## Example: tracking facility counts over time
 
 ``` r
+
 # quarterly snapshots for Sao Paulo
 sp_quarterly <- cnes_data(
   year = 2020:2023,
@@ -234,6 +247,7 @@ month to explore the data before scaling up.
 ## Smart type parsing
 
 ``` r
+
 # parsed types (default)
 ac <- cnes_data(year = 2023, month = 1, uf = "AC")
 class(ac$COMPETEN)  # Date
@@ -247,6 +261,7 @@ ac_raw <- cnes_data(year = 2023, month = 1, uf = "AC", parse = FALSE)
 Downloaded data is cached locally for faster future access:
 
 ``` r
+
 # check cache status
 cnes_cache_status()
 
@@ -258,6 +273,7 @@ If the `arrow` package is installed, data is cached in Parquet format.
 You can also use lazy evaluation:
 
 ``` r
+
 # lazy query (requires arrow)
 cnes_lazy <- cnes_data(year = 2023, uf = "AC", lazy = TRUE)
 cnes_lazy |>

@@ -21,6 +21,7 @@ DATASUS FTP:
 ## Getting started
 
 ``` r
+
 library(healthbR)
 library(dplyr)
 ```
@@ -28,6 +29,7 @@ library(dplyr)
 ### Check available years
 
 ``` r
+
 sinan_years()
 #> [1] 2007 2008 2009 ... 2022
 
@@ -38,6 +40,7 @@ sinan_years(status = "all")
 ### Module information
 
 ``` r
+
 sinan_info()
 ```
 
@@ -48,6 +51,7 @@ SINAN covers 31 notifiable diseases. Use
 to browse them:
 
 ``` r
+
 # all available diseases
 sinan_diseases()
 
@@ -77,6 +81,7 @@ Common disease codes:
 ### Basic download (dengue, single year)
 
 ``` r
+
 dengue_2022 <- sinan_data(year = 2022)
 dengue_2022
 ```
@@ -84,6 +89,7 @@ dengue_2022
 ### Multiple years
 
 ``` r
+
 tb <- sinan_data(year = 2020:2022, disease = "TUBE")
 tb
 ```
@@ -91,6 +97,7 @@ tb
 ### Selecting variables
 
 ``` r
+
 # only key variables (faster and less memory)
 dengue_key <- sinan_data(
   year = 2022,
@@ -103,6 +110,7 @@ dengue_key <- sinan_data(
 ### Exploring variables
 
 ``` r
+
 sinan_variables()
 sinan_variables(search = "sexo")
 sinan_variables(search = "municipio")
@@ -115,6 +123,7 @@ unit, use the `SG_UF_NOT` (UF of notification) or `ID_MUNICIP`
 (municipality code) columns after download:
 
 ``` r
+
 # filter by UF
 dengue_sp <- sinan_data(year = 2022) |>
   filter(SG_UF_NOT == "35")  # 35 = Sao Paulo
@@ -142,6 +151,7 @@ dengue_rj_capital <- sinan_data(year = 2022) |>
 ### Using the dictionary
 
 ``` r
+
 # all coded variables
 sinan_dictionary()
 
@@ -159,6 +169,7 @@ default,
 returns only final years:
 
 ``` r
+
 # final data only (default)
 sinan_years(status = "final")
 
@@ -175,6 +186,7 @@ Health.
 ## Example: confirmed dengue cases by month
 
 ``` r
+
 dengue <- sinan_data(year = 2022, disease = "DENG") |>
   filter(CLASSI_FIN %in% c("1", "5")) |>  # confirmed cases
 
@@ -190,6 +202,7 @@ cases_by_month
 ## Example: tuberculosis by sex and age group
 
 ``` r
+
 tb <- sinan_data(year = 2022, disease = "TUBE")
 
 # decode age: 4th digit means years
@@ -216,6 +229,7 @@ tb_age |>
 Combine SINAN data with Census population to calculate incidence rates:
 
 ``` r
+
 # step 1: confirmed dengue by UF
 dengue_uf <- sinan_data(year = 2022, disease = "DENG") |>
   filter(CLASSI_FIN %in% c("1", "5")) |>
@@ -238,6 +252,7 @@ By default,
 parses columns to appropriate types (dates, integers):
 
 ``` r
+
 # parsed types (default)
 dengue <- sinan_data(year = 2022, disease = "DENG")
 class(dengue$DT_NOTIFIC)  # Date
@@ -258,6 +273,7 @@ dengue_custom <- sinan_data(
 Downloaded data is cached locally for faster future access:
 
 ``` r
+
 # check cache status
 sinan_cache_status()
 
@@ -269,6 +285,7 @@ If the `arrow` package is installed, data is cached in Parquet format
 for faster loading. You can also use lazy evaluation:
 
 ``` r
+
 # lazy query (requires arrow)
 dengue_lazy <- sinan_data(year = 2022, disease = "DENG", lazy = TRUE)
 dengue_lazy |>
