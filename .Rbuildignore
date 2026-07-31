@@ -11,6 +11,7 @@
 ^\.covrignore$
 ^cran-comments\.md$
 ^\.claude$
+^CLAUDE\.md$
 ^_tmp_.*\.R$
 ^healthbR\.Rcheck$
 ^screenshot.*\.png$
