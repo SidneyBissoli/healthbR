@@ -239,4 +239,86 @@ permite leitura do bucket `healthbr-data`.
 
 ---
 
-*Documento criado em 2026-03-07. Atualizar ao iniciar a implementação.*
+## 7. SIM, SINASC e SIH via R2 — contrato e backlog (18/ago/2026)
+
+> Decisões tomadas no projeto healthbr-data em 18/ago/2026 (ver lá
+> `docs/contract-consumers-pt.md` — **fonte da verdade** do que o bucket garante —
+> e `docs/sim/exploration-pt.md` §9). Esta seção traduz o contrato para o
+> pacote. O módulo `sim` hoje lê o FTP direto e mantém uma lista fixa de anos
+> (`sim_available_years`: final 1996–2022, preliminar 2023–2024), já defasada
+> (FTP em ago/2026: final até 2024, preliminar 2025–2026). Com `source = "r2"`
+> essa informação passa a vir do `manifest.json`.
+
+### 7.1 Prefixos e partições no R2
+
+| Módulo | Prefixo R2 | Partição | Chave no manifesto | Observações |
+|---|---|---|---|---|
+| `sim` (não fetais) | `sim/dores/` | `ano=YYYY/uf=XX/` | `YYYY-XX` | 1979–presente; UF de **residência**; preliminares no mesmo prefixo |
+| `sim` (fetais) | `sim/dofet/` | `ano=YYYY/` | `YYYY` | arquivo nacional; sem `uf=` |
+| `sinasc` | `sinasc/` | `ano=YYYY/uf=XX/` | `YYYY-XX` | 1994–2022+ |
+| `sih` | `sih/rd/`, `sih/sp/` | `ano=YYYY/mes=MM/uf=XX/` | `YYYY-MM-XX` | RD 1992+, SP 1997+ |
+
+Todas as colunas são string; nenhum valor é transformado; **schema por
+arquivo-fonte** (abrir com `unify_schemas = TRUE`; colunas ausentes num ano
+vêm `NA`). Cada Parquet carrega metadado `healthbr` (JSON no schema metadata:
+`source_url`, `source_hash_md5`, `download_date`, `pipeline_version`,
+`git_commit`, `source_status`).
+
+### 7.2 Dados preliminares (SIM) — o que o pacote deve fazer
+
+O DATASUS publica o ano N fechado só em dez/N+1; até lá, N e N+1 estão em
+`PRELIM/` e são regravados sem aviso. O healthbr-data publica esses anos **no
+mesmo prefixo**, marcados `source_status = "preliminar"` no manifesto e no
+metadado de cada Parquet (ausente = final). Quando o ano fecha, a partição é
+substituída (sem histórico). Cabe ao pacote dar visibilidade — itens acordados:
+
+1. **`preliminary = FALSE`** em `sim_data()` (e nos demais módulos quando a
+   fonte tiver preliminares): com o default, anos marcados como preliminares
+   no manifesto são **excluídos** (e, se o usuário pediu explicitamente um ano
+   preliminar, erro/aviso claro sugerindo `preliminary = TRUE`). Nome do
+   argumento decidido: `preliminary` (adjetivo, como `lazy`, `verbose`).
+2. **Aviso** (`cli::cli_warn`/`cli_inform`) sempre que o retorno contiver
+   dados preliminares: anos, data de processamento (`processing_timestamp`)
+   e a frase "podem ser regravados pelo Ministério".
+3. **Marcação no resultado**: coluna `healthbr_status` (`"final"`/
+   `"preliminar"`) ou atributo `attr(x, "healthbr_source_status")` — decidir
+   na implementação; a coluna facilita `group_by`.
+4. **`sim_status()`** (padrão para os outros módulos): tabela ano × UF ×
+   status × `processing_timestamp` × `source_hash_md5` lida do manifesto —
+   substitui a lista fixa `sim_available_years`; `sim_years(status=)` e
+   `sim_info()` passam a consultá-la quando `source = "r2"`.
+5. **Vinheta/README**: calendário do SIM (final em dez/N+1; preliminares N e
+   N+1), o que muda entre preliminar e final, e como o cache local deve ser
+   invalidado (por `source_hash_md5`/`processing_timestamp`, não por nome).
+
+### 7.3 Notas de série histórica que o pacote deve absorver
+
+- **`contador`/`CONTADOR`** (SIM: minúsculo 1979–2005 e 2009–2010; maiúsculo
+  2006–2008 e 2011+): o R2 publica como na fonte (decisão A). O pacote
+  coalesce as duas caixas em `CONTADOR` ao retornar (conveniência mora aqui).
+  O SINASC hoje já vem unificado pelo pipeline, mas **será revertido** para a
+  caixa da fonte — coalescer desde já evita quebra.
+- SIM: `NUMERODO` não existe nos arquivos públicos; `CODMUNRES` 7 dígitos até
+  2005 e 6 a partir de 2006; CID-9 (1979–95) com nomes `DATAOBITO` (AAMMDD, dia
+  `00` até 1990), `MUNIRES`, `OCUPACAO`, `INSTRUCAO`, `ESTCIVIL`; `decode_age`
+  continua válido (`IDADE` é estável desde 1979).
+- Óbitos fetais só em `sim/dofet/` (`TIPOBITO = 1`); `sim/dores/` só tem
+  `TIPOBITO = 2`. Sugestão de API: `sim_data(type = c("dores", "dofet"))`.
+- SIH: transição 1998 (CID-9→10, datas), SIGTAP 2008; SP com 3 schemas.
+
+### 7.4 Ordem sugerida de implementação
+
+1. Infra comum: `.r2_filesystem()`, `.r2_manifest(prefix)` (cache curto),
+   `source = c("datasus", "r2")` nos `*_data()`.
+2. `sim`: `preliminary`, `sim_status()`, aviso, coalescência de `CONTADOR`,
+   `type = "dofet"`.
+3. `sinasc`, `sih`, `sipni` (seção 2 acima).
+4. Testes de integração com `HEALTHBR_INTEGRATION=true` contra o bucket
+   público; `NEWS.md`; anunciar a mudança de API no thread rOpenSci (#751).
+
+Rastreio: uma issue por item de 7.2 e 7.4 (milestone "backend R2"), quando o
+mantenedor aprovar o texto.
+
+---
+
+*Documento criado em 2026-03-07; seção 7 adicionada em 2026-08-18. Atualizar ao iniciar a implementação.*
