@@ -4,7 +4,20 @@
 > o backend Cloudflare R2 do projeto healthbr-data ao pacote healthbR,
 > permitindo que o usuário escolha a fonte dos dados via parâmetro `source`.
 >
-> Status: **planejado** — nenhuma linha de código foi alterada ainda.
+> Status: **SI-PNI implementado (0.3.0, branch feature/r2-backend, ago/2026)**;
+> SIM/SINASC/SIH (§7) pendentes. A implementação divergiu da seção 2 em
+> pontos decididos com o mantenedor em 19/ago/2026 (issue #1: o Ministério
+> removeu os microdados 2020–2025 da fonte oficial):
+> - `source = c("r2", "datasus")` é **vetor de prioridade com fallback
+>   automático** e o **R2 é o padrão** para o módulo inteiro (não mais
+>   `datasus` padrão);
+> - microdados 2020+ via R2 têm o **schema JSON de 56 campos**
+>   (`dt_vacina`, ...), diferente do CSV (~47 campos) — cada fonte retorna
+>   suas colunas como publicadas (tabela `sipni_variables_microdados`);
+> - novos: `sipni_status()` (manifesto, cache local com ETag), atributos
+>   `healthbr_source`/`healthbr_provenance`, `lazy = TRUE` retorna o
+>   dataset remoto; infra genérica em `R/utils-r2.R` (`.r2_filesystem()`,
+>   `.r2_open_dataset()`, `.r2_manifest()`) pronta para o SIM (§7.4.1).
 > Criado em: 2026-03-07.
 
 ---

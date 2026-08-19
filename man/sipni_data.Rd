@@ -15,7 +15,9 @@ sipni_data(
   cache = TRUE,
   cache_dir = NULL,
   lazy = FALSE,
-  backend = c("arrow", "duckdb")
+  backend = c("arrow", "duckdb"),
+  source = c("r2", "datasus"),
+  r2_credentials = NULL
 )
 }
 \arguments{
@@ -64,40 +66,86 @@ to the query engine before collecting into memory. Call
 \item{backend}{Character. Backend for lazy evaluation: \code{"arrow"}
 (default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
 DuckDB backend requires the \pkg{duckdb} package.}
+
+\item{source}{Character vector. Data source(s) in priority order:
+\code{"r2"} (healthbr-data mirror on Cloudflare R2, Parquet) and/or
+\code{"datasus"} (DATASUS FTP for 1994--2019, OpenDataSUS CSV for
+2020+). The default \code{c("r2", "datasus")} tries the mirror first
+and falls back to the official source automatically; pass a single
+value to disable the fallback. Note: as of 2026 the Ministry removed
+the 2020--2025 microdata files from OpenDataSUS, so those years are
+only served by \code{"r2"}. The R2 backend requires the \pkg{arrow}
+package.}
+
+\item{r2_credentials}{List or NULL. Credentials for the R2 backend. If
+NULL (default), uses the public read-only token of the healthbr-data
+bucket. To point at another S3-compatible bucket, pass
+\code{list(access_key_id =, secret_access_key =, endpoint =, bucket =)}.}
 }
 \value{
 A tibble with vaccination data. Includes columns
-\code{year} and \code{uf_source} to identify the source
-when multiple years/states are combined.
+\code{year}, \code{uf_source} (and \code{month} for 2020+) to identify
+the source partition when multiple years/states are combined.
+Attributes: \code{healthbr_source} (which source served each era) and,
+for R2 reads, \code{healthbr_provenance} (per-partition processing
+timestamp and Ministry source URL from the mirror manifests).
 
-\strong{Output differs by year range:}
+\strong{Output differs by year range \u2014 and, for 2020+, by source:}
 \itemize{
-\item \strong{1994--2019 (FTP)}: Aggregated data with DPNI (12 vars) or
-CPNI (7 vars) columns, all character.
-\item \strong{2020+ (CSV)}: Individual-level microdata with ~47 columns
-(snake_case Portuguese), all character. Use
-\code{sipni_variables(type = "API")} to see the full list.
+\item \strong{1994--2019 (aggregated)}: DPNI (12 vars) or CPNI (7 vars)
+columns. Identical for both sources.
+\item \strong{2020+ via R2 (default)}: 56 fields from the Ministry's JSON
+exports (\code{dt_vacina}, \code{ds_vacina},
+\code{sg_uf_paciente}, ...). Use \code{sipni_variables(type =
+      "API", source = "r2")} to see the list.
+\item \strong{2020+ via DATASUS CSV}: ~47 fields with different names
+(\code{data_vacina}, \code{descricao_vacina}, ...). Use
+\code{sipni_variables(type = "API", source = "datasus")}.
 }
+Each source returns its columns exactly as published by the Ministry;
+healthbR does not rename or remap them.
 }
 \description{
-Downloads and returns vaccination data from SI-PNI. For years 1994--2019,
-data is downloaded from DATASUS FTP (aggregated doses/coverage). For years
-2020+, data is downloaded from OpenDataSUS as monthly CSV bulk files
-(individual-level microdata with one row per vaccination dose).
+Downloads and returns vaccination data from SI-PNI. For years 1994--2019
+the data are aggregated (doses applied / coverage); for years 2020+ they
+are individual-level microdata (one row per vaccination dose).
 }
 \details{
-\strong{FTP data (1994--2019):}
-Downloaded as plain .DBF files. SI-PNI FTP data is \strong{aggregated} (dose
-counts and coverage rates per municipality, vaccine, and age group).
-Two file types: DPNI (doses) and CPNI (coverage).
+By default data are read from the \strong{healthbr-data R2 mirror} (Parquet on
+Cloudflare R2, values byte-identical to the Ministry's files, complete
+2020+ series), falling back automatically to the official DATASUS/
+OpenDataSUS sources if the mirror is unreachable \u2014 see \code{source}.
+The result carries a \code{healthbr_source} attribute recording which
+source actually served each era, and (for R2 reads) a
+\code{healthbr_provenance} attribute with the processing timestamp and
+Ministry source URL of each partition, taken from the mirror's manifests.
 
-\strong{CSV data (2020+):}
-Downloaded from OpenDataSUS as monthly CSV bulk files (national,
-semicolon-delimited, latin1 encoding). Each monthly ZIP is ~1.4 GB.
-This is \strong{individual-level microdata} (one row per vaccination dose,
-~47 fields per record). The \code{type} parameter is ignored for CSV
-years. Data is filtered by UF during chunked reading to avoid loading
-the full national file into memory.
+\strong{Aggregated data (1994--2019):}
+SI-PNI aggregated data (dose counts and coverage rates per municipality,
+vaccine, and age group). Two file types: DPNI (doses) and CPNI
+(coverage). Served from the R2 mirror as Parquet, or from DATASUS FTP
+as plain .DBF files.
+
+\strong{Microdata (2020+):}
+Individual-level microdata (one row per vaccination dose). The
+\code{type} parameter is ignored for these years. Via R2 the data come
+from the Ministry's JSON exports (no CSV serialization artifacts) and
+only the requested UF/month partitions are transferred. Via DATASUS the
+national monthly CSV ZIP (~1.4 GB) is downloaded and filtered by UF
+during chunked reading.
+
+\strong{Availability note (2026):} the Ministry decommissioned the old
+OpenDataSUS host and removed the 2020--2025 files from the new one.
+The R2 mirror holds the complete series; use
+\code{\link{sipni_status}()} to see exactly which months are published
+and when they were processed.
+
+\strong{Lazy evaluation with R2:} with \code{lazy = TRUE} and the default
+source, the function returns the remote arrow dataset itself \u2014 dplyr
+verbs are pushed down and only the touched partitions are transferred.
+In this mode the partition columns keep the bucket layout names
+(\code{ano}, \code{mes}, \code{uf}, as strings) instead of
+\code{year}/\code{month}/\code{uf_source}.
 \subsection{Parallel downloads}{
 
 When downloading multiple files (e.g., several years or states), install
@@ -127,12 +175,13 @@ sipni_data(year = 2024, uf = "AC", month = 1,
 \code{\link{sipni_info}()} for type descriptions,
 \code{\link{censo_populacao}()} for population denominators.
 
-Other sipni: 
-\code{\link{sipni_cache_status}()},
-\code{\link{sipni_clear_cache}()},
-\code{\link{sipni_dictionary}()},
-\code{\link{sipni_info}()},
-\code{\link{sipni_variables}()},
-\code{\link{sipni_years}()}
+Other sipni:
+\code{\link[=sipni_cache_status]{sipni_cache_status()}},
+\code{\link[=sipni_clear_cache]{sipni_clear_cache()}},
+\code{\link[=sipni_dictionary]{sipni_dictionary()}},
+\code{\link[=sipni_info]{sipni_info()}},
+\code{\link[=sipni_status]{sipni_status()}},
+\code{\link[=sipni_variables]{sipni_variables()}},
+\code{\link[=sipni_years]{sipni_years()}}
 }
 \concept{sipni}

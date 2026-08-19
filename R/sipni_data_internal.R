@@ -5,20 +5,29 @@
 # available years
 # ============================================================================
 
-#' SI-PNI available years (FTP 1994-2019 + OpenDataSUS CSV 2020-2025)
+#' SI-PNI available years (aggregates 1994-2019 + microdata 2020+)
+#'
+#' Static fallback; when the R2 manifest has been read this session,
+#' `.sipni_available_years()` extends this with the months actually
+#' published on the mirror.
 #' @noRd
-sipni_available_years <- 1994L:2025L
+sipni_available_years <- 1994L:2026L
 
 #' SI-PNI year ranges by source
 #' @noRd
 sipni_ftp_years <- 1994L:2019L
 
 #' @noRd
-sipni_api_years <- 2020L:2025L
+sipni_api_years <- 2020L:2026L
 
-#' SI-PNI OpenDataSUS CSV base URL
+#' SI-PNI OpenDataSUS CSV base URL (CKAN S3 bucket of dadosabertos.saude.gov.br)
+#'
+#' The previous host (arquivosdadosabertos.saude.gov.br) was decommissioned
+#' in 2026. Note: as of 2026-08 the Ministry only publishes the current
+#' year's CSVs here; 2020-2025 files were removed from the source and are
+#' available on the R2 mirror only.
 #' @noRd
-sipni_csv_base_url <- "https://arquivosdadosabertos.saude.gov.br/dados/dbbni"
+sipni_csv_base_url <- "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv"
 
 #' SI-PNI month names in Portuguese (for CSV ZIP filenames)
 #' @noRd
@@ -47,11 +56,11 @@ sipni_uf_list <- c(
 #' @noRd
 sipni_valid_types <- tibble::tibble(
   code = c("DPNI", "CPNI", "API"),
-  name = c("Doses Aplicadas", "Cobertura Vacinal", "Microdados CSV"),
+  name = c("Doses Aplicadas", "Cobertura Vacinal", "Microdados"),
   description = c(
-    "Doses de vacinas aplicadas por munic\u00edpio, faixa et\u00e1ria, imuno e dose (FTP, 1994-2019)",
-    "Cobertura vacinal por munic\u00edpio e imunobiol\u00f3gico (FTP, 1994-2019)",
-    "Microdados individuais de vacina\u00e7\u00e3o via OpenDataSUS CSV (2020+)"
+    "Doses de vacinas aplicadas por munic\u00edpio, faixa et\u00e1ria, imuno e dose (1994-2019)",
+    "Cobertura vacinal por munic\u00edpio e imunobiol\u00f3gico (1994-2019)",
+    "Microdados individuais de vacina\u00e7\u00e3o (2020+; R2 Parquet ou OpenDataSUS CSV)"
   )
 )
 
@@ -352,6 +361,77 @@ sipni_variables_api <- tibble::tibble(
     rep("estrategia", 6),
     rep("maternal", 2)
   )
+)
+
+# ============================================================================
+# variables metadata (microdata via R2 mirror - JSON origin, 56 fields)
+# ============================================================================
+
+#' SI-PNI microdata variables (R2 backend, 2020+)
+#'
+#' The R2 mirror publishes the Ministry's JSON exports (56 fields, prefixes
+#' co_/no_/ds_/sg_/nu_/dt_/tp_/st_), which differ from the CSV export
+#' column names in `sipni_variables_api`. Reference: the Ministry's
+#' Dicionario_tb_ria_rotina.pdf.
+#' @noRd
+sipni_variables_microdados <- tibble::tribble(
+  ~variable, ~description, ~type, ~section,
+  "co_documento", "C\u00f3digo \u00fanico do registro de vacina\u00e7\u00e3o (RNDS)", "character", "registro",
+  "co_paciente", "C\u00f3digo anonimizado do paciente", "character", "paciente",
+  "tp_sexo_paciente", "Sexo do paciente (M/F)", "character", "paciente",
+  "co_raca_cor_paciente", "C\u00f3digo ra\u00e7a/cor do paciente", "character", "paciente",
+  "no_raca_cor_paciente", "Nome ra\u00e7a/cor do paciente", "character", "paciente",
+  "co_municipio_paciente", "C\u00f3digo munic\u00edpio de resid\u00eancia do paciente (IBGE)", "character", "paciente",
+  "co_pais_paciente", "C\u00f3digo pa\u00eds de resid\u00eancia do paciente", "character", "paciente",
+  "no_municipio_paciente", "Nome munic\u00edpio de resid\u00eancia do paciente", "character", "paciente",
+  "no_pais_paciente", "Nome pa\u00eds de resid\u00eancia do paciente", "character", "paciente",
+  "sg_uf_paciente", "Sigla UF de resid\u00eancia do paciente", "character", "paciente",
+  "nu_cep_paciente", "CEP do paciente", "character", "paciente",
+  "ds_nacionalidade_paciente", "Nacionalidade do paciente", "character", "paciente",
+  "no_etnia_indigena_paciente", "Nome etnia ind\u00edgena do paciente", "character", "paciente",
+  "co_etnia_indigena_paciente", "C\u00f3digo etnia ind\u00edgena do paciente", "character", "paciente",
+  "co_cnes_estabelecimento", "C\u00f3digo CNES do estabelecimento", "character", "estabelecimento",
+  "no_razao_social_estabelecimento", "Raz\u00e3o social do estabelecimento", "character", "estabelecimento",
+  "no_fantasia_estalecimento", "Nome fantasia do estabelecimento (grafia da fonte)", "character", "estabelecimento",
+  "co_municipio_estabelecimento", "C\u00f3digo munic\u00edpio do estabelecimento (IBGE)", "character", "estabelecimento",
+  "no_municipio_estabelecimento", "Nome munic\u00edpio do estabelecimento", "character", "estabelecimento",
+  "sg_uf_estabelecimento", "Sigla UF do estabelecimento", "character", "estabelecimento",
+  "co_troca_documento", "C\u00f3digo de troca do documento", "character", "registro",
+  "co_vacina", "C\u00f3digo da vacina", "character", "vacina",
+  "sg_vacina", "Sigla da vacina", "character", "vacina",
+  "dt_vacina", "Data da vacina\u00e7\u00e3o (AAAA-MM-DD)", "date", "vacina",
+  "co_dose_vacina", "C\u00f3digo da dose", "character", "vacina",
+  "ds_dose_vacina", "Descri\u00e7\u00e3o da dose", "character", "vacina",
+  "co_local_aplicacao", "C\u00f3digo local de aplica\u00e7\u00e3o", "character", "administracao",
+  "ds_local_aplicacao", "Descri\u00e7\u00e3o local de aplica\u00e7\u00e3o", "character", "administracao",
+  "co_via_administracao", "C\u00f3digo via de administra\u00e7\u00e3o", "character", "administracao",
+  "ds_via_administracao", "Descri\u00e7\u00e3o via de administra\u00e7\u00e3o", "character", "administracao",
+  "co_lote_vacina", "C\u00f3digo do lote da vacina", "character", "vacina",
+  "ds_vacina_fabricante", "Nome do fabricante da vacina", "character", "vacina",
+  "dt_entrada_rnds", "Data/hora de entrada do registro na RNDS", "character", "registro",
+  "co_sistema_origem", "C\u00f3digo do sistema de origem", "character", "registro",
+  "ds_sistema_origem", "Descri\u00e7\u00e3o do sistema de origem", "character", "registro",
+  "st_documento", "Situa\u00e7\u00e3o do documento", "character", "registro",
+  "co_estrategia_vacinacao", "C\u00f3digo estrat\u00e9gia de vacina\u00e7\u00e3o", "character", "estrategia",
+  "ds_estrategia_vacinacao", "Descri\u00e7\u00e3o estrat\u00e9gia de vacina\u00e7\u00e3o", "character", "estrategia",
+  "co_origem_registro", "C\u00f3digo origem do registro", "character", "registro",
+  "ds_origem_registro", "Descri\u00e7\u00e3o origem do registro", "character", "registro",
+  "co_vacina_grupo_atendimento", "C\u00f3digo grupo de atendimento", "character", "estrategia",
+  "ds_vacina_grupo_atendimento", "Descri\u00e7\u00e3o grupo de atendimento", "character", "estrategia",
+  "co_vacina_categoria_atendimento", "C\u00f3digo categoria de atendimento", "character", "estrategia",
+  "ds_vacina_categoria_atendimento", "Descri\u00e7\u00e3o categoria de atendimento", "character", "estrategia",
+  "co_vacina_fabricante", "C\u00f3digo do fabricante da vacina", "character", "vacina",
+  "ds_vacina", "Descri\u00e7\u00e3o da vacina", "character", "vacina",
+  "ds_condicao_maternal", "Descri\u00e7\u00e3o condi\u00e7\u00e3o maternal", "character", "maternal",
+  "co_tipo_estabelecimento", "C\u00f3digo tipo do estabelecimento", "character", "estabelecimento",
+  "ds_tipo_estabelecimento", "Descri\u00e7\u00e3o tipo do estabelecimento", "character", "estabelecimento",
+  "co_natureza_estabelecimento", "C\u00f3digo natureza jur\u00eddica do estabelecimento", "character", "estabelecimento",
+  "ds_natureza_estabelecimento", "Descri\u00e7\u00e3o natureza jur\u00eddica do estabelecimento", "character", "estabelecimento",
+  "nu_idade_paciente", "Idade do paciente", "integer", "paciente",
+  "co_condicao_maternal", "C\u00f3digo condi\u00e7\u00e3o maternal", "character", "maternal",
+  "no_uf_paciente", "Nome UF de resid\u00eancia do paciente", "character", "paciente",
+  "no_uf_estabelecimento", "Nome UF do estabelecimento", "character", "estabelecimento",
+  "dt_deletado_rnds", "Data/hora de exclus\u00e3o do registro na RNDS", "character", "registro"
 )
 
 # ============================================================================
