@@ -20,12 +20,13 @@ Shows information about cached SI-PNI data files.
 sipni_cache_status()
 }
 \seealso{
-Other sipni: 
-\code{\link{sipni_clear_cache}()},
-\code{\link{sipni_data}()},
-\code{\link{sipni_dictionary}()},
-\code{\link{sipni_info}()},
-\code{\link{sipni_variables}()},
-\code{\link{sipni_years}()}
+Other sipni:
+\code{\link[=sipni_clear_cache]{sipni_clear_cache()}},
+\code{\link[=sipni_data]{sipni_data()}},
+\code{\link[=sipni_dictionary]{sipni_dictionary()}},
+\code{\link[=sipni_info]{sipni_info()}},
+\code{\link[=sipni_status]{sipni_status()}},
+\code{\link[=sipni_variables]{sipni_variables()}},
+\code{\link[=sipni_years]{sipni_years()}}
 }
 \concept{sipni}

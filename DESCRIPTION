@@ -1,6 +1,6 @@
 Package: healthbR
 Title: Access Brazilian Public Health Data
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: 
     person("Sidney", "Bissoli", , "sbissoli76@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-0442-3700"))
@@ -27,7 +27,6 @@ Description: Provides easy access to Brazilian public health data from multiple
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends: 
     R (>= 4.2.0)
 Imports:
@@ -61,3 +60,4 @@ Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://github.com/SidneyBissoli/healthbR, https://sidneybissoli.github.io/healthbR/
 BugReports: https://github.com/SidneyBissoli/healthbR/issues
+Config/roxygen2/version: 8.0.0

@@ -17,12 +17,12 @@ module, including data sources, available years, and usage guidance.
 ans_info()
 }
 \seealso{
-Other ans: 
-\code{\link{ans_cache_status}()},
-\code{\link{ans_clear_cache}()},
-\code{\link{ans_data}()},
-\code{\link{ans_operators}()},
-\code{\link{ans_variables}()},
-\code{\link{ans_years}()}
+Other ans:
+\code{\link[=ans_cache_status]{ans_cache_status()}},
+\code{\link[=ans_clear_cache]{ans_clear_cache()}},
+\code{\link[=ans_data]{ans_data()}},
+\code{\link[=ans_operators]{ans_operators()}},
+\code{\link[=ans_variables]{ans_variables()}},
+\code{\link[=ans_years]{ans_years()}}
 }
 \concept{ans}

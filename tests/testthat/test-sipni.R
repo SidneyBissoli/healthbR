@@ -15,8 +15,8 @@ test_that("sipni_years returns integer vector", {
 test_that("sipni_years contains expected range including API years", {
   years <- sipni_years()
   expect_equal(min(years), 1994L)
-  expect_equal(max(years), 2025L)
-  expect_equal(length(years), 32)
+  expect_gte(max(years), 2026L)
+  expect_gte(length(years), 33)
   expect_true(2020L %in% years)
   expect_true(2025L %in% years)
 })
@@ -78,14 +78,18 @@ test_that("sipni_variables CPNI has expected variables", {
 })
 
 test_that("sipni_variables API has expected variables", {
+  # default (R2 mirror): 56 JSON-export fields
   vars <- sipni_variables(type = "API")
   expect_s3_class(vars, "tbl_df")
   expect_true(all(c("variable", "description", "type", "section") %in% names(vars)))
-  expect_equal(nrow(vars), 47)
+  expect_equal(nrow(vars), 56)
+  # DATASUS CSV exports: 47 fields
+  vars_csv <- sipni_variables(type = "API", source = "datasus")
+  expect_equal(nrow(vars_csv), 47)
 })
 
 test_that("sipni_variables API has key variables", {
-  vars <- sipni_variables(type = "API")
+  vars <- sipni_variables(type = "API", source = "datasus")
   expect_true("data_vacina" %in% vars$variable)
   expect_true("descricao_vacina" %in% vars$variable)
   expect_true("tipo_sexo_paciente" %in% vars$variable)
@@ -199,7 +203,7 @@ test_that(".sipni_build_ftp_url errors on pre-1994", {
 test_that(".sipni_csv_build_url constructs correct URL", {
   url <- .sipni_csv_build_url(2024, 1)
   expect_equal(url,
-    "https://arquivosdadosabertos.saude.gov.br/dados/dbbni/vacinacao_jan_2024_csv.zip")
+    "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv/vacinacao_jan_2024_csv.zip")
 })
 
 test_that(".sipni_csv_build_url works for different months", {
@@ -265,7 +269,7 @@ test_that(".sipni_validate_year accepts mixed FTP and API years", {
 
 test_that(".sipni_validate_year errors on invalid years", {
   expect_error(.sipni_validate_year(1993), "not available")
-  expect_error(.sipni_validate_year(2026), "not available")
+  expect_equal(.sipni_validate_year(2026), 2026L)
   expect_error(.sipni_validate_year(2050), "not available")
 })
 
@@ -362,8 +366,8 @@ test_that("sipni_ftp_years covers 1994-2019", {
   expect_equal(sipni_ftp_years, 1994L:2019L)
 })
 
-test_that("sipni_api_years covers 2020-2025", {
-  expect_equal(sipni_api_years, 2020L:2025L)
+test_that("sipni_api_years covers 2020 onwards", {
+  expect_equal(sipni_api_years, 2020L:2026L)
 })
 
 test_that("sipni_available_years is the union of FTP and API years", {
@@ -376,7 +380,7 @@ test_that("sipni_available_years is the union of FTP and API years", {
 
 test_that("sipni_label_maps are consistent with dictionary", {
   for (var_name in names(sipni_label_maps)) {
-    dict_rows <- sipni_dictionary(var_name)
+    dict_rows <- sipni_dictionary(var_name, source = "datasus")
     map_codes <- names(sipni_label_maps[[var_name]])
     expect_true(all(map_codes %in% dict_rows$code),
                 info = paste(var_name, "label_maps codes not in dictionary"))
@@ -461,7 +465,7 @@ test_that("API cache naming follows expected pattern", {
 
 test_that("sipni_csv_base_url is correct", {
   expect_equal(sipni_csv_base_url,
-               "https://arquivosdadosabertos.saude.gov.br/dados/dbbni")
+               "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv")
 })
 
 test_that("sipni_month_names has 12 Portuguese month abbreviations", {
@@ -543,9 +547,11 @@ test_that("sipni_data downloads API data for single month", {
   expect_true("uf_source" %in% names(data))
   expect_equal(unique(data$year), 2024L)
   expect_equal(unique(data$uf_source), "AC")
-  # verify API columns present
-  expect_true("data_vacina" %in% names(data))
-  expect_true("descricao_vacina" %in% names(data))
+  # default source is the R2 mirror -> JSON export column names
+  expect_true("dt_vacina" %in% names(data))
+  expect_true("ds_vacina" %in% names(data))
+  # provenance attributes
+  expect_equal(unname(attr(data, "healthbr_source")["microdata"]), "r2")
 })
 
 test_that("sipni_data API column names match expected", {
@@ -557,12 +563,11 @@ test_that("sipni_data API column names match expected", {
 
   data <- sipni_data(year = 2024, uf = "AC", month = 1,
                      cache_dir = cache_dir)
-  expected_vars <- sipni_variables_api$variable
-  # all expected vars should be in data (excluding year/uf_source)
-  data_vars <- setdiff(names(data), c("year", "uf_source"))
-  # at least key vars should be present
-  expect_true("data_vacina" %in% data_vars)
-  expect_true("tipo_sexo_paciente" %in% data_vars)
+  # all 56 R2 microdata vars should be in data (plus year/month/uf_source)
+  data_vars <- setdiff(names(data), c("year", "month", "uf_source"))
+  expect_setequal(data_vars, sipni_variables_microdados$variable)
+  expect_true("dt_vacina" %in% data_vars)
+  expect_true("tp_sexo_paciente" %in% data_vars)
 })
 
 test_that("sipni_data API cache works", {
@@ -597,7 +602,7 @@ test_that("sipni_variables type column has non-character types (CPNI)", {
 })
 
 test_that("sipni_variables type column has non-character types (API)", {
-  vars <- sipni_variables(type = "API")
+  vars <- sipni_variables(type = "API", source = "datasus")
   expect_equal(vars$type[vars$variable == "data_vacina"], "date")
   expect_equal(vars$type[vars$variable == "numero_idade_paciente"], "integer")
   expect_equal(vars$type[vars$variable == "tipo_sexo_paciente"], "character")
@@ -646,7 +651,7 @@ test_that("sipni_data reports partial download failures (FTP)", {
   )
   # use year 2019 to stay in FTP path (sipni_ftp_years)
   result <- suppressWarnings(
-    sipni_data(2019, uf = c("AC", "XX"), parse = FALSE)
+    sipni_data(2019, uf = c("AC", "XX"), parse = FALSE, source = "datasus")
   )
   expect_s3_class(result, "data.frame")
   failures <- attr(result, "download_failures")
@@ -1261,7 +1266,7 @@ test_that("sipni_data returns parsed FTP data via mock", {
   )
 
   result <- sipni_data(year = 2019, uf = "AC", parse = TRUE,
-                        cache = FALSE)
+                        cache = FALSE, source = "datasus")
 
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 1)
@@ -1283,7 +1288,7 @@ test_that("sipni_data returns unparsed FTP data via mock", {
   )
 
   result <- sipni_data(year = 2019, uf = "AC", parse = FALSE,
-                        cache = FALSE)
+                        cache = FALSE, source = "datasus")
 
   expect_type(result$QT_DOSE, "character")
 })
@@ -1302,7 +1307,7 @@ test_that("sipni_data selects vars via mock", {
   )
 
   result <- sipni_data(year = 2019, uf = "AC", vars = "IMUNO",
-                        parse = FALSE, cache = FALSE)
+                        parse = FALSE, cache = FALSE, source = "datasus")
 
   expect_true("IMUNO" %in% names(result))
   expect_true("year" %in% names(result))
@@ -1328,7 +1333,7 @@ test_that("sipni_data returns parsed API data via mock", {
   )
 
   result <- sipni_data(year = 2024, uf = "AC", month = 1,
-                        parse = TRUE, cache = FALSE)
+                        parse = TRUE, cache = FALSE, source = "datasus")
 
   expect_s3_class(result, "tbl_df")
   expect_s3_class(result$data_vacina, "Date")
@@ -1357,7 +1362,7 @@ test_that("sipni_data handles mixed FTP and API years via mock", {
   )
 
   result <- sipni_data(year = c(2019, 2024), uf = "AC", month = 1,
-                        parse = FALSE, cache = FALSE)
+                        parse = FALSE, cache = FALSE, source = "datasus")
 
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 2)
@@ -1796,7 +1801,7 @@ test_that("sipni_data API path selects vars via mock", {
   result <- sipni_data(
     year = 2024, uf = "AC", month = 1,
     vars = c("data_vacina", "descricao_vacina"),
-    parse = FALSE, cache = FALSE
+    parse = FALSE, cache = FALSE, source = "datasus"
   )
 
   expect_true("data_vacina" %in% names(result))
@@ -1817,7 +1822,8 @@ test_that("sipni_data reports all failures as error", {
   )
 
   expect_error(
-    sipni_data(year = 2019, uf = "AC", parse = FALSE, cache = FALSE),
+    sipni_data(year = 2019, uf = "AC", parse = FALSE, cache = FALSE,
+               source = "datasus"),
     "No data"
   )
 })
@@ -1839,7 +1845,7 @@ test_that("sipni_data with col_types override in API path", {
   result <- sipni_data(
     year = 2024, uf = "AC", month = 1,
     parse = TRUE, col_types = list(numero_idade_paciente = "character"),
-    cache = FALSE
+    cache = FALSE, source = "datasus"
   )
 
   # override should keep it as character
@@ -1888,7 +1894,8 @@ test_that("sipni_data reports partial download failures (API)", {
   )
 
   result <- suppressWarnings(
-    sipni_data(2024, uf = c("AC", "RJ"), month = 1, parse = FALSE, cache = FALSE)
+    sipni_data(2024, uf = c("AC", "RJ"), month = 1, parse = FALSE,
+               cache = FALSE, source = "datasus")
   )
   expect_s3_class(result, "data.frame")
   failures <- attr(result, "download_failures")
@@ -1912,7 +1919,7 @@ test_that(".sipni_csv_build_url year 2020 month 1 produces correct URL", {
   url <- healthbR:::.sipni_csv_build_url(2020, 1)
   expect_equal(
     url,
-    "https://arquivosdadosabertos.saude.gov.br/dados/dbbni/vacinacao_jan_2020_csv.zip"
+    "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv/vacinacao_jan_2020_csv.zip"
   )
 })
 
@@ -1920,6 +1927,6 @@ test_that(".sipni_csv_build_url year 2025 month 12 produces correct URL", {
   url <- healthbR:::.sipni_csv_build_url(2025, 12)
   expect_equal(
     url,
-    "https://arquivosdadosabertos.saude.gov.br/dados/dbbni/vacinacao_dez_2025_csv.zip"
+    "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv/vacinacao_dez_2025_csv.zip"
   )
 })

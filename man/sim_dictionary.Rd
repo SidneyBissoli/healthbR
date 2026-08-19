@@ -23,12 +23,12 @@ sim_dictionary("SEXO")
 sim_dictionary("RACACOR")
 }
 \seealso{
-Other sim: 
-\code{\link{sim_cache_status}()},
-\code{\link{sim_clear_cache}()},
-\code{\link{sim_data}()},
-\code{\link{sim_info}()},
-\code{\link{sim_variables}()},
-\code{\link{sim_years}()}
+Other sim:
+\code{\link[=sim_cache_status]{sim_cache_status()}},
+\code{\link[=sim_clear_cache]{sim_clear_cache()}},
+\code{\link[=sim_data]{sim_data()}},
+\code{\link[=sim_info]{sim_info()}},
+\code{\link[=sim_variables]{sim_variables()}},
+\code{\link[=sim_years]{sim_years()}}
 }
 \concept{sim}

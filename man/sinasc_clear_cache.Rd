@@ -22,12 +22,12 @@ sinasc_clear_cache()
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-Other sinasc: 
-\code{\link{sinasc_cache_status}()},
-\code{\link{sinasc_data}()},
-\code{\link{sinasc_dictionary}()},
-\code{\link{sinasc_info}()},
-\code{\link{sinasc_variables}()},
-\code{\link{sinasc_years}()}
+Other sinasc:
+\code{\link[=sinasc_cache_status]{sinasc_cache_status()}},
+\code{\link[=sinasc_data]{sinasc_data()}},
+\code{\link[=sinasc_dictionary]{sinasc_dictionary()}},
+\code{\link[=sinasc_info]{sinasc_info()}},
+\code{\link[=sinasc_variables]{sinasc_variables()}},
+\code{\link[=sinasc_years]{sinasc_years()}}
 }
 \concept{sinasc}

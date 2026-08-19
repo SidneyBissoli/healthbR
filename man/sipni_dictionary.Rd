@@ -4,23 +4,45 @@
 \alias{sipni_dictionary}
 \title{SI-PNI Data Dictionary}
 \usage{
-sipni_dictionary(variable = NULL)
+sipni_dictionary(
+  variable = NULL,
+  source = c("r2", "datasus"),
+  cache = TRUE,
+  cache_dir = NULL
+)
 }
 \arguments{
 \item{variable}{Character. If provided, returns dictionary for a specific
 variable only. Default: NULL (returns all variables).}
+
+\item{source}{Character vector. \code{"r2"} (default) reads the full
+dictionaries published by the healthbr-data mirror (converted from the
+Ministry's original .cnv/.dbf files, including the \code{source_codes}
+traceability column); \code{"datasus"} uses the abridged dictionary
+built into the package. With the default \code{c("r2", "datasus")},
+the built-in dictionary is used automatically if the mirror is
+unreachable.}
+
+\item{cache}{Logical. If TRUE (default), caches the R2 dictionary
+locally after the first read.}
+
+\item{cache_dir}{Character. Cache directory. Default:
+\code{tools::R_user_dir("healthbR", "cache")}.}
 }
 \value{
-A tibble with columns: variable, description, code, label.
+A tibble with columns: variable, description, code, label (and
+\code{source_codes} when served from R2 \u2014 the original source codes
+each dictionary entry groups, for traceability to the .cnv files).
 }
 \description{
-Returns a tibble with the data dictionary for the SI-PNI FTP data
+Returns a tibble with the data dictionary for the SI-PNI aggregated data
 (1994--2019), including variable descriptions and category labels.
 }
 \details{
-The dictionary covers FTP data variables (DPNI/CPNI, 1994--2019).
+The dictionary covers aggregated data variables (DPNI/CPNI, 1994--2019):
+IMUNO (separately for doses and coverage), DOSE, FX_ETARIA, ANO, MES.
 API microdata (2020+) has description fields embedded in the data
-itself (e.g., \code{descricao_vacina}, \code{nome_raca_cor_paciente}),
+itself (e.g., \code{ds_vacina}, \code{no_raca_cor_paciente}),
 so a separate dictionary is not needed.
 }
 \examples{
@@ -29,12 +51,13 @@ sipni_dictionary("IMUNO")
 sipni_dictionary("DOSE")
 }
 \seealso{
-Other sipni: 
-\code{\link{sipni_cache_status}()},
-\code{\link{sipni_clear_cache}()},
-\code{\link{sipni_data}()},
-\code{\link{sipni_info}()},
-\code{\link{sipni_variables}()},
-\code{\link{sipni_years}()}
+Other sipni:
+\code{\link[=sipni_cache_status]{sipni_cache_status()}},
+\code{\link[=sipni_clear_cache]{sipni_clear_cache()}},
+\code{\link[=sipni_data]{sipni_data()}},
+\code{\link[=sipni_info]{sipni_info()}},
+\code{\link[=sipni_status]{sipni_status()}},
+\code{\link[=sipni_variables]{sipni_variables()}},
+\code{\link[=sipni_years]{sipni_years()}}
 }
 \concept{sipni}

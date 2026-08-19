@@ -26,12 +26,12 @@ sim_years()
 sim_years(status = "all")
 }
 \seealso{
-Other sim: 
-\code{\link{sim_cache_status}()},
-\code{\link{sim_clear_cache}()},
-\code{\link{sim_data}()},
-\code{\link{sim_dictionary}()},
-\code{\link{sim_info}()},
-\code{\link{sim_variables}()}
+Other sim:
+\code{\link[=sim_cache_status]{sim_cache_status()}},
+\code{\link[=sim_clear_cache]{sim_clear_cache()}},
+\code{\link[=sim_data]{sim_data()}},
+\code{\link[=sim_dictionary]{sim_dictionary()}},
+\code{\link[=sim_info]{sim_info()}},
+\code{\link[=sim_variables]{sim_variables()}}
 }
 \concept{sim}

@@ -4,16 +4,22 @@
 \alias{sipni_variables}
 \title{List SI-PNI Variables}
 \usage{
-sipni_variables(type = "DPNI", search = NULL)
+sipni_variables(type = "DPNI", search = NULL, source = c("r2", "datasus"))
 }
 \arguments{
 \item{type}{Character. File type to show variables for.
-\code{"DPNI"} (default) for doses applied (FTP, 1994-2019),
-\code{"CPNI"} for coverage (FTP, 1994-2019), or \code{"API"} for
-individual-level microdata (OpenDataSUS, 2020+).}
+\code{"DPNI"} (default) for doses applied (1994-2019),
+\code{"CPNI"} for coverage (1994-2019), or \code{"API"} for
+individual-level microdata (2020+).}
 
 \item{search}{Character. Optional search term to filter variables by
 name or description. Case-insensitive and accent-insensitive.}
+
+\item{source}{Character. Which source's column set to list for
+\code{type = "API"}: \code{"r2"} (default; 56 fields from the
+Ministry's JSON exports, served by the R2 mirror) or \code{"datasus"}
+(~47 fields of the OpenDataSUS CSV exports). Ignored for DPNI/CPNI
+(identical in both sources).}
 }
 \value{
 A tibble with columns: variable, description, type, section.
@@ -26,15 +32,17 @@ including descriptions and value types.
 sipni_variables()
 sipni_variables(type = "CPNI")
 sipni_variables(type = "API")
+sipni_variables(type = "API", source = "datasus")
 sipni_variables(search = "dose")
 }
 \seealso{
-Other sipni: 
-\code{\link{sipni_cache_status}()},
-\code{\link{sipni_clear_cache}()},
-\code{\link{sipni_data}()},
-\code{\link{sipni_dictionary}()},
-\code{\link{sipni_info}()},
-\code{\link{sipni_years}()}
+Other sipni:
+\code{\link[=sipni_cache_status]{sipni_cache_status()}},
+\code{\link[=sipni_clear_cache]{sipni_clear_cache()}},
+\code{\link[=sipni_data]{sipni_data()}},
+\code{\link[=sipni_dictionary]{sipni_dictionary()}},
+\code{\link[=sipni_info]{sipni_info()}},
+\code{\link[=sipni_status]{sipni_status()}},
+\code{\link[=sipni_years]{sipni_years()}}
 }
 \concept{sipni}

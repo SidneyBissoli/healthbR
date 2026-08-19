@@ -26,11 +26,11 @@ anvisa_variables(type = "hemovigilance")
 anvisa_variables(search = "registro")
 }
 \seealso{
-Other anvisa: 
-\code{\link{anvisa_cache_status}()},
-\code{\link{anvisa_clear_cache}()},
-\code{\link{anvisa_data}()},
-\code{\link{anvisa_info}()},
-\code{\link{anvisa_types}()}
+Other anvisa:
+\code{\link[=anvisa_cache_status]{anvisa_cache_status()}},
+\code{\link[=anvisa_clear_cache]{anvisa_clear_cache()}},
+\code{\link[=anvisa_data]{anvisa_data()}},
+\code{\link[=anvisa_info]{anvisa_info()}},
+\code{\link[=anvisa_types]{anvisa_types()}}
 }
 \concept{anvisa}

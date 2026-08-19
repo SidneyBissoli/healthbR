@@ -22,12 +22,12 @@ cnes_clear_cache()
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-Other cnes: 
-\code{\link{cnes_cache_status}()},
-\code{\link{cnes_data}()},
-\code{\link{cnes_dictionary}()},
-\code{\link{cnes_info}()},
-\code{\link{cnes_variables}()},
-\code{\link{cnes_years}()}
+Other cnes:
+\code{\link[=cnes_cache_status]{cnes_cache_status()}},
+\code{\link[=cnes_data]{cnes_data()}},
+\code{\link[=cnes_dictionary]{cnes_dictionary()}},
+\code{\link[=cnes_info]{cnes_info()}},
+\code{\link[=cnes_variables]{cnes_variables()}},
+\code{\link[=cnes_years]{cnes_years()}}
 }
 \concept{cnes}

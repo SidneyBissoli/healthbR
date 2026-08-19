@@ -23,13 +23,13 @@ sinan_diseases(search = "dengue")
 sinan_diseases(search = "sifilis")
 }
 \seealso{
-Other sinan: 
-\code{\link{sinan_cache_status}()},
-\code{\link{sinan_clear_cache}()},
-\code{\link{sinan_data}()},
-\code{\link{sinan_dictionary}()},
-\code{\link{sinan_info}()},
-\code{\link{sinan_variables}()},
-\code{\link{sinan_years}()}
+Other sinan:
+\code{\link[=sinan_cache_status]{sinan_cache_status()}},
+\code{\link[=sinan_clear_cache]{sinan_clear_cache()}},
+\code{\link[=sinan_data]{sinan_data()}},
+\code{\link[=sinan_dictionary]{sinan_dictionary()}},
+\code{\link[=sinan_info]{sinan_info()}},
+\code{\link[=sinan_variables]{sinan_variables()}},
+\code{\link[=sinan_years]{sinan_years()}}
 }
 \concept{sinan}

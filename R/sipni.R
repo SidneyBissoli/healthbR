@@ -1,16 +1,31 @@
 # sipni functions for healthbR package
 # functions to access vaccination data from the SI-PNI (Sistema de Informacao
-# do Programa Nacional de Imunizacoes) via DATASUS FTP (1994-2019) and
-# OpenDataSUS CSV bulk downloads (2020+)
+# do Programa Nacional de Imunizacoes). Default source is the healthbr-data
+# R2 mirror (Parquet, byte-identical to the Ministry's files) with automatic
+# fallback to DATASUS FTP (1994-2019) / OpenDataSUS CSV (2020+).
+# R2 plumbing lives in sipni_r2.R and utils-r2.R.
 
 # ============================================================================
 # internal validation functions
 # ============================================================================
 
+#' Years currently considered available for SI-PNI
+#'
+#' Static range (1994 up to the last year known at release time) extended
+#' with the microdata years actually published on the R2 mirror, when the
+#' manifest has been read this session (e.g. via `sipni_status()`).
+#' Never touches the network.
+#' @noRd
+.sipni_available_years <- function() {
+  r2_years <- .sipni_r2_microdados_years()
+  sort(union(sipni_available_years, r2_years))
+}
+
+
 #' Validate SI-PNI year parameter
 #' @noRd
 .sipni_validate_year <- function(year) {
-  .validate_year(year, sipni_available_years,
+  .validate_year(year, .sipni_available_years(),
                  years_fn_hint = "sipni_years()")
 }
 
@@ -45,7 +60,9 @@
 .sipni_validate_vars <- function(vars, type = "DPNI") {
   meta <- switch(type,
     "CPNI" = sipni_variables_cpni,
-    "API"  = sipni_variables_api,
+    # API era: accept both the R2 (JSON) and the DATASUS CSV column names \u2014
+    # which set comes back depends on the source that ends up serving the call
+    "API"  = dplyr::bind_rows(sipni_variables_microdados, sipni_variables_api),
     sipni_variables_dpni
   )
   known_vars <- meta$variable
@@ -278,7 +295,7 @@
     } else if ("uf_estabelecimento" %in% names(chunk)) {
       uf_col <- chunk$uf_estabelecimento
     } else {
-      # no UF column — buffer everything under "ALL"
+      # no UF column \u2014 buffer everything under "ALL"
       uf_buffers[["ALL"]] <<- c(uf_buffers[["ALL"]], list(chunk))
       return(invisible(NULL))
     }
@@ -529,16 +546,20 @@
 #' Returns an integer vector with years for which vaccination data are
 #' available.
 #'
-#' @return An integer vector of available years (1994--2025).
+#' @return An integer vector of available years (1994 onwards).
 #'
 #' @details
-#' SI-PNI data is available from two sources:
+#' SI-PNI data come in two eras:
 #' \itemize{
-#'   \item **FTP (1994--2019)**: Aggregated data (doses applied and coverage)
-#'     from DATASUS FTP as plain .DBF files.
-#'   \item **CSV (2020--2025)**: Individual-level microdata from
-#'     OpenDataSUS as monthly CSV bulk downloads (one row per vaccination dose).
+#'   \item **1994--2019**: Aggregated data (doses applied and coverage).
+#'   \item **2020+**: Individual-level microdata (one row per vaccination
+#'     dose), published monthly.
 #' }
+#' The returned vector is a static range extended with the microdata years
+#' actually published on the healthbr-data R2 mirror once its manifest has
+#' been read in the session (e.g. after calling
+#' \code{\link{sipni_status}()}); this function itself never touches the
+#' network. Use \code{\link{sipni_status}()} for month-level availability.
 #'
 #' @export
 #' @family sipni
@@ -546,7 +567,7 @@
 #' @examples
 #' sipni_years()
 sipni_years <- function() {
-  sipni_available_years
+  .sipni_available_years()
 }
 
 
@@ -564,7 +585,7 @@ sipni_years <- function() {
 #' @examples
 #' sipni_info()
 sipni_info <- function() {
-  yr_range <- range(sipni_available_years)
+  yr_range <- range(.sipni_available_years())
 
   cli::cli_h1(
     "SI-PNI \u2014 Sistema de Informa\u00e7\u00e3o do Programa Nacional de Imuniza\u00e7\u00f5es"
@@ -573,17 +594,19 @@ sipni_info <- function() {
   cli::cli_text("")
   cli::cli_text("Fonte:          Minist\u00e9rio da Sa\u00fade / DATASUS")
   cli::cli_text(
-    "Acesso:         FTP DATASUS (1994-2019) + OpenDataSUS CSV (2020+)"
+    "Acesso:         Espelho R2 healthbr-data (padr\u00e3o) com fallback DATASUS"
   )
   cli::cli_text(
-    "Dados:          Agregados (FTP) e microdados individuais (CSV)"
+    "Dados:          Agregados (1994-2019) e microdados individuais (2020+)"
   )
-  cli::cli_text("Granularidade:  Anual/UF (FTP), Mensal/UF (CSV)")
+  cli::cli_text("Granularidade:  Anual/UF (agregados), Mensal/UF (microdados)")
 
   cli::cli_h2("Fontes de dados")
   cli::cli_bullets(c(
+    "*" = "R2 healthbr-data (padr\u00e3o): Parquet id\u00eantico \u00e0 fonte, s\u00e9rie completa",
     "*" = "FTP DATASUS (1994\u20132019): Dados agregados (DPNI/CPNI) em .DBF",
-    "*" = "OpenDataSUS CSV (2020\u20132025): Microdados individuais (1 linha por dose)"
+    "*" = "OpenDataSUS CSV (2020+): Microdados individuais (1 linha por dose);",
+    " " = "  em 2026 o Minist\u00e9rio removeu 2020\u20132025 da fonte \u2014 use o espelho R2"
   ))
 
   cli::cli_h2("Dados dispon\u00edveis")
@@ -608,32 +631,37 @@ sipni_info <- function() {
   cli::cli_text("  FX_ETARIA  Faixa et\u00e1ria")
   cli::cli_text("  MUNIC      Munic\u00edpio (IBGE 6 d\u00edgitos)")
 
-  cli::cli_h2("Vari\u00e1veis-chave (API 2020+)")
-  cli::cli_text("  descricao_vacina       Nome da vacina")
-  cli::cli_text("  descricao_dose_vacina  Descri\u00e7\u00e3o da dose")
-  cli::cli_text("  tipo_sexo_paciente     Sexo do paciente (M/F)")
-  cli::cli_text("  numero_idade_paciente  Idade do paciente")
-  cli::cli_text("  data_vacina            Data da vacina\u00e7\u00e3o")
+  cli::cli_h2("Vari\u00e1veis-chave (microdados 2020+, R2)")
+  cli::cli_text("  ds_vacina          Nome da vacina")
+  cli::cli_text("  ds_dose_vacina     Descri\u00e7\u00e3o da dose")
+  cli::cli_text("  tp_sexo_paciente   Sexo do paciente (M/F)")
+  cli::cli_text("  nu_idade_paciente  Idade do paciente")
+  cli::cli_text("  dt_vacina          Data da vacina\u00e7\u00e3o")
 
   cli::cli_text("")
   cli::cli_alert_info(
     "1994-2019: Dados agregados (contagens por munic\u00edpio/vacina/faixa)."
   )
   cli::cli_alert_info(
-    "2020+: Microdados individuais (1 linha por dose aplicada) via CSV."
+    "2020+: Microdados individuais (1 linha por dose aplicada)."
   )
   cli::cli_alert_info(
-    "Use {.arg month} em {.fun sipni_data} para filtrar meses (CSV 2020+)."
+    "Use {.arg month} em {.fun sipni_data} para filtrar meses (2020+)."
+  )
+  cli::cli_alert_info(
+    "Use {.fun sipni_status} para ver a disponibilidade real no espelho R2."
   )
 
   invisible(list(
     name = "SI-PNI - Sistema de Informa\u00e7\u00e3o do Programa Nacional de Imuniza\u00e7\u00f5es",
-    source = "DATASUS FTP + OpenDataSUS CSV",
-    years = sipni_available_years,
+    source = "healthbr-data R2 (Parquet) + DATASUS FTP + OpenDataSUS CSV",
+    years = .sipni_available_years(),
     n_types = nrow(sipni_valid_types),
     n_variables_dpni = nrow(sipni_variables_dpni),
     n_variables_cpni = nrow(sipni_variables_cpni),
     n_variables_api = nrow(sipni_variables_api),
+    n_variables_microdados = nrow(sipni_variables_microdados),
+    url_r2 = paste0(healthbr_r2_pub_base, "/sipni/"),
     url_ftp = "ftp://ftp.datasus.gov.br/dissemin/publicos/PNI/",
     url_csv = sipni_csv_base_url
   ))
@@ -646,11 +674,16 @@ sipni_info <- function() {
 #' including descriptions and value types.
 #'
 #' @param type Character. File type to show variables for.
-#'   \code{"DPNI"} (default) for doses applied (FTP, 1994-2019),
-#'   \code{"CPNI"} for coverage (FTP, 1994-2019), or \code{"API"} for
-#'   individual-level microdata (OpenDataSUS, 2020+).
+#'   \code{"DPNI"} (default) for doses applied (1994-2019),
+#'   \code{"CPNI"} for coverage (1994-2019), or \code{"API"} for
+#'   individual-level microdata (2020+).
 #' @param search Character. Optional search term to filter variables by
 #'   name or description. Case-insensitive and accent-insensitive.
+#' @param source Character. Which source's column set to list for
+#'   \code{type = "API"}: \code{"r2"} (default; 56 fields from the
+#'   Ministry's JSON exports, served by the R2 mirror) or \code{"datasus"}
+#'   (~47 fields of the OpenDataSUS CSV exports). Ignored for DPNI/CPNI
+#'   (identical in both sources).
 #'
 #' @return A tibble with columns: variable, description, type, section.
 #'
@@ -661,12 +694,19 @@ sipni_info <- function() {
 #' sipni_variables()
 #' sipni_variables(type = "CPNI")
 #' sipni_variables(type = "API")
+#' sipni_variables(type = "API", source = "datasus")
 #' sipni_variables(search = "dose")
-sipni_variables <- function(type = "DPNI", search = NULL) {
+sipni_variables <- function(type = "DPNI", search = NULL,
+                            source = c("r2", "datasus")) {
   type <- .sipni_validate_type(type)
+  source <- match.arg(source)
   result <- switch(type,
     "CPNI" = sipni_variables_cpni,
-    "API"  = sipni_variables_api,
+    "API"  = if (source == "r2") {
+      sipni_variables_microdados
+    } else {
+      sipni_variables_api
+    },
     sipni_variables_dpni
   )
 
@@ -678,18 +718,32 @@ sipni_variables <- function(type = "DPNI", search = NULL) {
 
 #' SI-PNI Data Dictionary
 #'
-#' Returns a tibble with the data dictionary for the SI-PNI FTP data
+#' Returns a tibble with the data dictionary for the SI-PNI aggregated data
 #' (1994--2019), including variable descriptions and category labels.
 #'
 #' @param variable Character. If provided, returns dictionary for a specific
 #'   variable only. Default: NULL (returns all variables).
+#' @param source Character vector. \code{"r2"} (default) reads the full
+#'   dictionaries published by the healthbr-data mirror (converted from the
+#'   Ministry's original .cnv/.dbf files, including the \code{source_codes}
+#'   traceability column); \code{"datasus"} uses the abridged dictionary
+#'   built into the package. With the default \code{c("r2", "datasus")},
+#'   the built-in dictionary is used automatically if the mirror is
+#'   unreachable.
+#' @param cache Logical. If TRUE (default), caches the R2 dictionary
+#'   locally after the first read.
+#' @param cache_dir Character. Cache directory. Default:
+#'   \code{tools::R_user_dir("healthbR", "cache")}.
 #'
-#' @return A tibble with columns: variable, description, code, label.
+#' @return A tibble with columns: variable, description, code, label (and
+#'   \code{source_codes} when served from R2 \u2014 the original source codes
+#'   each dictionary entry groups, for traceability to the .cnv files).
 #'
 #' @details
-#' The dictionary covers FTP data variables (DPNI/CPNI, 1994--2019).
+#' The dictionary covers aggregated data variables (DPNI/CPNI, 1994--2019):
+#' IMUNO (separately for doses and coverage), DOSE, FX_ETARIA, ANO, MES.
 #' API microdata (2020+) has description fields embedded in the data
-#' itself (e.g., \code{descricao_vacina}, \code{nome_raca_cor_paciente}),
+#' itself (e.g., \code{ds_vacina}, \code{no_raca_cor_paciente}),
 #' so a separate dictionary is not needed.
 #'
 #' @export
@@ -699,8 +753,37 @@ sipni_variables <- function(type = "DPNI", search = NULL) {
 #' sipni_dictionary()
 #' sipni_dictionary("IMUNO")
 #' sipni_dictionary("DOSE")
-sipni_dictionary <- function(variable = NULL) {
-  result <- sipni_dictionary_data
+sipni_dictionary <- function(variable = NULL, source = c("r2", "datasus"),
+                             cache = TRUE, cache_dir = NULL) {
+  sources <- .resolve_sources(source)
+
+  result <- NULL
+  if ("r2" %in% sources && .has_arrow()) {
+    result <- tryCatch(
+      .sipni_r2_dictionary(cache = cache, cache_dir = cache_dir),
+      error = function(e) NULL
+    )
+    if (is.null(result) && !"datasus" %in% sources) {
+      cli::cli_abort(c(
+        "Could not read the SI-PNI dictionaries from the R2 mirror.",
+        "i" = "Use {.code source = \"datasus\"} for the built-in dictionary."
+      ))
+    }
+    if (is.null(result)) {
+      cli::cli_warn(c(
+        "!" = "R2 dictionaries unreachable; using the built-in dictionary."
+      ))
+    }
+  }
+  if (is.null(result)) {
+    if (!"datasus" %in% sources && !"r2" %in% sources) {
+      cli::cli_abort("No usable {.arg source} for the dictionary.")
+    }
+    if ("r2" %in% sources && !"datasus" %in% sources && !.has_arrow()) {
+      .r2_check_arrow()
+    }
+    result <- sipni_dictionary_data
+  }
 
   if (!is.null(variable)) {
     variable <- toupper(variable)
@@ -903,6 +986,63 @@ sipni_dictionary <- function(variable = NULL) {
 }
 
 
+#' Fetch one era (aggregates 1994-2019 or microdata 2020+) trying each
+#' source in priority order
+#'
+#' @param era "ftp" (aggregates) or "api" (microdata).
+#' @param sources Character vector from `.resolve_sources()` (priority order).
+#' @return list(results, failed_labels, source) \u2014 `source` is the source
+#'   that actually served the data (NA if all failed).
+#' @noRd
+.sipni_fetch_era <- function(era, params, sources, cache, cache_dir, creds) {
+  empty <- list(results = list(), failed_labels = character(0),
+                source = NA_character_)
+  years <- if (era == "ftp") params$ftp_years else params$api_years
+  if (length(years) == 0) return(empty)
+
+  last <- empty
+  for (i in seq_along(sources)) {
+    s <- sources[i]
+    res <- tryCatch({
+      if (s == "r2") {
+        if (era == "ftp") {
+          .sipni_r2_fetch_agregados(params$type, years, params$target_ufs,
+                                    cache, cache_dir, creds)
+        } else {
+          .sipni_r2_fetch_microdados(years, params$month_vals,
+                                     params$target_ufs,
+                                     cache, cache_dir, creds)
+        }
+      } else {
+        if (era == "ftp") {
+          .sipni_download_ftp(years, params$target_ufs, params$type,
+                              cache, cache_dir)
+        } else {
+          .sipni_download_api(years, params$target_ufs, params$month_vals,
+                              cache, cache_dir)
+        }
+      }
+    }, error = function(e) {
+      cli::cli_warn("Source {.val {s}} failed: {conditionMessage(e)}")
+      NULL
+    })
+
+    if (!is.null(res) && length(res$results) > 0) {
+      res$source <- s
+      return(res)
+    }
+    if (!is.null(res)) last <- res
+    if (i < length(sources)) {
+      cli::cli_warn(c(
+        "!" = "No data from source {.val {s}}; falling back to {.val {sources[i + 1]}}."
+      ))
+    }
+  }
+  last$source <- NA_character_
+  last
+}
+
+
 #' Bind FTP and API results separately then combine
 #' @return Combined tibble
 #' @noRd
@@ -962,7 +1102,8 @@ sipni_dictionary <- function(variable = NULL) {
 #' @return Parsed tibble
 #' @noRd
 .sipni_apply_parsing <- function(combined, has_ftp, has_api, type,
-                                 parse, col_types, lazy) {
+                                 parse, col_types, lazy,
+                                 api_source = "datasus") {
   if (!isTRUE(parse) || isTRUE(lazy)) return(combined)
 
   all_specs <- c()
@@ -971,7 +1112,12 @@ sipni_dictionary <- function(variable = NULL) {
     all_specs <- c(all_specs, .build_type_spec(ftp_meta))
   }
   if (has_api) {
-    all_specs <- c(all_specs, .build_type_spec(sipni_variables_api))
+    api_meta <- if (identical(api_source, "r2")) {
+      sipni_variables_microdados
+    } else {
+      sipni_variables_api
+    }
+    all_specs <- c(all_specs, .build_type_spec(api_meta))
   }
   if (length(all_specs) > 0) {
     combined <- .parse_columns(combined, all_specs, col_types = col_types)
@@ -983,10 +1129,18 @@ sipni_dictionary <- function(variable = NULL) {
 
 #' Download SI-PNI Vaccination Data
 #'
-#' Downloads and returns vaccination data from SI-PNI. For years 1994--2019,
-#' data is downloaded from DATASUS FTP (aggregated doses/coverage). For years
-#' 2020+, data is downloaded from OpenDataSUS as monthly CSV bulk files
-#' (individual-level microdata with one row per vaccination dose).
+#' Downloads and returns vaccination data from SI-PNI. For years 1994--2019
+#' the data are aggregated (doses applied / coverage); for years 2020+ they
+#' are individual-level microdata (one row per vaccination dose).
+#'
+#' By default data are read from the **healthbr-data R2 mirror** (Parquet on
+#' Cloudflare R2, values byte-identical to the Ministry's files, complete
+#' 2020+ series), falling back automatically to the official DATASUS/
+#' OpenDataSUS sources if the mirror is unreachable \u2014 see \code{source}.
+#' The result carries a \code{healthbr_source} attribute recording which
+#' source actually served each era, and (for R2 reads) a
+#' \code{healthbr_provenance} attribute with the processing timestamp and
+#' Ministry source URL of each partition, taken from the mirror's manifests.
 #'
 #' @param year Integer. Year(s) of the data. Required.
 #' @param type Character. File type for FTP data (1994--2019). Default:
@@ -1023,33 +1177,69 @@ sipni_dictionary <- function(variable = NULL) {
 #' @param backend Character. Backend for lazy evaluation: \code{"arrow"}
 #'   (default) or \code{"duckdb"}. Only used when \code{lazy = TRUE}.
 #'   DuckDB backend requires the \pkg{duckdb} package.
+#' @param source Character vector. Data source(s) in priority order:
+#'   \code{"r2"} (healthbr-data mirror on Cloudflare R2, Parquet) and/or
+#'   \code{"datasus"} (DATASUS FTP for 1994--2019, OpenDataSUS CSV for
+#'   2020+). The default \code{c("r2", "datasus")} tries the mirror first
+#'   and falls back to the official source automatically; pass a single
+#'   value to disable the fallback. Note: as of 2026 the Ministry removed
+#'   the 2020--2025 microdata files from OpenDataSUS, so those years are
+#'   only served by \code{"r2"}. The R2 backend requires the \pkg{arrow}
+#'   package.
+#' @param r2_credentials List or NULL. Credentials for the R2 backend. If
+#'   NULL (default), uses the public read-only token of the healthbr-data
+#'   bucket. To point at another S3-compatible bucket, pass
+#'   \code{list(access_key_id =, secret_access_key =, endpoint =, bucket =)}.
 #'
 #' @return A tibble with vaccination data. Includes columns
-#'   \code{year} and \code{uf_source} to identify the source
-#'   when multiple years/states are combined.
+#'   \code{year}, \code{uf_source} (and \code{month} for 2020+) to identify
+#'   the source partition when multiple years/states are combined.
+#'   Attributes: \code{healthbr_source} (which source served each era) and,
+#'   for R2 reads, \code{healthbr_provenance} (per-partition processing
+#'   timestamp and Ministry source URL from the mirror manifests).
 #'
-#'   **Output differs by year range:**
+#'   **Output differs by year range \u2014 and, for 2020+, by source:**
 #'   \itemize{
-#'     \item **1994--2019 (FTP)**: Aggregated data with DPNI (12 vars) or
-#'       CPNI (7 vars) columns, all character.
-#'     \item **2020+ (CSV)**: Individual-level microdata with ~47 columns
-#'       (snake_case Portuguese), all character. Use
-#'       \code{sipni_variables(type = "API")} to see the full list.
+#'     \item **1994--2019 (aggregated)**: DPNI (12 vars) or CPNI (7 vars)
+#'       columns. Identical for both sources.
+#'     \item **2020+ via R2 (default)**: 56 fields from the Ministry's JSON
+#'       exports (\code{dt_vacina}, \code{ds_vacina},
+#'       \code{sg_uf_paciente}, ...). Use \code{sipni_variables(type =
+#'       "API", source = "r2")} to see the list.
+#'     \item **2020+ via DATASUS CSV**: ~47 fields with different names
+#'       (\code{data_vacina}, \code{descricao_vacina}, ...). Use
+#'       \code{sipni_variables(type = "API", source = "datasus")}.
 #'   }
+#'   Each source returns its columns exactly as published by the Ministry;
+#'   healthbR does not rename or remap them.
 #'
 #' @details
-#' **FTP data (1994--2019):**
-#' Downloaded as plain .DBF files. SI-PNI FTP data is **aggregated** (dose
-#' counts and coverage rates per municipality, vaccine, and age group).
-#' Two file types: DPNI (doses) and CPNI (coverage).
+#' **Aggregated data (1994--2019):**
+#' SI-PNI aggregated data (dose counts and coverage rates per municipality,
+#' vaccine, and age group). Two file types: DPNI (doses) and CPNI
+#' (coverage). Served from the R2 mirror as Parquet, or from DATASUS FTP
+#' as plain .DBF files.
 #'
-#' **CSV data (2020+):**
-#' Downloaded from OpenDataSUS as monthly CSV bulk files (national,
-#' semicolon-delimited, latin1 encoding). Each monthly ZIP is ~1.4 GB.
-#' This is **individual-level microdata** (one row per vaccination dose,
-#' ~47 fields per record). The \code{type} parameter is ignored for CSV
-#' years. Data is filtered by UF during chunked reading to avoid loading
-#' the full national file into memory.
+#' **Microdata (2020+):**
+#' Individual-level microdata (one row per vaccination dose). The
+#' \code{type} parameter is ignored for these years. Via R2 the data come
+#' from the Ministry's JSON exports (no CSV serialization artifacts) and
+#' only the requested UF/month partitions are transferred. Via DATASUS the
+#' national monthly CSV ZIP (~1.4 GB) is downloaded and filtered by UF
+#' during chunked reading.
+#'
+#' **Availability note (2026):** the Ministry decommissioned the old
+#' OpenDataSUS host and removed the 2020--2025 files from the new one.
+#' The R2 mirror holds the complete series; use
+#' \code{\link{sipni_status}()} to see exactly which months are published
+#' and when they were processed.
+#'
+#' **Lazy evaluation with R2:** with \code{lazy = TRUE} and the default
+#' source, the function returns the remote arrow dataset itself \u2014 dplyr
+#' verbs are pushed down and only the touched partitions are transferred.
+#' In this mode the partition columns keep the bucket layout names
+#' (\code{ano}, \code{mes}, \code{uf}, as strings) instead of
+#' \code{year}/\code{month}/\code{uf_source}.
 #'
 #' ## Parallel downloads
 #' When downloading multiple files (e.g., several years or states), install
@@ -1081,52 +1271,84 @@ sipni_data <- function(year, type = "DPNI", uf = NULL, month = NULL,
                        vars = NULL,
                        parse = TRUE, col_types = NULL,
                        cache = TRUE, cache_dir = NULL,
-                       lazy = FALSE, backend = c("arrow", "duckdb")) {
+                       lazy = FALSE, backend = c("arrow", "duckdb"),
+                       source = c("r2", "datasus"),
+                       r2_credentials = NULL) {
 
   # 1. resolve and validate all parameters
+  sources <- .resolve_sources(source)
+  if ("r2" %in% sources && !.has_arrow()) {
+    if (length(sources) > 1) {
+      cli::cli_inform(c(
+        "i" = "Package {.pkg arrow} is not installed; using DATASUS directly.",
+        "i" = "Install {.pkg arrow} to enable the (faster) R2 backend."
+      ))
+      sources <- setdiff(sources, "r2")
+    } else {
+      .r2_check_arrow()
+    }
+  }
+  creds <- if ("r2" %in% sources) .r2_credentials(r2_credentials) else NULL
+
   params <- .sipni_resolve_params(year, type, uf, month, vars,
                                   missing_type = missing(type))
   backend <- match.arg(backend)
 
-  # 2. try lazy return (pre-download)
+  # 2. lazy return: remote R2 dataset (nothing downloaded), else local cache
+  if (isTRUE(lazy) && sources[1] == "r2") {
+    ds <- tryCatch(.sipni_r2_lazy(params, backend, creds),
+                   error = function(e) NULL)
+    if (!is.null(ds)) {
+      if (isTRUE(parse)) {
+        cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
+      }
+      return(ds)
+    }
+  }
   lazy_result <- .sipni_try_lazy_pre(params, lazy, backend, cache_dir, parse)
   if (!is.null(lazy_result)) return(lazy_result)
 
-  # 3. download FTP data (1994-2019)
-  ftp <- .sipni_download_ftp(params$ftp_years, params$target_ufs,
-                             params$type, cache, cache_dir)
+  # 3. fetch each era through the source priority chain
+  #    (aggregates 1994-2019; microdata 2020+)
+  ftp <- .sipni_fetch_era("ftp", params, sources, cache, cache_dir, creds)
+  api <- .sipni_fetch_era("api", params, sources, cache, cache_dir, creds)
 
-  # 4. download API data (2020+)
-  api <- .sipni_download_api(params$api_years, params$target_ufs,
-                             params$month_vals, cache, cache_dir)
-
-  # 5. bind results (FTP + API separately, then combine)
+  # 4. bind results (aggregates + microdata separately, then combine)
   combined <- .sipni_bind_results(ftp$results, api$results)
 
-  # 6. try lazy return (post-download)
+  # 5. try lazy return (post-download, local cache)
   lazy_result <- .sipni_try_lazy_post(lazy, backend, params$year, params$type,
                                       params$uf, month, vars, cache_dir)
   if (!is.null(lazy_result)) return(lazy_result)
 
-  # 7. parse column types
+  # 6. parse column types
   combined <- .sipni_apply_parsing(
     combined, has_ftp = length(ftp$results) > 0,
     has_api = length(api$results) > 0,
-    type = params$type, parse = parse, col_types = col_types, lazy = lazy
+    type = params$type, parse = parse, col_types = col_types, lazy = lazy,
+    api_source = api$source
   )
 
-  # 8. select variables if requested
+  # 7. select variables if requested
   if (!is.null(vars)) {
-    keep_cols <- unique(c("year", "uf_source", vars))
+    keep_cols <- unique(c("year", "month", "uf_source", vars))
     keep_cols <- intersect(keep_cols, names(combined))
     combined <- combined[, keep_cols, drop = FALSE]
   }
 
-  # 9. report failures and return
+  # 8. report failures
   all_failed <- c(ftp$failed_labels, api$failed_labels)
   combined <- .report_download_failures(combined, all_failed, "SI-PNI")
+  combined <- tibble::as_tibble(combined)
 
-  tibble::as_tibble(combined)
+  # 9. record which source served each era + manifest provenance
+  src <- c(aggregated = ftp$source, microdata = api$source)
+  attr(combined, "healthbr_source") <- src[!is.na(src)]
+  prov <- .sipni_r2_provenance(ftp$source, api$source, params,
+                               .sipni_cache_dir(cache_dir))
+  if (!is.null(prov)) attr(combined, "healthbr_provenance") <- prov
+
+  combined
 }
 
 

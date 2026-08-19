@@ -108,12 +108,12 @@ sim_data(year = 2022, uf = "RJ",
 \code{\link[=censo_populacao]{censo_populacao()}} for population denominators to calculate
 mortality rates.
 
-Other sim: 
-\code{\link{sim_cache_status}()},
-\code{\link{sim_clear_cache}()},
-\code{\link{sim_dictionary}()},
-\code{\link{sim_info}()},
-\code{\link{sim_variables}()},
-\code{\link{sim_years}()}
+Other sim:
+\code{\link[=sim_cache_status]{sim_cache_status()}},
+\code{\link[=sim_clear_cache]{sim_clear_cache()}},
+\code{\link[=sim_dictionary]{sim_dictionary()}},
+\code{\link[=sim_info]{sim_info()}},
+\code{\link[=sim_variables]{sim_variables()}},
+\code{\link[=sim_years]{sim_years()}}
 }
 \concept{sim}

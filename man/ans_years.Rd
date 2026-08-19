@@ -26,12 +26,12 @@ ans_years(type = "complaints")
 ans_years(type = "financial")
 }
 \seealso{
-Other ans: 
-\code{\link{ans_cache_status}()},
-\code{\link{ans_clear_cache}()},
-\code{\link{ans_data}()},
-\code{\link{ans_info}()},
-\code{\link{ans_operators}()},
-\code{\link{ans_variables}()}
+Other ans:
+\code{\link[=ans_cache_status]{ans_cache_status()}},
+\code{\link[=ans_clear_cache]{ans_clear_cache()}},
+\code{\link[=ans_data]{ans_data()}},
+\code{\link[=ans_info]{ans_info()}},
+\code{\link[=ans_operators]{ans_operators()}},
+\code{\link[=ans_variables]{ans_variables()}}
 }
 \concept{ans}

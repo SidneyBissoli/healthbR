@@ -7,31 +7,36 @@
 sipni_years()
 }
 \value{
-An integer vector of available years (1994--2025).
+An integer vector of available years (1994 onwards).
 }
 \description{
 Returns an integer vector with years for which vaccination data are
 available.
 }
 \details{
-SI-PNI data is available from two sources:
+SI-PNI data come in two eras:
 \itemize{
-\item \strong{FTP (1994--2019)}: Aggregated data (doses applied and coverage)
-from DATASUS FTP as plain .DBF files.
-\item \strong{CSV (2020--2025)}: Individual-level microdata from
-OpenDataSUS as monthly CSV bulk downloads (one row per vaccination dose).
+\item \strong{1994--2019}: Aggregated data (doses applied and coverage).
+\item \strong{2020+}: Individual-level microdata (one row per vaccination
+dose), published monthly.
 }
+The returned vector is a static range extended with the microdata years
+actually published on the healthbr-data R2 mirror once its manifest has
+been read in the session (e.g. after calling
+\code{\link{sipni_status}()}); this function itself never touches the
+network. Use \code{\link{sipni_status}()} for month-level availability.
 }
 \examples{
 sipni_years()
 }
 \seealso{
-Other sipni: 
-\code{\link{sipni_cache_status}()},
-\code{\link{sipni_clear_cache}()},
-\code{\link{sipni_data}()},
-\code{\link{sipni_dictionary}()},
-\code{\link{sipni_info}()},
-\code{\link{sipni_variables}()}
+Other sipni:
+\code{\link[=sipni_cache_status]{sipni_cache_status()}},
+\code{\link[=sipni_clear_cache]{sipni_clear_cache()}},
+\code{\link[=sipni_data]{sipni_data()}},
+\code{\link[=sipni_dictionary]{sipni_dictionary()}},
+\code{\link[=sipni_info]{sipni_info()}},
+\code{\link[=sipni_status]{sipni_status()}},
+\code{\link[=sipni_variables]{sipni_variables()}}
 }
 \concept{sipni}

@@ -20,12 +20,12 @@ Shows information about cached ANS data files.
 ans_cache_status()
 }
 \seealso{
-Other ans: 
-\code{\link{ans_clear_cache}()},
-\code{\link{ans_data}()},
-\code{\link{ans_info}()},
-\code{\link{ans_operators}()},
-\code{\link{ans_variables}()},
-\code{\link{ans_years}()}
+Other ans:
+\code{\link[=ans_clear_cache]{ans_clear_cache()}},
+\code{\link[=ans_data]{ans_data()}},
+\code{\link[=ans_info]{ans_info()}},
+\code{\link[=ans_operators]{ans_operators()}},
+\code{\link[=ans_variables]{ans_variables()}},
+\code{\link[=ans_years]{ans_years()}}
 }
 \concept{ans}
