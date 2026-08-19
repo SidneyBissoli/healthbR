@@ -7,33 +7,77 @@ Imunizacoes)** is Brazil’s national immunization information system,
 managed by the Ministry of Health. It tracks vaccination doses applied
 and coverage rates across the country.
 
-The `healthbR` package provides access to SI-PNI data from **two
-sources**:
+SI-PNI data come in two eras:
 
-| Source | Years | Data type | Granularity | Format |
-|----|----|----|----|----|
-| **FTP DATASUS** | 1994–2019 | Aggregated counts | Annual per UF | .DBF files |
-| **OpenDataSUS CSV** | 2020–2025 | Individual-level microdata | Monthly national | CSV bulk downloads |
+| Era | Years | Data type | Granularity |
+|----|----|----|----|
+| **Aggregated** | 1994–2019 | Dose counts (DPNI) and coverage (CPNI) | Annual per UF |
+| **Microdata** | 2020+ | Individual-level (one row per dose) | Monthly |
 
 [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
-automatically routes to the correct source based on the requested year.
+automatically routes to the correct era based on the requested year.
 
-## Data sources comparison
+## Data sources: the R2 mirror and DATASUS
 
-| Feature | FTP (1994–2019) | CSV (2020–2025) |
-|----|----|----|
-| Record type | Aggregated (dose counts per municipality/vaccine/age) | Individual (one row per vaccination dose) |
-| File types | DPNI (doses) or CPNI (coverage) | Single type (microdata) |
-| Variables | 7–12 per type | ~47 per record |
-| File size | Small (~100 KB per UF/year) | Large (~1.4 GB ZIP per month, national) |
-| Naming | UPPERCASE column names | snake_case column names |
-
-## Getting started
+By default, `healthbR` reads SI-PNI data from the
+[healthbr-data](https://github.com/SidneyBissoli/healthbr-data) mirror:
+hive-partitioned Parquet on Cloudflare R2 (free egress), with values
+**byte-identical** to the Ministry’s files and full provenance metadata
+(source URL, hash, download date, pipeline version) embedded in every
+file. If the mirror is unreachable,
+[`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
+falls back automatically to the official DATASUS/OpenDataSUS sources.
 
 ``` r
 
-library(healthbR)
-library(dplyr)
+# default: R2 mirror with automatic DATASUS fallback
+sipni_data(year = 2024, uf = "AC", month = 1)
+
+# pin a single source (no fallback)
+sipni_data(year = 2019, uf = "AC", source = "datasus")
+
+# invert the priority (DATASUS first, R2 as fallback)
+sipni_data(year = 2019, uf = "AC", source = c("datasus", "r2"))
+```
+
+Why the mirror is the default:
+
+- The Ministry decommissioned the old OpenDataSUS host in 2026 and
+  removed the 2020–2025 microdata files from the new one; **only the
+  mirror holds the complete 2020+ series**.
+- Only the requested UF/month partitions are transferred (no ~1.4 GB
+  national CSV download to extract one UF).
+- Aggregates read in seconds (the DATASUS FTP is slow and unstable for
+  large UFs).
+
+The result records where the data actually came from:
+
+``` r
+
+data <- sipni_data(year = 2024, uf = "AC", month = 1)
+attr(data, "healthbr_source")
+#>  microdata
+#>       "r2"
+attr(data, "healthbr_provenance")
+#> # A tibble: 1 x 7  (partition, processing timestamp, Ministry source URL...)
+```
+
+### Checking availability with sipni_status()
+
+The mirror publishes a `manifest.json` per dataset recording, for every
+partition, the Ministry source file, its hash, the processing timestamp
+and record counts.
+[`sipni_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md)
+reads it:
+
+``` r
+
+# everything the mirror holds
+sipni_status()
+
+# which 2026 microdata months are published so far?
+sipni_status("microdados") |>
+  filter(year == 2026)
 ```
 
 ### Check available years
@@ -41,7 +85,7 @@ library(dplyr)
 ``` r
 
 sipni_years()
-#> [1] 1994 1995 ... 2024 2025
+#> [1] 1994 1995 ... 2025 2026
 ```
 
 ### Module information
@@ -51,9 +95,9 @@ sipni_years()
 sipni_info()
 ```
 
-## FTP path: doses applied (DPNI)
+## Aggregated data: doses applied (DPNI)
 
-The default type downloads aggregated dose counts (1994–2019):
+The default type returns aggregated dose counts (1994–2019):
 
 ``` r
 
@@ -76,6 +120,10 @@ ac_doses
 
 ### Using the dictionary
 
+By default the dictionary is read from the mirror — the full versions
+converted from the Ministry’s original .cnv/.dbf files, including a
+`source_codes` column that traces each entry back to the original codes:
+
 ``` r
 
 # vaccine codes
@@ -86,9 +134,12 @@ sipni_dictionary("DOSE")
 
 # age groups
 sipni_dictionary("FX_ETARIA")
+
+# the abridged built-in dictionary (no network)
+sipni_dictionary("IMUNO", source = "datasus")
 ```
 
-## FTP path: vaccination coverage (CPNI)
+## Aggregated data: vaccination coverage (CPNI)
 
 The CPNI type provides coverage rates per municipality:
 
@@ -111,7 +162,7 @@ ac_coverage
 | POP      | Target population                 |
 | COBERT   | Vaccination coverage (%)          |
 
-## CSV path: individual-level microdata (2020+)
+## Microdata (2020+)
 
 For years 2020 and later, SI-PNI provides individual-level microdata
 (one row per vaccination dose). The `type` parameter is ignored for
@@ -124,40 +175,57 @@ ac_micro <- sipni_data(year = 2024, uf = "AC", month = 1)
 ac_micro
 ```
 
-### Key variables (CSV microdata)
+**Column names differ by source.** The mirror publishes the Ministry’s
+JSON exports (56 fields, no CSV serialization artifacts); the
+OpenDataSUS CSVs use different names (~47 fields). Each source returns
+its columns exactly as published — healthbR does not rename or remap
+them:
 
-| Variable                         | Description               |
-|----------------------------------|---------------------------|
-| sigla_uf_estabelecimento         | UF of the health facility |
-| codigo_municipio_estabelecimento | Municipality (IBGE)       |
-| tipo_sexo_paciente               | Sex (M/F)                 |
-| numero_idade_paciente            | Patient age               |
-| nome_raca_cor_paciente           | Race/color (descriptive)  |
-| descricao_vacina                 | Vaccine name              |
-| descricao_dose_vacina            | Dose description          |
-| data_vacina                      | Vaccination date          |
+| R2 mirror (default)     | DATASUS CSV                |
+|-------------------------|----------------------------|
+| `dt_vacina`             | `data_vacina`              |
+| `ds_vacina`             | `descricao_vacina`         |
+| `tp_sexo_paciente`      | `tipo_sexo_paciente`       |
+| `nu_idade_paciente`     | `numero_idade_paciente`    |
+| `sg_uf_estabelecimento` | `sigla_uf_estabelecimento` |
+
+### Key variables (R2 microdata)
+
+| Variable                     | Description               |
+|------------------------------|---------------------------|
+| sg_uf_estabelecimento        | UF of the health facility |
+| co_municipio_estabelecimento | Municipality (IBGE)       |
+| tp_sexo_paciente             | Sex (M/F)                 |
+| nu_idade_paciente            | Patient age               |
+| no_raca_cor_paciente         | Race/color (descriptive)  |
+| ds_vacina                    | Vaccine name              |
+| ds_dose_vacina               | Dose description          |
+| dt_vacina                    | Vaccination date          |
 
 ### Exploring variables
 
 ``` r
 
-# DPNI variables (FTP)
+# DPNI variables
 sipni_variables()
 
-# CPNI variables (FTP)
+# CPNI variables
 sipni_variables(type = "CPNI")
 
-# API/CSV variables (2020+)
+# microdata variables, R2 mirror (default; 56 fields)
 sipni_variables(type = "API")
+
+# microdata variables, OpenDataSUS CSV (~47 fields)
+sipni_variables(type = "API", source = "datasus")
 
 # search
 sipni_variables(search = "dose")
 ```
 
-## Month parameter for CSV data
+## Month parameter for microdata
 
-For years \>= 2020, each month is a separate ~1.4 GB national CSV file.
-Use `month` to select specific months:
+Each month is a separate partition. Use `month` to select specific
+months:
 
 ``` r
 
@@ -167,14 +235,14 @@ jan <- sipni_data(year = 2024, uf = "AC", month = 1)
 # first quarter
 q1 <- sipni_data(year = 2024, uf = "AC", month = 1:3)
 
-# all 12 months (default, downloads ~17 GB total)
+# all 12 months (default)
 full_year <- sipni_data(year = 2024, uf = "AC")
 ```
 
-For FTP data (1994–2019), the `month` parameter is ignored because FTP
-files are annual.
+For aggregated data (1994–2019), the `month` parameter is ignored
+because the files are annual.
 
-## Example: vaccine doses by immunobiological (FTP)
+## Example: vaccine doses by immunobiological
 
 ``` r
 
@@ -218,20 +286,20 @@ sp_cov |>
 
 ``` r
 
-# COVID-19 vaccinations in Acre, January 2024
+# vaccinations in Acre, January 2024
 ac_jan <- sipni_data(year = 2024, uf = "AC", month = 1)
 
 # vaccines administered
 ac_jan |>
-  count(descricao_vacina, sort = TRUE)
+  count(ds_vacina, sort = TRUE)
 
 # doses by sex
 ac_jan |>
-  count(tipo_sexo_paciente)
+  count(tp_sexo_paciente)
 
 # age distribution
 ac_jan |>
-  mutate(age = as.integer(numero_idade_paciente)) |>
+  mutate(age = as.integer(nu_idade_paciente)) |>
   filter(!is.na(age)) |>
   mutate(age_group = cut(age,
                          breaks = c(0, 5, 12, 18, 30, 60, Inf),
@@ -241,30 +309,50 @@ ac_jan |>
 
 ## Mixed year requests
 
-When requesting years that span both sources (e.g., 2019 and 2024),
+When requesting years that span both eras (e.g., 2019 and 2024),
 [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
-fetches from FTP and CSV respectively and combines the results. Note
-that column names and structure differ between sources:
+fetches each era and combines the results. Note that column names and
+structure differ between eras:
 
 ``` r
 
-# this downloads FTP (2019) + CSV (2024)
+# aggregated (2019) + microdata (2024)
 mixed <- sipni_data(year = c(2019, 2024), uf = "AC", month = 1)
 
-# columns from FTP (UPPERCASE) and CSV (snake_case) are combined
+# aggregated (UPPERCASE) and microdata columns are combined
 # with NAs where columns don't overlap
 names(mixed)
 ```
 
+## Lazy evaluation over the mirror
+
+With `lazy = TRUE` and the default source,
+[`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
+returns the **remote** arrow dataset — dplyr verbs are pushed down to R2
+and only the partitions your query touches are transferred. In this mode
+the partition columns keep the bucket layout names (`ano`, `mes`, `uf`,
+as strings):
+
+``` r
+
+ds <- sipni_data(year = 2019, uf = "AC", lazy = TRUE)
+ds |>
+  filter(IMUNO == "09") |>
+  select(MUNIC, DOSE, QT_DOSE) |>
+  collect()
+```
+
 ## Download tips
 
-- **FTP files** (1994–2019) are small (~100 KB each) and download
-  quickly.
-- **CSV files** (2020+) are large (~1.4 GB per month, national). Start
-  with a single month and UF.
-- The first download of a CSV month caches **all 27 UFs**. A second
-  request for a different UF from the same month is instant from cache.
-- Multiple months are downloaded concurrently when possible.
+- Aggregates (1994–2019) read from the mirror in seconds.
+- Microdata months for large UFs (SP, MG) hold millions of rows — start
+  with a single month and UF, or use `lazy = TRUE` and aggregate before
+  [`collect()`](https://dplyr.tidyverse.org/reference/compute.html).
+- Results are cached locally per partition: a second request for the
+  same year/month/UF is served from disk.
+- If you pin `source = "datasus"` for 2020+, only the current year’s
+  CSVs exist at the source, and each month is a ~1.4 GB national
+  download.
 
 ## Smart type parsing
 
@@ -274,7 +362,7 @@ names(mixed)
 ac <- sipni_data(year = 2019, uf = "AC")
 class(ac$QT_DOSE)  # integer
 
-# raw character columns
+# raw character columns, exactly as published
 ac_raw <- sipni_data(year = 2019, uf = "AC", parse = FALSE)
 ```
 
@@ -291,21 +379,10 @@ sipni_cache_status()
 sipni_clear_cache()
 ```
 
-If the `arrow` package is installed, data is cached in Parquet format.
-You can also use lazy evaluation:
-
-``` r
-
-# lazy query for FTP data (requires arrow)
-sipni_lazy <- sipni_data(year = 2019, uf = "AC", lazy = TRUE)
-sipni_lazy |>
-  filter(QT_DOSE > 0) |>
-  select(IMUNO, DOSE, QT_DOSE) |>
-  collect()
-```
-
 ## Additional resources
 
+- [healthbr-data](https://github.com/SidneyBissoli/healthbr-data) — the
+  mirror’s pipelines, reproducibility policy and dataset documentation
 - OpenDataSUS (`dadosabertos.saude.gov.br`)
 - [Census
   vignette](https://sidneybissoli.github.io/healthbR/articles/censo-denominadores.md)

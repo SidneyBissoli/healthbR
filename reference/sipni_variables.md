@@ -6,7 +6,7 @@ descriptions and value types.
 ## Usage
 
 ``` r
-sipni_variables(type = "DPNI", search = NULL)
+sipni_variables(type = "DPNI", search = NULL, source = c("r2", "datasus"))
 ```
 
 ## Arguments
@@ -14,14 +14,20 @@ sipni_variables(type = "DPNI", search = NULL)
 - type:
 
   Character. File type to show variables for. `"DPNI"` (default) for
-  doses applied (FTP, 1994-2019), `"CPNI"` for coverage (FTP,
-  1994-2019), or `"API"` for individual-level microdata (OpenDataSUS,
-  2020+).
+  doses applied (1994-2019), `"CPNI"` for coverage (1994-2019), or
+  `"API"` for individual-level microdata (2020+).
 
 - search:
 
   Character. Optional search term to filter variables by name or
   description. Case-insensitive and accent-insensitive.
+
+- source:
+
+  Character. Which source's column set to list for `type = "API"`:
+  `"r2"` (default; 56 fields from the Ministry's JSON exports, served by
+  the R2 mirror) or `"datasus"` (~47 fields of the OpenDataSUS CSV
+  exports). Ignored for DPNI/CPNI (identical in both sources).
 
 ## Value
 
@@ -35,6 +41,7 @@ Other sipni:
 [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md),
 [`sipni_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md),
 [`sipni_info()`](https://sidneybissoli.github.io/healthbR/reference/sipni_info.md),
+[`sipni_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md),
 [`sipni_years()`](https://sidneybissoli.github.io/healthbR/reference/sipni_years.md)
 
 ## Examples
@@ -68,6 +75,21 @@ sipni_variables(type = "CPNI")
 #> 6 POP      População alvo                    integer   vacinacao  
 #> 7 COBERT   Cobertura vacinal (%)             double    vacinacao  
 sipni_variables(type = "API")
+#> # A tibble: 56 × 4
+#>    variable              description                               type  section
+#>    <chr>                 <chr>                                     <chr> <chr>  
+#>  1 co_documento          Código único do registro de vacinação (R… char… regist…
+#>  2 co_paciente           Código anonimizado do paciente            char… pacien…
+#>  3 tp_sexo_paciente      Sexo do paciente (M/F)                    char… pacien…
+#>  4 co_raca_cor_paciente  Código raça/cor do paciente               char… pacien…
+#>  5 no_raca_cor_paciente  Nome raça/cor do paciente                 char… pacien…
+#>  6 co_municipio_paciente Código município de residência do pacien… char… pacien…
+#>  7 co_pais_paciente      Código país de residência do paciente     char… pacien…
+#>  8 no_municipio_paciente Nome município de residência do paciente  char… pacien…
+#>  9 no_pais_paciente      Nome país de residência do paciente       char… pacien…
+#> 10 sg_uf_paciente        Sigla UF de residência do paciente        char… pacien…
+#> # ℹ 46 more rows
+sipni_variables(type = "API", source = "datasus")
 #> # A tibble: 47 × 4
 #>    variable                          description                   type  section
 #>    <chr>                             <chr>                         <chr> <chr>  

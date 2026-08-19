@@ -9,7 +9,7 @@ including descriptions and value types."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,7 @@ including descriptions and value types.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">sipni_variables</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"DPNI"</span>, search <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">sipni_variables</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"DPNI"</span>, search <span class="op">=</span> <span class="cn">NULL</span>, source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r2"</span>, <span class="st">"datasus"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -77,14 +77,22 @@ including descriptions and value types.</p>
 
 <dl><dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p>Character. File type to show variables for.
-<code>"DPNI"</code> (default) for doses applied (FTP, 1994-2019),
-<code>"CPNI"</code> for coverage (FTP, 1994-2019), or <code>"API"</code> for
-individual-level microdata (OpenDataSUS, 2020+).</p></dd>
+<code>"DPNI"</code> (default) for doses applied (1994-2019),
+<code>"CPNI"</code> for coverage (1994-2019), or <code>"API"</code> for
+individual-level microdata (2020+).</p></dd>
 
 
 <dt id="arg-search">search<a class="anchor" aria-label="anchor" href="#arg-search"></a></dt>
 <dd><p>Character. Optional search term to filter variables by
 name or description. Case-insensitive and accent-insensitive.</p></dd>
+
+
+<dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
+<dd><p>Character. Which source's column set to list for
+<code>type = "API"</code>: <code>"r2"</code> (default; 56 fields from the
+Ministry's JSON exports, served by the R2 mirror) or <code>"datasus"</code>
+(~47 fields of the OpenDataSUS CSV exports). Ignored for DPNI/CPNI
+(identical in both sources).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -99,6 +107,7 @@ name or description. Case-insensitive and accent-insensitive.</p></dd>
 <code><a href="sipni_data.html">sipni_data()</a></code>,
 <code><a href="sipni_dictionary.html">sipni_dictionary()</a></code>,
 <code><a href="sipni_info.html">sipni_info()</a></code>,
+<code><a href="sipni_status.html">sipni_status()</a></code>,
 <code><a href="sipni_years.html">sipni_years()</a></code></p></div>
     </div>
 
@@ -132,6 +141,21 @@ name or description. Case-insensitive and accent-insensitive.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> POP      População alvo                    integer   vacinacao  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> COBERT   Cobertura vacinal (%)             double    vacinacao  </span>
 <span class="r-in"><span><span class="fu">sipni_variables</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"API"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 56 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    variable              description                               type  section</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> co_documento          Código único do registro de vacinação (R… char… regist…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> co_paciente           Código anonimizado do paciente            char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> tp_sexo_paciente      Sexo do paciente (M/F)                    char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> co_raca_cor_paciente  Código raça/cor do paciente               char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> no_raca_cor_paciente  Nome raça/cor do paciente                 char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> co_municipio_paciente Código município de residência do pacien… char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> co_pais_paciente      Código país de residência do paciente     char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> no_municipio_paciente Nome município de residência do paciente  char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> no_pais_paciente      Nome país de residência do paciente       char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> sg_uf_paciente        Sigla UF de residência do paciente        char… pacien…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 46 more rows</span></span>
+<span class="r-in"><span><span class="fu">sipni_variables</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"API"</span>, source <span class="op">=</span> <span class="st">"datasus"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 47 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    variable                          description                   type  section</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>

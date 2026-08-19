@@ -9,7 +9,7 @@ available."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,15 +73,19 @@ available.</p>
 
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An integer vector of available years (1994–2025).</p>
+    <p>An integer vector of available years (1994 onwards).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>SI-PNI data is available from two sources:</p><ul><li><p><strong>FTP (1994–2019)</strong>: Aggregated data (doses applied and coverage)
-from DATASUS FTP as plain .DBF files.</p></li>
-<li><p><strong>CSV (2020–2025)</strong>: Individual-level microdata from
-OpenDataSUS as monthly CSV bulk downloads (one row per vaccination dose).</p></li>
-</ul></div>
+    <p>SI-PNI data come in two eras:</p><ul><li><p><strong>1994–2019</strong>: Aggregated data (doses applied and coverage).</p></li>
+<li><p><strong>2020+</strong>: Individual-level microdata (one row per vaccination
+dose), published monthly.</p></li>
+</ul><p>The returned vector is a static range extended with the microdata years
+actually published on the healthbr-data R2 mirror once its manifest has
+been read in the session (e.g. after calling
+<code><a href="sipni_status.html">sipni_status()</a></code>); this function itself never touches the
+network. Use <code><a href="sipni_status.html">sipni_status()</a></code> for month-level availability.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other sipni:
@@ -90,6 +94,7 @@ OpenDataSUS as monthly CSV bulk downloads (one row per vaccination dose).</p></l
 <code><a href="sipni_data.html">sipni_data()</a></code>,
 <code><a href="sipni_dictionary.html">sipni_dictionary()</a></code>,
 <code><a href="sipni_info.html">sipni_info()</a></code>,
+<code><a href="sipni_status.html">sipni_status()</a></code>,
 <code><a href="sipni_variables.html">sipni_variables()</a></code></p></div>
     </div>
 
@@ -98,7 +103,7 @@ OpenDataSUS as monthly CSV bulk downloads (one row per vaccination dose).</p></l
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">sipni_years</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [16] 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31] 2024 2025</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] 2024 2025 2026</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

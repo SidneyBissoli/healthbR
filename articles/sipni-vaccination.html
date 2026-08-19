@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,111 +94,109 @@
 Imunizacoes)</strong> is Brazil’s national immunization information
 system, managed by the Ministry of Health. It tracks vaccination doses
 applied and coverage rates across the country.</p>
-<p>The <code>healthbR</code> package provides access to SI-PNI data from
-<strong>two sources</strong>:</p>
+<p>SI-PNI data come in two eras:</p>
 <table class="table">
 <colgroup>
-<col width="17%">
-<col width="14%">
-<col width="23%">
-<col width="27%">
-<col width="17%">
+<col width="13%">
+<col width="19%">
+<col width="30%">
+<col width="36%">
 </colgroup>
 <thead><tr class="header">
-<th>Source</th>
+<th>Era</th>
 <th>Years</th>
 <th>Data type</th>
 <th>Granularity</th>
-<th>Format</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><strong>FTP DATASUS</strong></td>
+<td><strong>Aggregated</strong></td>
 <td>1994–2019</td>
-<td>Aggregated counts</td>
+<td>Dose counts (DPNI) and coverage (CPNI)</td>
 <td>Annual per UF</td>
-<td>.DBF files</td>
 </tr>
 <tr class="even">
-<td><strong>OpenDataSUS CSV</strong></td>
-<td>2020–2025</td>
-<td>Individual-level microdata</td>
-<td>Monthly national</td>
-<td>CSV bulk downloads</td>
+<td><strong>Microdata</strong></td>
+<td>2020+</td>
+<td>Individual-level (one row per dose)</td>
+<td>Monthly</td>
 </tr>
 </tbody>
 </table>
-<p><code><a href="../reference/sipni_data.html">sipni_data()</a></code> automatically routes to the correct source
+<p><code><a href="../reference/sipni_data.html">sipni_data()</a></code> automatically routes to the correct era
 based on the requested year.</p>
 </div>
 <div class="section level2">
-<h2 id="data-sources-comparison">Data sources comparison<a class="anchor" aria-label="anchor" href="#data-sources-comparison"></a>
+<h2 id="data-sources-the-r2-mirror-and-datasus">Data sources: the R2 mirror and DATASUS<a class="anchor" aria-label="anchor" href="#data-sources-the-r2-mirror-and-datasus"></a>
 </h2>
-<table class="table">
-<colgroup>
-<col width="20%">
-<col width="40%">
-<col width="40%">
-</colgroup>
-<thead><tr class="header">
-<th>Feature</th>
-<th>FTP (1994–2019)</th>
-<th>CSV (2020–2025)</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Record type</td>
-<td>Aggregated (dose counts per municipality/vaccine/age)</td>
-<td>Individual (one row per vaccination dose)</td>
-</tr>
-<tr class="even">
-<td>File types</td>
-<td>DPNI (doses) or CPNI (coverage)</td>
-<td>Single type (microdata)</td>
-</tr>
-<tr class="odd">
-<td>Variables</td>
-<td>7–12 per type</td>
-<td>~47 per record</td>
-</tr>
-<tr class="even">
-<td>File size</td>
-<td>Small (~100 KB per UF/year)</td>
-<td>Large (~1.4 GB ZIP per month, national)</td>
-</tr>
-<tr class="odd">
-<td>Naming</td>
-<td>UPPERCASE column names</td>
-<td>snake_case column names</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level2">
-<h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
-</h2>
+<p>By default, <code>healthbR</code> reads SI-PNI data from the <a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a>
+mirror: hive-partitioned Parquet on Cloudflare R2 (free egress), with
+values <strong>byte-identical</strong> to the Ministry’s files and full
+provenance metadata (source URL, hash, download date, pipeline version)
+embedded in every file. If the mirror is unreachable,
+<code><a href="../reference/sipni_data.html">sipni_data()</a></code> falls back automatically to the official
+DATASUS/OpenDataSUS sources.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">healthbR</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># default: R2 mirror with automatic DATASUS fallback</span></span>
+<span><span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># pin a single source (no fallback)</span></span>
+<span><span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, source <span class="op">=</span> <span class="st">"datasus"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># invert the priority (DATASUS first, R2 as fallback)</span></span>
+<span><span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"datasus"</span>, <span class="st">"r2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Why the mirror is the default:</p>
+<ul>
+<li>The Ministry decommissioned the old OpenDataSUS host in 2026 and
+removed the 2020–2025 microdata files from the new one; <strong>only the
+mirror holds the complete 2020+ series</strong>.</li>
+<li>Only the requested UF/month partitions are transferred (no ~1.4 GB
+national CSV download to extract one UF).</li>
+<li>Aggregates read in seconds (the DATASUS FTP is slow and unstable for
+large UFs).</li>
+</ul>
+<p>The result records where the data actually came from:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">data</span>, <span class="st">"healthbr_source"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  microdata</span></span>
+<span><span class="co">#&gt;       "r2"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">data</span>, <span class="st">"healthbr_provenance"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 x 7  (partition, processing timestamp, Ministry source URL...)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="checking-availability-with-sipni_status">Checking availability with sipni_status()<a class="anchor" aria-label="anchor" href="#checking-availability-with-sipni_status"></a>
+</h3>
+<p>The mirror publishes a <code>manifest.json</code> per dataset
+recording, for every partition, the Ministry source file, its hash, the
+processing timestamp and record counts. <code><a href="../reference/sipni_status.html">sipni_status()</a></code>
+reads it:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># everything the mirror holds</span></span>
+<span><span class="fu"><a href="../reference/sipni_status.html">sipni_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># which 2026 microdata months are published so far?</span></span>
+<span><span class="fu"><a href="../reference/sipni_status.html">sipni_status</a></span><span class="op">(</span><span class="st">"microdados"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2026</span><span class="op">)</span></span></code></pre></div>
+</div>
 <div class="section level3">
 <h3 id="check-available-years">Check available years<a class="anchor" aria-label="anchor" href="#check-available-years"></a>
 </h3>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/sipni_years.html">sipni_years</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1994 1995 ... 2024 2025</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 1994 1995 ... 2025 2026</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="module-information">Module information<a class="anchor" aria-label="anchor" href="#module-information"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/sipni_info.html">sipni_info</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="ftp-path-doses-applied-dpni">FTP path: doses applied (DPNI)<a class="anchor" aria-label="anchor" href="#ftp-path-doses-applied-dpni"></a>
+<h2 id="aggregated-data-doses-applied-dpni">Aggregated data: doses applied (DPNI)<a class="anchor" aria-label="anchor" href="#aggregated-data-doses-applied-dpni"></a>
 </h2>
-<p>The default type downloads aggregated dose counts (1994–2019):</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<p>The default type returns aggregated dose counts (1994–2019):</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># doses applied in Acre, 2019</span></span>
 <span><span class="va">ac_doses</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span><span class="va">ac_doses</span></span></code></pre></div>
@@ -245,7 +243,11 @@ based on the requested year.</p>
 <div class="section level3">
 <h3 id="using-the-dictionary">Using the dictionary<a class="anchor" aria-label="anchor" href="#using-the-dictionary"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>By default the dictionary is read from the mirror — the full versions
+converted from the Ministry’s original .cnv/.dbf files, including a
+<code>source_codes</code> column that traces each entry back to the
+original codes:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># vaccine codes</span></span>
 <span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"IMUNO"</span><span class="op">)</span></span>
 <span></span>
@@ -253,14 +255,17 @@ based on the requested year.</p>
 <span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"DOSE"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># age groups</span></span>
-<span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"FX_ETARIA"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"FX_ETARIA"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># the abridged built-in dictionary (no network)</span></span>
+<span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"IMUNO"</span>, source <span class="op">=</span> <span class="st">"datasus"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="ftp-path-vaccination-coverage-cpni">FTP path: vaccination coverage (CPNI)<a class="anchor" aria-label="anchor" href="#ftp-path-vaccination-coverage-cpni"></a>
+<h2 id="aggregated-data-vaccination-coverage-cpni">Aggregated data: vaccination coverage (CPNI)<a class="anchor" aria-label="anchor" href="#aggregated-data-vaccination-coverage-cpni"></a>
 </h2>
 <p>The CPNI type provides coverage rates per municipality:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># vaccination coverage in Acre, 2019</span></span>
 <span><span class="va">ac_coverage</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, type <span class="op">=</span> <span class="st">"CPNI"</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span><span class="va">ac_coverage</span></span></code></pre></div>
@@ -306,17 +311,50 @@ based on the requested year.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="csv-path-individual-level-microdata-2020">CSV path: individual-level microdata (2020+)<a class="anchor" aria-label="anchor" href="#csv-path-individual-level-microdata-2020"></a>
+<h2 id="microdata-2020">Microdata (2020+)<a class="anchor" aria-label="anchor" href="#microdata-2020"></a>
 </h2>
 <p>For years 2020 and later, SI-PNI provides individual-level microdata
 (one row per vaccination dose). The <code>type</code> parameter is
 ignored for these years:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># microdata for Acre, January 2024</span></span>
 <span><span class="va">ac_micro</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">ac_micro</span></span></code></pre></div>
+<p><strong>Column names differ by source.</strong> The mirror publishes
+the Ministry’s JSON exports (56 fields, no CSV serialization artifacts);
+the OpenDataSUS CSVs use different names (~47 fields). Each source
+returns its columns exactly as published — healthbR does not rename or
+remap them:</p>
+<table class="table">
+<thead><tr class="header">
+<th>R2 mirror (default)</th>
+<th>DATASUS CSV</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>dt_vacina</code></td>
+<td><code>data_vacina</code></td>
+</tr>
+<tr class="even">
+<td><code>ds_vacina</code></td>
+<td><code>descricao_vacina</code></td>
+</tr>
+<tr class="odd">
+<td><code>tp_sexo_paciente</code></td>
+<td><code>tipo_sexo_paciente</code></td>
+</tr>
+<tr class="even">
+<td><code>nu_idade_paciente</code></td>
+<td><code>numero_idade_paciente</code></td>
+</tr>
+<tr class="odd">
+<td><code>sg_uf_estabelecimento</code></td>
+<td><code>sigla_uf_estabelecimento</code></td>
+</tr>
+</tbody>
+</table>
 <div class="section level3">
-<h3 id="key-variables-csv-microdata">Key variables (CSV microdata)<a class="anchor" aria-label="anchor" href="#key-variables-csv-microdata"></a>
+<h3 id="key-variables-r2-microdata">Key variables (R2 microdata)<a class="anchor" aria-label="anchor" href="#key-variables-r2-microdata"></a>
 </h3>
 <table class="table">
 <thead><tr class="header">
@@ -325,35 +363,35 @@ ignored for these years:</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>sigla_uf_estabelecimento</td>
+<td>sg_uf_estabelecimento</td>
 <td>UF of the health facility</td>
 </tr>
 <tr class="even">
-<td>codigo_municipio_estabelecimento</td>
+<td>co_municipio_estabelecimento</td>
 <td>Municipality (IBGE)</td>
 </tr>
 <tr class="odd">
-<td>tipo_sexo_paciente</td>
+<td>tp_sexo_paciente</td>
 <td>Sex (M/F)</td>
 </tr>
 <tr class="even">
-<td>numero_idade_paciente</td>
+<td>nu_idade_paciente</td>
 <td>Patient age</td>
 </tr>
 <tr class="odd">
-<td>nome_raca_cor_paciente</td>
+<td>no_raca_cor_paciente</td>
 <td>Race/color (descriptive)</td>
 </tr>
 <tr class="even">
-<td>descricao_vacina</td>
+<td>ds_vacina</td>
 <td>Vaccine name</td>
 </tr>
 <tr class="odd">
-<td>descricao_dose_vacina</td>
+<td>ds_dose_vacina</td>
 <td>Dose description</td>
 </tr>
 <tr class="even">
-<td>data_vacina</td>
+<td>dt_vacina</td>
 <td>Vaccination date</td>
 </tr>
 </tbody>
@@ -362,41 +400,44 @@ ignored for these years:</p>
 <div class="section level3">
 <h3 id="exploring-variables">Exploring variables<a class="anchor" aria-label="anchor" href="#exploring-variables"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># DPNI variables (FTP)</span></span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># DPNI variables</span></span>
 <span><span class="fu"><a href="../reference/sipni_variables.html">sipni_variables</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># CPNI variables (FTP)</span></span>
+<span><span class="co"># CPNI variables</span></span>
 <span><span class="fu"><a href="../reference/sipni_variables.html">sipni_variables</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"CPNI"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># API/CSV variables (2020+)</span></span>
+<span><span class="co"># microdata variables, R2 mirror (default; 56 fields)</span></span>
 <span><span class="fu"><a href="../reference/sipni_variables.html">sipni_variables</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"API"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># microdata variables, OpenDataSUS CSV (~47 fields)</span></span>
+<span><span class="fu"><a href="../reference/sipni_variables.html">sipni_variables</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"API"</span>, source <span class="op">=</span> <span class="st">"datasus"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># search</span></span>
 <span><span class="fu"><a href="../reference/sipni_variables.html">sipni_variables</a></span><span class="op">(</span>search <span class="op">=</span> <span class="st">"dose"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="month-parameter-for-csv-data">Month parameter for CSV data<a class="anchor" aria-label="anchor" href="#month-parameter-for-csv-data"></a>
+<h2 id="month-parameter-for-microdata">Month parameter for microdata<a class="anchor" aria-label="anchor" href="#month-parameter-for-microdata"></a>
 </h2>
-<p>For years &gt;= 2020, each month is a separate ~1.4 GB national CSV
-file. Use <code>month</code> to select specific months:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>Each month is a separate partition. Use <code>month</code> to select
+specific months:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># single month</span></span>
 <span><span class="va">jan</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># first quarter</span></span>
 <span><span class="va">q1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># all 12 months (default, downloads ~17 GB total)</span></span>
+<span><span class="co"># all 12 months (default)</span></span>
 <span><span class="va">full_year</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span></code></pre></div>
-<p>For FTP data (1994–2019), the <code>month</code> parameter is ignored
-because FTP files are annual.</p>
+<p>For aggregated data (1994–2019), the <code>month</code> parameter is
+ignored because the files are annual.</p>
 </div>
 <div class="section level2">
-<h2 id="example-vaccine-doses-by-immunobiological-ftp">Example: vaccine doses by immunobiological (FTP)<a class="anchor" aria-label="anchor" href="#example-vaccine-doses-by-immunobiological-ftp"></a>
+<h2 id="example-vaccine-doses-by-immunobiological">Example: vaccine doses by immunobiological<a class="anchor" aria-label="anchor" href="#example-vaccine-doses-by-immunobiological"></a>
 </h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ac_2019</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># decode immunobiological names</span></span>
@@ -415,7 +456,7 @@ because FTP files are annual.</p>
 <div class="section level2">
 <h2 id="example-coverage-trends-over-time">Example: coverage trends over time<a class="anchor" aria-label="anchor" href="#example-coverage-trends-over-time"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># coverage data for Sao Paulo, 2015-2019</span></span>
 <span><span class="va">sp_cov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span></span>
 <span>  year <span class="op">=</span> <span class="fl">2015</span><span class="op">:</span><span class="fl">2019</span>,</span>
@@ -434,21 +475,21 @@ because FTP files are annual.</p>
 <div class="section level2">
 <h2 id="example-individual-level-analysis-2020">Example: individual-level analysis (2020+)<a class="anchor" aria-label="anchor" href="#example-individual-level-analysis-2020"></a>
 </h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># COVID-19 vaccinations in Acre, January 2024</span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># vaccinations in Acre, January 2024</span></span>
 <span><span class="va">ac_jan</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># vaccines administered</span></span>
 <span><span class="va">ac_jan</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">descricao_vacina</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">ds_vacina</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># doses by sex</span></span>
 <span><span class="va">ac_jan</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">tipo_sexo_paciente</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">tp_sexo_paciente</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># age distribution</span></span>
 <span><span class="va">ac_jan</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">numero_idade_paciente</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">nu_idade_paciente</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>age_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut</a></span><span class="op">(</span><span class="va">age</span>,</span>
 <span>                         breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">30</span>, <span class="fl">60</span>, <span class="cn">Inf</span><span class="op">)</span>,</span>
@@ -458,69 +499,78 @@ because FTP files are annual.</p>
 <div class="section level2">
 <h2 id="mixed-year-requests">Mixed year requests<a class="anchor" aria-label="anchor" href="#mixed-year-requests"></a>
 </h2>
-<p>When requesting years that span both sources (e.g., 2019 and 2024),
-<code><a href="../reference/sipni_data.html">sipni_data()</a></code> fetches from FTP and CSV respectively and
-combines the results. Note that column names and structure differ
-between sources:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># this downloads FTP (2019) + CSV (2024)</span></span>
+<p>When requesting years that span both eras (e.g., 2019 and 2024),
+<code><a href="../reference/sipni_data.html">sipni_data()</a></code> fetches each era and combines the results.
+Note that column names and structure differ between eras:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># aggregated (2019) + microdata (2024)</span></span>
 <span><span class="va">mixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2019</span>, <span class="fl">2024</span><span class="op">)</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># columns from FTP (UPPERCASE) and CSV (snake_case) are combined</span></span>
+<span><span class="co"># aggregated (UPPERCASE) and microdata columns are combined</span></span>
 <span><span class="co"># with NAs where columns don't overlap</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mixed</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="lazy-evaluation-over-the-mirror">Lazy evaluation over the mirror<a class="anchor" aria-label="anchor" href="#lazy-evaluation-over-the-mirror"></a>
+</h2>
+<p>With <code>lazy = TRUE</code> and the default source,
+<code><a href="../reference/sipni_data.html">sipni_data()</a></code> returns the <strong>remote</strong> arrow
+dataset — dplyr verbs are pushed down to R2 and only the partitions your
+query touches are transferred. In this mode the partition columns keep
+the bucket layout names (<code>ano</code>, <code>mes</code>,
+<code>uf</code>, as strings):</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, lazy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">ds</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">IMUNO</span> <span class="op">==</span> <span class="st">"09"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">MUNIC</span>, <span class="va">DOSE</span>, <span class="va">QT_DOSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="download-tips">Download tips<a class="anchor" aria-label="anchor" href="#download-tips"></a>
 </h2>
 <ul>
-<li>
-<strong>FTP files</strong> (1994–2019) are small (~100 KB each) and
-download quickly.</li>
-<li>
-<strong>CSV files</strong> (2020+) are large (~1.4 GB per month,
-national). Start with a single month and UF.</li>
-<li>The first download of a CSV month caches <strong>all 27
-UFs</strong>. A second request for a different UF from the same month is
-instant from cache.</li>
-<li>Multiple months are downloaded concurrently when possible.</li>
+<li>Aggregates (1994–2019) read from the mirror in seconds.</li>
+<li>Microdata months for large UFs (SP, MG) hold millions of rows —
+start with a single month and UF, or use <code>lazy = TRUE</code> and
+aggregate before <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect()</a></code>.</li>
+<li>Results are cached locally per partition: a second request for the
+same year/month/UF is served from disk.</li>
+<li>If you pin <code>source = "datasus"</code> for 2020+, only the
+current year’s CSVs exist at the source, and each month is a ~1.4 GB
+national download.</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="smart-type-parsing">Smart type parsing<a class="anchor" aria-label="anchor" href="#smart-type-parsing"></a>
 </h2>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># parsed types (default)</span></span>
 <span><span class="va">ac</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ac</span><span class="op">$</span><span class="va">QT_DOSE</span><span class="op">)</span>  <span class="co"># integer</span></span>
 <span></span>
-<span><span class="co"># raw character columns</span></span>
+<span><span class="co"># raw character columns, exactly as published</span></span>
 <span><span class="va">ac_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, parse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="cache-management">Cache management<a class="anchor" aria-label="anchor" href="#cache-management"></a>
 </h2>
 <p>Downloaded data is cached locally for faster future access:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check cache status</span></span>
 <span><span class="fu"><a href="../reference/sipni_cache_status.html">sipni_cache_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># clear cache if needed</span></span>
 <span><span class="fu"><a href="../reference/sipni_clear_cache.html">sipni_clear_cache</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>If the <code>arrow</code> package is installed, data is cached in
-Parquet format. You can also use lazy evaluation:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># lazy query for FTP data (requires arrow)</span></span>
-<span><span class="va">sipni_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, lazy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">sipni_lazy</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">QT_DOSE</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">IMUNO</span>, <span class="va">DOSE</span>, <span class="va">QT_DOSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="additional-resources">Additional resources<a class="anchor" aria-label="anchor" href="#additional-resources"></a>
 </h2>
 <ul>
+<li>
+<a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a>
+— the mirror’s pipelines, reproducibility policy and dataset
+documentation</li>
 <li>OpenDataSUS (<code>dadosabertos.saude.gov.br</code>)</li>
 <li>
 <a href="censo-denominadores.html">Census vignette</a> for

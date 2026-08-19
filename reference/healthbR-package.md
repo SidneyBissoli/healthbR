@@ -35,3 +35,8 @@ Useful links:
 
 **Maintainer**: Sidney Bissoli <sbissoli76@gmail.com>
 ([ORCID](https://orcid.org/0009-0001-0442-3700))
+
+Authors:
+
+- Sidney Bissoli <sbissoli76@gmail.com>
+  ([ORCID](https://orcid.org/0009-0001-0442-3700))

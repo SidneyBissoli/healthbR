@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,6 +58,27 @@
       <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="healthbr-030">healthbR 0.3.0<a class="anchor" aria-label="anchor" href="#healthbr-030"></a></h2>
+<div class="section level3">
+<h3 id="si-pni-r2-backend-fixes-0-3-0">SI-PNI: R2 backend (fixes <a href="https://github.com/SidneyBissoli/healthbR/issues/1" class="external-link">#1</a>)<a class="anchor" aria-label="anchor" href="#si-pni-r2-backend-fixes-0-3-0"></a></h3>
+<p>The old OpenDataSUS host (<code>arquivosdadosabertos.saude.gov.br</code>) was decommissioned and, as of 2026, the Ministry removed the 2020-2025 microdata files from the new location as well — <code><a href="../reference/sipni_data.html">sipni_data()</a></code> for years &gt;= 2020 had been failing with 404 (<a href="https://github.com/SidneyBissoli/healthbR/issues/1" class="external-link">#1</a>). This release makes the <a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a> mirror (hive-partitioned Parquet on Cloudflare R2, values byte-identical to the Ministry’s files, complete 2020+ series) the default source for the whole SI-PNI module:</p>
+<ul><li>
+<strong><code>source</code> argument</strong> in <code><a href="../reference/sipni_data.html">sipni_data()</a></code> and <code><a href="../reference/sipni_dictionary.html">sipni_dictionary()</a></code>: <code>c("r2", "datasus")</code> (default) reads from the R2 mirror and falls back to the official DATASUS/OpenDataSUS sources automatically; pass a single value to pin a source. <code>r2_credentials</code> allows pointing at another S3-compatible bucket.</li>
+<li>
+<strong><code><a href="../reference/sipni_status.html">sipni_status()</a></code></strong> (new): month/UF-level availability and provenance of the mirror, read from its <code>manifest.json</code> files (processing timestamp, Ministry source URL, record counts). Manifests are cached locally and revalidated by ETag.</li>
+<li>
+<strong>Provenance attributes</strong>: results carry <code>healthbr_source</code> (which source served each era) and, for R2 reads, <code>healthbr_provenance</code> (per-partition processing timestamp + source URL).</li>
+<li>
+<strong>Column names for 2020+ differ by source</strong>: the mirror publishes the Ministry’s JSON exports (56 fields: <code>dt_vacina</code>, <code>ds_vacina</code>, …), while the OpenDataSUS CSVs use different names (<code>data_vacina</code>, <code>descricao_vacina</code>, …). Each source returns its columns exactly as published — no renaming. See <code>sipni_variables(type = "API", source =)</code>.</li>
+<li>
+<strong><code>lazy = TRUE</code> with R2</strong> returns the remote arrow dataset itself: dplyr verbs are pushed down and only the touched partitions are transferred (partition columns keep the bucket layout: <code>ano</code>, <code>mes</code>, <code>uf</code>).</li>
+<li>
+<strong>Aggregates (1994-2019) and dictionaries</strong> are also served from the mirror by default (much faster than DATASUS FTP, which remains available via <code>source = "datasus"</code>); the R2 dictionaries are the full versions converted from the Ministry’s original .cnv/.dbf files, with a <code>source_codes</code> traceability column.</li>
+<li>The DATASUS CSV URL was updated to the new CKAN S3 address (only the current year is published there).</li>
+<li>The R2 backend requires the <code>arrow</code> package (in Suggests); without it, <code><a href="../reference/sipni_data.html">sipni_data()</a></code> falls back to DATASUS with a message.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="healthbr-020">healthbR 0.2.0<a class="anchor" aria-label="anchor" href="#healthbr-020"></a></h2><p class="text-muted">CRAN release: 2026-02-15</p>
 <div class="section level3">

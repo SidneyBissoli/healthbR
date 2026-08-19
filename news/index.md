@@ -1,5 +1,58 @@
 # Changelog
 
+## healthbR 0.3.0
+
+### SI-PNI: R2 backend (fixes [\#1](https://github.com/SidneyBissoli/healthbR/issues/1))
+
+The old OpenDataSUS host (`arquivosdadosabertos.saude.gov.br`) was
+decommissioned and, as of 2026, the Ministry removed the 2020-2025
+microdata files from the new location as well —
+[`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
+for years \>= 2020 had been failing with 404
+([\#1](https://github.com/SidneyBissoli/healthbR/issues/1)). This
+release makes the
+[healthbr-data](https://github.com/SidneyBissoli/healthbr-data) mirror
+(hive-partitioned Parquet on Cloudflare R2, values byte-identical to the
+Ministry’s files, complete 2020+ series) the default source for the
+whole SI-PNI module:
+
+- **`source` argument** in
+  [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
+  and
+  [`sipni_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md):
+  `c("r2", "datasus")` (default) reads from the R2 mirror and falls back
+  to the official DATASUS/OpenDataSUS sources automatically; pass a
+  single value to pin a source. `r2_credentials` allows pointing at
+  another S3-compatible bucket.
+- **[`sipni_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md)**
+  (new): month/UF-level availability and provenance of the mirror, read
+  from its `manifest.json` files (processing timestamp, Ministry source
+  URL, record counts). Manifests are cached locally and revalidated by
+  ETag.
+- **Provenance attributes**: results carry `healthbr_source` (which
+  source served each era) and, for R2 reads, `healthbr_provenance`
+  (per-partition processing timestamp + source URL).
+- **Column names for 2020+ differ by source**: the mirror publishes the
+  Ministry’s JSON exports (56 fields: `dt_vacina`, `ds_vacina`, …),
+  while the OpenDataSUS CSVs use different names (`data_vacina`,
+  `descricao_vacina`, …). Each source returns its columns exactly as
+  published — no renaming. See
+  `sipni_variables(type = "API", source =)`.
+- **`lazy = TRUE` with R2** returns the remote arrow dataset itself:
+  dplyr verbs are pushed down and only the touched partitions are
+  transferred (partition columns keep the bucket layout: `ano`, `mes`,
+  `uf`).
+- **Aggregates (1994-2019) and dictionaries** are also served from the
+  mirror by default (much faster than DATASUS FTP, which remains
+  available via `source = "datasus"`); the R2 dictionaries are the full
+  versions converted from the Ministry’s original .cnv/.dbf files, with
+  a `source_codes` traceability column.
+- The DATASUS CSV URL was updated to the new CKAN S3 address (only the
+  current year is published there).
+- The R2 backend requires the `arrow` package (in Suggests); without it,
+  [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
+  falls back to DATASUS with a message.
+
 ## healthbR 0.2.0
 
 CRAN release: 2026-02-15

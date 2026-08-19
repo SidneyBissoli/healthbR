@@ -26,6 +26,7 @@ Other sipni:
 [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md),
 [`sipni_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md),
 [`sipni_info()`](https://sidneybissoli.github.io/healthbR/reference/sipni_info.md),
+[`sipni_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md),
 [`sipni_variables()`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md),
 [`sipni_years()`](https://sidneybissoli.github.io/healthbR/reference/sipni_years.md)
 

@@ -1,9 +1,8 @@
 # Download SI-PNI Vaccination Data
 
-Downloads and returns vaccination data from SI-PNI. For years 1994–2019,
-data is downloaded from DATASUS FTP (aggregated doses/coverage). For
-years 2020+, data is downloaded from OpenDataSUS as monthly CSV bulk
-files (individual-level microdata with one row per vaccination dose).
+Downloads and returns vaccination data from SI-PNI. For years 1994–2019
+the data are aggregated (doses applied / coverage); for years 2020+ they
+are individual-level microdata (one row per vaccination dose).
 
 ## Usage
 
@@ -19,7 +18,9 @@ sipni_data(
   cache = TRUE,
   cache_dir = NULL,
   lazy = FALSE,
-  backend = c("arrow", "duckdb")
+  backend = c("arrow", "duckdb"),
+  source = c("r2", "datasus"),
+  r2_credentials = NULL
 )
 ```
 
@@ -94,33 +95,83 @@ sipni_data(
   `"duckdb"`. Only used when `lazy = TRUE`. DuckDB backend requires the
   duckdb package.
 
+- source:
+
+  Character vector. Data source(s) in priority order: `"r2"`
+  (healthbr-data mirror on Cloudflare R2, Parquet) and/or `"datasus"`
+  (DATASUS FTP for 1994–2019, OpenDataSUS CSV for 2020+). The default
+  `c("r2", "datasus")` tries the mirror first and falls back to the
+  official source automatically; pass a single value to disable the
+  fallback. Note: as of 2026 the Ministry removed the 2020–2025
+  microdata files from OpenDataSUS, so those years are only served by
+  `"r2"`. The R2 backend requires the arrow package.
+
+- r2_credentials:
+
+  List or NULL. Credentials for the R2 backend. If NULL (default), uses
+  the public read-only token of the healthbr-data bucket. To point at
+  another S3-compatible bucket, pass
+  `list(access_key_id =, secret_access_key =, endpoint =, bucket =)`.
+
 ## Value
 
-A tibble with vaccination data. Includes columns `year` and `uf_source`
-to identify the source when multiple years/states are combined.
+A tibble with vaccination data. Includes columns `year`, `uf_source`
+(and `month` for 2020+) to identify the source partition when multiple
+years/states are combined. Attributes: `healthbr_source` (which source
+served each era) and, for R2 reads, `healthbr_provenance` (per-partition
+processing timestamp and Ministry source URL from the mirror manifests).
 
-**Output differs by year range:**
+**Output differs by year range 2014 and, for 2020+, by source:**
 
-- **1994–2019 (FTP)**: Aggregated data with DPNI (12 vars) or CPNI (7
-  vars) columns, all character.
+- **1994–2019 (aggregated)**: DPNI (12 vars) or CPNI (7 vars) columns.
+  Identical for both sources.
 
-- **2020+ (CSV)**: Individual-level microdata with ~47 columns
-  (snake_case Portuguese), all character. Use
-  `sipni_variables(type = "API")` to see the full list.
+- **2020+ via R2 (default)**: 56 fields from the Ministry's JSON exports
+  (`dt_vacina`, `ds_vacina`, `sg_uf_paciente`, ...). Use
+  `sipni_variables(type = "API", source = "r2")` to see the list.
+
+- **2020+ via DATASUS CSV**: ~47 fields with different names
+  (`data_vacina`, `descricao_vacina`, ...). Use
+  `sipni_variables(type = "API", source = "datasus")`.
+
+Each source returns its columns exactly as published by the Ministry;
+healthbR does not rename or remap them.
 
 ## Details
 
-**FTP data (1994–2019):** Downloaded as plain .DBF files. SI-PNI FTP
-data is **aggregated** (dose counts and coverage rates per municipality,
-vaccine, and age group). Two file types: DPNI (doses) and CPNI
-(coverage).
+By default data are read from the **healthbr-data R2 mirror** (Parquet
+on Cloudflare R2, values byte-identical to the Ministry's files,
+complete 2020+ series), falling back automatically to the official
+DATASUS/ OpenDataSUS sources if the mirror is unreachable 2014 see
+`source`. The result carries a `healthbr_source` attribute recording
+which source actually served each era, and (for R2 reads) a
+`healthbr_provenance` attribute with the processing timestamp and
+Ministry source URL of each partition, taken from the mirror's
+manifests.
 
-**CSV data (2020+):** Downloaded from OpenDataSUS as monthly CSV bulk
-files (national, semicolon-delimited, latin1 encoding). Each monthly ZIP
-is ~1.4 GB. This is **individual-level microdata** (one row per
-vaccination dose, ~47 fields per record). The `type` parameter is
-ignored for CSV years. Data is filtered by UF during chunked reading to
-avoid loading the full national file into memory.
+**Aggregated data (1994–2019):** SI-PNI aggregated data (dose counts and
+coverage rates per municipality, vaccine, and age group). Two file
+types: DPNI (doses) and CPNI (coverage). Served from the R2 mirror as
+Parquet, or from DATASUS FTP as plain .DBF files.
+
+**Microdata (2020+):** Individual-level microdata (one row per
+vaccination dose). The `type` parameter is ignored for these years. Via
+R2 the data come from the Ministry's JSON exports (no CSV serialization
+artifacts) and only the requested UF/month partitions are transferred.
+Via DATASUS the national monthly CSV ZIP (~1.4 GB) is downloaded and
+filtered by UF during chunked reading.
+
+**Availability note (2026):** the Ministry decommissioned the old
+OpenDataSUS host and removed the 2020–2025 files from the new one. The
+R2 mirror holds the complete series; use
+[`sipni_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md)
+to see exactly which months are published and when they were processed.
+
+**Lazy evaluation with R2:** with `lazy = TRUE` and the default source,
+the function returns the remote arrow dataset itself 2014 dplyr verbs
+are pushed down and only the touched partitions are transferred. In this
+mode the partition columns keep the bucket layout names (`ano`, `mes`,
+`uf`, as strings) instead of `year`/`month`/`uf_source`.
 
 ### Parallel downloads
 
@@ -142,6 +193,7 @@ Other sipni:
 [`sipni_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sipni_clear_cache.md),
 [`sipni_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md),
 [`sipni_info()`](https://sidneybissoli.github.io/healthbR/reference/sipni_info.md),
+[`sipni_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md),
 [`sipni_variables()`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md),
 [`sipni_years()`](https://sidneybissoli.github.io/healthbR/reference/sipni_years.md)
 

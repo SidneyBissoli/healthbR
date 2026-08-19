@@ -1,12 +1,17 @@
 # SI-PNI Data Dictionary
 
-Returns a tibble with the data dictionary for the SI-PNI FTP data
+Returns a tibble with the data dictionary for the SI-PNI aggregated data
 (1994–2019), including variable descriptions and category labels.
 
 ## Usage
 
 ``` r
-sipni_dictionary(variable = NULL)
+sipni_dictionary(
+  variable = NULL,
+  source = c("r2", "datasus"),
+  cache = TRUE,
+  cache_dir = NULL
+)
 ```
 
 ## Arguments
@@ -16,16 +21,38 @@ sipni_dictionary(variable = NULL)
   Character. If provided, returns dictionary for a specific variable
   only. Default: NULL (returns all variables).
 
+- source:
+
+  Character vector. `"r2"` (default) reads the full dictionaries
+  published by the healthbr-data mirror (converted from the Ministry's
+  original .cnv/.dbf files, including the `source_codes` traceability
+  column); `"datasus"` uses the abridged dictionary built into the
+  package. With the default `c("r2", "datasus")`, the built-in
+  dictionary is used automatically if the mirror is unreachable.
+
+- cache:
+
+  Logical. If TRUE (default), caches the R2 dictionary locally after the
+  first read.
+
+- cache_dir:
+
+  Character. Cache directory. Default:
+  `tools::R_user_dir("healthbR", "cache")`.
+
 ## Value
 
-A tibble with columns: variable, description, code, label.
+A tibble with columns: variable, description, code, label (and
+`source_codes` when served from R2 2014 the original source codes each
+dictionary entry groups, for traceability to the .cnv files).
 
 ## Details
 
-The dictionary covers FTP data variables (DPNI/CPNI, 1994–2019). API
-microdata (2020+) has description fields embedded in the data itself
-(e.g., `descricao_vacina`, `nome_raca_cor_paciente`), so a separate
-dictionary is not needed.
+The dictionary covers aggregated data variables (DPNI/CPNI, 1994–2019):
+IMUNO (separately for doses and coverage), DOSE, FX_ETARIA, ANO, MES.
+API microdata (2020+) has description fields embedded in the data itself
+(e.g., `ds_vacina`, `no_raca_cor_paciente`), so a separate dictionary is
+not needed.
 
 ## See also
 
@@ -34,6 +61,7 @@ Other sipni:
 [`sipni_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sipni_clear_cache.md),
 [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md),
 [`sipni_info()`](https://sidneybissoli.github.io/healthbR/reference/sipni_info.md),
+[`sipni_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md),
 [`sipni_variables()`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md),
 [`sipni_years()`](https://sidneybissoli.github.io/healthbR/reference/sipni_years.md)
 
@@ -41,52 +69,49 @@ Other sipni:
 
 ``` r
 sipni_dictionary()
-#> # A tibble: 36 × 4
-#>    variable description              code  label                    
-#>    <chr>    <chr>                    <chr> <chr>                    
-#>  1 IMUNO    Código do imunobiológico 09    BCG                      
-#>  2 IMUNO    Código do imunobiológico 21    Hepatite B               
-#>  3 IMUNO    Código do imunobiológico 22    Tríplice bacteriana (DTP)
-#>  4 IMUNO    Código do imunobiológico 23    Poliomielite oral (VOP)  
-#>  5 IMUNO    Código do imunobiológico 24    Sarampo                  
-#>  6 IMUNO    Código do imunobiológico 28    Febre amarela            
-#>  7 IMUNO    Código do imunobiológico 29    Tríplice viral (SCR)     
-#>  8 IMUNO    Código do imunobiológico 39    Dupla adulto (dT)        
-#>  9 IMUNO    Código do imunobiológico 42    Tetravalente (DTP+Hib)   
-#> 10 IMUNO    Código do imunobiológico 46    Rotavírus humano         
-#> # ℹ 26 more rows
+#> # A tibble: 263 × 5
+#>    variable description                                code  label  source_codes
+#>    <chr>    <chr>                                      <chr> <chr>  <chr>       
+#>  1 IMUNO    Código do imunobiológico (doses aplicadas) 01    BCG (… 02          
+#>  2 IMUNO    Código do imunobiológico (doses aplicadas) 02    BCG -… 03          
+#>  3 IMUNO    Código do imunobiológico (doses aplicadas) 03    Febre… 06          
+#>  4 IMUNO    Código do imunobiológico (doses aplicadas) 04    Febre… 07          
+#>  5 IMUNO    Código do imunobiológico (doses aplicadas) 05    Haemo… 09          
+#>  6 IMUNO    Código do imunobiológico (doses aplicadas) 06    Hepat… 88,45       
+#>  7 IMUNO    Código do imunobiológico (doses aplicadas) 07    Hepat… 08,82       
+#>  8 IMUNO    Código do imunobiológico (doses aplicadas) 08    Hepat… 67          
+#>  9 IMUNO    Código do imunobiológico (doses aplicadas) 09    Influ… 14          
+#> 10 IMUNO    Código do imunobiológico (doses aplicadas) 10    Influ… 22          
+#> # ℹ 253 more rows
 sipni_dictionary("IMUNO")
-#> # A tibble: 20 × 4
-#>    variable description              code  label                       
-#>    <chr>    <chr>                    <chr> <chr>                       
-#>  1 IMUNO    Código do imunobiológico 09    BCG                         
-#>  2 IMUNO    Código do imunobiológico 21    Hepatite B                  
-#>  3 IMUNO    Código do imunobiológico 22    Tríplice bacteriana (DTP)   
-#>  4 IMUNO    Código do imunobiológico 23    Poliomielite oral (VOP)     
-#>  5 IMUNO    Código do imunobiológico 24    Sarampo                     
-#>  6 IMUNO    Código do imunobiológico 28    Febre amarela               
-#>  7 IMUNO    Código do imunobiológico 29    Tríplice viral (SCR)        
-#>  8 IMUNO    Código do imunobiológico 39    Dupla adulto (dT)           
-#>  9 IMUNO    Código do imunobiológico 42    Tetravalente (DTP+Hib)      
-#> 10 IMUNO    Código do imunobiológico 46    Rotavírus humano            
-#> 11 IMUNO    Código do imunobiológico 56    Pneumocócica 10-valente     
-#> 12 IMUNO    Código do imunobiológico 63    Meningocócica C conjugada   
-#> 13 IMUNO    Código do imunobiológico 81    Pentavalente (DTP+HB+Hib)   
-#> 14 IMUNO    Código do imunobiológico 82    Poliomielite inativada (VIP)
-#> 15 IMUNO    Código do imunobiológico 83    Hepatite A                  
-#> 16 IMUNO    Código do imunobiológico 84    Pneumocócica 23-valente     
-#> 17 IMUNO    Código do imunobiológico 85    HPV quadrivalente           
-#> 18 IMUNO    Código do imunobiológico 86    dTpa (gestante)             
-#> 19 IMUNO    Código do imunobiológico 87    Varicela                    
-#> 20 IMUNO    Código do imunobiológico 99    Outros imunobiológicos      
+#> # A tibble: 111 × 5
+#>    variable description                                code  label  source_codes
+#>    <chr>    <chr>                                      <chr> <chr>  <chr>       
+#>  1 IMUNO    Código do imunobiológico (doses aplicadas) 01    BCG (… 02          
+#>  2 IMUNO    Código do imunobiológico (doses aplicadas) 02    BCG -… 03          
+#>  3 IMUNO    Código do imunobiológico (doses aplicadas) 03    Febre… 06          
+#>  4 IMUNO    Código do imunobiológico (doses aplicadas) 04    Febre… 07          
+#>  5 IMUNO    Código do imunobiológico (doses aplicadas) 05    Haemo… 09          
+#>  6 IMUNO    Código do imunobiológico (doses aplicadas) 06    Hepat… 88,45       
+#>  7 IMUNO    Código do imunobiológico (doses aplicadas) 07    Hepat… 08,82       
+#>  8 IMUNO    Código do imunobiológico (doses aplicadas) 08    Hepat… 67          
+#>  9 IMUNO    Código do imunobiológico (doses aplicadas) 09    Influ… 14          
+#> 10 IMUNO    Código do imunobiológico (doses aplicadas) 10    Influ… 22          
+#> # ℹ 101 more rows
 sipni_dictionary("DOSE")
-#> # A tibble: 6 × 4
-#>   variable description  code  label     
-#>   <chr>    <chr>        <chr> <chr>     
-#> 1 DOSE     Tipo de dose 1     1ª dose   
-#> 2 DOSE     Tipo de dose 2     2ª dose   
-#> 3 DOSE     Tipo de dose 3     3ª dose   
-#> 4 DOSE     Tipo de dose 4     4ª dose   
-#> 5 DOSE     Tipo de dose R     Reforço   
-#> 6 DOSE     Tipo de dose U     Dose única
+#> # A tibble: 12 × 5
+#>    variable description  code  label          source_codes
+#>    <chr>    <chr>        <chr> <chr>          <chr>       
+#>  1 DOSE     Tipo de dose 1     Dose única     04,09       
+#>  2 DOSE     Tipo de dose 2     1ª dose        01,32       
+#>  3 DOSE     Tipo de dose 3     2ª dose        02,33       
+#>  4 DOSE     Tipo de dose 4     3ª dose        03,34       
+#>  5 DOSE     Tipo de dose 5     4ª dose        07,35       
+#>  6 DOSE     Tipo de dose 6     1º reforço     05,5        
+#>  7 DOSE     Tipo de dose 7     2º reforço     06          
+#>  8 DOSE     Tipo de dose 8     Revacinacao    10          
+#>  9 DOSE     Tipo de dose 9     Dose Inicial   36          
+#> 10 DOSE     Tipo de dose 10    Dose Adicional 37          
+#> 11 DOSE     Tipo de dose 11    Dose           08          
+#> 12 DOSE     Tipo de dose 12    Tratamento     11-31       
 ```

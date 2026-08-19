@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -181,9 +181,9 @@
 </tr>
 <tr>
 <td><strong>SI-PNI</strong></td>
-<td>National Immunization Program (FTP 1994–2019, CSV 2020+)</td>
+<td>National Immunization Program (aggregates 1994–2019, microdata 2020+; served from the healthbr-data R2 mirror with automatic DATASUS fallback)</td>
 <td>Annual or Monthly/UF</td>
-<td>1994–2025</td>
+<td>1994–2026</td>
 </tr>
 </tbody>
 </table>
@@ -280,8 +280,9 @@
 <span><span class="co"># health facilities in Acre, January 2023</span></span>
 <span><span class="va">cnes</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cnes_data.html">cnes_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># vaccination data -- Acre, 2019 (FTP) or 2024 (CSV)</span></span>
-<span><span class="va">vacinas</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># vaccination data -- Acre (R2 mirror by default, DATASUS fallback)</span></span>
+<span><span class="va">vacinas</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span><span class="va">micro</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2024</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, month <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="survey-modules">Survey modules<a class="anchor" aria-label="anchor" href="#survey-modules"></a>
@@ -372,7 +373,9 @@
 <li>
 <strong>PNS / PNAD Continua / POF / Censo</strong>: IBGE</li>
 <li>
-<strong>SIM / SINASC / SIH / SIA / SINAN / CNES / SI-PNI</strong>: DATASUS FTP</li>
+<strong>SIM / SINASC / SIH / SIA / SINAN / CNES</strong>: DATASUS FTP</li>
+<li>
+<strong>SI-PNI</strong>: <a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a> mirror on Cloudflare R2 (byte-identical to the Ministry’s files, with provenance metadata), falling back to DATASUS FTP / OpenDataSUS</li>
 <li>
 <strong>SISAB</strong>: Ministry of Health REST API</li>
 <li>

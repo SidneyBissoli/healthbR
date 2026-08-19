@@ -125,10 +125,13 @@ Live births from the Live Birth Information System (DATASUS FTP,
 
 ## SI-PNI – Vaccination
 
-Vaccination data from SI-PNI (FTP 1994–2019, OpenDataSUS CSV 2020–2025)
+Vaccination data from SI-PNI (aggregates 1994–2019, microdata 2020+; R2
+mirror with DATASUS fallback)
 
 - [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
   : Download SI-PNI Vaccination Data
+- [`sipni_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md)
+  : SI-PNI Data Availability on the R2 Mirror
 - [`sipni_years()`](https://sidneybissoli.github.io/healthbR/reference/sipni_years.md)
   : List Available SI-PNI Years
 - [`sipni_info()`](https://sidneybissoli.github.io/healthbR/reference/sipni_info.md)
