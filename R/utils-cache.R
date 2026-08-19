@@ -147,7 +147,9 @@
     if (!.has_partitioned_cache(cache_dir, dataset_name)) {
       return(NULL)
     }
-    return(arrow::open_dataset(file.path(cache_dir, dataset_name)))
+    # unify_schemas: cached years may carry different column sets
+    return(arrow::open_dataset(file.path(cache_dir, dataset_name),
+                               unify_schemas = TRUE))
   }
 
   if (backend == "duckdb") {
@@ -167,7 +169,8 @@
       return(NULL)
     }
 
-    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
+                              unify_schemas = TRUE)
     return(arrow::to_duckdb(ds))
   }
 
@@ -382,7 +385,7 @@
   dataset_dir <- file.path(cache_dir, dataset_name)
 
   if (.has_arrow() && .has_partitioned_cache(cache_dir, dataset_name)) {
-    return(arrow::open_dataset(dataset_dir))
+    return(arrow::open_dataset(dataset_dir, unify_schemas = TRUE))
   }
 
   # fallback: try flat RDS
@@ -457,7 +460,11 @@
                       pattern = paste0("^", module_name, "_.*\\.(parquet|rds)$"),
                       full.names = TRUE)
 
-  if (length(files) == 0) {
+  # hive-partitioned dataset directories (e.g. sim_data/, sipni_r2_data/)
+  dirs <- list.dirs(cache_dir, recursive = FALSE)
+  dirs <- dirs[grepl(paste0("^", module_name, "_"), basename(dirs))]
+
+  if (length(files) == 0 && length(dirs) == 0) {
     cli::cli_inform("No cached {module_label} files found.")
     return(invisible(tibble::tibble(
       file = character(), size_mb = numeric(), modified = as.POSIXct(character())
@@ -471,8 +478,20 @@
     modified = info$mtime
   )
 
+  if (length(dirs) > 0) {
+    dir_rows <- lapply(dirs, function(d) {
+      inner <- list.files(d, recursive = TRUE, full.names = TRUE)
+      tibble::tibble(
+        file = paste0(basename(d), "/ (", length(inner), " partition file(s))"),
+        size_mb = round(sum(file.info(inner)$size) / 1e6, 2),
+        modified = file.info(d)$mtime
+      )
+    })
+    result <- dplyr::bind_rows(result, dplyr::bind_rows(dir_rows))
+  }
+
   cli::cli_inform(c(
-    "i" = "{module_label} cache: {nrow(result)} file(s), {sum(result$size_mb)} MB total",
+    "i" = "{module_label} cache: {nrow(result)} entr{?y/ies}, {round(sum(result$size_mb), 2)} MB total",
     "i" = "Cache directory: {.file {cache_dir}}"
   ))
 

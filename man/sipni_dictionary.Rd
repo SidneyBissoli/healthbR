@@ -8,7 +8,8 @@ sipni_dictionary(
   variable = NULL,
   source = c("r2", "datasus"),
   cache = TRUE,
-  cache_dir = NULL
+  cache_dir = NULL,
+  lookup = FALSE
 )
 }
 \arguments{
@@ -28,11 +29,19 @@ locally after the first read.}
 
 \item{cache_dir}{Character. Cache directory. Default:
 \code{tools::R_user_dir("healthbR", "cache")}.}
+
+\item{lookup}{Logical. If TRUE, returns a \strong{data-code lookup}: one row
+per value as it appears in the data columns (the .cnv
+\code{source_codes}, expanded), ready to join against
+\code{sipni_data()} results. Default FALSE returns the dictionaries in
+their published form. See Details -- for decoding data you almost
+always want \code{lookup = TRUE}.}
 }
 \value{
 A tibble with columns: variable, description, code, label (and
-\code{source_codes} when served from R2 \u2014 the original source codes
-each dictionary entry groups, for traceability to the .cnv files).
+\code{source_codes} when served from R2 with \code{lookup = FALSE} --
+the original data codes each dictionary entry groups, for
+traceability to the .cnv files).
 }
 \description{
 Returns a tibble with the data dictionary for the SI-PNI aggregated data
@@ -44,11 +53,28 @@ IMUNO (separately for doses and coverage), DOSE, FX_ETARIA, ANO, MES.
 API microdata (2020+) has description fields embedded in the data
 itself (e.g., \code{ds_vacina}, \code{no_raca_cor_paciente}),
 so a separate dictionary is not needed.
+
+\strong{code vs source_codes.} In the Ministry's .cnv dictionary files,
+\code{code} is a sequential category code and \code{source_codes} holds
+the value(s) actually found in the data -- possibly several per label
+(comma-separated or ranges), reflecting code changes over the years.
+Joining data against \code{code} silently decodes to the wrong labels.
+Use \code{lookup = TRUE} to get one row per data code. When more than
+one category claims the same data code, the more specific claim wins:
+explicitly listed codes take precedence over codes that only fall
+inside a range -- ranges are residual catch-alls by construction (e.g.
+FX_ETARIA "Idade ignorada" spans \code{00-99} and must not override the
+explicit age groups). The built-in fallback dictionary
+(\code{source = "datasus"}) is already stored as a data-code lookup, so
+\code{lookup} has no effect there.
 }
 \examples{
 sipni_dictionary()
 sipni_dictionary("IMUNO")
 sipni_dictionary("DOSE")
+
+# join-ready lookup (data code -> label)
+sipni_dictionary("IMUNO", lookup = TRUE)
 }
 \seealso{
 Other sipni:

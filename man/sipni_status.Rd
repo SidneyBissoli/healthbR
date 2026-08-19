@@ -18,7 +18,7 @@ and revalidated by ETag). Default:
 }
 \value{
 A tibble with columns: \code{dataset}, \code{year}, \code{month}
-(NA for aggregates), \code{uf} (NA for microdata \u2014 partitions are
+(NA for aggregates), \code{uf} (NA for microdata -- partitions are
 monthly and national), \code{records}, \code{processing_timestamp}
 (as recorded by the pipeline, no timezone), \code{source_url} (the
 Ministry file the partition was derived from).

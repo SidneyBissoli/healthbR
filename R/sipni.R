@@ -60,7 +60,7 @@
 .sipni_validate_vars <- function(vars, type = "DPNI") {
   meta <- switch(type,
     "CPNI" = sipni_variables_cpni,
-    # API era: accept both the R2 (JSON) and the DATASUS CSV column names \u2014
+    # API era: accept both the R2 (JSON) and the DATASUS CSV column names --
     # which set comes back depends on the source that ends up serving the call
     "API"  = dplyr::bind_rows(sipni_variables_microdados, sipni_variables_api),
     sipni_variables_dpni
@@ -107,6 +107,14 @@
 }
 
 
+#' Move identifier columns to the front (cache reads return them last)
+#' @noRd
+.sipni_front_cols <- function(df, cols) {
+  cols <- intersect(cols, names(df))
+  df[, c(cols, setdiff(names(df), cols)), drop = FALSE]
+}
+
+
 #' Read a plain .DBF file and return as tibble
 #' @noRd
 .sipni_read_dbf <- function(path) {
@@ -128,11 +136,15 @@
     return(NULL)
   }
 
-  ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+  # unify_schemas: cached years may have different column sets (schema per
+  # source file); the default first-file schema would silently drop columns
+  ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
+                            unify_schemas = TRUE)
   cached <- ds |>
     dplyr::filter(.data$uf_source == uf,
                    .data$year == target_year) |>
-    dplyr::collect()
+    dplyr::collect() |>
+    .sipni_front_cols(c("year", "uf_source"))
 
   if (nrow(cached) > 0) cached else NULL
 }
@@ -234,12 +246,16 @@
     return(NULL)
   }
 
-  ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+  # unify_schemas: cached years may have different column sets (schema per
+  # source file); the default first-file schema would silently drop columns
+  ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
+                            unify_schemas = TRUE)
   cached <- ds |>
     dplyr::filter(.data$uf_source == uf,
                    .data$year == target_year,
                    .data$month == target_month) |>
-    dplyr::collect()
+    dplyr::collect() |>
+    .sipni_front_cols(c("year", "month", "uf_source"))
 
   if (nrow(cached) > 0) cached else NULL
 }
@@ -295,7 +311,7 @@
     } else if ("uf_estabelecimento" %in% names(chunk)) {
       uf_col <- chunk$uf_estabelecimento
     } else {
-      # no UF column \u2014 buffer everything under "ALL"
+      # no UF column -- buffer everything under "ALL"
       uf_buffers[["ALL"]] <<- c(uf_buffers[["ALL"]], list(chunk))
       return(invisible(NULL))
     }
@@ -734,10 +750,17 @@ sipni_variables <- function(type = "DPNI", search = NULL,
 #'   locally after the first read.
 #' @param cache_dir Character. Cache directory. Default:
 #'   \code{tools::R_user_dir("healthbR", "cache")}.
+#' @param lookup Logical. If TRUE, returns a **data-code lookup**: one row
+#'   per value as it appears in the data columns (the .cnv
+#'   \code{source_codes}, expanded), ready to join against
+#'   \code{sipni_data()} results. Default FALSE returns the dictionaries in
+#'   their published form. See Details -- for decoding data you almost
+#'   always want \code{lookup = TRUE}.
 #'
 #' @return A tibble with columns: variable, description, code, label (and
-#'   \code{source_codes} when served from R2 \u2014 the original source codes
-#'   each dictionary entry groups, for traceability to the .cnv files).
+#'   \code{source_codes} when served from R2 with \code{lookup = FALSE} --
+#'   the original data codes each dictionary entry groups, for
+#'   traceability to the .cnv files).
 #'
 #' @details
 #' The dictionary covers aggregated data variables (DPNI/CPNI, 1994--2019):
@@ -746,6 +769,20 @@ sipni_variables <- function(type = "DPNI", search = NULL,
 #' itself (e.g., \code{ds_vacina}, \code{no_raca_cor_paciente}),
 #' so a separate dictionary is not needed.
 #'
+#' **code vs source_codes.** In the Ministry's .cnv dictionary files,
+#' \code{code} is a sequential category code and \code{source_codes} holds
+#' the value(s) actually found in the data -- possibly several per label
+#' (comma-separated or ranges), reflecting code changes over the years.
+#' Joining data against \code{code} silently decodes to the wrong labels.
+#' Use \code{lookup = TRUE} to get one row per data code. When more than
+#' one category claims the same data code, the more specific claim wins:
+#' explicitly listed codes take precedence over codes that only fall
+#' inside a range -- ranges are residual catch-alls by construction (e.g.
+#' FX_ETARIA "Idade ignorada" spans \code{00-99} and must not override the
+#' explicit age groups). The built-in fallback dictionary
+#' (\code{source = "datasus"}) is already stored as a data-code lookup, so
+#' \code{lookup} has no effect there.
+#'
 #' @export
 #' @family sipni
 #'
@@ -753,8 +790,12 @@ sipni_variables <- function(type = "DPNI", search = NULL,
 #' sipni_dictionary()
 #' sipni_dictionary("IMUNO")
 #' sipni_dictionary("DOSE")
+#'
+#' # join-ready lookup (data code -> label)
+#' sipni_dictionary("IMUNO", lookup = TRUE)
 sipni_dictionary <- function(variable = NULL, source = c("r2", "datasus"),
-                             cache = TRUE, cache_dir = NULL) {
+                             cache = TRUE, cache_dir = NULL,
+                             lookup = FALSE) {
   sources <- .resolve_sources(source)
 
   result <- NULL
@@ -783,6 +824,12 @@ sipni_dictionary <- function(variable = NULL, source = c("r2", "datasus"),
       .r2_check_arrow()
     }
     result <- sipni_dictionary_data
+  }
+
+  # data-code lookup: expand .cnv source_codes into one row per data code
+  # (the built-in fallback is already stored in this shape)
+  if (isTRUE(lookup) && "source_codes" %in% names(result)) {
+    result <- .sipni_expand_dict_lookup(result)
   }
 
   if (!is.null(variable)) {
@@ -991,7 +1038,7 @@ sipni_dictionary <- function(variable = NULL, source = c("r2", "datasus"),
 #'
 #' @param era "ftp" (aggregates) or "api" (microdata).
 #' @param sources Character vector from `.resolve_sources()` (priority order).
-#' @return list(results, failed_labels, source) \u2014 `source` is the source
+#' @return list(results, failed_labels, source) -- `source` is the source
 #'   that actually served the data (NA if all failed).
 #' @noRd
 .sipni_fetch_era <- function(era, params, sources, cache, cache_dir, creds) {
@@ -1136,7 +1183,7 @@ sipni_dictionary <- function(variable = NULL, source = c("r2", "datasus"),
 #' By default data are read from the **healthbr-data R2 mirror** (Parquet on
 #' Cloudflare R2, values byte-identical to the Ministry's files, complete
 #' 2020+ series), falling back automatically to the official DATASUS/
-#' OpenDataSUS sources if the mirror is unreachable \u2014 see \code{source}.
+#' OpenDataSUS sources if the mirror is unreachable -- see \code{source}.
 #' The result carries a \code{healthbr_source} attribute recording which
 #' source actually served each era, and (for R2 reads) a
 #' \code{healthbr_provenance} attribute with the processing timestamp and
@@ -1198,7 +1245,7 @@ sipni_dictionary <- function(variable = NULL, source = c("r2", "datasus"),
 #'   for R2 reads, \code{healthbr_provenance} (per-partition processing
 #'   timestamp and Ministry source URL from the mirror manifests).
 #'
-#'   **Output differs by year range \u2014 and, for 2020+, by source:**
+#'   **Output differs by year range -- and, for 2020+, by source:**
 #'   \itemize{
 #'     \item **1994--2019 (aggregated)**: DPNI (12 vars) or CPNI (7 vars)
 #'       columns. Identical for both sources.
@@ -1235,7 +1282,7 @@ sipni_dictionary <- function(variable = NULL, source = c("r2", "datasus"),
 #' and when they were processed.
 #'
 #' **Lazy evaluation with R2:** with \code{lazy = TRUE} and the default
-#' source, the function returns the remote arrow dataset itself \u2014 dplyr
+#' source, the function returns the remote arrow dataset itself -- dplyr
 #' verbs are pushed down and only the touched partitions are transferred.
 #' In this mode the partition columns keep the bucket layout names
 #' (\code{ano}, \code{mes}, \code{uf}, as strings) instead of

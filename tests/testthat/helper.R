@@ -23,3 +23,17 @@ skip_if_no_integration <- function() {
   }
   skip_if_offline()
 }
+
+
+# skip if an external test service (e.g. httpbin.org) is unreachable --
+# skip_if_offline() only probes general connectivity, not the service itself
+skip_if_service_down <- function(url) {
+  ok <- tryCatch({
+    h <- curl::new_handle(nobody = TRUE, timeout = 10, followlocation = TRUE)
+    r <- curl::curl_fetch_memory(url, handle = h)
+    r$status_code < 500
+  }, error = function(e) FALSE)
+  if (!ok) {
+    testthat::skip(paste0("External service unreachable: ", url))
+  }
+}

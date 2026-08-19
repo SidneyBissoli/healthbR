@@ -891,6 +891,7 @@ test_that("pnadc_list_ftp_files returns empty on connection error", {
 # --- pnadc_apply_survey_design() --------------------------------------------
 
 test_that("pnadc_apply_survey_design errors on missing design vars", {
+  skip_if_not_installed("srvyr")
   mock_data <- tibble::tibble(
     Ano = 2022L,
     UF = "33"
@@ -903,6 +904,7 @@ test_that("pnadc_apply_survey_design errors on missing design vars", {
 })
 
 test_that("pnadc_apply_survey_design errors with partial missing vars", {
+  skip_if_not_installed("srvyr")
   mock_data <- tibble::tibble(
     UPA = "123",
     UF = "33"

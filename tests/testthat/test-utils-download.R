@@ -7,6 +7,7 @@
 test_that(".http_download_resumable downloads a small file", {
   skip_on_cran()
   skip_if_offline()
+  skip_if_service_down("https://httpbin.org/bytes/16")
 
   dest <- tempfile(fileext = ".txt")
   on.exit(if (file.exists(dest)) file.remove(dest))
@@ -34,6 +35,7 @@ test_that(".http_download_resumable errors on invalid URL", {
 test_that(".http_download_resumable resumes partial file", {
   skip_on_cran()
   skip_if_offline()
+  skip_if_service_down("https://httpbin.org/bytes/16")
 
   dest <- tempfile(fileext = ".bin")
   on.exit(if (file.exists(dest)) file.remove(dest))
@@ -68,6 +70,7 @@ test_that(".multi_download returns empty data frame for empty input", {
 test_that(".multi_download downloads multiple files", {
   skip_on_cran()
   skip_if_offline()
+  skip_if_service_down("https://httpbin.org/bytes/16")
 
   urls <- c(
     "https://httpbin.org/bytes/512",
@@ -87,6 +90,7 @@ test_that(".multi_download downloads multiple files", {
 test_that(".multi_download handles mixed success/failure", {
   skip_on_cran()
   skip_if_offline()
+  skip_if_service_down("https://httpbin.org/bytes/16")
 
   urls <- c(
     "https://httpbin.org/bytes/256",
@@ -150,6 +154,7 @@ test_that(".http_download errors on invalid URL", {
 test_that(".http_download downloads a small file", {
   skip_on_cran()
   skip_if_offline()
+  skip_if_service_down("https://httpbin.org/bytes/16")
 
   dest <- tempfile(fileext = ".txt")
   on.exit(if (file.exists(dest)) file.remove(dest))

@@ -90,7 +90,7 @@ Attributes: \code{healthbr_source} (which source served each era) and,
 for R2 reads, \code{healthbr_provenance} (per-partition processing
 timestamp and Ministry source URL from the mirror manifests).
 
-\strong{Output differs by year range \u2014 and, for 2020+, by source:}
+\strong{Output differs by year range -- and, for 2020+, by source:}
 \itemize{
 \item \strong{1994--2019 (aggregated)}: DPNI (12 vars) or CPNI (7 vars)
 columns. Identical for both sources.
@@ -114,7 +114,7 @@ are individual-level microdata (one row per vaccination dose).
 By default data are read from the \strong{healthbr-data R2 mirror} (Parquet on
 Cloudflare R2, values byte-identical to the Ministry's files, complete
 2020+ series), falling back automatically to the official DATASUS/
-OpenDataSUS sources if the mirror is unreachable \u2014 see \code{source}.
+OpenDataSUS sources if the mirror is unreachable -- see \code{source}.
 The result carries a \code{healthbr_source} attribute recording which
 source actually served each era, and (for R2 reads) a
 \code{healthbr_provenance} attribute with the processing timestamp and
@@ -141,7 +141,7 @@ The R2 mirror holds the complete series; use
 and when they were processed.
 
 \strong{Lazy evaluation with R2:} with \code{lazy = TRUE} and the default
-source, the function returns the remote arrow dataset itself \u2014 dplyr
+source, the function returns the remote arrow dataset itself -- dplyr
 verbs are pushed down and only the touched partitions are transferred.
 In this mode the partition columns keep the bucket layout names
 (\code{ano}, \code{mes}, \code{uf}, as strings) instead of

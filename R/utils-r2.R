@@ -1,4 +1,4 @@
-# utils-r2.R \u2014 shared Cloudflare R2 backend utilities for healthbR
+# utils-r2.R -- shared Cloudflare R2 backend utilities for healthbR
 #
 # The healthbr-data project (https://github.com/SidneyBissoli/healthbr-data)
 # redistributes DATASUS/OpenDataSUS datasets exactly as published by the
@@ -150,7 +150,7 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
 #' Open a hive-partitioned dataset under a bucket prefix
 #'
 #' Opens `bucket/prefix` as an arrow Dataset. Pass the partition columns
-#' below the prefix via `partition_cols` so they are read as strings —
+#' below the prefix via `partition_cols` so they are read as strings --
 #' the healthbr-data contract is all-string columns, and arrow's automatic
 #' hive inference would otherwise turn e.g. `mes=01` into an integer.
 #'
@@ -161,7 +161,7 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
 #'   directories below the prefix, in order (e.g. c("mes", "uf")), all
 #'   read as utf8. NULL lets arrow autodetect.
 #' @param unify_schemas Logical. TRUE inspects every file and unions the
-#'   schemas (required when the prefix spans years with different layouts —
+#'   schemas (required when the prefix spans years with different layouts --
 #'   the healthbr-data contract publishes schema per source file); FALSE
 #'   (default) uses the first file's schema.
 #' @return An arrow Dataset.
@@ -181,7 +181,7 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
   args <- list(
     sources = fs$path(paste0(creds$bucket, "/", prefix)),
     format = "parquet",
-    # dataset roots also hold README.md / manifest.json — not data files
+    # dataset roots also hold README.md / manifest.json -- not data files
     factory_options = list(
       selector_ignore_prefixes = c(".", "_", "README", "manifest")
     )

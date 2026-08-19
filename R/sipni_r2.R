@@ -1,4 +1,4 @@
-# sipni_r2.R \u2014 SI-PNI access via the healthbr-data Cloudflare R2 mirror
+# sipni_r2.R -- SI-PNI access via the healthbr-data Cloudflare R2 mirror
 #
 # The healthbr-data project redistributes the SI-PNI datasets exactly as
 # published by the Ministry of Health, as hive-partitioned Parquet:
@@ -31,7 +31,7 @@ sipni_r2_prefix_cobertura <- "sipni/agregados/cobertura"
 #' @noRd
 sipni_r2_prefix_dicionarios <- "sipni/dicionarios"
 
-#' Manifest object paths (microdados manifest lives at sipni/manifest.json \u2014
+#' Manifest object paths (microdados manifest lives at sipni/manifest.json --
 #' legacy exception documented in the healthbr-data consumer contract)
 #' @noRd
 sipni_r2_manifest_paths <- c(
@@ -152,7 +152,8 @@ sipni_r2_manifest_paths <- c(
     return(empty)
   }
   tryCatch({
-    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
+                              unify_schemas = TRUE)
     ds |>
       dplyr::select(dplyr::all_of(cols)) |>
       dplyr::distinct() |>
@@ -209,7 +210,8 @@ sipni_r2_manifest_paths <- c(
       have <- dplyr::inner_join(wanted, combos,
                                 by = c("year", "month", "uf_source"))
       if (nrow(have) > 0) {
-        ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+        ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
+                                  unify_schemas = TRUE)
         cached <- ds |>
           dplyr::filter(.data$year %in% !!unique(have$year),
                         .data$month %in% !!unique(have$month),
@@ -218,6 +220,7 @@ sipni_r2_manifest_paths <- c(
         # the coarse filter may bring extra combos; trim to the wanted set
         cached <- dplyr::semi_join(cached, wanted,
                                    by = c("year", "month", "uf_source"))
+        cached <- .sipni_front_cols(cached, c("year", "month", "uf_source"))
         if (nrow(cached) > 0) results <- c(results, list(cached))
       }
     }
@@ -281,7 +284,7 @@ sipni_r2_manifest_paths <- c(
 #'
 #' Output is shaped exactly like the FTP path (`year` + `uf_source` + the
 #' original DBF columns, CPNI `COBERT` decimal comma fixed), and shares the
-#' FTP path's local partitioned cache \u2014 the content is identical by
+#' FTP path's local partitioned cache -- the content is identical by
 #' construction, only the transport differs.
 #'
 #' @return list(results = list of tibbles, failed_labels = character).
@@ -305,13 +308,15 @@ sipni_r2_manifest_paths <- c(
     if (nrow(combos) > 0) {
       have <- dplyr::inner_join(wanted, combos, by = c("year", "uf_source"))
       if (nrow(have) > 0) {
-        ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+        ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
+                                  unify_schemas = TRUE)
         cached <- ds |>
           dplyr::filter(.data$year %in% !!unique(have$year),
                         .data$uf_source %in% !!unique(have$uf_source)) |>
           dplyr::collect()
         cached <- dplyr::semi_join(cached, wanted,
                                    by = c("year", "uf_source"))
+        cached <- .sipni_front_cols(cached, c("year", "uf_source"))
         if (nrow(cached) > 0) results <- c(results, list(cached))
       }
     }
@@ -370,7 +375,7 @@ sipni_r2_manifest_paths <- c(
 #'
 #' Returns the remote dataset filtered by the request. Column layout is the
 #' bucket contract layout (partition columns `ano`, `mes`, `uf` as strings),
-#' not the eager `year`/`month`/`uf_source` convention \u2014 dplyr verbs are
+#' not the eager `year`/`month`/`uf_source` convention -- dplyr verbs are
 #' pushed down to R2, so only the touched row groups are transferred.
 #'
 #' @return An arrow Dataset query, a duckdb tbl, or NULL if the request
@@ -438,6 +443,66 @@ sipni_r2_dict_files <- tibble::tibble(
     "M\u00eas"
   )
 )
+
+
+#' Expand a .cnv-style dictionary into a data-code lookup
+#'
+#' In the .cnv-derived dictionaries, `code` is the sequential category code
+#' of the .cnv file and `source_codes` holds the value(s) found in the .dbf
+#' DATA files -- possibly several per label, comma-separated and/or as
+#' ranges (e.g. "88,45" or "11-31"). This expands each entry into one row
+#' per data code, so the result joins directly against sipni_data()
+#' columns. Rows without source_codes (e.g. the coverage indicators, whose
+#' `code` already is the data value) pass through unchanged.
+#'
+#' When more than one category claims the same data code, the more
+#' SPECIFIC claim wins: codes listed explicitly take precedence over codes
+#' that only fall inside a range -- ranges are residual catch-alls by
+#' construction (e.g. FX_ETARIA "Idade ignorada" spans "00-99" and must
+#' not override the explicit age groups). Ties between equally specific
+#' claims resolve to the first entry.
+#'
+#' @param dict A tibble as returned by `.sipni_r2_dictionary()`.
+#' @return A tibble (variable, description, code, label).
+#' @noRd
+.sipni_expand_dict_lookup <- function(dict) {
+  expand_codes <- function(source_codes, code) {
+    if (is.na(source_codes)) {
+      return(tibble::tibble(code = code, from_range = FALSE))
+    }
+    parts <- trimws(strsplit(source_codes, ",", fixed = TRUE)[[1]])
+    dplyr::bind_rows(lapply(parts, function(p) {
+      m <- regmatches(p, regexec("^([0-9]+)-([0-9]+)$", p))[[1]]
+      if (length(m) == 3) {
+        tibble::tibble(
+          code = sprintf(paste0("%0", nchar(m[2]), "d"),
+                         seq(as.integer(m[2]), as.integer(m[3]))),
+          from_range = TRUE
+        )
+      } else {
+        tibble::tibble(code = p, from_range = FALSE)
+      }
+    }))
+  }
+
+  rows <- lapply(seq_len(nrow(dict)), function(i) {
+    codes <- expand_codes(dict$source_codes[i], dict$code[i])
+    tibble::tibble(
+      variable = dict$variable[i],
+      description = dict$description[i],
+      code = codes$code,
+      label = dict$label[i],
+      from_range = codes$from_range
+    )
+  })
+
+  dplyr::bind_rows(rows) |>
+    dplyr::arrange(.data$from_range) |>   # explicit claims first (stable)
+    dplyr::distinct(.data$variable, .data$description, .data$code,
+                    .keep_all = TRUE) |>
+    dplyr::arrange(.data$variable, .data$description, .data$code) |>
+    dplyr::select("variable", "description", "code", "label")
+}
 
 
 #' Read the SI-PNI dictionaries from R2 (with flat local cache)
@@ -513,7 +578,7 @@ sipni_r2_dict_files <- tibble::tibble(
 #'   \code{tools::R_user_dir("healthbR", "cache")}.
 #'
 #' @return A tibble with columns: \code{dataset}, \code{year}, \code{month}
-#'   (NA for aggregates), \code{uf} (NA for microdata \u2014 partitions are
+#'   (NA for aggregates), \code{uf} (NA for microdata -- partitions are
 #'   monthly and national), \code{records}, \code{processing_timestamp}
 #'   (as recorded by the pipeline, no timezone), \code{source_url} (the
 #'   Ministry file the partition was derived from).

@@ -1,3 +1,41 @@
+# healthbR 0.3.1
+
+## SI-PNI dictionary corrections (important)
+
+* **The built-in SI-PNI dictionary and label maps were wrong** and have been
+  regenerated from the Ministry's official .cnv/.dbf dictionary files (as
+  published on the healthbr-data mirror). The 0.2.0 hand-written table
+  mislabeled 19 of 20 IMUNO codes — e.g. data code `09` is *Haemophilus
+  influenzae tipo b (Hib)* per the official .cnv, not *BCG* (BCG is data
+  code `02`) — and used DOSE/FX_ETARIA codes that do not occur in the data
+  at all. Any decoding done with the built-in dictionary of previous
+  versions should be redone. Regeneration script: `data-raw/sipni-dictionaries.R`.
+* **New `lookup = TRUE` in `sipni_dictionary()`**: returns a data-code
+  lookup (one row per value as it appears in the data, expanding the .cnv
+  `source_codes` — including comma lists like `88,45` and ranges like
+  `11-31`), ready to join against `sipni_data()` results. Joining data
+  against the .cnv `code` column decodes to wrong labels; the vignette
+  examples were corrected accordingly. Overlapping categories are resolved
+  by specificity — explicitly listed codes beat range catch-alls — so
+  residuals like FX_ETARIA "Idade ignorada" (source codes `00-99`) only
+  label codes no specific category claimed.
+
+## Fixes and polish
+
+* **Local partitioned caches are now opened with `unify_schemas = TRUE`**
+  (all modules): when cached years carry different column sets — DPNI 1994
+  has 7 columns, 2019 has 12 — reads used the first file's schema and
+  silently dropped the extra columns of other years.
+* Results served from the local cache now place the identifier columns
+  (`year`, `month`, `uf_source`) first, matching fresh downloads.
+* `sipni_cache_status()` (and every module's `*_cache_status()`) now also
+  reports hive-partitioned cache datasets, which were previously invisible.
+* Roxygen comments no longer leak `\u` escapes into Rd files
+  (R CMD check WARNING).
+* Test hygiene: tests hitting httpbin.org now skip when the service is
+  unreachable; `pnadc_apply_survey_design()` error tests skip without
+  `srvyr`.
+
 # healthbR 0.3.0
 
 ## SI-PNI: R2 backend (fixes #1)

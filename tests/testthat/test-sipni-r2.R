@@ -217,8 +217,109 @@ test_that(".sipni_r2_manifest_summary parses aggregate partition keys", {
 
 
 # ============================================================================
+# .sipni_expand_dict_lookup / sipni_dictionary(lookup = TRUE)
+# ============================================================================
+
+test_that(".sipni_expand_dict_lookup expands commas, ranges and reuse", {
+  d <- tibble::tibble(
+    variable = c("IMUNO", "IMUNO", "DOSE", "IMUNO", "IMUNO"),
+    description = "x",
+    code = c("01", "02", "03", "04", "05"),
+    label = c("A", "B", "Tratamento", "C", "D"),
+    source_codes = c("08,82", "11-13", NA, "99", "99")
+  )
+  lk <- .sipni_expand_dict_lookup(d)
+
+  # comma-separated codes -> one row each
+  expect_setequal(lk$code[lk$label == "A"], c("08", "82"))
+  # ranges expand with zero padding
+  expect_true(all(c("11", "12", "13") %in% lk$code[lk$label == "B"]))
+  # NA source_codes -> code passes through unchanged
+  expect_true("03" %in% lk$code[lk$variable == "DOSE"])
+  # a data code claimed twice resolves to the FIRST entry (TabWin order)
+  expect_equal(lk$label[lk$code == "99"], "C")
+  expect_equal(names(lk), c("variable", "description", "code", "label"))
+})
+
+test_that(".sipni_expand_dict_lookup: catch-all ranges do not override", {
+  # mimics FX_ETARIA: the "Idade ignorada" 00-99 catch-all comes FIRST in
+  # the published file — explicit codes must still win (specificity rule)
+  d <- tibble::tibble(
+    variable = "FX_ETARIA",
+    description = "x",
+    code = c("99", "10", "36"),
+    label = c("Idade ignorada", "Menor de 1 ano", "5 a 9 anos"),
+    source_codes = c("00-99", "50", "67")
+  )
+  lk <- .sipni_expand_dict_lookup(d)
+  expect_equal(lk$label[lk$code == "50"], "Menor de 1 ano")
+  expect_equal(lk$label[lk$code == "67"], "5 a 9 anos")
+  # unclaimed codes fall through to the catch-all
+  expect_equal(lk$label[lk$code == "07"], "Idade ignorada")
+  expect_false(any(grepl(" | ", lk$label, fixed = TRUE)))
+})
+
+test_that("local partitioned cache reads unify schemas across years", {
+  skip_if_not_installed("arrow")
+
+  # years with different column sets (schema per source file, like DPNI
+  # 1994 = 7 cols vs 2019 = 12 cols); without unify_schemas the read
+  # projected everything to the first file's schema, dropping columns
+  tmp <- withr::local_tempdir()
+  old <- tibble::tibble(year = 1994L, uf_source = "AC",
+                        ANO = "1994", QT_DOSE = "1")
+  new <- tibble::tibble(year = 2019L, uf_source = "AC",
+                        ANO = "2019", QT_DOSE = "2", ANOMES = "201901")
+  .cache_append_partitioned(old, tmp, "sipni_dpni_data",
+                            c("uf_source", "year"))
+  .cache_append_partitioned(new, tmp, "sipni_dpni_data",
+                            c("uf_source", "year"))
+
+  got <- .sipni_ftp_check_cache("AC", 2019, "DPNI", cache = TRUE,
+                                cache_dir = tmp)
+  expect_true("ANOMES" %in% names(got))
+  expect_equal(got$ANOMES, "201901")
+
+  res <- .sipni_r2_fetch_agregados("DPNI", years = c(1994L, 2019L),
+                                   ufs = "AC", cache = TRUE,
+                                   cache_dir = tmp, creds = NULL)
+  combined <- dplyr::bind_rows(res$results)
+  expect_equal(nrow(combined), 2)
+  expect_true("ANOMES" %in% names(combined))
+})
+
+test_that("sipni_dictionary(lookup = TRUE) is a no-op on the built-in dict", {
+  expect_identical(sipni_dictionary(source = "datasus"),
+                   sipni_dictionary(source = "datasus", lookup = TRUE))
+})
+
+test_that("built-in dictionary follows the official .cnv data codes", {
+  d <- sipni_dictionary(source = "datasus")
+  # regenerated from the Ministry's .cnv files: data code 02 = BCG,
+  # 09 = Hib (the 0.2.0 hand-written table mislabeled these)
+  expect_match(d$label[d$variable == "IMUNO" & d$code == "02"][1], "BCG")
+  expect_match(d$label[d$variable == "IMUNO" & d$code == "09"][1], "Hib")
+  # range-encoded DOSE codes (11-31 = Tratamento) are expanded
+  expect_equal(unique(d$label[d$variable == "DOSE" & d$code == "11"]),
+               "Tratamento")
+  expect_true(all(c("IMUNO", "DOSE", "FX_ETARIA", "ANO", "MES") %in%
+                    d$variable))
+})
+
+
+# ============================================================================
 # integration tests (require internet + HEALTHBR_INTEGRATION=true)
 # ============================================================================
+
+test_that("sipni_dictionary lookup decodes real aggregate data codes", {
+  skip_if_no_integration()
+
+  lk <- sipni_dictionary("IMUNO", lookup = TRUE,
+                         cache_dir = tempfile("sipni_lk_test"))
+  agg <- sipni_data(year = 2019, uf = "AC", parse = FALSE,
+                    cache_dir = tempfile("sipni_lk_data"))
+  expect_true(all(unique(agg$IMUNO) %in% lk$code))
+})
 
 test_that("sipni_status reads the live manifests", {
   skip_if_no_integration()
@@ -305,5 +406,5 @@ test_that("sipni_dictionary reads the R2 dictionaries", {
                     "source_codes") %in% names(dict)))
   expect_true(all(c("IMUNO", "DOSE", "FX_ETARIA", "ANO", "MES") %in%
                     dict$variable))
-  expect_gt(nrow(dict), nrow(sipni_dictionary_data))
+  expect_gt(nrow(dict), 200)
 })
