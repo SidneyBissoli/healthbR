@@ -26,11 +26,11 @@ sisab_variables(type = "sb")
 sisab_variables(search = "cobertura")
 }
 \seealso{
-Other sisab: 
-\code{\link{sisab_cache_status}()},
-\code{\link{sisab_clear_cache}()},
-\code{\link{sisab_data}()},
-\code{\link{sisab_info}()},
-\code{\link{sisab_years}()}
+Other sisab:
+\code{\link[=sisab_cache_status]{sisab_cache_status()}},
+\code{\link[=sisab_clear_cache]{sisab_clear_cache()}},
+\code{\link[=sisab_data]{sisab_data()}},
+\code{\link[=sisab_info]{sisab_info()}},
+\code{\link[=sisab_years]{sisab_years()}}
 }
 \concept{sisab}

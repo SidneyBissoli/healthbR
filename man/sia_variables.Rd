@@ -26,12 +26,12 @@ sia_variables(search = "sexo")
 sia_variables(search = "procedimento")
 }
 \seealso{
-Other sia: 
-\code{\link{sia_cache_status}()},
-\code{\link{sia_clear_cache}()},
-\code{\link{sia_data}()},
-\code{\link{sia_dictionary}()},
-\code{\link{sia_info}()},
-\code{\link{sia_years}()}
+Other sia:
+\code{\link[=sia_cache_status]{sia_cache_status()}},
+\code{\link[=sia_clear_cache]{sia_clear_cache()}},
+\code{\link[=sia_data]{sia_data()}},
+\code{\link[=sia_dictionary]{sia_dictionary()}},
+\code{\link[=sia_info]{sia_info()}},
+\code{\link[=sia_years]{sia_years()}}
 }
 \concept{sia}

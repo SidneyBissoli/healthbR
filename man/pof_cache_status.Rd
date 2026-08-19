@@ -20,13 +20,13 @@ Shows cache status including downloaded files and their sizes.
 pof_cache_status()
 }
 \seealso{
-Other pof: 
-\code{\link{pof_clear_cache}()},
-\code{\link{pof_data}()},
-\code{\link{pof_dictionary}()},
-\code{\link{pof_info}()},
-\code{\link{pof_registers}()},
-\code{\link{pof_variables}()},
-\code{\link{pof_years}()}
+Other pof:
+\code{\link[=pof_clear_cache]{pof_clear_cache()}},
+\code{\link[=pof_data]{pof_data()}},
+\code{\link[=pof_dictionary]{pof_dictionary()}},
+\code{\link[=pof_info]{pof_info()}},
+\code{\link[=pof_registers]{pof_registers()}},
+\code{\link[=pof_variables]{pof_variables()}},
+\code{\link[=pof_years]{pof_years()}}
 }
 \concept{pof}

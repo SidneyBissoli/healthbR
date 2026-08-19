@@ -23,12 +23,12 @@ cnes_dictionary("TP_UNID")
 cnes_dictionary("ESFERA_A")
 }
 \seealso{
-Other cnes: 
-\code{\link{cnes_cache_status}()},
-\code{\link{cnes_clear_cache}()},
-\code{\link{cnes_data}()},
-\code{\link{cnes_info}()},
-\code{\link{cnes_variables}()},
-\code{\link{cnes_years}()}
+Other cnes:
+\code{\link[=cnes_cache_status]{cnes_cache_status()}},
+\code{\link[=cnes_clear_cache]{cnes_clear_cache()}},
+\code{\link[=cnes_data]{cnes_data()}},
+\code{\link[=cnes_info]{cnes_info()}},
+\code{\link[=cnes_variables]{cnes_variables()}},
+\code{\link[=cnes_years]{cnes_years()}}
 }
 \concept{cnes}

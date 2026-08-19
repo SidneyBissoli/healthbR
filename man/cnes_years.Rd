@@ -26,12 +26,12 @@ cnes_years()
 cnes_years(status = "all")
 }
 \seealso{
-Other cnes: 
-\code{\link{cnes_cache_status}()},
-\code{\link{cnes_clear_cache}()},
-\code{\link{cnes_data}()},
-\code{\link{cnes_dictionary}()},
-\code{\link{cnes_info}()},
-\code{\link{cnes_variables}()}
+Other cnes:
+\code{\link[=cnes_cache_status]{cnes_cache_status()}},
+\code{\link[=cnes_clear_cache]{cnes_clear_cache()}},
+\code{\link[=cnes_data]{cnes_data()}},
+\code{\link[=cnes_dictionary]{cnes_dictionary()}},
+\code{\link[=cnes_info]{cnes_info()}},
+\code{\link[=cnes_variables]{cnes_variables()}}
 }
 \concept{cnes}

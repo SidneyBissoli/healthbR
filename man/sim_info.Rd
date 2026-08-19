@@ -17,12 +17,12 @@ including data sources, available years, and usage guidance.
 sim_info()
 }
 \seealso{
-Other sim: 
-\code{\link{sim_cache_status}()},
-\code{\link{sim_clear_cache}()},
-\code{\link{sim_data}()},
-\code{\link{sim_dictionary}()},
-\code{\link{sim_variables}()},
-\code{\link{sim_years}()}
+Other sim:
+\code{\link[=sim_cache_status]{sim_cache_status()}},
+\code{\link[=sim_clear_cache]{sim_clear_cache()}},
+\code{\link[=sim_data]{sim_data()}},
+\code{\link[=sim_dictionary]{sim_dictionary()}},
+\code{\link[=sim_variables]{sim_variables()}},
+\code{\link[=sim_years]{sim_years()}}
 }
 \concept{sim}

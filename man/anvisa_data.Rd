@@ -101,11 +101,11 @@ sngpc <- anvisa_data(type = "sngpc", year = 2020, month = 1)
 \code{\link{anvisa_types}()} for available types,
 \code{\link{anvisa_variables}()} for variable descriptions.
 
-Other anvisa: 
-\code{\link{anvisa_cache_status}()},
-\code{\link{anvisa_clear_cache}()},
-\code{\link{anvisa_info}()},
-\code{\link{anvisa_types}()},
-\code{\link{anvisa_variables}()}
+Other anvisa:
+\code{\link[=anvisa_cache_status]{anvisa_cache_status()}},
+\code{\link[=anvisa_clear_cache]{anvisa_clear_cache()}},
+\code{\link[=anvisa_info]{anvisa_info()}},
+\code{\link[=anvisa_types]{anvisa_types()}},
+\code{\link[=anvisa_variables]{anvisa_variables()}}
 }
 \concept{anvisa}

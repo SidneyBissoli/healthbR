@@ -100,11 +100,11 @@ sisab_data(year = 2024, level = "municipality", uf = "SP", month = 1)
 \code{\link{sisab_info}()} for report type descriptions,
 \code{\link{censo_populacao}()} for population denominators.
 
-Other sisab: 
-\code{\link{sisab_cache_status}()},
-\code{\link{sisab_clear_cache}()},
-\code{\link{sisab_info}()},
-\code{\link{sisab_variables}()},
-\code{\link{sisab_years}()}
+Other sisab:
+\code{\link[=sisab_cache_status]{sisab_cache_status()}},
+\code{\link[=sisab_clear_cache]{sisab_clear_cache()}},
+\code{\link[=sisab_info]{sisab_info()}},
+\code{\link[=sisab_variables]{sisab_variables()}},
+\code{\link[=sisab_years]{sisab_years()}}
 }
 \concept{sisab}

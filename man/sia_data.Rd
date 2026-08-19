@@ -130,12 +130,12 @@ med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
 \code{\link{sia_info}()} for file type descriptions,
 \code{\link{censo_populacao}()} for population denominators.
 
-Other sia: 
-\code{\link{sia_cache_status}()},
-\code{\link{sia_clear_cache}()},
-\code{\link{sia_dictionary}()},
-\code{\link{sia_info}()},
-\code{\link{sia_variables}()},
-\code{\link{sia_years}()}
+Other sia:
+\code{\link[=sia_cache_status]{sia_cache_status()}},
+\code{\link[=sia_clear_cache]{sia_clear_cache()}},
+\code{\link[=sia_dictionary]{sia_dictionary()}},
+\code{\link[=sia_info]{sia_info()}},
+\code{\link[=sia_variables]{sia_variables()}},
+\code{\link[=sia_years]{sia_years()}}
 }
 \concept{sia}

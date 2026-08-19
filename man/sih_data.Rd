@@ -108,12 +108,12 @@ sih_data(year = 2022, month = 3, uf = "RJ",
 \code{\link[=censo_populacao]{censo_populacao()}} for population denominators to calculate
 hospitalization rates.
 
-Other sih: 
-\code{\link{sih_cache_status}()},
-\code{\link{sih_clear_cache}()},
-\code{\link{sih_dictionary}()},
-\code{\link{sih_info}()},
-\code{\link{sih_variables}()},
-\code{\link{sih_years}()}
+Other sih:
+\code{\link[=sih_cache_status]{sih_cache_status()}},
+\code{\link[=sih_clear_cache]{sih_clear_cache()}},
+\code{\link[=sih_dictionary]{sih_dictionary()}},
+\code{\link[=sih_info]{sih_info()}},
+\code{\link[=sih_variables]{sih_variables()}},
+\code{\link[=sih_years]{sih_years()}}
 }
 \concept{sih}

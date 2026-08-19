@@ -17,11 +17,11 @@ descriptions, and categories.
 anvisa_types()
 }
 \seealso{
-Other anvisa: 
-\code{\link{anvisa_cache_status}()},
-\code{\link{anvisa_clear_cache}()},
-\code{\link{anvisa_data}()},
-\code{\link{anvisa_info}()},
-\code{\link{anvisa_variables}()}
+Other anvisa:
+\code{\link[=anvisa_cache_status]{anvisa_cache_status()}},
+\code{\link[=anvisa_clear_cache]{anvisa_clear_cache()}},
+\code{\link[=anvisa_data]{anvisa_data()}},
+\code{\link[=anvisa_info]{anvisa_info()}},
+\code{\link[=anvisa_variables]{anvisa_variables()}}
 }
 \concept{anvisa}

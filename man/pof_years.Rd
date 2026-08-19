@@ -16,13 +16,13 @@ Returns a character vector with available POF survey years.
 pof_years()
 }
 \seealso{
-Other pof: 
-\code{\link{pof_cache_status}()},
-\code{\link{pof_clear_cache}()},
-\code{\link{pof_data}()},
-\code{\link{pof_dictionary}()},
-\code{\link{pof_info}()},
-\code{\link{pof_registers}()},
-\code{\link{pof_variables}()}
+Other pof:
+\code{\link[=pof_cache_status]{pof_cache_status()}},
+\code{\link[=pof_clear_cache]{pof_clear_cache()}},
+\code{\link[=pof_data]{pof_data()}},
+\code{\link[=pof_dictionary]{pof_dictionary()}},
+\code{\link[=pof_info]{pof_info()}},
+\code{\link[=pof_registers]{pof_registers()}},
+\code{\link[=pof_variables]{pof_variables()}}
 }
 \concept{pof}

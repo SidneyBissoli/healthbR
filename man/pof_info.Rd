@@ -24,13 +24,13 @@ pof_info("2008-2009")
 \seealso{
 \code{\link{pof_years}}, \code{\link{pof_data}}
 
-Other pof: 
-\code{\link{pof_cache_status}()},
-\code{\link{pof_clear_cache}()},
-\code{\link{pof_data}()},
-\code{\link{pof_dictionary}()},
-\code{\link{pof_registers}()},
-\code{\link{pof_variables}()},
-\code{\link{pof_years}()}
+Other pof:
+\code{\link[=pof_cache_status]{pof_cache_status()}},
+\code{\link[=pof_clear_cache]{pof_clear_cache()}},
+\code{\link[=pof_data]{pof_data()}},
+\code{\link[=pof_dictionary]{pof_dictionary()}},
+\code{\link[=pof_registers]{pof_registers()}},
+\code{\link[=pof_variables]{pof_variables()}},
+\code{\link[=pof_years]{pof_years()}}
 }
 \concept{pof}

@@ -20,5 +20,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Sidney Bissoli \email{sbissoli76@gmail.com} (\href{https://orcid.org/0009-0001-0442-3700}{ORCID})
 
+Authors:
+\itemize{
+  \item Sidney Bissoli \email{sbissoli76@gmail.com} (\href{https://orcid.org/0009-0001-0442-3700}{ORCID})
+}
+
 }
 \keyword{internal}

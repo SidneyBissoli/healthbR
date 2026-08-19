@@ -112,12 +112,12 @@ prof <- cnes_data(year = 2023, month = 1, uf = "AC", type = "PF")
 \code{\link{cnes_info}()} for file type descriptions,
 \code{\link{censo_populacao}()} for population denominators.
 
-Other cnes: 
-\code{\link{cnes_cache_status}()},
-\code{\link{cnes_clear_cache}()},
-\code{\link{cnes_dictionary}()},
-\code{\link{cnes_info}()},
-\code{\link{cnes_variables}()},
-\code{\link{cnes_years}()}
+Other cnes:
+\code{\link[=cnes_cache_status]{cnes_cache_status()}},
+\code{\link[=cnes_clear_cache]{cnes_clear_cache()}},
+\code{\link[=cnes_dictionary]{cnes_dictionary()}},
+\code{\link[=cnes_info]{cnes_info()}},
+\code{\link[=cnes_variables]{cnes_variables()}},
+\code{\link[=cnes_years]{cnes_years()}}
 }
 \concept{cnes}

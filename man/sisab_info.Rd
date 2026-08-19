@@ -17,11 +17,11 @@ Displays information about the Primary Care Health Information System
 sisab_info()
 }
 \seealso{
-Other sisab: 
-\code{\link{sisab_cache_status}()},
-\code{\link{sisab_clear_cache}()},
-\code{\link{sisab_data}()},
-\code{\link{sisab_variables}()},
-\code{\link{sisab_years}()}
+Other sisab:
+\code{\link[=sisab_cache_status]{sisab_cache_status()}},
+\code{\link[=sisab_clear_cache]{sisab_clear_cache()}},
+\code{\link[=sisab_data]{sisab_data()}},
+\code{\link[=sisab_variables]{sisab_variables()}},
+\code{\link[=sisab_years]{sisab_years()}}
 }
 \concept{sisab}
