@@ -121,23 +121,37 @@ ac_doses
 ### Using the dictionary
 
 By default the dictionary is read from the mirror — the full versions
-converted from the Ministry’s original .cnv/.dbf files, including a
-`source_codes` column that traces each entry back to the original codes:
+converted from the Ministry’s original .cnv/.dbf files.
+
+**Important — decoding data requires `lookup = TRUE`.** In the .cnv
+files, `code` is a sequential category code, and the value(s) actually
+found in the data columns live in `source_codes` (possibly several per
+label, reflecting code changes over the years — e.g. data codes `08`
+**and** `82` both mean Hepatite B). Joining data against `code` silently
+produces wrong labels. `lookup = TRUE` expands the dictionary into one
+row per **data code**, ready to join:
 
 ``` r
 
-# vaccine codes
+# published form (code = .cnv category, source_codes = data codes)
 sipni_dictionary("IMUNO")
 
-# dose types
-sipni_dictionary("DOSE")
+# join-ready lookup: one row per data code
+sipni_dictionary("IMUNO", lookup = TRUE)
 
-# age groups
-sipni_dictionary("FX_ETARIA")
+# dose types and age groups
+sipni_dictionary("DOSE", lookup = TRUE)
+sipni_dictionary("FX_ETARIA", lookup = TRUE)
 
-# the abridged built-in dictionary (no network)
+# the built-in offline copy (already in data-code form)
 sipni_dictionary("IMUNO", source = "datasus")
 ```
+
+When more than one .cnv category claims the same data code, the more
+specific claim wins: explicitly listed codes take precedence over codes
+that only fall inside a range. This matters for residual catch-all
+categories: FX_ETARIA’s “Idade ignorada” spans codes `00-99`, but it
+only labels codes that no specific age group claimed explicitly.
 
 ## Aggregated data: vaccination coverage (CPNI)
 
@@ -248,8 +262,8 @@ because the files are annual.
 
 ac_2019 <- sipni_data(year = 2019, uf = "AC")
 
-# decode immunobiological names
-imuno_labels <- sipni_dictionary("IMUNO") |>
+# decode immunobiological names: lookup = TRUE gives data-code rows
+imuno_labels <- sipni_dictionary("IMUNO", lookup = TRUE) |>
   select(code, label)
 
 doses_by_vaccine <- ac_2019 |>
@@ -261,6 +275,10 @@ doses_by_vaccine <- ac_2019 |>
 
 doses_by_vaccine
 ```
+
+Note: the 2019 aggregated data are drastically incomplete *at the
+source* (the Ministry was migrating to the new SI-PNI that year); totals
+are a fraction of 2018’s. This is faithful to what DATASUS publishes.
 
 ## Example: coverage trends over time
 
@@ -337,7 +355,7 @@ as strings):
 
 ds <- sipni_data(year = 2019, uf = "AC", lazy = TRUE)
 ds |>
-  filter(IMUNO == "09") |>
+  filter(IMUNO == "02") |>   # data code 02 = BCG (see sipni_dictionary)
   select(MUNIC, DOSE, QT_DOSE) |>
   collect()
 ```

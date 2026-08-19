@@ -31,7 +31,7 @@ sipni_status(dataset = c("microdados", "doses", "cobertura"), cache_dir = NULL)
 ## Value
 
 A tibble with columns: `dataset`, `year`, `month` (NA for aggregates),
-`uf` (NA for microdata 2014 partitions are monthly and national),
+`uf` (NA for microdata – partitions are monthly and national),
 `records`, `processing_timestamp` (as recorded by the pipeline, no
 timezone), `source_url` (the Ministry file the partition was derived
 from).

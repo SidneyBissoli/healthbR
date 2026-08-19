@@ -11,7 +11,7 @@ are individual-level microdata (one row per vaccination dose)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@ are individual-level microdata (one row per vaccination dose)."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Download SI-PNI Vaccination Data</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/v0.3.0/R/sipni.R" class="external-link"><code>R/sipni.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/main/R/sipni.R" class="external-link"><code>R/sipni.R</code></a></small>
       <div class="d-none name"><code>sipni_data.Rd</code></div>
     </div>
 
@@ -187,7 +187,7 @@ the source partition when multiple years/states are combined.
 Attributes: <code>healthbr_source</code> (which source served each era) and,
 for R2 reads, <code>healthbr_provenance</code> (per-partition processing
 timestamp and Ministry source URL from the mirror manifests).</p>
-<p><strong>Output differs by year range 2014 and, for 2020+, by source:</strong></p><ul><li><p><strong>1994–2019 (aggregated)</strong>: DPNI (12 vars) or CPNI (7 vars)
+<p><strong>Output differs by year range – and, for 2020+, by source:</strong></p><ul><li><p><strong>1994–2019 (aggregated)</strong>: DPNI (12 vars) or CPNI (7 vars)
 columns. Identical for both sources.</p></li>
 <li><p><strong>2020+ via R2 (default)</strong>: 56 fields from the Ministry's JSON
 exports (<code>dt_vacina</code>, <code>ds_vacina</code>,
@@ -204,7 +204,7 @@ healthbR does not rename or remap them.</p>
     <p>By default data are read from the <strong>healthbr-data R2 mirror</strong> (Parquet on
 Cloudflare R2, values byte-identical to the Ministry's files, complete
 2020+ series), falling back automatically to the official DATASUS/
-OpenDataSUS sources if the mirror is unreachable 2014 see <code>source</code>.
+OpenDataSUS sources if the mirror is unreachable – see <code>source</code>.
 The result carries a <code>healthbr_source</code> attribute recording which
 source actually served each era, and (for R2 reads) a
 <code>healthbr_provenance</code> attribute with the processing timestamp and
@@ -227,7 +227,7 @@ The R2 mirror holds the complete series; use
 <code><a href="sipni_status.html">sipni_status()</a></code> to see exactly which months are published
 and when they were processed.</p>
 <p><strong>Lazy evaluation with R2:</strong> with <code>lazy = TRUE</code> and the default
-source, the function returns the remote arrow dataset itself 2014 dplyr
+source, the function returns the remote arrow dataset itself – dplyr
 verbs are pushed down and only the touched partitions are transferred.
 In this mode the partition columns keep the bucket layout names
 (<code>ano</code>, <code>mes</code>, <code>uf</code>, as strings) instead of

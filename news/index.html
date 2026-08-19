@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,9 +55,29 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/v0.3.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.1" id="healthbr-031">healthbR 0.3.1<a class="anchor" aria-label="anchor" href="#healthbr-031"></a></h2>
+<div class="section level3">
+<h3 id="si-pni-dictionary-corrections-important-0-3-1">SI-PNI dictionary corrections (important)<a class="anchor" aria-label="anchor" href="#si-pni-dictionary-corrections-important-0-3-1"></a></h3>
+<ul><li>
+<strong>The built-in SI-PNI dictionary and label maps were wrong</strong> and have been regenerated from the Ministry’s official .cnv/.dbf dictionary files (as published on the healthbr-data mirror). The 0.2.0 hand-written table mislabeled 19 of 20 IMUNO codes — e.g. data code <code>09</code> is <em>Haemophilus influenzae tipo b (Hib)</em> per the official .cnv, not <em>BCG</em> (BCG is data code <code>02</code>) — and used DOSE/FX_ETARIA codes that do not occur in the data at all. Any decoding done with the built-in dictionary of previous versions should be redone. Regeneration script: <code>data-raw/sipni-dictionaries.R</code>.</li>
+<li>
+<strong>New <code>lookup = TRUE</code> in <code><a href="../reference/sipni_dictionary.html">sipni_dictionary()</a></code></strong>: returns a data-code lookup (one row per value as it appears in the data, expanding the .cnv <code>source_codes</code> — including comma lists like <code>88,45</code> and ranges like <code>11-31</code>), ready to join against <code><a href="../reference/sipni_data.html">sipni_data()</a></code> results. Joining data against the .cnv <code>code</code> column decodes to wrong labels; the vignette examples were corrected accordingly. Overlapping categories are resolved by specificity — explicitly listed codes beat range catch-alls — so residuals like FX_ETARIA “Idade ignorada” (source codes <code>00-99</code>) only label codes no specific category claimed.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixes-and-polish-0-3-1">Fixes and polish<a class="anchor" aria-label="anchor" href="#fixes-and-polish-0-3-1"></a></h3>
+<ul><li>
+<strong>Local partitioned caches are now opened with <code>unify_schemas = TRUE</code></strong> (all modules): when cached years carry different column sets — DPNI 1994 has 7 columns, 2019 has 12 — reads used the first file’s schema and silently dropped the extra columns of other years.</li>
+<li>Results served from the local cache now place the identifier columns (<code>year</code>, <code>month</code>, <code>uf_source</code>) first, matching fresh downloads.</li>
+<li>
+<code><a href="../reference/sipni_cache_status.html">sipni_cache_status()</a></code> (and every module’s <code>*_cache_status()</code>) now also reports hive-partitioned cache datasets, which were previously invisible.</li>
+<li>Roxygen comments no longer leak <code>\u</code> escapes into Rd files (R CMD check WARNING).</li>
+<li>Test hygiene: tests hitting httpbin.org now skip when the service is unreachable; <code>pnadc_apply_survey_design()</code> error tests skip without <code>srvyr</code>.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="healthbr-030">healthbR 0.3.0<a class="anchor" aria-label="anchor" href="#healthbr-030"></a></h2>
 <div class="section level3">

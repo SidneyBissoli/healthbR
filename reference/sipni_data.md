@@ -121,7 +121,7 @@ years/states are combined. Attributes: `healthbr_source` (which source
 served each era) and, for R2 reads, `healthbr_provenance` (per-partition
 processing timestamp and Ministry source URL from the mirror manifests).
 
-**Output differs by year range 2014 and, for 2020+, by source:**
+**Output differs by year range – and, for 2020+, by source:**
 
 - **1994–2019 (aggregated)**: DPNI (12 vars) or CPNI (7 vars) columns.
   Identical for both sources.
@@ -142,7 +142,7 @@ healthbR does not rename or remap them.
 By default data are read from the **healthbr-data R2 mirror** (Parquet
 on Cloudflare R2, values byte-identical to the Ministry's files,
 complete 2020+ series), falling back automatically to the official
-DATASUS/ OpenDataSUS sources if the mirror is unreachable 2014 see
+DATASUS/ OpenDataSUS sources if the mirror is unreachable – see
 `source`. The result carries a `healthbr_source` attribute recording
 which source actually served each era, and (for R2 reads) a
 `healthbr_provenance` attribute with the processing timestamp and
@@ -168,8 +168,8 @@ R2 mirror holds the complete series; use
 to see exactly which months are published and when they were processed.
 
 **Lazy evaluation with R2:** with `lazy = TRUE` and the default source,
-the function returns the remote arrow dataset itself 2014 dplyr verbs
-are pushed down and only the touched partitions are transferred. In this
+the function returns the remote arrow dataset itself – dplyr verbs are
+pushed down and only the touched partitions are transferred. In this
 mode the partition columns keep the bucket layout names (`ano`, `mes`,
 `uf`, as strings) instead of `year`/`month`/`uf_source`.
 

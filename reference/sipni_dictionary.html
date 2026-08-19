@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>SI-PNI Data Dictionary</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/v0.3.0/R/sipni.R" class="external-link"><code>R/sipni.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/main/R/sipni.R" class="external-link"><code>R/sipni.R</code></a></small>
       <div class="d-none name"><code>sipni_dictionary.Rd</code></div>
     </div>
 
@@ -72,7 +72,8 @@
 <span>  variable <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r2"</span>, <span class="st">"datasus"</span><span class="op">)</span>,</span>
 <span>  cache <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  cache_dir <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  cache_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lookup <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -104,12 +105,22 @@ locally after the first read.</p></dd>
 <dd><p>Character. Cache directory. Default:
 <code>tools::R_user_dir("healthbR", "cache")</code>.</p></dd>
 
+
+<dt id="arg-lookup">lookup<a class="anchor" aria-label="anchor" href="#arg-lookup"></a></dt>
+<dd><p>Logical. If TRUE, returns a <strong>data-code lookup</strong>: one row
+per value as it appears in the data columns (the .cnv
+<code>source_codes</code>, expanded), ready to join against
+<code><a href="sipni_data.html">sipni_data()</a></code> results. Default FALSE returns the dictionaries in
+their published form. See Details – for decoding data you almost
+always want <code>lookup = TRUE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble with columns: variable, description, code, label (and
-<code>source_codes</code> when served from R2 2014 the original source codes
-each dictionary entry groups, for traceability to the .cnv files).</p>
+<code>source_codes</code> when served from R2 with <code>lookup = FALSE</code> –
+the original data codes each dictionary entry groups, for
+traceability to the .cnv files).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -118,6 +129,19 @@ IMUNO (separately for doses and coverage), DOSE, FX_ETARIA, ANO, MES.
 API microdata (2020+) has description fields embedded in the data
 itself (e.g., <code>ds_vacina</code>, <code>no_raca_cor_paciente</code>),
 so a separate dictionary is not needed.</p>
+<p><strong>code vs source_codes.</strong> In the Ministry's .cnv dictionary files,
+<code>code</code> is a sequential category code and <code>source_codes</code> holds
+the value(s) actually found in the data – possibly several per label
+(comma-separated or ranges), reflecting code changes over the years.
+Joining data against <code>code</code> silently decodes to the wrong labels.
+Use <code>lookup = TRUE</code> to get one row per data code. When more than
+one category claims the same data code, the more specific claim wins:
+explicitly listed codes take precedence over codes that only fall
+inside a range – ranges are residual catch-alls by construction (e.g.
+FX_ETARIA "Idade ignorada" spans <code>00-99</code> and must not override the
+explicit age groups). The built-in fallback dictionary
+(<code>source = "datasus"</code>) is already stored as a data-code lookup, so
+<code>lookup</code> has no effect there.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -179,6 +203,23 @@ so a separate dictionary is not needed.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> DOSE     Tipo de dose 10    Dose Adicional 37          </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> DOSE     Tipo de dose 11    Dose           08          </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> DOSE     Tipo de dose 12    Tratamento     11-31       </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># join-ready lookup (data code -&gt; label)</span></span></span>
+<span class="r-in"><span><span class="fu">sipni_dictionary</span><span class="op">(</span><span class="st">"IMUNO"</span>, lookup <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 112 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    variable description                                  code  label            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> IMUNO    Código do imunobiológico (cobertura vacinal) 003   dTpa gestante    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> IMUNO    Código do imunobiológico (cobertura vacinal) 006   Febre Amarela    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> IMUNO    Código do imunobiológico (cobertura vacinal) 009   Haemophilus infl…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> IMUNO    Código do imunobiológico (cobertura vacinal) 012   Pneumocócica     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> IMUNO    Código do imunobiológico (cobertura vacinal) 018   Sarampo          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> IMUNO    Código do imunobiológico (cobertura vacinal) 020   Influenza Campan…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> IMUNO    Código do imunobiológico (cobertura vacinal) 021   Tríplice Viral  …</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> IMUNO    Código do imunobiológico (cobertura vacinal) 053   Meningococo C    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> IMUNO    Código do imunobiológico (cobertura vacinal) 061   Rotavírus Humano </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> IMUNO    Código do imunobiológico (cobertura vacinal) 072   BCG              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 102 more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

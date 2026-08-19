@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@
       <h1>Vaccination Data with SI-PNI</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/v0.3.0/vignettes/sipni-vaccination.Rmd" class="external-link"><code>vignettes/sipni-vaccination.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/main/vignettes/sipni-vaccination.Rmd" class="external-link"><code>vignettes/sipni-vaccination.Rmd</code></a></small>
       <div class="d-none name"><code>sipni-vaccination.Rmd</code></div>
     </div>
 
@@ -244,21 +244,35 @@ reads it:</p>
 <h3 id="using-the-dictionary">Using the dictionary<a class="anchor" aria-label="anchor" href="#using-the-dictionary"></a>
 </h3>
 <p>By default the dictionary is read from the mirror — the full versions
-converted from the Ministry’s original .cnv/.dbf files, including a
-<code>source_codes</code> column that traces each entry back to the
-original codes:</p>
+converted from the Ministry’s original .cnv/.dbf files.</p>
+<p><strong>Important — decoding data requires
+<code>lookup = TRUE</code>.</strong> In the .cnv files,
+<code>code</code> is a sequential category code, and the value(s)
+actually found in the data columns live in <code>source_codes</code>
+(possibly several per label, reflecting code changes over the years —
+e.g. data codes <code>08</code> <strong>and</strong> <code>82</code>
+both mean Hepatite B). Joining data against <code>code</code> silently
+produces wrong labels. <code>lookup = TRUE</code> expands the dictionary
+into one row per <strong>data code</strong>, ready to join:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># vaccine codes</span></span>
+<code class="sourceCode R"><span><span class="co"># published form (code = .cnv category, source_codes = data codes)</span></span>
 <span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"IMUNO"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># dose types</span></span>
-<span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"DOSE"</span><span class="op">)</span></span>
+<span><span class="co"># join-ready lookup: one row per data code</span></span>
+<span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"IMUNO"</span>, lookup <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># age groups</span></span>
-<span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"FX_ETARIA"</span><span class="op">)</span></span>
+<span><span class="co"># dose types and age groups</span></span>
+<span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"DOSE"</span>, lookup <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"FX_ETARIA"</span>, lookup <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># the abridged built-in dictionary (no network)</span></span>
+<span><span class="co"># the built-in offline copy (already in data-code form)</span></span>
 <span><span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"IMUNO"</span>, source <span class="op">=</span> <span class="st">"datasus"</span><span class="op">)</span></span></code></pre></div>
+<p>When more than one .cnv category claims the same data code, the more
+specific claim wins: explicitly listed codes take precedence over codes
+that only fall inside a range. This matters for residual catch-all
+categories: FX_ETARIA’s “Idade ignorada” spans codes <code>00-99</code>,
+but it only labels codes that no specific age group claimed
+explicitly.</p>
 </div>
 </div>
 <div class="section level2">
@@ -440,8 +454,8 @@ ignored because the files are annual.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ac_2019</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># decode immunobiological names</span></span>
-<span><span class="va">imuno_labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"IMUNO"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="co"># decode immunobiological names: lookup = TRUE gives data-code rows</span></span>
+<span><span class="va">imuno_labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_dictionary.html">sipni_dictionary</a></span><span class="op">(</span><span class="st">"IMUNO"</span>, lookup <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">code</span>, <span class="va">label</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">doses_by_vaccine</span> <span class="op">&lt;-</span> <span class="va">ac_2019</span> <span class="op">|&gt;</span></span>
@@ -452,6 +466,10 @@ ignored because the files are annual.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">total_doses</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">doses_by_vaccine</span></span></code></pre></div>
+<p>Note: the 2019 aggregated data are drastically incomplete <em>at the
+source</em> (the Ministry was migrating to the new SI-PNI that year);
+totals are a fraction of 2018’s. This is faithful to what DATASUS
+publishes.</p>
 </div>
 <div class="section level2">
 <h2 id="example-coverage-trends-over-time">Example: coverage trends over time<a class="anchor" aria-label="anchor" href="#example-coverage-trends-over-time"></a>
@@ -522,7 +540,7 @@ the bucket layout names (<code>ano</code>, <code>mes</code>,
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sipni_data.html">sipni_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2019</span>, uf <span class="op">=</span> <span class="st">"AC"</span>, lazy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">ds</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">IMUNO</span> <span class="op">==</span> <span class="st">"09"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">IMUNO</span> <span class="op">==</span> <span class="st">"02"</span><span class="op">)</span> <span class="op">|&gt;</span>   <span class="co"># data code 02 = BCG (see sipni_dictionary)</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">MUNIC</span>, <span class="va">DOSE</span>, <span class="va">QT_DOSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
