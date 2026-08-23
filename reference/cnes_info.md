@@ -38,8 +38,8 @@ cnes_info()
 #> ── Dados disponíveis ──
 #> 
 #> • `cnes_data()`: Dados cadastrais de estabelecimentos de saúde
-#>   Anos definitivos: 2005–2023
-#>   Anos preliminares: 2024
+#>   Anos definitivos: 2005–2024
+#>   Anos preliminares: 2025 and 2026
 #> • `cnes_variables()`: Lista de variáveis disponíveis
 #> • `cnes_dictionary()`: Dicionário completo com categorias
 #> 

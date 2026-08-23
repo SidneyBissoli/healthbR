@@ -59,6 +59,17 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="healthbr-development-version">healthbR (development version)<a class="anchor" aria-label="anchor" href="#healthbr-development-version"></a></h2>
+<div class="section level3">
+<h3 id="datasus-year-coverage-fixes-a-broken-download-development-version">DATASUS year coverage (fixes a broken download)<a class="anchor" aria-label="anchor" href="#datasus-year-coverage-fixes-a-broken-download-development-version"></a></h3>
+<ul><li>
+<strong>SINAN</strong>: 2023, 2024 and 2025 were promoted by DATASUS from <code>PRELIM/</code> to <code>FINAIS/</code>; the package still built <code>PRELIM/</code> URLs for 2023-2024, which no longer exist on the FTP, so <code>sinan_data(2023)</code>/<code>sinan_data(2024)</code> failed. Year lists updated: final = 2007-2025, preliminary = 2026.</li>
+<li>
+<strong>SIH</strong>, <strong>SIA</strong>, <strong>CNES</strong>: 2025 and 2026 (files published through 2026-05/06/07) are now accepted as preliminary years; 2024 is now final.</li>
+</ul><p>Detected by the portfolio source monitor (edition probing against the DATASUS FTP); the year lists in <code>R/*_data_internal.R</code> remain the source of truth until discovery is made dynamic.</p>
+</div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.1" id="healthbr-031">healthbR 0.3.1<a class="anchor" aria-label="anchor" href="#healthbr-031"></a></h2>
 <div class="section level3">
 <h3 id="si-pni-dictionary-corrections-important-0-3-1">SI-PNI dictionary corrections (important)<a class="anchor" aria-label="anchor" href="#si-pni-dictionary-corrections-important-0-3-1"></a></h3>

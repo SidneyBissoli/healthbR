@@ -38,8 +38,8 @@ sia_info()
 #> ── Dados disponíveis ──
 #> 
 #> • `sia_data()`: Microdados de produção ambulatorial
-#>   Anos definitivos: 2008–2023
-#>   Anos preliminares: 2024
+#>   Anos definitivos: 2008–2024
+#>   Anos preliminares: 2025 and 2026
 #> • `sia_variables()`: Lista de variáveis disponíveis
 #> • `sia_dictionary()`: Dicionário completo com categorias
 #> 

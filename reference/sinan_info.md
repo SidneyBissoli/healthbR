@@ -40,8 +40,8 @@ sinan_info()
 #> ── Dados disponíveis ──
 #> 
 #> • `sinan_data()`: Microdados de agravos notificáveis
-#>   Anos definitivos: 2007–2022
-#>   Anos preliminares: 2023–2024
+#>   Anos definitivos: 2007–2025
+#>   Anos preliminares: 2026–2026
 #> • `sinan_diseases()`: Lista de agravos disponíveis
 #> • `sinan_variables()`: Lista de variáveis disponíveis
 #> • `sinan_dictionary()`: Dicionário completo com categorias

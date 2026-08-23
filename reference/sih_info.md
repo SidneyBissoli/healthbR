@@ -38,8 +38,8 @@ sih_info()
 #> ── Dados disponíveis ──
 #> 
 #> • `sih_data()`: Microdados de internações hospitalares
-#>   Anos definitivos: 2008–2023
-#>   Anos preliminares: 2024
+#>   Anos definitivos: 2008–2024
+#>   Anos preliminares: 2025 and 2026
 #> • `sih_variables()`: Lista de variáveis disponíveis
 #> • `sih_dictionary()`: Dicionário completo com categorias
 #> 
