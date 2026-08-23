@@ -8,8 +8,8 @@
 #' SINAN available years by status
 #' @noRd
 sinan_available_years <- list(
-  final = 2007L:2022L,
-  preliminary = 2023L:2024L
+  final = 2007L:2025L,
+  preliminary = 2026L
 )
 
 # ============================================================================

@@ -8,8 +8,8 @@
 #' SIH available years by status
 #' @noRd
 sih_available_years <- list(
-  final = 2008L:2023L,
-  preliminary = 2024L
+  final = 2008L:2024L,
+  preliminary = 2025L:2026L
 )
 
 # ============================================================================

@@ -8,8 +8,8 @@
 #' CNES available years by status
 #' @noRd
 cnes_available_years <- list(
-  final = 2005L:2023L,
-  preliminary = 2024L
+  final = 2005L:2024L,
+  preliminary = 2025L:2026L
 )
 
 # ============================================================================

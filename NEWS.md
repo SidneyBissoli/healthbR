@@ -1,3 +1,18 @@
+# healthbR (development version)
+
+## DATASUS year coverage (fixes a broken download)
+
+* **SINAN**: 2023, 2024 and 2025 were promoted by DATASUS from `PRELIM/` to
+  `FINAIS/`; the package still built `PRELIM/` URLs for 2023-2024, which no
+  longer exist on the FTP, so `sinan_data(2023)`/`sinan_data(2024)` failed.
+  Year lists updated: final = 2007-2025, preliminary = 2026.
+* **SIH**, **SIA**, **CNES**: 2025 and 2026 (files published through
+  2026-05/06/07) are now accepted as preliminary years; 2024 is now final.
+
+Detected by the portfolio source monitor (edition probing against the
+DATASUS FTP); the year lists in `R/*_data_internal.R` remain the source of
+truth until discovery is made dynamic.
+
 # healthbR 0.3.1
 
 ## SI-PNI dictionary corrections (important)

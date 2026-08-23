@@ -178,8 +178,10 @@ test_that(".sinan_build_ftp_url constructs correct final URLs", {
 })
 
 test_that(".sinan_build_ftp_url constructs correct preliminary URLs", {
-  url <- .sinan_build_ftp_url(2023, "DENG")
-  expect_match(url, "PRELIM/DENGBR23\\.dbc$")
+  # 2023-2025 were promoted to FINAIS by DATASUS in 2026; 2026 is preliminary
+  url <- .sinan_build_ftp_url(2026, "DENG")
+  expect_match(url, "PRELIM/DENGBR26\\.dbc$")
+  expect_match(.sinan_build_ftp_url(2024, "DENG"), "FINAIS/DENGBR24\\.dbc$")
 })
 
 test_that(".sinan_build_ftp_url works with different diseases", {

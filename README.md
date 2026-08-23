@@ -26,10 +26,10 @@ healthbR provides easy access to Brazilian public health data directly from R. T
 |--------|-------------|-------------|-------|
 | **SIM** | Mortality Information System (deaths) | Annual/UF | 1996--2024 |
 | **SINASC** | Live Birth Information System | Annual/UF | 1996--2024 |
-| **SIH** | Hospital Information System (admissions) | Monthly/UF | 2008--2024 |
-| **SIA** | Outpatient Information System (13 file types) | Monthly/UF | 2008--2024 |
-| **SINAN** | Notifiable Diseases Surveillance (31 diseases) | Annual/UF | 2007--2024 |
-| **CNES** | National Health Facility Registry (13 file types) | Monthly/UF | 2005--2024 |
+| **SIH** | Hospital Information System (admissions) | Monthly/UF | 2008--2026 |
+| **SIA** | Outpatient Information System (13 file types) | Monthly/UF | 2008--2026 |
+| **SINAN** | Notifiable Diseases Surveillance (31 diseases) | Annual/UF | 2007--2026 |
+| **CNES** | National Health Facility Registry (13 file types) | Monthly/UF | 2005--2026 |
 | **SI-PNI** | National Immunization Program (aggregates 1994--2019, microdata 2020+; served from the healthbr-data R2 mirror with automatic DATASUS fallback) | Annual or Monthly/UF | 1994--2026 |
 
 DATASUS modules download `.dbc` files (compressed DBF) and decompress them internally using vendored C code -- no external dependencies required.
