@@ -54,6 +54,34 @@ jobs:
             fi
           }
 
+          # SI-PNI CSVs live on the CKAN S3 bucket (the previous host,
+          # arquivosdadosabertos.saude.gov.br, was decommissioned in 2026 —
+          # a probe pinned to it failed monthly from April to August).
+          # No hardcoded year/month: the Ministry publishes current-year
+          # months with variable lag, so try the last 6 months and pass if
+          # ANY exists — that is what "source alive, publishing under the
+          # naming scheme the package builds" means. Keep this URL in sync
+          # with sipni_csv_base_url (R/sipni_data_internal.R).
+          probe_sipni_csv() {
+            local label="SI-PNI CSV" base="$1"
+            TOTAL=$((TOTAL + 1))
+            local months=(jan fev mar abr mai jun jul ago set out nov dez)
+            local y m status="000" tried=""
+            y=$(date -u +%Y); m=$(date -u +%-m)
+            for _ in 1 2 3 4 5 6; do
+              status=$(curl --silent --head --max-time 30 --output /dev/null --write-out '%{http_code}' "$base/vacinacao_${months[$((m-1))]}_${y}_csv.zip" 2>/dev/null || echo "000")
+              tried="${months[$((m-1))]}/$y"
+              if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then break; fi
+              m=$((m - 1)); if [ "$m" -eq 0 ]; then m=12; y=$((y - 1)); fi
+            done
+            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+              echo "| $TOTAL | $label | HTTP HEAD | :white_check_mark: $status ($tried) |"
+            else
+              echo "| $TOTAL | $label | HTTP HEAD | :x: none of the last 6 months found |"
+              FAIL=$((FAIL + 1))
+            fi
+          }
+
           echo "## Endpoint Health Check — $(date -u '+%Y-%m-%d %H:%M UTC')"
           echo ""
           echo "| # | Module | Method | Status |"
@@ -68,8 +96,12 @@ jobs:
           probe_ftp "CNES"      "ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/ST/"
           probe_ftp "SI-PNI FTP" "ftp://ftp.datasus.gov.br/dissemin/publicos/PNI/DADOS/"
 
-          # OpenDataSUS (directory listing returns 403; probe a known file with HEAD)
-          probe_head "SI-PNI CSV" "https://arquivosdadosabertos.saude.gov.br/dados/dbbni/vacinacao_jan_2024_csv.zip"
+          # OpenDataSUS CSVs (CKAN S3 bucket; see probe_sipni_csv above)
+          probe_sipni_csv "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv"
+
+          # healthbr-data R2 mirror (default SI-PNI source for 2020+; keep in
+          # sync with healthbr_r2_pub_base in R/utils-r2.R)
+          probe_get "SI-PNI R2 mirror" "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev/sipni/manifest.json"
 
           # SISAB API (smallest possible request)
           probe_get "SISAB" "https://relatorioaps-prd.saude.gov.br/cobertura/aps?unidadeGeografica=BRASIL&nuCompInicio=202401&nuCompFim=202401"
