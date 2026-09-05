@@ -207,8 +207,8 @@ All data is downloaded from official Brazilian government repositories:
 
 - **VIGITEL**: Ministry of Health
 - **PNS / PNAD Continua / POF / Censo**: IBGE
-- **SIM / SINASC / SIH / SIA / SINAN / CNES**: DATASUS FTP
-- **SI-PNI**:
+- **SIM / SINASC / SIA / SINAN / CNES**: DATASUS FTP
+- **SIH / SI-PNI**:
   [healthbr-data](https://github.com/SidneyBissoli/healthbr-data) mirror
   on Cloudflare R2 (byte-identical to the Ministry’s files, with
   provenance metadata), falling back to DATASUS FTP / OpenDataSUS

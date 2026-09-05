@@ -61,6 +61,19 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="healthbr-development-version">healthbR (development version)<a class="anchor" aria-label="anchor" href="#healthbr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="sih-r2-backend-development-version">SIH: R2 backend<a class="anchor" aria-label="anchor" href="#sih-r2-backend-development-version"></a></h3>
+<p>The <a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a> mirror (hive-partitioned Parquet on Cloudflare R2, one partition per DATASUS file <code>RD{UF}{yy}{mm}.dbc</code>, values byte-identical, 1992-present, provenance record per file) is now the default source of the SIH module, the same design the SI-PNI module adopted in 0.3.0:</p>
+<ul><li>
+<strong><code>source</code> argument</strong> in <code><a href="../reference/sih_data.html">sih_data()</a></code>: <code>c("r2", "datasus")</code> (default) reads from the mirror and falls back to the DATASUS FTP when the mirror yields nothing; a single value pins a source. <code>r2_credentials</code> points at another bucket. Without  the FTP is used directly. Both transports share the local partitioned cache.</li>
+<li>
+<strong><code><a href="../reference/sih_status.html">sih_status()</a></code></strong> (new): one row per published partition (competence x UF) from the mirror’s manifest, with the DATASUS URL, MD5 and size of the source file, record count and processing timestamp – the way to see which competences exist and whether a file was re-issued.</li>
+<li>
+<strong>Provenance attributes</strong>: <code>attr(x, "healthbr_source")</code> says which source served the tibble; from the mirror, <code>attr(x, "healthbr_provenance")</code> lists the source files behind it.</li>
+<li>
+<strong>Lazy over the mirror</strong>: <code>sih_data(lazy = TRUE)</code> now returns a remote arrow (or duckdb) dataset over R2 – nothing is transferred until <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect()</a></code>, and filters and column selections are pushed down. The mirror’s 14 historical schemas are handled by imposing the schema of the newest requested year, so only the requested years are ever read.</li>
+<li>Documentation now states that <code>year</code>/<code>month</code> are the AIH’s <strong>billing competence</strong>, not the admission date (<code>DT_INTER</code>), and that the four competences after a year close 99.7-99.9% of its admissions (measured on the whole mirror).</li>
+</ul></div>
+<div class="section level3">
 <h3 id="datasus-year-coverage-fixes-a-broken-download-development-version">DATASUS year coverage (fixes a broken download)<a class="anchor" aria-label="anchor" href="#datasus-year-coverage-fixes-a-broken-download-development-version"></a></h3>
 <ul><li>
 <strong>SINAN</strong>: 2023, 2024 and 2025 were promoted by DATASUS from <code>PRELIM/</code> to <code>FINAIS/</code>; the package still built <code>PRELIM/</code> URLs for 2023-2024, which no longer exist on the FTP, so <code>sinan_data(2023)</code>/<code>sinan_data(2024)</code> failed. Year lists updated: final = 2007-2025, preliminary = 2026.</li>

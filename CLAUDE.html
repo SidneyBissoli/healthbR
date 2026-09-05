@@ -73,7 +73,7 @@
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span>           <span class="co"># run all tests</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span>filter <span class="op">=</span> <span class="st">"sim"</span><span class="op">)</span>   <span class="co"># run one module's tests (tests/testthat/test-sim.R)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span>          <span class="co"># full R CMD check</span></span>
-<span><span class="fu">covr</span><span class="fu">::</span><span class="fu"><a href="http://covr.r-lib.org/reference/package_coverage.html" class="external-link">package_coverage</a></span><span class="op">(</span><span class="op">)</span>   <span class="co"># coverage (target &gt;= 75%)</span></span></code></pre></div>
+<span><span class="fu">covr</span><span class="fu">::</span><span class="fu">package_coverage</span><span class="op">(</span><span class="op">)</span>   <span class="co"># coverage (target &gt;= 75%)</span></span></code></pre></div>
 <p>Integration tests (which download real data) are skipped unless <code>HEALTHBR_INTEGRATION=true</code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>HEALTHBR_INTEGRATION <span class="op">=</span> <span class="st">"true"</span><span class="op">)</span></span>

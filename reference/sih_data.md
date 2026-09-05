@@ -1,8 +1,8 @@
 # Download SIH Hospital Admission Microdata
 
-Downloads and returns hospital admission microdata from DATASUS FTP.
-Each row represents one hospital admission record (AIH). Data is
-organized monthly – one .dbc file per state (UF) per month.
+Returns hospital admission microdata (SIH-RD, "AIH reduzida"). Each row
+represents one hospital admission record (AIH). Data is organized
+monthly – one file per state (UF) per billing competence (month).
 
 ## Usage
 
@@ -18,7 +18,9 @@ sih_data(
   cache = TRUE,
   cache_dir = NULL,
   lazy = FALSE,
-  backend = c("arrow", "duckdb")
+  backend = c("arrow", "duckdb"),
+  source = c("r2", "datasus"),
+  r2_credentials = NULL
 )
 ```
 
@@ -92,21 +94,73 @@ sih_data(
   `"duckdb"`. Only used when `lazy = TRUE`. DuckDB backend requires the
   duckdb package.
 
+- source:
+
+  Character. Source priority: `c("r2", "datasus")` (default) reads from
+  the healthbr-data R2 mirror and falls back to the DATASUS FTP if the
+  mirror yields nothing; `"r2"` or `"datasus"` alone pins a source. The
+  R2 source requires the arrow package; without it the package uses the
+  FTP directly.
+
+- r2_credentials:
+
+  List or NULL. Credentials for the R2 bucket (`access_key_id`,
+  `secret_access_key`, optionally `endpoint` and `bucket`). NULL
+  (default) uses the public read-only token of the healthbr-data mirror.
+
 ## Value
 
 A tibble with hospital admission microdata. Includes columns `year`,
-`month`, and `uf_source` to identify the source when multiple
-years/months/states are combined.
+`month`, and `uf_source` to identify the source file when multiple
+years/months/states are combined: `year`/`month` are the BILLING
+COMPETENCE of the AIH (the month the account was processed), not the
+admission date, which is `DT_INTER`; `uf_source` is the state of the
+hospital, not of the patient's residence (`MUNIC_RES`). Two attributes
+record where the data came from: `attr(x, "healthbr_source")` (`"r2"` or
+`"datasus"`) and, for the mirror, `attr(x, "healthbr_provenance")`, a
+tibble with one row per source file read (competence, UF, DATASUS URL,
+MD5, size, record count and processing timestamp) – see
+[`sih_status()`](https://sidneybissoli.github.io/healthbR/reference/sih_status.md).
 
 ## Details
 
-Data is downloaded from DATASUS FTP as .dbc files (one per state per
-month). The .dbc format is decompressed internally using vendored C code
-from the blast library. No external dependencies are required.
+By default data are read from the **healthbr-data R2 mirror** (Parquet
+on Cloudflare R2, values byte-identical to the Ministry's `.dbc` files,
+with provenance metadata for every file) and the package falls back to
+the DATASUS FTP if the mirror is unreachable – see `source`. Both
+transports share the same local cache, because the content is the same
+by construction.
 
-SIH data is monthly, so downloading an entire year for all states
-requires 324 files (27 UFs x 12 months). Use `uf` and `month` to limit
-downloads.
+### Sources
+
+The mirror stores each DATASUS file `RD{UF}{yy}{mm}.dbc` as one Parquet
+partition `sih/rd/ano=YYYY/mes=MM/uf=XX/`, all columns as character, and
+publishes a manifest with the MD5 and size of every source file. Reading
+from it needs no decompression and transfers only the columns actually
+used. The FTP path downloads the `.dbc` (decompressed internally with
+vendored C code from the blast library; no external dependencies).
+
+### Competence versus admission date
+
+A file of competence `2023-01` holds the admissions billed in January
+2023, including admissions that started months earlier; conversely the
+admissions of December 2023 are spread over the competences of December
+2023 to April 2024. Measured on the whole mirror (2016-2026), the four
+competences following a year close 99.7-99.9% of that year's admissions.
+To count admissions by the date they started, filter on `DT_INTER` after
+reading a window of competences.
+
+### Lazy evaluation with R2
+
+With `lazy = TRUE` and the R2 source first, the returned object is a
+remote dataset over the mirror: nothing is downloaded until
+[`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html),
+and filters/column selections are pushed down to the Parquet files.
+Listing the mirror takes a few seconds. With `source = "datasus"`, lazy
+evaluation works over the local cache as before.
+
+SIH data is monthly, so an entire year for all states means 324 files
+(27 UFs x 12 months). Use `uf` and `month` to limit reads.
 
 ### Parallel downloads
 
@@ -126,6 +180,7 @@ Other sih:
 [`sih_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sih_clear_cache.md),
 [`sih_dictionary()`](https://sidneybissoli.github.io/healthbR/reference/sih_dictionary.md),
 [`sih_info()`](https://sidneybissoli.github.io/healthbR/reference/sih_info.md),
+[`sih_status()`](https://sidneybissoli.github.io/healthbR/reference/sih_status.md),
 [`sih_variables()`](https://sidneybissoli.github.io/healthbR/reference/sih_variables.md),
 [`sih_years()`](https://sidneybissoli.github.io/healthbR/reference/sih_years.md)
 

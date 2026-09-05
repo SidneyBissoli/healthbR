@@ -82,6 +82,7 @@ including data sources, available years, and usage guidance.</p>
 <code><a href="sih_clear_cache.html">sih_clear_cache()</a></code>,
 <code><a href="sih_data.html">sih_data()</a></code>,
 <code><a href="sih_dictionary.html">sih_dictionary()</a></code>,
+<code><a href="sih_status.html">sih_status()</a></code>,
 <code><a href="sih_variables.html">sih_variables()</a></code>,
 <code><a href="sih_years.html">sih_years()</a></code></p></div>
     </div>
@@ -93,7 +94,7 @@ including data sources, available years, and usage guidance.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">SIH — Sistema de Informações Hospitalares</span> <span style="color: #00BBBB;">───────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Fonte: Ministério da Saúde / DATASUS</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Acesso: FTP DATASUS</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Acesso: Espelho R2 healthbr-data (padrão) com fallback FTP DATASUS</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Documento base: Autorização de Internação Hospitalar (AIH)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Granularidade: Mensal (um arquivo por UF/mês)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
@@ -114,7 +115,15 @@ including data sources, available years, and usage guidance.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> MORTE Óbito hospitalar (0=Não, 1=Sim)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> VAL_TOT Valor total da AIH</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Fontes de dados</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> R2 healthbr-data (padrão): Parquet idêntico ao .dbc do FTP, 1992–presente,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   com proveniência (URL, MD5 e data de download do arquivo de origem)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> FTP DATASUS (fallback): arquivos RD{UF}{aa}{mm}.dbc, 2008–presente</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Use `source` em `sih_data()` para fixar uma fonte.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Dados mensais: use `month` em `sih_data()` para selecionar meses.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> `sih_status()` lista as competências publicadas no espelho, com hash e data de cada arquivo.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -7,13 +7,13 @@ admissions financed by the Brazilian public health system (SUS) through
 the *Autorizacao de Internacao Hospitalar* (AIH). It is managed by the
 Ministry of Health through DATASUS.
 
-| Feature     | Details                              |
-|-------------|--------------------------------------|
-| Coverage    | Per state (UF), all 27 states        |
-| Years       | 2008–2024                            |
-| Granularity | Monthly (one file per UF/month)      |
-| Unit        | One row per hospital admission (AIH) |
-| Format      | .dbc files from DATASUS FTP          |
+| Feature | Details |
+|----|----|
+| Coverage | Per state (UF), all 27 states |
+| Years | 2008–2024 |
+| Granularity | Monthly (one file per UF/month) |
+| Unit | One row per hospital admission (AIH) |
+| Format | Parquet on the healthbr-data R2 mirror (default), .dbc files from DATASUS FTP (fallback) |
 
 ## Getting started
 

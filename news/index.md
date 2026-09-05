@@ -2,6 +2,39 @@
 
 ## healthbR (development version)
 
+### SIH: R2 backend
+
+The [healthbr-data](https://github.com/SidneyBissoli/healthbr-data)
+mirror (hive-partitioned Parquet on Cloudflare R2, one partition per
+DATASUS file `RD{UF}{yy}{mm}.dbc`, values byte-identical, 1992-present,
+provenance record per file) is now the default source of the SIH module,
+the same design the SI-PNI module adopted in 0.3.0:
+
+- **`source` argument** in
+  [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md):
+  `c("r2", "datasus")` (default) reads from the mirror and falls back to
+  the DATASUS FTP when the mirror yields nothing; a single value pins a
+  source. `r2_credentials` points at another bucket. Without the FTP is
+  used directly. Both transports share the local partitioned cache.
+- **[`sih_status()`](https://sidneybissoli.github.io/healthbR/reference/sih_status.md)**
+  (new): one row per published partition (competence x UF) from the
+  mirror’s manifest, with the DATASUS URL, MD5 and size of the source
+  file, record count and processing timestamp – the way to see which
+  competences exist and whether a file was re-issued.
+- **Provenance attributes**: `attr(x, "healthbr_source")` says which
+  source served the tibble; from the mirror,
+  `attr(x, "healthbr_provenance")` lists the source files behind it.
+- **Lazy over the mirror**: `sih_data(lazy = TRUE)` now returns a remote
+  arrow (or duckdb) dataset over R2 – nothing is transferred until
+  [`collect()`](https://dplyr.tidyverse.org/reference/compute.html), and
+  filters and column selections are pushed down. The mirror’s 14
+  historical schemas are handled by imposing the schema of the newest
+  requested year, so only the requested years are ever read.
+- Documentation now states that `year`/`month` are the AIH’s **billing
+  competence**, not the admission date (`DT_INTER`), and that the four
+  competences after a year close 99.7-99.9% of its admissions (measured
+  on the whole mirror).
+
 ### DATASUS year coverage (fixes a broken download)
 
 - **SINAN**: 2023, 2024 and 2025 were promoted by DATASUS from `PRELIM/`

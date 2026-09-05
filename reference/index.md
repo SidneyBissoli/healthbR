@@ -45,11 +45,13 @@ Outpatient and high-complexity procedures (DATASUS FTP, 2008–2024)
 
 ## SIH – Hospital admissions
 
-Hospital admissions from the Hospital Information System (DATASUS FTP,
-2008–2024)
+Hospital admissions from the Hospital Information System (healthbr-data
+R2 mirror with DATASUS FTP fallback, 2008–2026)
 
 - [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)
   : Download SIH Hospital Admission Microdata
+- [`sih_status()`](https://sidneybissoli.github.io/healthbR/reference/sih_status.md)
+  : Status of the SIH-RD dataset on the healthbr-data R2 mirror
 - [`sih_years()`](https://sidneybissoli.github.io/healthbR/reference/sih_years.md)
   : List Available SIH Years
 - [`sih_info()`](https://sidneybissoli.github.io/healthbR/reference/sih_info.md)

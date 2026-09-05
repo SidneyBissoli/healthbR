@@ -27,6 +27,7 @@ Other sih:
 [`sih_clear_cache()`](https://sidneybissoli.github.io/healthbR/reference/sih_clear_cache.md),
 [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md),
 [`sih_info()`](https://sidneybissoli.github.io/healthbR/reference/sih_info.md),
+[`sih_status()`](https://sidneybissoli.github.io/healthbR/reference/sih_status.md),
 [`sih_variables()`](https://sidneybissoli.github.io/healthbR/reference/sih_variables.md),
 [`sih_years()`](https://sidneybissoli.github.io/healthbR/reference/sih_years.md)
 
