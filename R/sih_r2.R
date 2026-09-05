@@ -56,6 +56,16 @@ sih_r2_status_cols <- c(
   manifest <- .r2_manifest(sih_r2_manifest_path, cache_dir)
   if (is.null(manifest) || is.null(manifest$partitions)) return(NULL)
 
+  # Session memo keyed on the manifest's own identity: building the summary
+  # walks 11k+ partitions and cost ~4.6 s per call (measured 2026-09-05 with
+  # 11,157 partitions), which every sih_data(source = "r2") call was paying
+  # even with a warm cache. The parsed manifest is already memoised by
+  # .r2_manifest(); the summary derived from it is memoised the same way.
+  stamp <- rlang::hash(manifest)
+  memo_key <- paste0("summary:", sih_r2_manifest_path)
+  memo <- .r2_env[[memo_key]]
+  if (!is.null(memo) && identical(memo$stamp, stamp)) return(memo$summary)
+
   parts <- manifest$partitions
   keys <- names(parts)
 
@@ -73,7 +83,9 @@ sih_r2_status_cols <- c(
     vapply(parts, function(p) scalar_num(p[[field]]), numeric(1),
            USE.NAMES = FALSE)
   }
-  # first output file of a partition, whatever shape the parser gave it
+  # first output file of a partition, whatever shape the parser gave it --
+  # computed ONCE per partition (as.list() on a one-row data frame is what
+  # made the three per-field passes slow)
   first_output <- function(p) {
     of <- p[["output_files"]]
     if (is.null(of) || length(of) == 0) return(NULL)
@@ -83,12 +95,13 @@ sih_r2_status_cols <- c(
       of[[1]]
     }
   }
+  outputs <- lapply(parts, first_output)
   get_output_chr <- function(field) {
-    vapply(parts, function(p) scalar_chr(first_output(p)[[field]]),
+    vapply(outputs, function(o) scalar_chr(o[[field]]),
            character(1), USE.NAMES = FALSE)
   }
   get_output_num <- function(field) {
-    vapply(parts, function(p) scalar_num(first_output(p)[[field]]),
+    vapply(outputs, function(o) scalar_num(o[[field]]),
            numeric(1), USE.NAMES = FALSE)
   }
 
@@ -111,6 +124,7 @@ sih_r2_status_cols <- c(
   summ <- summ[order(summ$year, summ$month, summ$uf), ]
   attr(summ, "last_updated") <- scalar_chr(manifest$last_updated)
   attr(summ, "manifest_version") <- scalar_chr(manifest$manifest_version)
+  .r2_env[[memo_key]] <- list(stamp = stamp, summary = summ)
   summ
 }
 

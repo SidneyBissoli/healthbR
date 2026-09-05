@@ -509,17 +509,34 @@
                       pattern = paste0("^", module_name, "_.*\\.(parquet|rds)$"),
                       full.names = TRUE)
 
-  if (length(files) == 0) {
+  # hive-partitioned dataset directories (e.g. sih_data/, sipni_r2_data/) --
+  # the same set .cache_status() reports. They were left behind until
+  # 2026-09-05: sih_clear_cache() answered "No cached SIH files to clear"
+  # while sih_cache_status() listed the partitions, and a "cold" download
+  # measured right after clearing was in fact served from the cache.
+  dirs <- list.dirs(cache_dir, recursive = FALSE)
+  dirs <- dirs[grepl(paste0("^", module_name, "_"), basename(dirs))]
+
+  if (length(files) == 0 && length(dirs) == 0) {
     cli::cli_inform("No cached {module_label} files to clear.")
     return(invisible(NULL))
   }
 
-  removed <- file.remove(files)
-  n_removed <- sum(removed)
+  n_removed <- if (length(files) > 0) sum(file.remove(files)) else 0L
+  n_partitions <- 0L
+  if (length(dirs) > 0) {
+    n_partitions <- sum(vapply(dirs, function(d) {
+      length(list.files(d, recursive = TRUE))
+    }, integer(1)))
+    unlink(dirs, recursive = TRUE)
+  }
 
-  cli::cli_inform(c(
-    "v" = "Removed {n_removed} cached {module_label} file(s)."
-  ))
+  msg <- "Removed {n_removed} cached {module_label} file(s)"
+  if (n_partitions > 0) {
+    msg <- paste0(msg, " and {n_partitions} partition file(s) in ",
+                  "{length(dirs)} dataset director{?y/ies}")
+  }
+  cli::cli_inform(c("v" = paste0(msg, ".")))
 
   invisible(NULL)
 }

@@ -70,6 +70,33 @@ test_that(".sih_r2_manifest_summary turns the manifest into one row per partitio
   expect_equal(attr(s, "manifest_version"), "1.0.0")
 })
 
+test_that("sih_clear_cache removes the partitioned dataset directory too", {
+  tmp <- withr::local_tempdir()
+  part <- file.path(tmp, "sih_data", "uf_source=RR", "year=2023", "month=1")
+  dir.create(part, recursive = TRUE)
+  writeLines("x", file.path(part, "part-0.parquet"))
+  writeLines("x", file.path(tmp, "sih_2022_AC.rds"))
+  writeLines("x", file.path(tmp, "r2_sih_rd_manifest_json"))
+  expect_message(sih_clear_cache(cache_dir = tmp), "1 partition file")
+  expect_false(dir.exists(file.path(tmp, "sih_data")))
+  expect_false(file.exists(file.path(tmp, "sih_2022_AC.rds")))
+  # the manifest copy is not module data and stays
+  expect_true(file.exists(file.path(tmp, "r2_sih_rd_manifest_json")))
+  expect_message(sih_clear_cache(cache_dir = tmp), "No cached SIH files")
+})
+
+test_that(".sih_r2_manifest_summary is memoised per manifest content", {
+  local_mocked_bindings(.r2_manifest = function(...) fake_manifest)
+  a <- .sih_r2_manifest_summary(tempdir())
+  b <- .sih_r2_manifest_summary(tempdir())
+  expect_identical(a, b)
+  # a different manifest (same size, same stamp fields) must NOT hit the memo
+  changed <- fake_manifest
+  changed$partitions[["2023-01-AC"]]$total_records <- 1
+  local_mocked_bindings(.r2_manifest = function(...) changed)
+  expect_equal(.sih_r2_manifest_summary(tempdir())$records[1], 1)
+})
+
 test_that(".sih_r2_manifest_summary tolerates a partition without output_files", {
   bare <- fake_manifest
   bare$partitions[["2023-01-AC"]]$output_files <- NULL
