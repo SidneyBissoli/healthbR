@@ -1,19 +1,35 @@
 # SIH via the healthbr-data R2 mirror (sih_r2.R + the source chain in sih.R)
 
+# Shaped like jsonlite::fromJSON(simplifyVector = TRUE) reads the real
+# manifest: `output_files` (an array of one object) becomes a one-row
+# data.frame. The AC entry uses the list-of-lists shape instead, which the
+# summary must read the same way.
 fake_manifest <- list(
   manifest_version = "1.0.0",
   dataset = "sih/rd",
   last_updated = "2026-08-18T12:33:31",
+  pipeline_version = "1.0.0",
   partitions = list(
     "2024-04-RR" = list(
       source_url = "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR2404.dbc",
       total_records = 4001, processing_timestamp = "2026-03-09 04:10:00",
-      source_hash_md5 = "md5-rr-2404", source_size_bytes = 300000
+      source_hash_md5 = "md5-rr-2404", source_size_bytes = 300000,
+      output_files = data.frame(
+        path = "sih/rd/ano=2024/mes=04/uf=RR/part-0.parquet",
+        size_bytes = 250000, sha256 = "sha-rr-2404", record_count = 4001,
+        stringsAsFactors = FALSE
+      ),
+      pipeline_version = "1.0.0", git_commit = "020ee5cc"
     ),
     "2023-01-AC" = list(
       source_url = "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDAC2301.dbc",
       total_records = 4165, processing_timestamp = "2026-03-09 03:02:56",
-      source_hash_md5 = "md5-ac-2301", source_size_bytes = 294939
+      source_hash_md5 = "md5-ac-2301", source_size_bytes = 294939,
+      output_files = list(list(
+        path = "sih/rd/ano=2023/mes=01/uf=AC/part-0.parquet",
+        size_bytes = 240000, sha256 = "sha-ac-2301", record_count = 4165
+      )),
+      pipeline_version = "1.0.0", git_commit = "020ee5cc"
     )
   )
 )
@@ -41,6 +57,30 @@ test_that(".sih_r2_manifest_summary turns the manifest into one row per partitio
   expect_equal(s$source_size_bytes, c(294939, 300000))
   expect_true(all(grepl("^ftp://ftp\\.datasus\\.gov\\.br/", s$source_url)))
   expect_equal(unique(s$dataset), "sih_rd")
+  # the Parquet behind each partition and the pipeline that wrote it, read
+  # from both shapes of `output_files`
+  expect_equal(s$parquet_path, c("sih/rd/ano=2023/mes=01/uf=AC/part-0.parquet",
+                                 "sih/rd/ano=2024/mes=04/uf=RR/part-0.parquet"))
+  expect_equal(s$parquet_sha256, c("sha-ac-2301", "sha-rr-2404"))
+  expect_equal(s$parquet_size_bytes, c(240000, 250000))
+  expect_equal(s$pipeline_version, c("1.0.0", "1.0.0"))
+  expect_equal(s$git_commit, c("020ee5cc", "020ee5cc"))
+  expect_named(s, sih_r2_status_cols)
+  expect_equal(attr(s, "last_updated"), "2026-08-18T12:33:31")
+  expect_equal(attr(s, "manifest_version"), "1.0.0")
+})
+
+test_that(".sih_r2_manifest_summary tolerates a partition without output_files", {
+  bare <- fake_manifest
+  bare$partitions[["2023-01-AC"]]$output_files <- NULL
+  bare$partitions[["2023-01-AC"]]$git_commit <- NULL
+  local_mocked_bindings(.r2_manifest = function(...) bare)
+  s <- .sih_r2_manifest_summary(tempdir())
+  expect_equal(nrow(s), 2)
+  expect_true(is.na(s$parquet_path[1]))
+  expect_true(is.na(s$parquet_sha256[1]))
+  expect_true(is.na(s$git_commit[1]))
+  expect_equal(s$parquet_sha256[2], "sha-rr-2404")
 })
 
 test_that(".sih_r2_provenance keeps only the partitions a call touched", {
@@ -58,9 +98,7 @@ test_that("sih_status warns and returns a typed empty tibble when the manifest i
   local_mocked_bindings(.r2_manifest = function(...) NULL)
   expect_warning(st <- sih_status(cache_dir = tempdir()), "manifest")
   expect_equal(nrow(st), 0)
-  expect_named(st, c("dataset", "year", "month", "uf", "records",
-                     "processing_timestamp", "source_url",
-                     "source_hash_md5", "source_size_bytes"))
+  expect_named(st, sih_r2_status_cols)
 })
 
 test_that(".sih_r2_shape mirrors the FTP path's columns", {
@@ -191,4 +229,7 @@ test_that("sih_status lists the published competences", {
   expect_true(all(nchar(st$uf) == 2))
   expect_true(all(st$month %in% 1:12))
   expect_true(all(!is.na(st$source_hash_md5)))
+  expect_true(all(!is.na(st$parquet_sha256)))
+  expect_true(all(grepl("^sih/rd/ano=\\d{4}/mes=\\d{2}/uf=[A-Z]{2}/", st$parquet_path)))
+  expect_match(attr(st, "last_updated"), "^\\d{4}-\\d{2}-\\d{2}")
 })

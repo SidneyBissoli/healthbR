@@ -16,7 +16,12 @@ SI-PNI module adopted in 0.3.0:
 * **`sih_status()`** (new): one row per published partition (competence x
   UF) from the mirror's manifest, with the DATASUS URL, MD5 and size of the
   source file, record count and processing timestamp -- the way to see
-  which competences exist and whether a file was re-issued.
+  which competences exist and whether a file was re-issued. It also carries
+  the Parquet behind each partition (`parquet_path`, `parquet_sha256`,
+  `parquet_size_bytes`) and the healthbr-data pipeline that wrote it
+  (`pipeline_version`, `git_commit`), with the manifest's `last_updated`
+  and `manifest_version` as attributes -- enough for a derived product to
+  record exactly which files it was built from (the sih-br-mcp cubes do).
 * **Provenance attributes**: `attr(x, "healthbr_source")` says which source
   served the tibble; from the mirror, `attr(x, "healthbr_provenance")` lists
   the source files behind it.

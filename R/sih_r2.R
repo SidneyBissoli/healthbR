@@ -29,11 +29,28 @@ sih_r2_manifest_path <- "sih/rd/manifest.json"
 # manifest summary + provenance
 # ============================================================================
 
+#' Column names of the SIH-RD manifest summary (and of sih_status())
+#' @noRd
+sih_r2_status_cols <- c(
+  "dataset", "year", "month", "uf", "records", "processing_timestamp",
+  "source_url", "source_hash_md5", "source_size_bytes",
+  "parquet_path", "parquet_sha256", "parquet_size_bytes",
+  "pipeline_version", "git_commit"
+)
+
 #' Summarise the SIH-RD manifest as one row per partition
 #'
-#' @return A tibble (dataset, year, month, uf, records, processing_timestamp,
-#'   source_url, source_hash_md5, source_size_bytes) or NULL when the manifest
-#'   is unreachable and not cached. Never errors.
+#' Each manifest entry describes one DATASUS file (source_*), the Parquet it
+#' became (`output_files`, always one file per partition: path, sha256,
+#' size, record_count) and the healthbr-data pipeline that wrote it
+#' (`pipeline_version`, `git_commit`). `output_files` arrives as a one-row
+#' data.frame when the manifest is parsed with `simplifyVector = TRUE` and
+#' as a list of lists otherwise; both shapes are read.
+#'
+#' @return A tibble with the columns in `sih_r2_status_cols`, sorted by year,
+#'   month and uf, with the manifest's `last_updated` and `manifest_version`
+#'   as attributes of the same names -- or NULL when the manifest is
+#'   unreachable and not cached. Never errors.
 #' @noRd
 .sih_r2_manifest_summary <- function(cache_dir) {
   manifest <- .r2_manifest(sih_r2_manifest_path, cache_dir)
@@ -42,17 +59,37 @@ sih_r2_manifest_path <- "sih/rd/manifest.json"
   parts <- manifest$partitions
   keys <- names(parts)
 
+  scalar_chr <- function(v) {
+    if (is.null(v) || length(v) == 0) NA_character_ else as.character(v[[1]])
+  }
+  scalar_num <- function(v) {
+    if (is.null(v) || length(v) == 0) NA_real_ else as.numeric(v[[1]])
+  }
   get_chr <- function(field) {
-    vapply(parts, function(p) {
-      v <- p[[field]]
-      if (is.null(v) || length(v) == 0) NA_character_ else as.character(v[1])
-    }, character(1), USE.NAMES = FALSE)
+    vapply(parts, function(p) scalar_chr(p[[field]]), character(1),
+           USE.NAMES = FALSE)
   }
   get_num <- function(field) {
-    vapply(parts, function(p) {
-      v <- p[[field]]
-      if (is.null(v) || length(v) == 0) NA_real_ else as.numeric(v[1])
-    }, numeric(1), USE.NAMES = FALSE)
+    vapply(parts, function(p) scalar_num(p[[field]]), numeric(1),
+           USE.NAMES = FALSE)
+  }
+  # first output file of a partition, whatever shape the parser gave it
+  first_output <- function(p) {
+    of <- p[["output_files"]]
+    if (is.null(of) || length(of) == 0) return(NULL)
+    if (is.data.frame(of)) {
+      if (nrow(of) == 0) NULL else as.list(of[1, , drop = FALSE])
+    } else {
+      of[[1]]
+    }
+  }
+  get_output_chr <- function(field) {
+    vapply(parts, function(p) scalar_chr(first_output(p)[[field]]),
+           character(1), USE.NAMES = FALSE)
+  }
+  get_output_num <- function(field) {
+    vapply(parts, function(p) scalar_num(first_output(p)[[field]]),
+           numeric(1), USE.NAMES = FALSE)
   }
 
   summ <- tibble::tibble(
@@ -64,9 +101,17 @@ sih_r2_manifest_path <- "sih/rd/manifest.json"
     processing_timestamp = get_chr("processing_timestamp"),
     source_url = get_chr("source_url"),
     source_hash_md5 = get_chr("source_hash_md5"),
-    source_size_bytes = get_num("source_size_bytes")
+    source_size_bytes = get_num("source_size_bytes"),
+    parquet_path = get_output_chr("path"),
+    parquet_sha256 = get_output_chr("sha256"),
+    parquet_size_bytes = get_output_num("size_bytes"),
+    pipeline_version = get_chr("pipeline_version"),
+    git_commit = get_chr("git_commit")
   )
-  summ[order(summ$year, summ$month, summ$uf), ]
+  summ <- summ[order(summ$year, summ$month, summ$uf), ]
+  attr(summ, "last_updated") <- scalar_chr(manifest$last_updated)
+  attr(summ, "manifest_version") <- scalar_chr(manifest$manifest_version)
+  summ
 }
 
 
@@ -254,18 +299,25 @@ sih_r2_manifest_path <- "sih/rd/manifest.json"
 #'
 #' Reads the mirror's `manifest.json` (revalidated by ETag, cached locally)
 #' and returns one row per published partition (billing competence x state
-#' of the hospital), with the DATASUS source file it came from, its MD5 and
-#' size, the record count and the processing timestamp. This is what
-#' [sih_data()] reads by default; use it to see which competences are
-#' published and to detect a re-issued file (the MD5 changes).
+#' of the hospital): the DATASUS source file it came from (URL, MD5, size),
+#' the Parquet it became (path in the bucket, SHA-256, size, record count),
+#' when it was processed and by which version of the healthbr-data pipeline.
+#' This is what [sih_data()] reads by default; use it to see which
+#' competences are published, to detect a re-issued file (the MD5 changes)
+#' and to record the exact files behind a derived product.
 #'
 #' @param cache_dir Character. Cache directory for the local copy of the
 #'   manifest. Default: the SIH module cache.
 #'
-#' @return A tibble with columns `dataset`, `year`, `month`, `uf`, `records`,
-#'   `processing_timestamp`, `source_url`, `source_hash_md5` and
-#'   `source_size_bytes`. Empty (with a warning) if the manifest cannot be
-#'   read and no local copy exists.
+#' @return A tibble with one row per partition and columns `dataset`, `year`,
+#'   `month`, `uf`, `records`, `processing_timestamp` (UTC),
+#'   `source_url`, `source_hash_md5`, `source_size_bytes` (the DATASUS
+#'   `.dbc`), `parquet_path`, `parquet_sha256`, `parquet_size_bytes` (the
+#'   mirror's Parquet), `pipeline_version` and `git_commit` (the healthbr-data
+#'   pipeline that wrote it). The manifest's `last_updated` timestamp and
+#'   `manifest_version` come along as attributes of the same names
+#'   (`attr(st, "last_updated")`). Empty (with a warning) if the manifest
+#'   cannot be read and no local copy exists.
 #'
 #' @export
 #' @family sih
@@ -274,6 +326,8 @@ sih_r2_manifest_path <- "sih/rd/manifest.json"
 #' st <- sih_status()
 #' # competences published for Roraima in 2024
 #' st[st$uf == "RR" & st$year == 2024, ]
+#' # when the mirror's manifest was last updated
+#' attr(st, "last_updated")
 sih_status <- function(cache_dir = NULL) {
   cache_dir <- .sih_cache_dir(cache_dir)
   s <- .sih_r2_manifest_summary(cache_dir)
@@ -286,7 +340,10 @@ sih_status <- function(cache_dir = NULL) {
       dataset = character(0), year = integer(0), month = integer(0),
       uf = character(0), records = numeric(0),
       processing_timestamp = character(0), source_url = character(0),
-      source_hash_md5 = character(0), source_size_bytes = numeric(0)
+      source_hash_md5 = character(0), source_size_bytes = numeric(0),
+      parquet_path = character(0), parquet_sha256 = character(0),
+      parquet_size_bytes = numeric(0), pipeline_version = character(0),
+      git_commit = character(0)
     ))
   }
   s

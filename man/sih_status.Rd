@@ -11,24 +11,33 @@ sih_status(cache_dir = NULL)
 manifest. Default: the SIH module cache.}
 }
 \value{
-A tibble with columns \code{dataset}, \code{year}, \code{month}, \code{uf}, \code{records},
-\code{processing_timestamp}, \code{source_url}, \code{source_hash_md5} and
-\code{source_size_bytes}. Empty (with a warning) if the manifest cannot be
-read and no local copy exists.
+A tibble with one row per partition and columns \code{dataset}, \code{year},
+\code{month}, \code{uf}, \code{records}, \code{processing_timestamp} (UTC),
+\code{source_url}, \code{source_hash_md5}, \code{source_size_bytes} (the DATASUS
+\code{.dbc}), \code{parquet_path}, \code{parquet_sha256}, \code{parquet_size_bytes} (the
+mirror's Parquet), \code{pipeline_version} and \code{git_commit} (the healthbr-data
+pipeline that wrote it). The manifest's \code{last_updated} timestamp and
+\code{manifest_version} come along as attributes of the same names
+(\code{attr(st, "last_updated")}). Empty (with a warning) if the manifest
+cannot be read and no local copy exists.
 }
 \description{
 Reads the mirror's \code{manifest.json} (revalidated by ETag, cached locally)
 and returns one row per published partition (billing competence x state
-of the hospital), with the DATASUS source file it came from, its MD5 and
-size, the record count and the processing timestamp. This is what
-\code{\link[=sih_data]{sih_data()}} reads by default; use it to see which competences are
-published and to detect a re-issued file (the MD5 changes).
+of the hospital): the DATASUS source file it came from (URL, MD5, size),
+the Parquet it became (path in the bucket, SHA-256, size, record count),
+when it was processed and by which version of the healthbr-data pipeline.
+This is what \code{\link[=sih_data]{sih_data()}} reads by default; use it to see which
+competences are published, to detect a re-issued file (the MD5 changes)
+and to record the exact files behind a derived product.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 st <- sih_status()
 # competences published for Roraima in 2024
 st[st$uf == "RR" & st$year == 2024, ]
+# when the mirror's manifest was last updated
+attr(st, "last_updated")
 \dontshow{\}) # examplesIf}
 }
 \seealso{
