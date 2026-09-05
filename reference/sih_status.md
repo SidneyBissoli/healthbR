@@ -2,11 +2,14 @@
 
 Reads the mirror's `manifest.json` (revalidated by ETag, cached locally)
 and returns one row per published partition (billing competence x state
-of the hospital), with the DATASUS source file it came from, its MD5 and
-size, the record count and the processing timestamp. This is what
+of the hospital): the DATASUS source file it came from (URL, MD5, size),
+the Parquet it became (path in the bucket, SHA-256, size, record count),
+when it was processed and by which version of the healthbr-data
+pipeline. This is what
 [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)
-reads by default; use it to see which competences are published and to
-detect a re-issued file (the MD5 changes).
+reads by default; use it to see which competences are published, to
+detect a re-issued file (the MD5 changes) and to record the exact files
+behind a derived product.
 
 ## Usage
 
@@ -23,10 +26,15 @@ sih_status(cache_dir = NULL)
 
 ## Value
 
-A tibble with columns `dataset`, `year`, `month`, `uf`, `records`,
-`processing_timestamp`, `source_url`, `source_hash_md5` and
-`source_size_bytes`. Empty (with a warning) if the manifest cannot be
-read and no local copy exists.
+A tibble with one row per partition and columns `dataset`, `year`,
+`month`, `uf`, `records`, `processing_timestamp` (UTC), `source_url`,
+`source_hash_md5`, `source_size_bytes` (the DATASUS `.dbc`),
+`parquet_path`, `parquet_sha256`, `parquet_size_bytes` (the mirror's
+Parquet), `pipeline_version` and `git_commit` (the healthbr-data
+pipeline that wrote it). The manifest's `last_updated` timestamp and
+`manifest_version` come along as attributes of the same names
+(`attr(st, "last_updated")`). Empty (with a warning) if the manifest
+cannot be read and no local copy exists.
 
 ## See also
 
@@ -46,5 +54,7 @@ if (FALSE) { # interactive()
 st <- sih_status()
 # competences published for Roraima in 2024
 st[st$uf == "RR" & st$year == 2024, ]
+# when the mirror's manifest was last updated
+attr(st, "last_updated")
 }
 ```
