@@ -4,6 +4,9 @@
 
 - [Introduction to
   healthbR](https://sidneybissoli.github.io/healthbR/articles/healthbR.md):
+- [healthbR vs microdatasus: reading DATASUS microdata (SIM, SINASC,
+  SIH) in
+  R](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.md):
 
 ### DATASUS modules
 

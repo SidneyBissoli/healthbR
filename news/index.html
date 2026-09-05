@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/healthbR.html">Getting started</a></li>
+    <li><a class="dropdown-item" href="../articles/healthbr-vs-microdatasus.html">healthbR vs microdatasus</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>DATASUS modules</h6></li>
     <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS modules overview</a></li>
@@ -61,8 +62,15 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="healthbr-development-version">healthbR (development version)<a class="anchor" aria-label="anchor" href="#healthbr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="new-vignette-healthbr-vs-microdatasus-development-version">New vignette: healthbR vs microdatasus<a class="anchor" aria-label="anchor" href="#new-vignette-healthbr-vs-microdatasus-development-version"></a></h3>
+<ul><li>
+<code><a href="../articles/healthbr-vs-microdatasus.html">vignette("healthbr-vs-microdatasus")</a></code> compares healthbR with <a href="https://CRAN.R-project.org/package=microdatasus" class="external-link">microdatasus</a> on the DATASUS systems both read (SIM, SINASC, SIH, SIA, SINAN, CNES): coverage table, what each package does with the raw codes (labels vs. codes plus dictionary), where the bytes come from (DATASUS FTP <code>.dbc</code> vs. the healthbr-data Parquet mirror with provenance), lazy evaluation, cache, and a measured run of the same three downloads (SIH RR 2023-01, SIM and SINASC AC 2022) in both packages. README and DESCRIPTION now name DATASUS and the neighbouring packages (microdatasus, PySUS, basedosdados) so the comparison is findable.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="sih-r2-backend-development-version">SIH: R2 backend<a class="anchor" aria-label="anchor" href="#sih-r2-backend-development-version"></a></h3>
-<p>The <a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a> mirror (hive-partitioned Parquet on Cloudflare R2, one partition per DATASUS file <code>RD{UF}{yy}{mm}.dbc</code>, values byte-identical, 1992-present, provenance record per file) is now the default source of the SIH module, the same design the SI-PNI module adopted in 0.3.0:</p>
+<ul><li>
+<strong>Warm calls no longer pay for the manifest summary.</strong> Turning the mirror’s manifest (11,157 partitions on 2026-09-05) into the <code><a href="../reference/sih_status.html">sih_status()</a></code> tibble cost ~4.6 s and ran on <em>every</em> <code>sih_data(source = "r2")</code> call, so a one-file read from a warm cache took ~5.5 s against 0.9 s from the FTP. The per-partition output-file lookup is now done once and the summary is memoised per manifest content (<code><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">rlang::hash()</a></code>), the way the parsed manifest already was: the same warm read now takes ~0.8 s and <code><a href="../reference/sih_status.html">sih_status()</a></code> ~0.75 s. Found while measuring the comparison vignette.</li>
+</ul><p>The <a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a> mirror (hive-partitioned Parquet on Cloudflare R2, one partition per DATASUS file <code>RD{UF}{yy}{mm}.dbc</code>, values byte-identical, 1992-present, provenance record per file) is now the default source of the SIH module, the same design the SI-PNI module adopted in 0.3.0:</p>
 <ul><li>
 <strong><code>source</code> argument</strong> in <code><a href="../reference/sih_data.html">sih_data()</a></code>: <code>c("r2", "datasus")</code> (default) reads from the mirror and falls back to the DATASUS FTP when the mirror yields nothing; a single value pins a source. <code>r2_credentials</code> points at another bucket. Without  the FTP is used directly. Both transports share the local partitioned cache.</li>
 <li>
@@ -72,6 +80,11 @@
 <li>
 <strong>Lazy over the mirror</strong>: <code>sih_data(lazy = TRUE)</code> now returns a remote arrow (or duckdb) dataset over R2 – nothing is transferred until <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect()</a></code>, and filters and column selections are pushed down. The mirror’s 14 historical schemas are handled by imposing the schema of the newest requested year, so only the requested years are ever read.</li>
 <li>Documentation now states that <code>year</code>/<code>month</code> are the AIH’s <strong>billing competence</strong>, not the admission date (<code>DT_INTER</code>), and that the four competences after a year close 99.7-99.9% of its admissions (measured on the whole mirror).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="cache-development-version">Cache<a class="anchor" aria-label="anchor" href="#cache-development-version"></a></h3>
+<ul><li>
+<strong><code>*_clear_cache()</code> now clears the partitioned cache too.</strong> The shared <code>.clear_cache()</code> removed only flat <code>&lt;module&gt;_*.parquet|rds</code> files and left the hive-partitioned dataset directories (<code>sih_data/</code>, <code>sim_data/</code>, <code>sipni_r2_data/</code>, …) behind, so <code><a href="../reference/sih_clear_cache.html">sih_clear_cache()</a></code> answered “No cached SIH files to clear” while <code><a href="../reference/sih_cache_status.html">sih_cache_status()</a></code> still listed the partitions – and a “cold” download timed right after clearing was served from the cache. It now removes the same directories <code>.cache_status()</code> reports and says how many partition files went. Affects every module with a partitioned cache. Found while measuring the comparison vignette.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="datasus-year-coverage-fixes-a-broken-download-development-version">DATASUS year coverage (fixes a broken download)<a class="anchor" aria-label="anchor" href="#datasus-year-coverage-fixes-a-broken-download-development-version"></a></h3>

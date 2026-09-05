@@ -3,9 +3,19 @@
 ## Overview
 
 healthbR provides easy access to Brazilian public health data directly
-from R. The package downloads, caches, and processes data from official
-sources, returning clean, analysis-ready tibbles following tidyverse
-conventions.
+from R: the DATASUS microdata systems (SIM mortality, SINASC live
+births, SIH hospital admissions, SIA outpatient production, SINAN
+notifiable diseases, CNES facilities, SI-PNI vaccination), the IBGE and
+Ministry of Health surveys (VIGITEL, PNS, PNAD Continua, POF, Censo) and
+the regulatory agencies (ANS, ANVISA). The package downloads, caches,
+and processes data from official sources, returning clean,
+analysis-ready tibbles following tidyverse conventions.
+
+If you already use
+[microdatasus](https://CRAN.R-project.org/package=microdatasus) (or
+PySUS in Python) for DATASUS, see [healthbR vs
+microdatasus](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html)
+– a measured comparison of the two packages on the systems both read.
 
 ### Surveys (IBGE / Ministry of Health)
 
@@ -31,7 +41,10 @@ conventions.
 
 DATASUS modules download `.dbc` files (compressed DBF) and decompress
 them internally using vendored C code – no external dependencies
-required.
+required. SIH and SI-PNI read by default from the
+[healthbr-data](https://github.com/SidneyBissoli/healthbr-data) Parquet
+mirror (byte-identical to the Ministry’s files, with per-file
+provenance: source URL, MD5, timestamp) and fall back to the FTP.
 
 ### Primary Care & Regulatory Agencies
 
@@ -41,9 +54,37 @@ required.
 | **ANS** | ANS Open Data Portal | Supplementary health beneficiaries, consumer complaints, financial statements | 2007–present |
 | **ANVISA** | ANVISA Open Data Portal | Product registrations, pharmacovigilance, hemovigilance, technovigilance, SNGPC | snapshot + 2014–present |
 
+## healthbR and microdatasus
+
+Two R packages read DATASUS microdata; they overlap on six systems and
+differ in what they do with the bytes. Measured on 2026-09-05 (healthbR
+0.3.1 dev, microdatasus 3.0.0) and detailed in the vignette [healthbR vs
+microdatasus](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html):
+
+|  | healthbR | microdatasus |
+|----|----|----|
+| DATASUS systems | SIM, SINASC, SIH, SIA, SINAN (31 diseases), CNES, SI-PNI | SIM, SINASC, SIH, SIA, SINAN (8 diseases), CNES |
+| Beyond DATASUS | VIGITEL, PNS, PNAD Continua, POF, Censo, SISAB, ANS, ANVISA | SIGTAP, CADGER and municipality tables |
+| `.dbc` reader | vendored C (blast) | the same code, adapted from healthbR in 3.0.0 |
+| Codes | kept as codes; typed (`Date`, integer, double); labels via `*_dictionary()` | replaced by labels by `process_*()`; all columns character |
+| Source | healthbr-data Parquet mirror with provenance (SIH, SI-PNI), FTP otherwise | DATASUS FTP |
+| Lazy / cache | `lazy = TRUE` (arrow or duckdb), local Parquet cache | none |
+
+Same rows, same records, same death counts on the three downloads
+compared. Each package fits a different workflow; the vignette says
+which.
+
 ## Installation
 
-You can install the development version of healthbR from GitHub:
+From CRAN (0.2.0):
+
+``` r
+
+install.packages("healthbR")
+```
+
+The development version, with the SIH mirror and the newest year
+coverage, from GitHub:
 
 ``` r
 
@@ -203,7 +244,8 @@ sim_clear_cache()
 
 ## Data sources
 
-All data is downloaded from official Brazilian government repositories:
+All data is downloaded from official Brazilian government repositories
+(DATASUS, IBGE, ANS, ANVISA):
 
 - **VIGITEL**: Ministry of Health
 - **PNS / PNAD Continua / POF / Censo**: IBGE
@@ -558,6 +600,9 @@ Product registrations, pharmacovigilance, and SNGPC (HTTPS CSV,
 
 - [Introduction to
   healthbR](https://sidneybissoli.github.io/healthbR/articles/healthbR.md):
+- [healthbR vs microdatasus: reading DATASUS microdata (SIM, SINASC,
+  SIH) in
+  R](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.md):
 
 ### DATASUS modules
 
