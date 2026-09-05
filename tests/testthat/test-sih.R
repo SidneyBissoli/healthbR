@@ -410,7 +410,7 @@ test_that("sih_data reports partial download failures", {
     }
   )
   result <- suppressWarnings(
-    sih_data(2022, month = 1, uf = c("AC", "XX"), parse = FALSE)
+    sih_data(2022, source = "datasus", month = 1, uf = c("AC", "XX"), parse = FALSE)
   )
   expect_s3_class(result, "data.frame")
   failures <- attr(result, "download_failures")
@@ -428,7 +428,7 @@ test_that("sih_data reports partial download failures", {
 test_that("sih_info returns invisible list with all expected fields", {
   result <- sih_info()
   expect_type(result, "list")
-  expect_equal(result$source, "DATASUS FTP")
+  expect_equal(result$source, "healthbr-data R2 (Parquet) + DATASUS FTP")
   expect_true(length(result$final_years) > 0)
   expect_true(result$n_variables > 0)
   expect_true(grepl("SIH", result$name))
@@ -550,7 +550,7 @@ test_that("sih_data applies diagnosis filter via mock", {
     }
   )
 
-  result <- sih_data(2022, month = 1, uf = "AC",
+  result <- sih_data(2022, source = "datasus", month = 1, uf = "AC",
                      diagnosis = "I21", parse = FALSE)
   expect_equal(nrow(result), 2)
   expect_true(all(grepl("^I21", result$DIAG_PRINC)))
@@ -568,7 +568,7 @@ test_that("sih_data with multiple diagnosis codes", {
     }
   )
 
-  result <- sih_data(2022, month = 1, uf = "AC",
+  result <- sih_data(2022, source = "datasus", month = 1, uf = "AC",
                      diagnosis = c("I21", "J18"), parse = FALSE)
   expect_equal(nrow(result), 3)
   expect_true(all(grepl("^(I21|J18)", result$DIAG_PRINC)))
@@ -585,7 +585,7 @@ test_that("sih_data warns when DIAG_PRINC column missing for diagnosis filter", 
   )
 
   expect_warning(
-    sih_data(2022, month = 1, uf = "AC",
+    sih_data(2022, source = "datasus", month = 1, uf = "AC",
              diagnosis = "I21", parse = FALSE),
     "DIAG_PRINC"
   )
@@ -603,7 +603,7 @@ test_that("sih_data with vars selects columns", {
     }
   )
 
-  result <- sih_data(2022, month = 1, uf = "AC",
+  result <- sih_data(2022, source = "datasus", month = 1, uf = "AC",
                      vars = c("DIAG_PRINC", "SEXO"), parse = FALSE)
 
   expect_true("DIAG_PRINC" %in% names(result))
@@ -627,7 +627,7 @@ test_that("sih_data parse=TRUE converts types via mock", {
     }
   )
 
-  result <- sih_data(2022, month = 1, uf = "AC", parse = TRUE)
+  result <- sih_data(2022, source = "datasus", month = 1, uf = "AC", parse = TRUE)
   expect_s3_class(result$DT_INTER, "Date")
   expect_type(result$VAL_TOT, "double")
   expect_type(result$DIAS_PERM, "integer")

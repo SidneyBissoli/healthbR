@@ -28,6 +28,7 @@ Other sih:
 \code{\link[=sih_clear_cache]{sih_clear_cache()}},
 \code{\link[=sih_data]{sih_data()}},
 \code{\link[=sih_info]{sih_info()}},
+\code{\link[=sih_status]{sih_status()}},
 \code{\link[=sih_variables]{sih_variables()}},
 \code{\link[=sih_years]{sih_years()}}
 }

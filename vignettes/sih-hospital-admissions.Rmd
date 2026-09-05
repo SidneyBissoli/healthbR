@@ -25,7 +25,7 @@ The **SIH (Sistema de Informacoes Hospitalares)** records all hospital admission
 | Years | 2008--2024 |
 | Granularity | Monthly (one file per UF/month) |
 | Unit | One row per hospital admission (AIH) |
-| Format | .dbc files from DATASUS FTP |
+| Format | Parquet on the healthbr-data R2 mirror (default), .dbc files from DATASUS FTP (fallback) |
 
 ## Getting started
 

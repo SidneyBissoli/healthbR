@@ -79,9 +79,10 @@ reference:
       - sia_clear_cache
 
   - title: "SIH -- Hospital admissions"
-    desc: "Hospital admissions from the Hospital Information System (DATASUS FTP, 2008--2024)"
+    desc: "Hospital admissions from the Hospital Information System (healthbr-data R2 mirror with DATASUS FTP fallback, 2008--2026)"
     contents:
       - sih_data
+      - sih_status
       - sih_years
       - sih_info
       - sih_variables

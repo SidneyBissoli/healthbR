@@ -167,7 +167,7 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
 #' @return An arrow Dataset.
 #' @noRd
 .r2_open_dataset <- function(prefix, creds = NULL, partition_cols = NULL,
-                             unify_schemas = FALSE) {
+                             unify_schemas = FALSE, schema = NULL) {
   creds <- creds %||% .r2_credentials()
   fs <- .r2_filesystem(creds)
 
@@ -188,6 +188,9 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
   )
   if (!is.null(partitioning)) args$partitioning <- partitioning
   if (isTRUE(unify_schemas)) args$unify_schemas <- TRUE
+  # an explicit schema (partition fields included) lets a prefix with several
+  # historical schemas be opened without reading every footer
+  if (!is.null(schema)) args$schema <- schema
   do.call(arrow::open_dataset, args)
 }
 
