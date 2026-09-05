@@ -12,6 +12,8 @@ navbar:
       menu:
         - text: "Getting started"
           href: articles/healthbR.html
+        - text: "healthbR vs microdatasus"
+          href: articles/healthbr-vs-microdatasus.html
         - text: "---"
         - text: "DATASUS modules"
         - text: "DATASUS modules overview"
@@ -233,6 +235,7 @@ articles:
     navbar: ~
     contents:
       - healthbR
+      - healthbr-vs-microdatasus
 
   - title: "DATASUS modules"
     contents:

@@ -1,6 +1,28 @@
 # healthbR (development version)
 
+## New vignette: healthbR vs microdatasus
+
+* `vignette("healthbr-vs-microdatasus")` compares healthbR with
+  [microdatasus](https://CRAN.R-project.org/package=microdatasus) on the
+  DATASUS systems both read (SIM, SINASC, SIH, SIA, SINAN, CNES): coverage
+  table, what each package does with the raw codes (labels vs. codes plus
+  dictionary), where the bytes come from (DATASUS FTP `.dbc` vs. the
+  healthbr-data Parquet mirror with provenance), lazy evaluation, cache, and
+  a measured run of the same three downloads (SIH RR 2023-01, SIM and SINASC
+  AC 2022) in both packages. README and DESCRIPTION now name DATASUS and the
+  neighbouring packages (microdatasus, PySUS, basedosdados) so the
+  comparison is findable.
+
 ## SIH: R2 backend
+
+* **Warm calls no longer pay for the manifest summary.** Turning the
+  mirror's manifest (11,157 partitions on 2026-09-05) into the
+  `sih_status()` tibble cost ~4.6 s and ran on *every* `sih_data(source =
+  "r2")` call, so a one-file read from a warm cache took ~5.5 s against
+  0.9 s from the FTP. The per-partition output-file lookup is now done once
+  and the summary is memoised per manifest content (`rlang::hash()`), the
+  way the parsed manifest already was: the same warm read now takes ~0.8 s
+  and `sih_status()` ~0.75 s. Found while measuring the comparison vignette.
 
 The [healthbr-data](https://github.com/SidneyBissoli/healthbr-data) mirror
 (hive-partitioned Parquet on Cloudflare R2, one partition per DATASUS file
@@ -34,6 +56,18 @@ SI-PNI module adopted in 0.3.0:
   competence**, not the admission date (`DT_INTER`), and that the four
   competences after a year close 99.7-99.9% of its admissions (measured on
   the whole mirror).
+
+## Cache
+
+* **`*_clear_cache()` now clears the partitioned cache too.** The shared
+  `.clear_cache()` removed only flat `<module>_*.parquet|rds` files and left
+  the hive-partitioned dataset directories (`sih_data/`, `sim_data/`,
+  `sipni_r2_data/`, ...) behind, so `sih_clear_cache()` answered "No cached
+  SIH files to clear" while `sih_cache_status()` still listed the partitions
+  -- and a "cold" download timed right after clearing was served from the
+  cache. It now removes the same directories `.cache_status()` reports and
+  says how many partition files went. Affects every module with a
+  partitioned cache. Found while measuring the comparison vignette.
 
 ## DATASUS year coverage (fixes a broken download)
 
