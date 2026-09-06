@@ -69,12 +69,17 @@ explicit age groups). The built-in fallback dictionary
 \code{lookup} has no effect there.
 }
 \examples{
-sipni_dictionary()
-sipni_dictionary("IMUNO")
-sipni_dictionary("DOSE")
+# built-in fallback dictionary: no network, no cache
+sipni_dictionary(source = "datasus")
+sipni_dictionary("IMUNO", source = "datasus")
 
 # join-ready lookup (data code -> label)
-sipni_dictionary("IMUNO", lookup = TRUE)
+sipni_dictionary("IMUNO", source = "datasus", lookup = TRUE)
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
+# official .cnv dictionaries from the healthbr-data mirror (downloads once)
+sipni_dictionary()
+sipni_dictionary("DOSE")
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other sipni:

@@ -787,12 +787,16 @@ sipni_variables <- function(type = "DPNI", search = NULL,
 #' @family sipni
 #'
 #' @examples
-#' sipni_dictionary()
-#' sipni_dictionary("IMUNO")
-#' sipni_dictionary("DOSE")
+#' # built-in fallback dictionary: no network, no cache
+#' sipni_dictionary(source = "datasus")
+#' sipni_dictionary("IMUNO", source = "datasus")
 #'
 #' # join-ready lookup (data code -> label)
-#' sipni_dictionary("IMUNO", lookup = TRUE)
+#' sipni_dictionary("IMUNO", source = "datasus", lookup = TRUE)
+#' @examplesIf interactive()
+#' # official .cnv dictionaries from the healthbr-data mirror (downloads once)
+#' sipni_dictionary()
+#' sipni_dictionary("DOSE")
 sipni_dictionary <- function(variable = NULL, source = c("r2", "datasus"),
                              cache = TRUE, cache_dir = NULL,
                              lookup = FALSE) {

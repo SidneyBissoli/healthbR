@@ -1,4 +1,8 @@
-# healthbR (development version)
+# healthbR 0.4.0
+
+*First CRAN release since 0.2.0: this version also carries everything in
+0.3.0 and 0.3.1 below (SI-PNI on the healthbr-data mirror, SI-PNI
+dictionary corrections), which were GitHub-only.*
 
 ## New vignette: healthbR vs microdatasus
 
