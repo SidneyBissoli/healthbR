@@ -17,9 +17,12 @@ supplementary health beneficiaries, consumer complaints, and financial
 statements), 'ANVISA' ('Agencia Nacional de Vigilancia Sanitaria' -
 product registrations, 'pharmacovigilance', 'hemovigilance',
 'technovigilance', and controlled substance sales via 'SNGPC'), and
-other health information systems. Data is downloaded from the Brazilian
-Ministry of Health and 'IBGE' repositories. Data is returned in tidy
-format following tidyverse conventions.
+other health information systems. Data is downloaded from 'DATASUS' (the
+Ministry of Health's informatics department: compressed '.dbc' microdata
+read natively, or the healthbr-data 'Parquet' mirror with per-file
+provenance) and from 'IBGE' repositories, and is returned in tidy format
+following tidyverse conventions. A vignette compares the package with
+'microdatasus' on the 'DATASUS' systems both read.
 
 ## See also
 

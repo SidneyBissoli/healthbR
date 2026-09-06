@@ -93,55 +93,23 @@ Other sipni:
 ## Examples
 
 ``` r
-sipni_dictionary()
-#> # A tibble: 263 × 5
-#>    variable description                                code  label  source_codes
-#>    <chr>    <chr>                                      <chr> <chr>  <chr>       
-#>  1 IMUNO    Código do imunobiológico (doses aplicadas) 01    BCG (… 02          
-#>  2 IMUNO    Código do imunobiológico (doses aplicadas) 02    BCG -… 03          
-#>  3 IMUNO    Código do imunobiológico (doses aplicadas) 03    Febre… 06          
-#>  4 IMUNO    Código do imunobiológico (doses aplicadas) 04    Febre… 07          
-#>  5 IMUNO    Código do imunobiológico (doses aplicadas) 05    Haemo… 09          
-#>  6 IMUNO    Código do imunobiológico (doses aplicadas) 06    Hepat… 88,45       
-#>  7 IMUNO    Código do imunobiológico (doses aplicadas) 07    Hepat… 08,82       
-#>  8 IMUNO    Código do imunobiológico (doses aplicadas) 08    Hepat… 67          
-#>  9 IMUNO    Código do imunobiológico (doses aplicadas) 09    Influ… 14          
-#> 10 IMUNO    Código do imunobiológico (doses aplicadas) 10    Influ… 22          
-#> # ℹ 253 more rows
-sipni_dictionary("IMUNO")
-#> # A tibble: 111 × 5
-#>    variable description                                code  label  source_codes
-#>    <chr>    <chr>                                      <chr> <chr>  <chr>       
-#>  1 IMUNO    Código do imunobiológico (doses aplicadas) 01    BCG (… 02          
-#>  2 IMUNO    Código do imunobiológico (doses aplicadas) 02    BCG -… 03          
-#>  3 IMUNO    Código do imunobiológico (doses aplicadas) 03    Febre… 06          
-#>  4 IMUNO    Código do imunobiológico (doses aplicadas) 04    Febre… 07          
-#>  5 IMUNO    Código do imunobiológico (doses aplicadas) 05    Haemo… 09          
-#>  6 IMUNO    Código do imunobiológico (doses aplicadas) 06    Hepat… 88,45       
-#>  7 IMUNO    Código do imunobiológico (doses aplicadas) 07    Hepat… 08,82       
-#>  8 IMUNO    Código do imunobiológico (doses aplicadas) 08    Hepat… 67          
-#>  9 IMUNO    Código do imunobiológico (doses aplicadas) 09    Influ… 14          
-#> 10 IMUNO    Código do imunobiológico (doses aplicadas) 10    Influ… 22          
-#> # ℹ 101 more rows
-sipni_dictionary("DOSE")
-#> # A tibble: 12 × 5
-#>    variable description  code  label          source_codes
-#>    <chr>    <chr>        <chr> <chr>          <chr>       
-#>  1 DOSE     Tipo de dose 1     Dose única     04,09       
-#>  2 DOSE     Tipo de dose 2     1ª dose        01,32       
-#>  3 DOSE     Tipo de dose 3     2ª dose        02,33       
-#>  4 DOSE     Tipo de dose 4     3ª dose        03,34       
-#>  5 DOSE     Tipo de dose 5     4ª dose        07,35       
-#>  6 DOSE     Tipo de dose 6     1º reforço     05,5        
-#>  7 DOSE     Tipo de dose 7     2º reforço     06          
-#>  8 DOSE     Tipo de dose 8     Revacinacao    10          
-#>  9 DOSE     Tipo de dose 9     Dose Inicial   36          
-#> 10 DOSE     Tipo de dose 10    Dose Adicional 37          
-#> 11 DOSE     Tipo de dose 11    Dose           08          
-#> 12 DOSE     Tipo de dose 12    Tratamento     11-31       
-
-# join-ready lookup (data code -> label)
-sipni_dictionary("IMUNO", lookup = TRUE)
+# built-in fallback dictionary: no network, no cache
+sipni_dictionary(source = "datasus")
+#> # A tibble: 387 × 4
+#>    variable description       code  label
+#>    <chr>    <chr>             <chr> <chr>
+#>  1 ANO      Ano de referência 1994  1994 
+#>  2 ANO      Ano de referência 1995  1995 
+#>  3 ANO      Ano de referência 1996  1996 
+#>  4 ANO      Ano de referência 1997  1997 
+#>  5 ANO      Ano de referência 1998  1998 
+#>  6 ANO      Ano de referência 1999  1999 
+#>  7 ANO      Ano de referência 2000  2000 
+#>  8 ANO      Ano de referência 2001  2001 
+#>  9 ANO      Ano de referência 2002  2002 
+#> 10 ANO      Ano de referência 2003  2003 
+#> # ℹ 377 more rows
+sipni_dictionary("IMUNO", source = "datasus")
 #> # A tibble: 112 × 4
 #>    variable description                                  code  label            
 #>    <chr>    <chr>                                        <chr> <chr>            
@@ -156,4 +124,26 @@ sipni_dictionary("IMUNO", lookup = TRUE)
 #>  9 IMUNO    Código do imunobiológico (cobertura vacinal) 061   Rotavírus Humano 
 #> 10 IMUNO    Código do imunobiológico (cobertura vacinal) 072   BCG              
 #> # ℹ 102 more rows
+
+# join-ready lookup (data code -> label)
+sipni_dictionary("IMUNO", source = "datasus", lookup = TRUE)
+#> # A tibble: 112 × 4
+#>    variable description                                  code  label            
+#>    <chr>    <chr>                                        <chr> <chr>            
+#>  1 IMUNO    Código do imunobiológico (cobertura vacinal) 003   dTpa gestante    
+#>  2 IMUNO    Código do imunobiológico (cobertura vacinal) 006   Febre Amarela    
+#>  3 IMUNO    Código do imunobiológico (cobertura vacinal) 009   Haemophilus infl…
+#>  4 IMUNO    Código do imunobiológico (cobertura vacinal) 012   Pneumocócica     
+#>  5 IMUNO    Código do imunobiológico (cobertura vacinal) 018   Sarampo          
+#>  6 IMUNO    Código do imunobiológico (cobertura vacinal) 020   Influenza Campan…
+#>  7 IMUNO    Código do imunobiológico (cobertura vacinal) 021   Tríplice Viral  …
+#>  8 IMUNO    Código do imunobiológico (cobertura vacinal) 053   Meningococo C    
+#>  9 IMUNO    Código do imunobiológico (cobertura vacinal) 061   Rotavírus Humano 
+#> 10 IMUNO    Código do imunobiológico (cobertura vacinal) 072   BCG              
+#> # ℹ 102 more rows
+if (FALSE) { # interactive()
+# official .cnv dictionaries from the healthbr-data mirror (downloads once)
+sipni_dictionary()
+sipni_dictionary("DOSE")
+}
 ```

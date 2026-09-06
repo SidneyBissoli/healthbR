@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,14 +60,15 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="healthbr-development-version">healthbR (development version)<a class="anchor" aria-label="anchor" href="#healthbr-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.4.0" id="healthbr-040">healthbR 0.4.0<a class="anchor" aria-label="anchor" href="#healthbr-040"></a></h2>
+<p><em>First CRAN release since 0.2.0: this version also carries everything in 0.3.0 and 0.3.1 below (SI-PNI on the healthbr-data mirror, SI-PNI dictionary corrections), which were GitHub-only.</em></p>
 <div class="section level3">
-<h3 id="new-vignette-healthbr-vs-microdatasus-development-version">New vignette: healthbR vs microdatasus<a class="anchor" aria-label="anchor" href="#new-vignette-healthbr-vs-microdatasus-development-version"></a></h3>
+<h3 id="new-vignette-healthbr-vs-microdatasus-0-4-0">New vignette: healthbR vs microdatasus<a class="anchor" aria-label="anchor" href="#new-vignette-healthbr-vs-microdatasus-0-4-0"></a></h3>
 <ul><li>
 <code><a href="../articles/healthbr-vs-microdatasus.html">vignette("healthbr-vs-microdatasus")</a></code> compares healthbR with <a href="https://CRAN.R-project.org/package=microdatasus" class="external-link">microdatasus</a> on the DATASUS systems both read (SIM, SINASC, SIH, SIA, SINAN, CNES): coverage table, what each package does with the raw codes (labels vs. codes plus dictionary), where the bytes come from (DATASUS FTP <code>.dbc</code> vs. the healthbr-data Parquet mirror with provenance), lazy evaluation, cache, and a measured run of the same three downloads (SIH RR 2023-01, SIM and SINASC AC 2022) in both packages. README and DESCRIPTION now name DATASUS and the neighbouring packages (microdatasus, PySUS, basedosdados) so the comparison is findable.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="sih-r2-backend-development-version">SIH: R2 backend<a class="anchor" aria-label="anchor" href="#sih-r2-backend-development-version"></a></h3>
+<h3 id="sih-r2-backend-0-4-0">SIH: R2 backend<a class="anchor" aria-label="anchor" href="#sih-r2-backend-0-4-0"></a></h3>
 <ul><li>
 <strong>Warm calls no longer pay for the manifest summary.</strong> Turning the mirror’s manifest (11,157 partitions on 2026-09-05) into the <code><a href="../reference/sih_status.html">sih_status()</a></code> tibble cost ~4.6 s and ran on <em>every</em> <code>sih_data(source = "r2")</code> call, so a one-file read from a warm cache took ~5.5 s against 0.9 s from the FTP. The per-partition output-file lookup is now done once and the summary is memoised per manifest content (<code><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">rlang::hash()</a></code>), the way the parsed manifest already was: the same warm read now takes ~0.8 s and <code><a href="../reference/sih_status.html">sih_status()</a></code> ~0.75 s. Found while measuring the comparison vignette.</li>
 </ul><p>The <a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a> mirror (hive-partitioned Parquet on Cloudflare R2, one partition per DATASUS file <code>RD{UF}{yy}{mm}.dbc</code>, values byte-identical, 1992-present, provenance record per file) is now the default source of the SIH module, the same design the SI-PNI module adopted in 0.3.0:</p>
@@ -82,12 +83,12 @@
 <li>Documentation now states that <code>year</code>/<code>month</code> are the AIH’s <strong>billing competence</strong>, not the admission date (<code>DT_INTER</code>), and that the four competences after a year close 99.7-99.9% of its admissions (measured on the whole mirror).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="cache-development-version">Cache<a class="anchor" aria-label="anchor" href="#cache-development-version"></a></h3>
+<h3 id="cache-0-4-0">Cache<a class="anchor" aria-label="anchor" href="#cache-0-4-0"></a></h3>
 <ul><li>
 <strong><code>*_clear_cache()</code> now clears the partitioned cache too.</strong> The shared <code>.clear_cache()</code> removed only flat <code>&lt;module&gt;_*.parquet|rds</code> files and left the hive-partitioned dataset directories (<code>sih_data/</code>, <code>sim_data/</code>, <code>sipni_r2_data/</code>, …) behind, so <code><a href="../reference/sih_clear_cache.html">sih_clear_cache()</a></code> answered “No cached SIH files to clear” while <code><a href="../reference/sih_cache_status.html">sih_cache_status()</a></code> still listed the partitions – and a “cold” download timed right after clearing was served from the cache. It now removes the same directories <code>.cache_status()</code> reports and says how many partition files went. Affects every module with a partitioned cache. Found while measuring the comparison vignette.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="datasus-year-coverage-fixes-a-broken-download-development-version">DATASUS year coverage (fixes a broken download)<a class="anchor" aria-label="anchor" href="#datasus-year-coverage-fixes-a-broken-download-development-version"></a></h3>
+<h3 id="datasus-year-coverage-fixes-a-broken-download-0-4-0">DATASUS year coverage (fixes a broken download)<a class="anchor" aria-label="anchor" href="#datasus-year-coverage-fixes-a-broken-download-0-4-0"></a></h3>
 <ul><li>
 <strong>SINAN</strong>: 2023, 2024 and 2025 were promoted by DATASUS from <code>PRELIM/</code> to <code>FINAIS/</code>; the package still built <code>PRELIM/</code> URLs for 2023-2024, which no longer exist on the FTP, so <code>sinan_data(2023)</code>/<code>sinan_data(2024)</code> failed. Year lists updated: final = 2007-2025, preliminary = 2026.</li>
 <li>
