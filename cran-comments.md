@@ -1,3 +1,11 @@
+## Resubmission
+
+This is a resubmission. In the previous submission (2026-09-06) CRAN found
+two (possibly) invalid file URIs in README.md: relative links to
+CONTRIBUTING.md and CODE_OF_CONDUCT.md, which are not shipped in the
+tarball (.Rbuildignore). Both links now point to the absolute GitHub URLs
+of those files. No other change.
+
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
