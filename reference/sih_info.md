@@ -39,7 +39,7 @@ sih_info()
 #> ── Dados disponíveis ──
 #> 
 #> • `sih_data()`: Microdados de internações hospitalares
-#>   Anos definitivos: 2008–2024
+#>   Anos definitivos: 1992–2024
 #>   Anos preliminares: 2025 and 2026
 #> • `sih_variables()`: Lista de variáveis disponíveis
 #> • `sih_dictionary()`: Dicionário completo com categorias
@@ -58,6 +58,7 @@ sih_info()
 #> • R2 healthbr-data (padrão): Parquet idêntico ao .dbc do FTP, 1992–presente,
 #>   com proveniência (URL, MD5 e data de download do arquivo de origem)
 #> • FTP DATASUS (fallback): arquivos RD{UF}{aa}{mm}.dbc, 2008–presente
+#>   RACA_COR (raça/cor) só existe no leiaute da AIH a partir de 2008.
 #>   Use `source` em `sih_data()` para fixar uma fonte.
 #> 
 #> ℹ Dados mensais: use `month` em `sih_data()` para selecionar meses.

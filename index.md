@@ -33,7 +33,7 @@ microdatasus](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-micr
 |----|----|----|----|
 | **SIM** | Mortality Information System (deaths) | Annual/UF | 1996–2024 |
 | **SINASC** | Live Birth Information System | Annual/UF | 1996–2024 |
-| **SIH** | Hospital Information System (admissions) | Monthly/UF | 2008–2026 |
+| **SIH** | Hospital Information System (admissions) | Monthly/UF | 1992–2026 |
 | **SIA** | Outpatient Information System (13 file types) | Monthly/UF | 2008–2026 |
 | **SINAN** | Notifiable Diseases Surveillance (31 diseases) | Annual/UF | 2007–2026 |
 | **CNES** | National Health Facility Registry (13 file types) | Monthly/UF | 2005–2026 |

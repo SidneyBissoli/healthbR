@@ -1,7 +1,10 @@
 # List Available SIH Years
 
 Returns an integer vector with years for which hospital admission
-microdata are available from DATASUS FTP.
+microdata are available. Since 0.4.0.9000 the range starts in 1992:
+years before 2008 exist only on the healthbr-data R2 mirror (the DATASUS
+FTP fallback starts in 2008) and have no `RACA_COR` column (race/colour
+was added to the AIH layout in 2008).
 
 ## Usage
 
@@ -40,9 +43,11 @@ Other sih:
 
 ``` r
 sih_years()
-#>  [1] 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022
-#> [16] 2023 2024
+#>  [1] 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006
+#> [16] 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#> [31] 2022 2023 2024
 sih_years(status = "all")
-#>  [1] 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022
-#> [16] 2023 2024 2025 2026
+#>  [1] 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006
+#> [16] 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#> [31] 2022 2023 2024 2025 2026
 ```

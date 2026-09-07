@@ -10,7 +10,7 @@ Ministry of Health through DATASUS.
 | Feature | Details |
 |----|----|
 | Coverage | Per state (UF), all 27 states |
-| Years | 2008–2024 |
+| Years | 1992–2024 (1992–2007 only on the R2 mirror; `RACA_COR` only from 2008) |
 | Granularity | Monthly (one file per UF/month) |
 | Unit | One row per hospital admission (AIH) |
 | Format | Parquet on the healthbr-data R2 mirror (default), .dbc files from DATASUS FTP (fallback) |
