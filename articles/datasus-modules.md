@@ -11,7 +11,7 @@ registry, vaccination data, and primary care coverage:
 |----|----|----|----|----|
 | SIM | [`sim_data()`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md) | Declaracao de Obito (DO) | Annual/UF | 1996–2024 |
 | SINASC | [`sinasc_data()`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md) | Declaracao de Nascido Vivo (DN) | Annual/UF | 1996–2024 |
-| SIH | [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md) | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF | 1992–2024 (R2 mirror; FTP from 2008) |
+| SIH | [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md) | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF | 2008–2024 |
 | SIA | [`sia_data()`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md) | BPA / APAC | Monthly/type/UF | 2008–2024 |
 | SINAN | [`sinan_data()`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md) | Ficha de Notificacao | Annual/National | 2007–2024 |
 | CNES | [`cnes_data()`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md) | Cadastro de Estabelecimentos | Monthly/type/UF | 2005–2024 |
