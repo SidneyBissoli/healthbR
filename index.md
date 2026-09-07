@@ -270,14 +270,14 @@ citation("healthbR")
 ## Contributing
 
 Please see
-[CONTRIBUTING.md](https://sidneybissoli.github.io/healthbR/CONTRIBUTING.md)
+[CONTRIBUTING.md](https://github.com/SidneyBissoli/healthbR/blob/main/CONTRIBUTING.md)
 for guidelines on how to contribute to this project.
 
 ## Code of Conduct
 
 Please note that the healthbR project is released with a [Contributor
 Code of
-Conduct](https://sidneybissoli.github.io/healthbR/CODE_OF_CONDUCT.md).
+Conduct](https://github.com/SidneyBissoli/healthbR/blob/main/CODE_OF_CONDUCT.md).
 By contributing to this project, you agree to abide by its terms.
 
 ## License
