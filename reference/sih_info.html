@@ -9,7 +9,7 @@ including data sources, available years, and usage guidance."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@ including data sources, available years, and usage guidance."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>SIH Module Information</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/v0.4.0/R/sih.R" class="external-link"><code>R/sih.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/main/R/sih.R" class="external-link"><code>R/sih.R</code></a></small>
       <div class="d-none name"><code>sih_info.Rd</code></div>
     </div>
 
@@ -102,7 +102,7 @@ including data sources, available years, and usage guidance.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Dados disponíveis</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> `sih_data()`: Microdados de internações hospitalares</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   Anos definitivos: 2008–2024</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Anos definitivos: 1992–2024</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Anos preliminares: 2025 and 2026</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> `sih_variables()`: Lista de variáveis disponíveis</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> `sih_dictionary()`: Dicionário completo com categorias</span>
@@ -121,6 +121,7 @@ including data sources, available years, and usage guidance.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> R2 healthbr-data (padrão): Parquet idêntico ao .dbc do FTP, 1992–presente,</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   com proveniência (URL, MD5 e data de download do arquivo de origem)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> FTP DATASUS (fallback): arquivos RD{UF}{aa}{mm}.dbc, 2008–presente</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   RACA_COR (raça/cor) só existe no leiaute da AIH a partir de 2008.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Use `source` em `sih_data()` para fixar uma fonte.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Dados mensais: use `month` em `sih_data()` para selecionar meses.</span>

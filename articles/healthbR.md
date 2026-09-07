@@ -26,7 +26,7 @@ groups:
 |----|----|----|----|
 | SIM | Mortality (death certificates) | Annual/UF | 1996–2024 |
 | SINASC | Live births | Annual/UF | 1996–2024 |
-| SIH | Hospital admissions (AIH) | Monthly/UF | 2008–2024 |
+| SIH | Hospital admissions (AIH) | Monthly/UF | 1992–2024 |
 | SIA | Outpatient procedures (13 file types) | Monthly/UF | 2008–2024 |
 | SINAN | Notifiable diseases (31 diseases) | Annual/National | 2007–2024 |
 | CNES | Health facility registry (13 file types) | Monthly/UF | 2005–2024 |

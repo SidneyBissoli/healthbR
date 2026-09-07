@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">healthbR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,9 +56,21 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/v0.4.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.0.9000" id="healthbr-0409000">healthbR 0.4.0.9000<a class="anchor" aria-label="anchor" href="#healthbr-0409000"></a></h2>
+<div class="section level3">
+<h3 id="mirror-served-from-the-custom-domain-0-4-0-9000">Mirror served from the custom domain<a class="anchor" aria-label="anchor" href="#mirror-served-from-the-custom-domain-0-4-0-9000"></a></h3>
+<ul><li>Manifests and single-object reads from the healthbr-data mirror now go to <code>https://data.sidneybissoli.com</code> first (the bucket behind Cloudflare’s cache, same paths) and fall back to the <code>r2.dev</code> URL when the domain does not answer. <code>options(healthbR.r2_pub_base = ...)</code> overrides the domain. <code><a href="../reference/sipni_info.html">sipni_info()</a></code> points to the domain.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="sih-through-the-mirror-0-4-0-9000">SIH: 1992-2007 through the mirror<a class="anchor" aria-label="anchor" href="#sih-through-the-mirror-0-4-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/sih_years.html">sih_years()</a></code> now starts in 1992 instead of 2008. The healthbr-data mirror has carried the whole SIH-RD series (1992-present) since it was built, but <code><a href="../reference/sih_data.html">sih_data()</a></code> refused any year before 2008 even with <code>source = "r2"</code>, because the year list was written for the DATASUS FTP folder (<code>SIHSUS/200801_</code>). The FTP fallback still covers 2008 on only and says so when asked for an earlier year. Two caveats for the early years, both properties of the source files: <code>RACA_COR</code> (race/colour) only exists from 2008 on, and <code>DIAG_PRINC</code> is CID-10 only from 1998 (1992-1997 use the 6-digit CID-9 derived coding). Needed by the sih-br-mcp cubes for 1998-2007.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="healthbr-040">healthbR 0.4.0<a class="anchor" aria-label="anchor" href="#healthbr-040"></a></h2>
 <p><em>First CRAN release since 0.2.0: this version also carries everything in 0.3.0 and 0.3.1 below (SI-PNI on the healthbr-data mirror, SI-PNI dictionary corrections), which were GitHub-only.</em></p>

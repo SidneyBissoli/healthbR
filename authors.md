@@ -8,15 +8,15 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/SidneyBissoli/healthbR/blob/v0.4.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/SidneyBissoli/healthbR/blob/main/inst/CITATION)
 
 Bissoli S (2025). *healthbR: Access Brazilian Public Health Data*. R
-package version 0.4.0, <https://github.com/SidneyBissoli/healthbR>.
+package version 0.4.0.9000, <https://github.com/SidneyBissoli/healthbR>.
 
     @Manual{,
       title = {healthbR: Access Brazilian Public Health Data},
       author = {Sidney Bissoli},
       year = {2025},
-      note = {R package version 0.4.0},
+      note = {R package version 0.4.0.9000},
       url = {https://github.com/SidneyBissoli/healthbR},
     }

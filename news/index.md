@@ -1,5 +1,31 @@
 # Changelog
 
+## healthbR 0.4.0.9000
+
+### Mirror served from the custom domain
+
+- Manifests and single-object reads from the healthbr-data mirror now go
+  to `https://data.sidneybissoli.com` first (the bucket behind
+  Cloudflare’s cache, same paths) and fall back to the `r2.dev` URL when
+  the domain does not answer. `options(healthbR.r2_pub_base = ...)`
+  overrides the domain.
+  [`sipni_info()`](https://sidneybissoli.github.io/healthbR/reference/sipni_info.md)
+  points to the domain.
+
+### SIH: 1992-2007 through the mirror
+
+- [`sih_years()`](https://sidneybissoli.github.io/healthbR/reference/sih_years.md)
+  now starts in 1992 instead of 2008. The healthbr-data mirror has
+  carried the whole SIH-RD series (1992-present) since it was built, but
+  [`sih_data()`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)
+  refused any year before 2008 even with `source = "r2"`, because the
+  year list was written for the DATASUS FTP folder (`SIHSUS/200801_`).
+  The FTP fallback still covers 2008 on only and says so when asked for
+  an earlier year. Two caveats for the early years, both properties of
+  the source files: `RACA_COR` (race/colour) only exists from 2008 on,
+  and `DIAG_PRINC` is CID-10 only from 1998 (1992-1997 use the 6-digit
+  CID-9 derived coding). Needed by the sih-br-mcp cubes for 1998-2007.
+
 ## healthbR 0.4.0
 
 *First CRAN release since 0.2.0: this version also carries everything in
