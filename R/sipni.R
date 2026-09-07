@@ -677,7 +677,7 @@ sipni_info <- function() {
     n_variables_cpni = nrow(sipni_variables_cpni),
     n_variables_api = nrow(sipni_variables_api),
     n_variables_microdados = nrow(sipni_variables_microdados),
-    url_r2 = paste0(healthbr_r2_pub_base, "/sipni/"),
+    url_r2 = stringr::str_c(healthbr_r2_pub_domain, "/sipni/"),
     url_ftp = "ftp://ftp.datasus.gov.br/dissemin/publicos/PNI/",
     url_csv = sipni_csv_base_url
   ))

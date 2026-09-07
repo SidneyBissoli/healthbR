@@ -32,9 +32,22 @@ healthbr_r2_access_key <- "28c72d4b3e1140fa468e367ae472b522"
 #' @noRd
 healthbr_r2_secret_key <- "2937b2106736e2ba64e24e92f2be4e6c312bba3355586e41ce634b14c1482951"
 
-#' healthbr-data public HTTP base URL (single-object reads, e.g. manifests)
+#' healthbr-data public HTTP base URLs (single-object reads, e.g. manifests)
+#'
+#' The custom domain serves the whole bucket with the same paths and is
+#' preferred (it is the one behind Cloudflare's cache); the `r2.dev` URL is
+#' the fallback when the domain is unreachable. Override the domain with
+#' `options(healthbR.r2_pub_base = "https://...")` (no trailing slash).
 #' @noRd
+healthbr_r2_pub_domain <- "https://data.sidneybissoli.com"
 healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
+
+#' Public URLs of one object, in the order to try them
+#' @noRd
+.r2_pub_urls <- function(object_path) {
+  bases <- unique(c(getOption("healthbR.r2_pub_base", healthbr_r2_pub_domain), healthbr_r2_pub_base))
+  stringr::str_c(bases, "/", object_path)
+}
 
 #' Session-level memoization environment for R2 handles and manifests
 #' @noRd
@@ -213,13 +226,23 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
 #'   unreachable and no local copy exists.
 #' @noRd
 .r2_manifest <- function(manifest_path, cache_dir) {
-  url <- paste0(healthbr_r2_pub_base, "/", manifest_path)
+  # custom domain first, r2.dev as fallback: the first URL that answers the
+  # HEAD is the one the download uses (same object, same etag)
+  urls <- .r2_pub_urls(manifest_path)
+  url <- urls[1]
   slug <- gsub("[^a-z0-9]+", "_", tolower(manifest_path))
   json_path <- file.path(cache_dir, paste0("r2_", slug))
   etag_path <- paste0(json_path, ".etag")
 
   local_etag <- if (file.exists(etag_path)) readLines(etag_path, warn = FALSE)[1] else NA_character_
-  remote_etag <- .r2_head_etag(url)
+  remote_etag <- NULL
+  for (candidate in urls) {
+    remote_etag <- .r2_head_etag(candidate)
+    if (!is.null(remote_etag)) {
+      url <- candidate
+      break
+    }
+  }
 
   # session memo: same manifest + same etag -> reuse parsed object
   memo_key <- paste0("manifest:", manifest_path)

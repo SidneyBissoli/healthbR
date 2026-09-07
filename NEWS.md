@@ -1,5 +1,13 @@
 # healthbR 0.4.0.9000
 
+## Mirror served from the custom domain
+
+* Manifests and single-object reads from the healthbr-data mirror now go
+  to `https://data.sidneybissoli.com` first (the bucket behind Cloudflare's
+  cache, same paths) and fall back to the `r2.dev` URL when the domain does
+  not answer. `options(healthbR.r2_pub_base = ...)` overrides the domain.
+  `sipni_info()` points to the domain.
+
 ## SIH: 1992-2007 through the mirror
 
 * `sih_years()` now starts in 1992 instead of 2008. The healthbr-data mirror
