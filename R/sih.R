@@ -44,9 +44,10 @@
 #' @noRd
 .sih_build_ftp_url <- function(year, month, uf) {
   if (year < 2008L) {
-    cli::cli_abort(
-      "Year {.val {year}} is not supported. SIH data starts in 2008."
-    )
+    cli::cli_abort(c(
+      "Year {.val {year}} is not supported by the DATASUS FTP fallback (folder SIHSUS/200801_ starts in 2008).",
+      "i" = "1992-2007 are served by the healthbr-data mirror: use {.code source = \"r2\"}."
+    ))
   }
 
   yy <- sprintf("%02d", year %% 100)
@@ -141,7 +142,10 @@
 #' List Available SIH Years
 #'
 #' Returns an integer vector with years for which hospital admission microdata
-#' are available from DATASUS FTP.
+#' are available. Since 0.4.0.9000 the range starts in 1992: years before 2008
+#' exist only on the healthbr-data R2 mirror (the DATASUS FTP fallback starts
+#' in 2008) and have no \code{RACA_COR} column (race/colour was added to the
+#' AIH layout in 2008).
 #'
 #' @param status Character. Filter by data status. One of:
 #'   \itemize{
@@ -214,6 +218,7 @@ sih_info <- function() {
   cli::cli_bullets(c(
     "*" = "R2 healthbr-data (padr\u00e3o): Parquet id\u00eantico ao .dbc do FTP, 1992\u2013presente, com proveni\u00eancia (URL, MD5 e data de download do arquivo de origem)",
     "*" = "FTP DATASUS (fallback): arquivos RD{{UF}}{{aa}}{{mm}}.dbc, 2008\u2013presente",
+    " " = "  RACA_COR (ra\u00e7a/cor) s\u00f3 existe no leiaute da AIH a partir de 2008.",
     " " = "  Use {.arg source} em {.fun sih_data} para fixar uma fonte."
   ))
 

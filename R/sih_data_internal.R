@@ -8,7 +8,10 @@
 #' SIH available years by status
 #' @noRd
 sih_available_years <- list(
-  final = 2008L:2024L,
+  # 1992-2007 exist only on the healthbr-data mirror (source = "r2"); the
+  # DATASUS FTP folder the fallback reads (SIHSUS/200801_) starts in 2008.
+  # RACA_COR exists only from 2008 on.
+  final = 1992L:2024L,
   preliminary = 2025L:2026L
 )
 

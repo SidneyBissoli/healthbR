@@ -10,6 +10,10 @@ test_that("sih_years returns integer vector", {
   expect_gt(length(years), 0)
   expect_true(2022L %in% years)
   expect_true(2008L %in% years)
+  # 1992-2007 come from the healthbr-data mirror (0.4.0.9000)
+  expect_true(1998L %in% years)
+  expect_true(1992L %in% years)
+  expect_false(1991L %in% years)
 })
 
 test_that("sih_years filters by status", {
@@ -220,7 +224,8 @@ test_that(".sih_validate_year accepts valid years", {
 })
 
 test_that(".sih_validate_year errors on invalid years", {
-  expect_error(.sih_validate_year(2007), "not available")
+  expect_equal(.sih_validate_year(2007), 2007L)  # 1992-2007: mirror only (0.4.0.9000)
+  expect_error(.sih_validate_year(1991), "not available")
   expect_error(.sih_validate_year(2050), "not available")
 })
 

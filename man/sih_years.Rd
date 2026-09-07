@@ -19,7 +19,10 @@ An integer vector of available years.
 }
 \description{
 Returns an integer vector with years for which hospital admission microdata
-are available from DATASUS FTP.
+are available. Since 0.4.0.9000 the range starts in 1992: years before 2008
+exist only on the healthbr-data R2 mirror (the DATASUS FTP fallback starts
+in 2008) and have no \code{RACA_COR} column (race/colour was added to the
+AIH layout in 2008).
 }
 \examples{
 sih_years()

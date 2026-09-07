@@ -23,7 +23,7 @@ The `healthbR` package provides access to eight DATASUS information systems, cov
 |--------|----------|-----------------|-------------|-------|
 | SIM | `sim_data()` | Declaracao de Obito (DO) | Annual/UF | 1996--2024 |
 | SINASC | `sinasc_data()` | Declaracao de Nascido Vivo (DN) | Annual/UF | 1996--2024 |
-| SIH | `sih_data()` | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF | 2008--2024 |
+| SIH | `sih_data()` | AIH (Autorizacao de Internacao Hospitalar) | Monthly/UF | 1992--2024 (R2 mirror; FTP from 2008) |
 | SIA | `sia_data()` | BPA / APAC | Monthly/type/UF | 2008--2024 |
 | SINAN | `sinan_data()` | Ficha de Notificacao | Annual/National | 2007--2024 |
 | CNES | `cnes_data()` | Cadastro de Estabelecimentos | Monthly/type/UF | 2005--2024 |
