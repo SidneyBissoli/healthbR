@@ -2,6 +2,40 @@
 
 ## healthbR 0.4.0.9000
 
+### SI-PNI: the national CSV no longer has to fit in RAM ([\#4](https://github.com/SidneyBissoli/healthbR/issues/4))
+
+- `sipni_data(uf = "RJ", source = "datasus")` for a 2020+ month used to
+  hold all 27 UFs of the national monthly CSV in memory until the end of
+  the read, so campaign months (the June 2021 file has 41.8M rows, 21 GB
+  of CSV) needed more than 16 GB even for one state
+  ([\#4](https://github.com/SidneyBissoli/healthbR/issues/4), reported
+  by [@EnfRodrigoBruno](https://github.com/EnfRodrigoBruno)). With
+  `arrow` installed the file is now re-encoded to UTF-8 byte-wise into
+  ~256 MB pieces (arrow’s dataset scanner reads UTF-8 only, and handed
+  the whole file it reads ahead of the writers without bound) and each
+  piece is streamed by arrow into the partitioned cache, one partition
+  per UF, and the requested state is read back from there: no row of the
+  national file is materialised in R, whatever its size. The cache still
+  ends up with all 27 UFs of the month (a later request for another
+  state does not download the ~1.4 GB ZIP again), and the partitions are
+  written to a staging directory first, so an interrupted read never
+  leaves a partial UF in the cache. Without `arrow` a readr chunked
+  reader keeps only the requested state and discards the others (the
+  partitioned CSV cache was never readable without `arrow` anyway). Both
+  engines read every column as character and treat `""` and `"NA"` as
+  missing, so the cache holds the same values whichever filled it.
+
+- Found while measuring
+  [\#4](https://github.com/SidneyBissoli/healthbR/issues/4) against the
+  real June 2021 file: the national CSV now carries the 56-field schema
+  of the JSON exports, whose UF column is `sg_uf_estabelecimento`. The
+  reader only knew `sigla_uf_estabelecimento` and `uf_estabelecimento`,
+  so every row went to a pseudo-UF `"ALL"` and the call returned an
+  empty tibble after reading the whole file (had it not run out of
+  memory first). The reader now recognises the three headers, matches
+  the UF case-insensitively, and when none is present says so from the
+  header alone, before reading the file.
+
 ### Mirror served from the custom domain
 
 - Manifests and single-object reads from the healthbr-data mirror now go
@@ -27,6 +61,8 @@
   CID-9 derived coding). Needed by the sih-br-mcp cubes for 1998-2007.
 
 ## healthbR 0.4.0
+
+CRAN release: 2026-09-07
 
 *First CRAN release since 0.2.0: this version also carries everything in
 0.3.0 and 0.3.1 below (SI-PNI on the healthbr-data mirror, SI-PNI

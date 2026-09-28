@@ -158,8 +158,11 @@ Parquet, or from DATASUS FTP as plain .DBF files.
 vaccination dose). The `type` parameter is ignored for these years. Via
 R2 the data come from the Ministry's JSON exports (no CSV serialization
 artifacts) and only the requested UF/month partitions are transferred.
-Via DATASUS the national monthly CSV ZIP (~1.4 GB) is downloaded and
-filtered by UF during chunked reading.
+Via DATASUS the national monthly CSV ZIP (~1.4 GB) is downloaded and,
+with arrow installed, streamed straight into the local cache with one
+partition per state (so other states of that month cost no further
+download); without arrow only the requested state is kept. Either way
+the file is never held whole in memory.
 
 **Availability note (2026):** the Ministry decommissioned the old
 OpenDataSUS host and removed the 2020–2025 files from the new one. The

@@ -220,8 +220,11 @@ Individual-level microdata (one row per vaccination dose). The
 <code>type</code> parameter is ignored for these years. Via R2 the data come
 from the Ministry's JSON exports (no CSV serialization artifacts) and
 only the requested UF/month partitions are transferred. Via DATASUS the
-national monthly CSV ZIP (~1.4 GB) is downloaded and filtered by UF
-during chunked reading.</p>
+national monthly CSV ZIP (~1.4 GB) is downloaded and, with <span class="pkg">arrow</span>
+installed, streamed straight into the local cache with one partition per
+state (so other states of that month cost no further download); without
+<span class="pkg">arrow</span> only the requested state is kept. Either way the file is
+never held whole in memory.</p>
 <p><strong>Availability note (2026):</strong> the Ministry decommissioned the old
 OpenDataSUS host and removed the 2020–2025 files from the new one.
 The R2 mirror holds the complete series; use
