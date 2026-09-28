@@ -429,6 +429,9 @@
   # ensure base directory exists
   dir.create(dataset_dir, recursive = TRUE, showWarnings = FALSE)
 
+  # "overwrite" replaces files with the SAME name inside a partition (arrow
+  # names them part-{i}.parquet) and keeps the others: a partition written
+  # twice by this function ends up with the second write only
   tryCatch({
     arrow::write_dataset(
       data,

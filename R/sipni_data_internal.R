@@ -29,6 +29,17 @@ sipni_api_years <- 2020L:2026L
 #' @noRd
 sipni_csv_base_url <- "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv"
 
+#' Column that carries the establishment UF in the national CSV, by schema
+#'
+#' The Ministry has published the monthly CSV under more than one header:
+#' the 2021 campaign files (and the 2026 re-publication) use the 56-field
+#' schema of the JSON exports (`sg_uf_estabelecimento`); the ~47-field
+#' schema uses `sigla_uf_estabelecimento`; `uf_estabelecimento` is kept for
+#' older files. The chunked reader picks the first one present.
+#' @noRd
+sipni_csv_uf_columns <- c("sg_uf_estabelecimento", "sigla_uf_estabelecimento",
+                          "uf_estabelecimento")
+
 #' SI-PNI month names in Portuguese (for CSV ZIP filenames)
 #' @noRd
 sipni_month_names <- c(

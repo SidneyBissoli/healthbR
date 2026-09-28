@@ -295,103 +295,357 @@
 }
 
 
-#' Read SI-PNI CSV in chunks, splitting by UF
-#' @return A named list of chunk lists, keyed by UF code.
+#' Add the partition columns (year, month, uf_source) in front of a chunk
 #' @noRd
-.sipni_csv_read_chunked <- function(csv_path, month_name, year) {
-  cli::cli_inform(c(
-    "i" = "Reading and caching all UFs for {month_name} {year}..."
-  ))
+.sipni_csv_add_partition_cols <- function(data, uf, year, month) {
+  data$year <- as.integer(year)
+  data$month <- as.integer(month)
+  data$uf_source <- uf
+  .sipni_front_cols(data, c("year", "month", "uf_source"))
+}
 
-  uf_buffers <- list()
 
-  callback <- readr::SideEffectChunkCallback$new(function(chunk, pos) {
-    if ("sigla_uf_estabelecimento" %in% names(chunk)) {
-      uf_col <- chunk$sigla_uf_estabelecimento
-    } else if ("uf_estabelecimento" %in% names(chunk)) {
-      uf_col <- chunk$uf_estabelecimento
-    } else {
-      # no UF column -- buffer everything under "ALL"
-      uf_buffers[["ALL"]] <<- c(uf_buffers[["ALL"]], list(chunk))
-      return(invisible(NULL))
+#' Header of a national CSV and the column that carries the establishment UF
+#'
+#' Reads one line, not the file: until 0.4.0 an unrecognised header sent
+#' every row to a pseudo-UF "ALL" and the caller got an empty tibble after
+#' reading the whole file (#4: the 2021 files use sg_uf_estabelecimento,
+#' which the reader did not know).
+#' @return list(header = character, uf_col = character or NA)
+#' @noRd
+.sipni_csv_header <- function(csv_path) {
+  first_line <- readLines(csv_path, n = 1L, encoding = "latin1", warn = FALSE)
+  # a UTF-8 byte-order mark (EF BB BF), which readr used to strip for us
+  bom <- rawToChar(as.raw(c(0xef, 0xbb, 0xbf)))
+  Encoding(bom) <- "latin1"
+  first_line <- sub(stringr::str_c("^", bom), "", first_line)
+  header <- gsub('^"|"$', "", strsplit(first_line, ";", fixed = TRUE)[[1]])
+  list(header = header, uf_col = intersect(sipni_csv_uf_columns, header)[1])
+}
+
+
+#' Re-encode a latin1 CSV to UTF-8, block by block, replacing the file
+#'
+#' Arrow's dataset scanner reads UTF-8 only (the `encoding` option of
+#' `csv_read_options()` is honoured by `read_csv_arrow()`, not by
+#' `open_dataset()`), and the Ministry publishes the CSV in latin1. The
+#' conversion works on raw bytes, `block` bytes at a time (latin1 is a
+#' single-byte encoding, so any boundary is safe), with vectorised base R
+#' (`.latin1_to_utf8()`): no lines are parsed and no strings are built, so
+#' it holds one block in memory and runs at ~100 MB/s (measured on the
+#' June 2021 file; `iconv()` on the same blocks ran at 10 MB/s and
+#' `file(encoding = "latin1")` connections at 0.1 MB/s).
+#'
+#' The output is a directory of pieces of about `piece_bytes` each, cut at
+#' line ends and without the header line, so that arrow can be handed one
+#' small file at a time: scanning the whole 21 GB file as one dataset let
+#' arrow read ahead of the parquet writers without bound (39-49 GB of
+#' process memory, measured), whatever the writer batching. The latin1 file
+#' is removed as soon as the pieces are complete.
+#' @return Path of the directory of UTF-8 pieces.
+#' @noRd
+.sipni_csv_to_utf8 <- function(csv_path, block = 1e6, piece_bytes = 256e6) {
+  utf8_dir <- stringr::str_c(csv_path, ".utf8")
+  dir.create(utf8_dir, showWarnings = FALSE)
+  inp <- file(csv_path, open = "rb")
+  out <- NULL
+  n_piece <- 0L
+  piece_written <- 0
+  open_piece <- function() {
+    n_piece <<- n_piece + 1L
+    out <<- file(file.path(utf8_dir, sprintf("piece-%04d.csv", n_piece)),
+                 open = "wb")
+    piece_written <<- 0
+  }
+  on.exit({
+    try(close(inp), silent = TRUE)
+    if (!is.null(out)) try(close(out), silent = TRUE)
+  }, add = TRUE)
+
+  # pieces are opened lazily, so a cut right before the end of the file
+  # never leaves an empty piece behind
+  write_piece <- function(bytes) {
+    if (is.null(out)) open_piece()
+    writeBin(.latin1_to_utf8(bytes), out)
+    piece_written <<- piece_written + length(bytes)
+  }
+
+  header_done <- FALSE
+  newline <- as.raw(0x0a)
+  repeat {
+    bytes <- readBin(inp, what = "raw", n = block)
+    if (length(bytes) == 0) break
+    if (!header_done) {
+      # the pieces carry no header line: the caller already read it
+      nl <- which(bytes == newline)[1]
+      if (is.na(nl)) next
+      bytes <- bytes[-seq_len(nl)]
+      header_done <- TRUE
+      if (length(bytes) == 0) next
     }
-
-    for (u in unique(uf_col)) {
-      rows <- chunk[uf_col == u, , drop = FALSE]
-      if (nrow(rows) > 0) {
-        uf_buffers[[u]] <<- c(uf_buffers[[u]], list(rows))
+    if (piece_written >= piece_bytes) {
+      # cut at the end of the current line so every piece holds whole rows
+      nl <- which(bytes == newline)[1]
+      if (!is.na(nl)) {
+        write_piece(bytes[seq_len(nl)])
+        close(out)
+        out <- NULL
+        bytes <- bytes[-seq_len(nl)]
+        if (length(bytes) == 0) next
       }
     }
+    write_piece(bytes)
+  }
+  close(inp)
+  if (!is.null(out)) close(out)
+  out <- NULL
+  file.remove(csv_path)
+  utf8_dir
+}
+
+
+#' Re-encode a raw latin1 byte vector as UTF-8 (vectorised)
+#'
+#' Bytes below 0x80 are unchanged; each byte b >= 0x80 becomes the pair
+#' (0xC0 | b >> 6, 0x80 | b & 0x3F). Byte-identical to
+#' `iconv(list(x), "latin1", "UTF-8", toRaw = TRUE)[[1]]`, ten times faster.
+#' @noRd
+.latin1_to_utf8 <- function(bytes) {
+  hi <- bytes > as.raw(127L)
+  if (!any(hi)) return(bytes)
+  out <- rep(bytes, times = 1L + hi)
+  second <- cumsum(1L + hi)[hi]          # output index of each pair's 2nd byte
+  v <- as.integer(bytes[hi])
+  out[second - 1L] <- as.raw(bitwOr(192L, bitwShiftR(v, 6L)))
+  out[second] <- as.raw(bitwOr(128L, bitwAnd(v, 63L)))
+  out
+}
+
+
+#' Open UTF-8 headerless CSV piece(s) as an arrow dataset: all utf8, ';'
+#'
+#' Same reading conventions as the readr fallback (all character, "" and
+#' "NA" are missing), so the cache holds the same values whichever engine
+#' filled it.
+#' @param path One piece, or the directory of pieces.
+#' @noRd
+.sipni_csv_arrow_dataset <- function(path, header) {
+  fields <- lapply(header, function(x) arrow::utf8())
+  names(fields) <- header
+  arrow::open_dataset(
+    path, format = "csv", schema = arrow::schema(fields),
+    read_options = arrow::csv_read_options(skip_rows = 0L,
+                                           column_names = header),
+    parse_options = arrow::csv_parse_options(delimiter = ";"),
+    convert_options = arrow::csv_convert_options(strings_can_be_null = TRUE,
+                                                 null_values = c("", "NA"))
+  )
+}
+
+
+#' Stream the national CSV through arrow and return the requested UF
+#'
+#' Nothing of the file is materialised in R: the CSV is re-encoded to UTF-8
+#' into pieces of ~256 MB (see `.sipni_csv_to_utf8()`, which removes the
+#' latin1 original), then with `cache = TRUE` arrow scans one piece at a
+#' time and appends it to the hive-partitioned parquet dataset (one
+#' partition per UF) in a staging directory, which is then moved into the
+#' cache; the requested UF is read back from the cache. With `cache = FALSE`
+#' only the requested UF is collected. Peak memory is one piece plus arrow's
+#' buffers and the requested UF, whatever the size of the file (the June
+#' 2021 file has 41.8M rows / 21 GB).
+#' @noRd
+.sipni_csv_ingest_arrow <- function(csv_path, header, uf_col, uf, year, month,
+                                    cache, cache_dir) {
+  target_year <- as.integer(year)
+  target_month <- as.integer(month)
+  utf8_dir <- .sipni_csv_to_utf8(csv_path)
+  # arrow keeps a file open until the dataset object is collected; on
+  # Windows an open file cannot be removed, so references are dropped and
+  # gc() called before the removal below (the on.exit is only a fallback)
+  on.exit(unlink(utf8_dir, recursive = TRUE), add = TRUE)
+  pieces <- list.files(utf8_dir, pattern = "\\.csv$", full.names = TRUE)
+
+  query <- function(path) {
+    .sipni_csv_arrow_dataset(path, header) |>
+      dplyr::mutate(uf_source = toupper(!!rlang::sym(uf_col)),
+                    year = !!target_year, month = !!target_month) |>
+      # rows with no establishment UF cannot be attributed to any state
+      dplyr::filter(!is.na(.data$uf_source))
+  }
+
+  if (!isTRUE(cache)) {
+    out <- query(utf8_dir) |>
+      dplyr::filter(.data$uf_source == !!uf) |>
+      dplyr::collect()
+    invisible(gc(verbose = FALSE))
+    return(.sipni_front_cols(tibble::as_tibble(out),
+                             c("year", "month", "uf_source")))
+  }
+
+  staging_root <- file.path(cache_dir, "sipni_csv_staging")
+  dir.create(staging_root, recursive = TRUE, showWarnings = FALSE)
+  spill_dir <- tempfile("month_", tmpdir = staging_root)
+  on.exit({
+    unlink(spill_dir, recursive = TRUE)
+    if (length(list.files(staging_root, all.files = TRUE, no.. = TRUE)) == 0) {
+      unlink(staging_root, recursive = TRUE)
+    }
+  }, add = TRUE)
+
+  # one piece at a time: scanning the whole file as one dataset let arrow
+  # read ahead of the parquet writers without bound (39-49 GB measured on
+  # the June 2021 file, whatever the writer batching). Each piece gets its
+  # own file basename, so a partition accumulates one file per piece.
+  staged <- file.path(spill_dir, "sipni_csv_data")
+  for (i in seq_along(pieces)) {
+    arrow::write_dataset(
+      query(pieces[i]), path = staged, format = "parquet",
+      partitioning = c("uf_source", "year", "month"),
+      basename_template = stringr::str_c("part-", i, "-{i}.parquet"),
+      existing_data_behavior = "overwrite"
+    )
+    # arrow memory referenced from R: R's own allocations are too few to
+    # trigger a collection by themselves
+    invisible(gc(verbose = FALSE))
+    file.remove(pieces[i])
+  }
+  .sipni_csv_spill_commit(spill_dir, cache_dir)
+
+  cached <- .sipni_csv_check_cache(uf, year, month, TRUE, cache_dir)
+  if (is.null(cached)) tibble::tibble() else cached
+}
+
+
+#' Fallback without arrow: readr in chunks, keeping only the requested UF
+#'
+#' The other UFs are discarded (the partitioned CSV cache cannot be written
+#' or read without arrow). Until 0.4.0 this reader kept every UF in memory
+#' until the end of the file (#4).
+#' @noRd
+.sipni_csv_ingest_readr <- function(csv_path, uf_col, uf, year, month,
+                                    cache, cache_dir, chunk_size = 100000L) {
+  target_chunks <- list()
+  callback <- readr::SideEffectChunkCallback$new(function(chunk, pos) {
+    uf_vals <- toupper(chunk[[uf_col]])
+    keep <- !is.na(uf_vals) & uf_vals == uf
+    if (any(keep)) {
+      target_chunks[[length(target_chunks) + 1L]] <<- chunk[keep, , drop = FALSE]
+    }
+    invisible(NULL)
   })
 
   readr::read_delim_chunked(
     csv_path,
     callback = callback,
     delim = ";",
-    chunk_size = 100000L,
+    chunk_size = as.integer(chunk_size),
     locale = readr::locale(encoding = "latin1"),
     col_types = readr::cols(.default = readr::col_character()),
     show_col_types = FALSE,
     progress = FALSE
   )
 
-  uf_buffers
+  out <- dplyr::bind_rows(target_chunks)
+  if (nrow(out) == 0) return(tibble::tibble())
+  out <- .sipni_csv_add_partition_cols(out, uf, year, month)
+  if (isTRUE(cache)) {
+    .cache_append_partitioned(out, cache_dir, "sipni_csv_data",
+                              c("uf_source", "year", "month"))
+  }
+  out
 }
 
 
-#' Bind UF buffers, cache all UFs, and extract the requested UF
-#' @return A tibble for the requested UF, or an empty tibble with a warning.
+#' Read one national CSV: find the UF column, pick the engine, warn if empty
+#' @return A tibble for the requested UF (empty, with a warning, if none).
 #' @noRd
-.sipni_csv_cache_and_extract <- function(uf_buffers, uf, year, month,
-                                         cache, cache_dir) {
-  dataset_name <- "sipni_csv_data"
-  target_year <- as.integer(year)
-  target_month <- as.integer(month)
+.sipni_csv_ingest <- function(csv_path, uf, year, month, cache, cache_dir) {
   month_name <- sipni_month_names[month]
-  requested_data <- NULL
+  hdr <- .sipni_csv_header(csv_path)
 
-  for (u in names(uf_buffers)) {
-    uf_data <- dplyr::bind_rows(uf_buffers[[u]])
-    if (nrow(uf_data) == 0) next
-
-    uf_data$year <- target_year
-    uf_data$month <- target_month
-    uf_data$uf_source <- u
-    cols <- names(uf_data)
-    uf_data <- uf_data[, c("year", "month", "uf_source",
-                            setdiff(cols, c("year", "month", "uf_source")))]
-
-    if (isTRUE(cache)) {
-      .cache_append_partitioned(uf_data, cache_dir, dataset_name,
-                                c("uf_source", "year", "month"))
-    }
-
-    if (u == uf) {
-      requested_data <- uf_data
-    }
+  if (is.na(hdr$uf_col)) {
+    cli::cli_warn(c(
+      "!" = "No UF column found in the SI-PNI CSV for {month_name} {year}.",
+      "i" = "Looked for {.val {sipni_csv_uf_columns}}; the file has {length(hdr$header)} column{?s}: {.val {utils::head(hdr$header, 8)}}{if (length(hdr$header) > 8) ', ...' else ''}.",
+      "i" = "Nothing can be returned for UF={uf}; please report this header at {.url https://github.com/SidneyBissoli/healthbR/issues}."
+    ))
+    return(tibble::tibble())
   }
 
-  if (is.null(requested_data) || nrow(requested_data) == 0) {
+  if (.has_arrow()) {
+    cli::cli_inform(c(
+      "i" = if (isTRUE(cache)) {
+        "Reading {month_name} {year} into the cache (all UFs), then returning {uf}..."
+      } else {
+        "Reading {month_name} {year}, keeping only {uf}..."
+      }
+    ))
+    result <- .sipni_csv_ingest_arrow(csv_path, hdr$header, hdr$uf_col, uf,
+                                      year, month, cache, cache_dir)
+  } else {
+    cli::cli_inform(c(
+      "i" = "Reading {month_name} {year}, keeping only {uf} (install {.pkg arrow} to cache the other UFs)..."
+    ))
+    result <- .sipni_csv_ingest_readr(csv_path, hdr$uf_col, uf, year, month,
+                                      cache, cache_dir)
+  }
+
+  if (nrow(result) == 0) {
     cli::cli_warn(c(
       "!" = "No data found for UF={uf} in {month_name} {year}.",
       "i" = "The CSV may not contain data for this UF/month."
     ))
     return(tibble::tibble())
   }
+  result
+}
 
-  requested_data
+
+#' Move the staged partitions into the real cache dataset
+#'
+#' Only called after the whole CSV was read, so a partition is either absent
+#' from the cache or complete -- an interrupted read never leaves a partial
+#' UF behind that `.sipni_csv_check_cache()` would later serve as if whole.
+#' @noRd
+.sipni_csv_spill_commit <- function(spill_dir, cache_dir) {
+  staged <- file.path(spill_dir, "sipni_csv_data")
+  if (!dir.exists(staged)) return(invisible(0L))
+  final <- file.path(cache_dir, "sipni_csv_data")
+
+  # leaf partition directories: uf_source=XX/year=YYYY/month=M
+  leaves <- list.dirs(staged, recursive = TRUE, full.names = FALSE)
+  leaves <- leaves[grepl("^uf_source=[^/]+/year=[^/]+/month=[^/]+$", leaves)]
+
+  n_moved <- 0L
+  for (leaf in leaves) {
+    dest <- file.path(final, leaf)
+    dir.create(dirname(dest), recursive = TRUE, showWarnings = FALSE)
+    # the staged copy is a complete month for that UF; it replaces whatever
+    # an earlier run left there (e.g. the same UF written as a target before)
+    if (dir.exists(dest)) unlink(dest, recursive = TRUE)
+    if (file.rename(file.path(staged, leaf), dest)) {
+      n_moved <- n_moved + 1L
+    } else {
+      cli::cli_warn("Failed to move staged SI-PNI partition {.path {leaf}} into the cache.")
+    }
+  }
+  invisible(n_moved)
 }
 
 
 #' Process national SI-PNI CSV for one month, caching ALL UFs
 #'
-#' Downloads the national monthly CSV ZIP from OpenDataSUS, reads it in
-#' chunks splitting by UF, and caches ALL 27 states. This means a second
-#' request for a different UF from the same month is instant from cache.
+#' Downloads the national monthly CSV ZIP from OpenDataSUS and hands the CSV
+#' to `.sipni_csv_ingest()`. With `cache = TRUE` and arrow installed the
+#' whole file is streamed into the partitioned cache (one partition per UF),
+#' so a second request for a different UF of the same month is served from
+#' the cache without downloading the ~1.4 GB ZIP again -- and, unlike before
+#' #4, without ever holding the national file in RAM.
 #'
 #' @param year Integer. Year.
 #' @param month Integer. Month (1-12).
-#' @param uf Character. The UF to return (all 27 are cached regardless).
+#' @param uf Character. The UF to return.
 #' @param cache Logical. Whether to use caching.
 #' @param cache_dir Character or NULL. Cache directory.
 #' @param zip_path Character or NULL. Path to an already-downloaded ZIP file.
@@ -404,7 +658,6 @@
                                         cache = TRUE, cache_dir = NULL,
                                         zip_path = NULL) {
   cache_dir <- .sipni_cache_dir(cache_dir)
-  month_name <- sipni_month_names[month]
 
   # 1. check partitioned cache first (preferred path)
   cached <- .sipni_csv_check_cache(uf, year, month, cache, cache_dir)
@@ -418,15 +671,8 @@
   }
   on.exit(unlink(zip_info$temp_dir, recursive = TRUE), add = TRUE)
 
-  # 3. read CSV in chunks, buffering ALL UFs
-  uf_buffers <- .sipni_csv_read_chunked(zip_info$csv_path, month_name, year)
-
-  # 4. bind, cache all UFs, and extract the requested one
-  result <- .sipni_csv_cache_and_extract(uf_buffers, uf, year, month,
-                                          cache, cache_dir)
-  rm(uf_buffers)
-
-  result
+  # 3. stream the CSV (arrow: all UFs into the cache; readr: requested UF only)
+  .sipni_csv_ingest(zip_info$csv_path, uf, year, month, cache, cache_dir)
 }
 
 
@@ -1276,8 +1522,11 @@ sipni_dictionary <- function(variable = NULL, source = c("r2", "datasus"),
 #' \code{type} parameter is ignored for these years. Via R2 the data come
 #' from the Ministry's JSON exports (no CSV serialization artifacts) and
 #' only the requested UF/month partitions are transferred. Via DATASUS the
-#' national monthly CSV ZIP (~1.4 GB) is downloaded and filtered by UF
-#' during chunked reading.
+#' national monthly CSV ZIP (~1.4 GB) is downloaded and, with \pkg{arrow}
+#' installed, streamed straight into the local cache with one partition per
+#' state (so other states of that month cost no further download); without
+#' \pkg{arrow} only the requested state is kept. Either way the file is
+#' never held whole in memory.
 #'
 #' **Availability note (2026):** the Ministry decommissioned the old
 #' OpenDataSUS host and removed the 2020--2025 files from the new one.
