@@ -1546,18 +1546,48 @@ test_that(".sipni_csv_process_national handles CSV with no UF column", {
     utils::zip(zip_path, "vacinacao.csv", flags = "-q")
   })
 
-  # no UF column means everything goes to "ALL" bucket, not "AC"
-  result <- suppressWarnings(
-    healthbR:::.sipni_csv_process_national(
+  # no recognisable UF column: say so from the header, return empty
+  warns <- testthat::capture_warnings(
+    result <- healthbR:::.sipni_csv_process_national(
       year = 2024, month = 1, uf = "AC",
       cache = FALSE, cache_dir = cache_dir,
       zip_path = zip_path
     )
   )
+  expect_length(warns, 1)
+  expect_match(warns, "No UF column found")
+  expect_match(warns, "sg_uf_estabelecimento")
 
-  # AC won't be found since data goes to "ALL" bucket
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 0)
+})
+
+test_that(".sipni_csv_process_national recognises the 56-field header (sg_uf_estabelecimento, #4)", {
+  temp_dir <- withr::local_tempdir()
+  cache_dir <- withr::local_tempdir()
+
+  # header of the June 2021 national file as published in 2026
+  csv_content <- paste(
+    "co_documento;sg_uf_paciente;sg_uf_estabelecimento;dt_vacina",
+    "a;SP;RJ;2021-06-10",
+    "b;RJ;SP;2021-06-10",
+    "c;MG;rj;2021-06-11",
+    sep = "\n"
+  )
+  csv_path <- file.path(temp_dir, "vacinacao.csv")
+  writeLines(csv_content, csv_path, useBytes = TRUE)
+  zip_path <- file.path(temp_dir, "vacinacao_jun_2021_csv.zip")
+  withr::with_dir(temp_dir, utils::zip(zip_path, "vacinacao.csv", flags = "-q"))
+
+  result <- suppressMessages(healthbR:::.sipni_csv_process_national(
+    year = 2021, month = 6, uf = "RJ",
+    cache = FALSE, cache_dir = cache_dir, zip_path = zip_path
+  ))
+
+  # establishment UF, not patient UF; case-insensitive
+  expect_equal(nrow(result), 2)
+  expect_equal(sort(result$co_documento), c("a", "c"))
+  expect_equal(unique(result$uf_source), "RJ")
 })
 
 test_that(".sipni_csv_process_national caches when cache=TRUE", {
@@ -1586,6 +1616,204 @@ test_that(".sipni_csv_process_national caches when cache=TRUE", {
   # verify cache was written
   dataset_path <- file.path(cache_dir, "sipni_csv_data")
   expect_true(dir.exists(dataset_path))
+})
+
+# --- #4: the national CSV must not be held whole in RAM ---------------------
+
+# 9 rows, 3 UFs interleaved so that every 2-row chunk mixes UFs
+.sipni_csv_fixture_zip <- function(dir) {
+  csv_content <- paste(
+    "sigla_uf_estabelecimento;data_vacina;descricao_vacina",
+    "AC;2024-01-01;BCG",
+    "SP;2024-01-02;BCG",
+    "RJ;2024-01-03;BCG",
+    "SP;2024-01-04;Hepatite B",
+    "AC;2024-01-05;Hepatite B",
+    "SP;2024-01-06;COVID-19",
+    "RJ;2024-01-07;COVID-19",
+    "SP;2024-01-08;Febre Amarela",
+    "AC;2024-01-09;Febre Amarela",
+    sep = "\n"
+  )
+  csv_path <- file.path(dir, "vacinacao.csv")
+  writeLines(csv_content, csv_path, useBytes = TRUE)
+  zip_path <- file.path(dir, "vacinacao_jan_2024_csv.zip")
+  withr::with_dir(dir, utils::zip(zip_path, "vacinacao.csv", flags = "-q"))
+  list(csv = csv_path, zip = zip_path)
+}
+
+test_that(".sipni_csv_process_national (arrow) caches every UF and returns the requested one", {
+  skip_if_not_installed("arrow")
+  temp_dir <- withr::local_tempdir()
+  cache_dir <- withr::local_tempdir()
+  fx <- .sipni_csv_fixture_zip(temp_dir)
+
+  result <- suppressMessages(healthbR:::.sipni_csv_process_national(
+    year = 2024, month = 1, uf = "AC",
+    cache = TRUE, cache_dir = cache_dir, zip_path = fx$zip
+  ))
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 3)
+  expect_equal(unique(result$uf_source), "AC")
+  expect_equal(names(result)[1:3], c("year", "month", "uf_source"))
+  expect_true(all(vapply(result, is.character, logical(1))[-(1:3)]))
+  expect_equal(sort(result$data_vacina),
+               c("2024-01-01", "2024-01-05", "2024-01-09"))
+
+  # the other UFs are in the cache, complete and not duplicated
+  sp <- healthbR:::.sipni_csv_check_cache("SP", 2024, 1, TRUE, cache_dir)
+  rj <- healthbR:::.sipni_csv_check_cache("RJ", 2024, 1, TRUE, cache_dir)
+  expect_equal(nrow(sp), 4)
+  expect_equal(sort(sp$data_vacina),
+               c("2024-01-02", "2024-01-04", "2024-01-06", "2024-01-08"))
+  expect_equal(nrow(rj), 2)
+
+  # the staging area and the re-encoded copy are gone, and a second call is
+  # served from the cache
+  expect_false(dir.exists(file.path(cache_dir, "sipni_csv_staging")))
+  expect_length(grep("\\.utf8$", list.dirs(tempdir(), recursive = TRUE)), 0)
+  again <- healthbR:::.sipni_csv_process_national(
+    year = 2024, month = 1, uf = "SP",
+    cache = TRUE, cache_dir = cache_dir, zip_path = "does-not-exist.zip"
+  )
+  expect_equal(nrow(again), 4)
+})
+
+test_that(".sipni_csv_process_national with cache = FALSE writes nothing to disk", {
+  temp_dir <- withr::local_tempdir()
+  cache_dir <- withr::local_tempdir()
+  fx <- .sipni_csv_fixture_zip(temp_dir)
+
+  result <- suppressMessages(healthbR:::.sipni_csv_process_national(
+    year = 2024, month = 1, uf = "SP",
+    cache = FALSE, cache_dir = cache_dir, zip_path = fx$zip
+  ))
+
+  expect_equal(nrow(result), 4)
+  expect_equal(unique(result$uf_source), "SP")
+  expect_equal(names(result)[1:3], c("year", "month", "uf_source"))
+  expect_false(dir.exists(file.path(cache_dir, "sipni_csv_data")))
+  expect_false(dir.exists(file.path(cache_dir, "sipni_csv_staging")))
+})
+
+test_that(".sipni_csv_process_national without arrow keeps only the requested UF (readr)", {
+  temp_dir <- withr::local_tempdir()
+  cache_dir <- withr::local_tempdir()
+  fx <- .sipni_csv_fixture_zip(temp_dir)
+  local_mocked_bindings(.has_arrow = function() FALSE)
+
+  result <- suppressMessages(healthbR:::.sipni_csv_process_national(
+    year = 2024, month = 1, uf = "RJ",
+    cache = FALSE, cache_dir = cache_dir, zip_path = fx$zip
+  ))
+
+  expect_equal(nrow(result), 2)
+  expect_equal(unique(result$uf_source), "RJ")
+  expect_equal(names(result)[1:3], c("year", "month", "uf_source"))
+  expect_equal(sort(result$data_vacina), c("2024-01-03", "2024-01-07"))
+  expect_false(dir.exists(file.path(cache_dir, "sipni_csv_staging")))
+})
+
+test_that(".sipni_csv_to_utf8 cuts headerless pieces at line ends and drops the latin1 file", {
+  temp_dir <- withr::local_tempdir()
+  fx <- .sipni_csv_fixture_zip(temp_dir)
+  original <- readLines(fx$csv, encoding = "latin1")
+
+  # 9 rows of ~20 bytes; pieces of 40 bytes -> several pieces
+  dir <- healthbR:::.sipni_csv_to_utf8(fx$csv, block = 16, piece_bytes = 40)
+  pieces <- list.files(dir, pattern = "\\.csv$", full.names = TRUE)
+  expect_gt(length(pieces), 2)
+  expect_false(file.exists(fx$csv))
+
+  lines <- unlist(lapply(pieces, readLines, encoding = "UTF-8"))
+  expect_equal(lines, original[-1])                  # every row, no header
+  expect_true(all(vapply(pieces, function(p) {
+    b <- readBin(p, "raw", file.size(p)); b[length(b)] == as.raw(0x0a)
+  }, logical(1))))                                     # whole lines only
+
+  # the pieces read as one dataset give the whole file back
+  hdr <- strsplit(original[1], ";", fixed = TRUE)[[1]]
+  skip_if_not_installed("arrow")
+  back <- healthbR:::.sipni_csv_arrow_dataset(dir, hdr) |> dplyr::collect()
+  expect_equal(nrow(back), 9)
+  expect_equal(sum(back$sigla_uf_estabelecimento == "SP"), 4)
+})
+
+test_that(".latin1_to_utf8 matches iconv byte for byte", {
+  set.seed(4)
+  bytes <- as.raw(sample(c(32:126, 128:255), 50000, replace = TRUE,
+                         prob = c(rep(20, 95), rep(1, 128))))
+  expect_identical(healthbR:::.latin1_to_utf8(bytes),
+                   iconv(list(bytes), "latin1", "UTF-8", toRaw = TRUE)[[1]])
+  ascii <- charToRaw("plain ascii;only")
+  expect_identical(healthbR:::.latin1_to_utf8(ascii), ascii)
+  # a block boundary inside the file never splits a character (single-byte)
+  half <- c(healthbR:::.latin1_to_utf8(bytes[1:25000]),
+            healthbR:::.latin1_to_utf8(bytes[25001:50000]))
+  expect_identical(half, healthbR:::.latin1_to_utf8(bytes))
+})
+
+test_that("arrow and readr engines read the same values", {
+  skip_if_not_installed("arrow")
+  temp_dir <- withr::local_tempdir()
+  # accents (latin1 on disk), quoted field, empty field -> NA in both engines
+  csv_content <- paste(
+    "sigla_uf_estabelecimento;descricao_dose;municipio;obs",
+    "AC;1ª Dose;\"RIO BRANCO\";",
+    "AC;Reforço;CRUZEIRO DO SUL;NA",
+    "SP;2ª Dose;SAO PAULO;x",
+    sep = "\n"
+  )
+  csv_path <- file.path(temp_dir, "vacinacao.csv")
+  writeLines(iconv(csv_content, from = "UTF-8", to = "latin1"), csv_path,
+             useBytes = TRUE)
+  hdr <- healthbR:::.sipni_csv_header(csv_path)
+  expect_equal(hdr$uf_col, "sigla_uf_estabelecimento")
+
+  # readr first: the arrow engine re-encodes the file in place (latin1 -> UTF-8)
+  via_readr <- healthbR:::.sipni_csv_ingest_readr(
+    csv_path, hdr$uf_col, "AC", 2024, 1, cache = FALSE, cache_dir = NULL
+  )
+  via_arrow <- healthbR:::.sipni_csv_ingest_arrow(
+    csv_path, hdr$header, hdr$uf_col, "AC", 2024, 1, cache = FALSE, cache_dir = NULL
+  )
+  expect_false(file.exists(csv_path))                       # latin1 original gone
+  expect_false(dir.exists(paste0(csv_path, ".utf8")))        # and so are the pieces
+  expect_equal(nrow(via_arrow), 2)
+  expect_equal(as.data.frame(via_arrow), as.data.frame(via_readr))
+  expect_equal(via_arrow$descricao_dose, c("1ª Dose", "Reforço"))
+  expect_equal(via_arrow$obs, c(NA_character_, NA_character_))
+  expect_equal(via_arrow$municipio[1], "RIO BRANCO")
+})
+
+test_that(".sipni_csv_spill_commit replaces a stale partition and moves the rest", {
+  skip_if_not_installed("arrow")
+  cache_dir <- withr::local_tempdir()
+  spill_dir <- withr::local_tempdir()
+  parts <- c("uf_source", "year", "month")
+
+  # a stale (say, partial) SP partition already in the cache
+  stale <- tibble::tibble(year = 2024L, month = 1L, uf_source = "SP", x = "old")
+  healthbR:::.cache_append_partitioned(stale, cache_dir, "sipni_csv_data", parts)
+
+  # staged: a complete SP, plus RJ
+  healthbR:::.cache_append_partitioned(
+    tibble::tibble(year = 2024L, month = 1L, uf_source = c("SP", "SP", "RJ"),
+                   x = c("new1", "new2", "rj")),
+    spill_dir, "sipni_csv_data", parts
+  )
+
+  n <- healthbR:::.sipni_csv_spill_commit(spill_dir, cache_dir)
+  expect_equal(n, 2L)
+
+  sp <- healthbR:::.sipni_csv_check_cache("SP", 2024, 1, TRUE, cache_dir)
+  expect_equal(sort(sp$x), c("new1", "new2"))
+  rj <- healthbR:::.sipni_csv_check_cache("RJ", 2024, 1, TRUE, cache_dir)
+  expect_equal(rj$x, "rj")
+  # nothing left behind in the staging dataset
+  expect_length(list.files(file.path(spill_dir, "sipni_csv_data"),
+                           pattern = "\\.parquet$", recursive = TRUE), 0)
 })
 
 # ============================================================================
