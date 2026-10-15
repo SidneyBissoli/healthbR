@@ -283,9 +283,11 @@ sih_r2_status_cols <- c(
   # union is not pushed into the scans (two years of RR read every file of
   # both years, 92 s)
   per_year <- lapply(years, function(y) {
-    yd <- .r2_open_dataset(paste0(sih_r2_prefix, "/ano=", y), creds,
-                           partition_cols = c("mes", "uf"), schema = sch) |>
-      dplyr::filter(.data$uf %in% !!ufs)
+    # the newest year was already listed to take the schema
+    yd <- if (y == max(years)) newest else
+      .r2_open_dataset(paste0(sih_r2_prefix, "/ano=", y), creds,
+                       partition_cols = c("mes", "uf"), schema = sch)
+    yd <- yd |> dplyr::filter(.data$uf %in% !!ufs)
     if (length(months) < 12) {
       yd <- yd |> dplyr::filter(.data$mes %in% !!sprintf("%02d", months))
     }
