@@ -194,8 +194,8 @@ sih_r2_status_cols <- c(
                         .data$month %in% !!unique(have$month),
                         .data$uf_source %in% !!unique(have$uf_source)) |>
           dplyr::collect()
-        cached <- dplyr::semi_join(cached, wanted,
-                                   by = c("year", "month", "uf_source"))
+        cached <- .r2_trim_to_wanted(cached, wanted,
+                                     c("year", "month", "uf_source"))
         cached <- .sipni_front_cols(cached, c("year", "month", "uf_source"))
         if (nrow(cached) > 0) results <- c(results, list(cached))
       }
@@ -264,9 +264,11 @@ sih_r2_status_cols <- c(
 #' The bucket spans 14 historical schemas (35 to 113 columns), so the whole
 #' prefix cannot be opened with an inferred schema: the first file arrow
 #' meets is from 1992. Instead the schema is taken from the newest requested
-#' year and imposed on the whole prefix; partition pruning on `ano` then
-#' guarantees only the requested years are ever read. Listing the prefix
-#' costs a few seconds (one object per UF-month since 1992).
+#' year and imposed on each requested year, opened under its own `ano=`
+#' prefix (partitioned by `mes`/`uf`, with `ano` added as a constant) and
+#' unioned. Only the requested years are listed: listing the whole prefix
+#' (11,184 objects, one per UF-month since 1992) took 12.7 s against 1.1 s
+#' for one year (measured 2026-10-14).
 #'
 #' @return An arrow Dataset (or duckdb tbl) with `year`, `month`, `uf_source`
 #'   in front of the raw columns, or NULL if the mirror cannot be opened.
@@ -275,16 +277,23 @@ sih_r2_status_cols <- c(
   years <- sort(as.integer(years))
   newest <- .r2_open_dataset(paste0(sih_r2_prefix, "/ano=", max(years)), creds,
                              partition_cols = c("mes", "uf"))
-  sch <- newest$schema$AddField(0L, arrow::field("ano", arrow::utf8()))
+  sch <- newest$schema
 
-  ds <- .r2_open_dataset(sih_r2_prefix, creds,
-                         partition_cols = c("ano", "mes", "uf"), schema = sch)
-  ds <- ds |>
-    dplyr::filter(.data$ano %in% !!as.character(years),
-                  .data$uf %in% !!ufs)
-  if (length(months) < 12) {
-    ds <- ds |> dplyr::filter(.data$mes %in% !!sprintf("%02d", months))
-  }
+  # partitions are pruned inside each year: a filter written after the
+  # union is not pushed into the scans (two years of RR read every file of
+  # both years, 92 s)
+  per_year <- lapply(years, function(y) {
+    # the newest year was already listed to take the schema
+    yd <- if (y == max(years)) newest else
+      .r2_open_dataset(paste0(sih_r2_prefix, "/ano=", y), creds,
+                       partition_cols = c("mes", "uf"), schema = sch)
+    yd <- yd |> dplyr::filter(.data$uf %in% !!ufs)
+    if (length(months) < 12) {
+      yd <- yd |> dplyr::filter(.data$mes %in% !!sprintf("%02d", months))
+    }
+    yd |> dplyr::mutate(ano = !!as.character(y))
+  })
+  ds <- Reduce(dplyr::union_all, per_year)
   raw_cols <- setdiff(names(newest$schema), c("mes", "uf"))
   ds <- ds |>
     dplyr::mutate(year = as.integer(.data$ano),

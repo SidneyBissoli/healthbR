@@ -260,3 +260,57 @@ test_that("sih_status lists the published competences", {
   expect_true(all(grepl("^sih/rd/ano=\\d{4}/mes=\\d{2}/uf=[A-Z]{2}/", st$parquet_path)))
   expect_match(attr(st, "last_updated"), "^\\d{4}-\\d{2}-\\d{2}")
 })
+
+test_that(".r2_trim_to_wanted keeps only the wanted partitions", {
+  cached <- tibble::tibble(
+    year = c(2023L, 2023L, 2024L, 2024L), month = c(1L, 2L, 1L, 2L),
+    uf_source = "RR", N_AIH = c("a", "b", "c", "d")
+  )
+  by <- c("year", "month", "uf_source")
+  # the coarse %in% read brought two combinations that were not asked for
+  wanted <- tibble::tibble(year = c(2023L, 2024L), month = c(1L, 2L), uf_source = "RR")
+  expect_identical(.r2_trim_to_wanted(cached, wanted, by)$N_AIH, c("a", "d"))
+  # every row wanted: returned untouched
+  expect_identical(.r2_trim_to_wanted(cached, cached[by], by), cached)
+})
+
+test_that(".sih_r2_lazy opens only the requested years and prunes inside each", {
+  skip_if_not_installed("arrow")
+  root <- withr::local_tempdir()
+  part <- function(y, m, uf, n, morte) {
+    d <- file.path(root, "sih/rd", paste0("ano=", y), paste0("mes=", m), paste0("uf=", uf))
+    dir.create(d, recursive = TRUE)
+    arrow::write_parquet(
+      data.frame(N_AIH = paste0(y, m, uf, seq_len(n)), MORTE = morte),
+      file.path(d, "part-0.parquet")
+    )
+  }
+  part(2021, "01", "RR", 2, c("0", "1"))
+  part(2022, "01", "RR", 3, c("1", "1", "0"))
+  part(2022, "12", "RR", 1, "1")
+  part(2022, "01", "AC", 4, rep("1", 4))
+  part(2023, "01", "RR", 2, c("0", "0"))
+  opened <- character(0)
+  local_mocked_bindings(.r2_open_dataset = function(prefix, creds, partition_cols = NULL,
+                                                    unify_schemas = FALSE, schema = NULL) {
+    opened <<- c(opened, prefix)
+    fields <- rep(list(arrow::utf8()), length(partition_cols))
+    names(fields) <- partition_cols
+    arrow::open_dataset(file.path(root, prefix), format = "parquet",
+                        partitioning = do.call(arrow::hive_partition, fields),
+                        schema = schema)
+  })
+
+  res <- .sih_r2_lazy(c(2022, 2023), months = 1, ufs = "RR",
+                      backend = "arrow", creds = NULL) |>
+    dplyr::collect() |>
+    dplyr::arrange(.data$year, .data$N_AIH)
+
+  # 2021 is never listed; the newest year is listed once, for the schema
+  expect_setequal(opened, c("sih/rd/ano=2022", "sih/rd/ano=2023"))
+  expect_length(opened, 2)
+  expect_identical(names(res), c("year", "month", "uf_source", "N_AIH", "MORTE"))
+  expect_identical(res$year, c(2022L, 2022L, 2022L, 2023L, 2023L))
+  expect_true(all(res$month == 1L & res$uf_source == "RR"))
+  expect_identical(sum(res$MORTE == "1"), 2L)
+})

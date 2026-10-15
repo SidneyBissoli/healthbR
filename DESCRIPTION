@@ -26,7 +26,7 @@ Description: Provides easy access to Brazilian public health data from multiple
     microdata read natively, or the healthbr-data 'Parquet' mirror with
     per-file provenance) and from 'IBGE' repositories, and is returned in tidy
     format following tidyverse conventions. A vignette compares the package
-    with 'microdatasus' on the 'DATASUS' systems both read.
+    with 'microdatasus' and 'read.dbc' on the 'DATASUS' files they read.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

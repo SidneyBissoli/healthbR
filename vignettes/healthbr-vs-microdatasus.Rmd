@@ -1,8 +1,8 @@
 ---
-title: "healthbR vs microdatasus: reading DATASUS microdata (SIM, SINASC, SIH) in R"
+title: "healthbR, microdatasus and read.dbc: reading DATASUS microdata in R"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{healthbR vs microdatasus: reading DATASUS microdata (SIM, SINASC, SIH) in R}
+  %\VignetteIndexEntry{healthbR, microdatasus and read.dbc: reading DATASUS microdata in R}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,54 +18,283 @@ knitr::opts_chunk$set(
 ## Why this vignette
 
 If you read DATASUS microdata in R -- deaths from SIM, live births from
-SINASC, hospital admissions from SIH -- you have two packages to choose from:
-[microdatasus](https://CRAN.R-project.org/package=microdatasus), by Raphael
-Saldanha, described in Saldanha et al. (2019) and the usual answer to "how
-do I get DATASUS into R", and healthbR. They overlap on six DATASUS systems and differ in
-almost everything they do with the bytes after the download. This vignette
-puts the two side by side on the *same* three downloads and shows what each
-one returns, so you can pick the one that fits your workflow -- or use both.
+SINASC, hospital admissions from SIH -- there are three routes, and they
+work at different layers:
 
-Everything below was measured on 2026-09-05 with healthbR 0.3.1
-(development version), microdatasus 3.0.0, arrow 25.0.0, dplyr 1.2.1 and
-R 4.6.1 on Windows, from a residential connection in Brazil. Timings are
-single runs and will vary with your network; the row counts, column types
-and values will not. Nothing here runs at build time (`eval = FALSE`): the
-outputs are pasted from that session, and the code is complete so you can
-rerun it.
+- [read.dbc](https://github.com/danicat/read.dbc), by Daniela Petruzalek,
+  is a **reader**: hand it a `.dbc` file you downloaded and it returns a
+  data frame. For a decade it was what every other tool called underneath.
+- [microdatasus](https://CRAN.R-project.org/package=microdatasus), by
+  Raphael Saldanha, described in Saldanha et al. (2019), **downloads and
+  labels**: `fetch_datasus()` fetches the files from the Ministry's FTP and
+  `process_*()` replaces codes with labels. It is the usual answer to "how
+  do I get DATASUS into R".
+- healthbR **downloads, caches and types**, reads SIH and SI-PNI from a
+  Parquet mirror with per-file provenance, and covers systems and surveys
+  outside DATASUS.
 
-## What each package covers
+This vignette puts the three side by side on the *same* files: what each
+one returns, how long it takes, the same tasks written in each, and the
+mirror's Parquet read with no package at all. Pick the one that fits your
+workflow -- or combine them.
 
-| | healthbR | microdatasus 3.0.0 |
+Two measurement sessions, same Windows laptop, R 4.6.1, a residential
+connection in Brazil:
+
+- **2026-10-14** (read.dbc, speed, side-by-side code, Parquet): healthbR
+  0.4.0.9000 (development version), microdatasus 3.0.0, read.dbc 1.2.0,
+  arrow 25.0.1, duckdb 1.5.5, dplyr 1.2.1.
+- **2026-09-05** (the SIH, SIM and SINASC walk-throughs further down):
+  healthbR 0.3.1 (development version), microdatasus 3.0.0, which is still
+  the CRAN version, arrow 25.0.0, dplyr 1.2.1. Row counts, record sets and
+  column types of the SIH file were measured again on 2026-10-14 and had
+  not changed.
+
+Timings depend on your network; row counts, column types and values do
+not. Nothing here runs at build time (`eval = FALSE`): the outputs are
+pasted from those sessions, and the code is complete so you can rerun it.
+
+## Three layers
+
+| | read.dbc 1.2.0 | microdatasus 3.0.0 | healthbR |
+|---|---|---|---|
+| You give it | a `.dbc` path | system, years, months, UFs | system, years, months, UFs |
+| It downloads | -- | from the DATASUS FTP | from the FTP, or from the healthbr-data Parquet mirror (SIH, SI-PNI) |
+| Columns come back | as the DBF declares them: numeric fields parsed by `foreign` | all character (`fetch_datasus()`); labels after `process_*()` | typed by meaning: dates as `Date`, counts and values numeric, codes kept as character |
+| Keeps a copy | -- | -- | partitioned Parquet cache; a repeated call does not download |
+| Dependencies | `foreign` | 12 packages | more (`arrow` optional, for the mirror and lazy queries) |
+| Writes `.dbc` | yes (`dbf2dbc()`) | -- | -- |
+| On CRAN | **no: archived on 2025-12-14** | yes | yes (0.4.0) |
+
+## read.dbc today
+
+CRAN archived read.dbc on 2025-12-14, "as issues were not corrected in
+time"; the last release, 1.2.0, is from 2025-11-28. It still works -- every
+number below was measured with it -- but it now installs from source:
+
+```{r}
+# from the CRAN archive (needs Rtools on Windows: the package compiles C)
+install.packages(
+  "https://cran.r-project.org/src/contrib/Archive/read.dbc/read.dbc_1.2.0.tar.gz",
+  repos = NULL, type = "source"
+)
+# or the development version
+# remotes::install_github("danicat/read.dbc")
+```
+
+The other two no longer depend on it. microdatasus 3.0.0 "removes the
+dependency on `read.dbc` and reads DBC files with vendored C code adapted
+from `healthbR`" (its NEWS), and exports that reader as
+`microdatasus::read_dbc()`. healthbR has shipped its own decompressor from
+the start: Mark Adler's `blast.c` plus a small `dbc2dbf.c` (see
+`inst/COPYRIGHTS`). All three decode the same PKWare DCL stream, and on the
+same file they decompress at the same speed (next section). If a script of
+yours calls `read.dbc::read.dbc(file)` and you would rather not depend on
+an archived package, `microdatasus::read_dbc(file)` is the closest drop-in;
+it returns every column as character.
+
+## Speed
+
+Two SIH files from the FTP, competence 2023-01: Roraima, the smallest
+(349 KB `.dbc`, 4,734 admissions), and São Paulo, the largest (16.4 MB,
+210,225 admissions). Each cold run is a new R process with an empty
+healthbR cache, so nothing is reused between runs; the figures are the
+median of three runs, package loading excluded. All five routes returned
+the same rows, and the same set of `N_AIH`.
+
+**One file, from nothing:**
+
+| Route | RR | SP |
 |---|---|---|
-| SIM (mortality) | `sim_data()`: DO, 1996--2024 | `"SIM-DO"`, `"SIM-DOFET"`, `"SIM-DOEXT"`, `"SIM-DOINF"`, `"SIM-DOMAT"` |
-| SINASC (live births) | `sinasc_data()`: 1996--2024 | `"SINASC"` |
-| SIH (admissions) | `sih_data()`: RD (reduced AIH), 2008--2026 | `"SIH-RD"`, `"SIH-RJ"`, `"SIH-SP"`, `"SIH-ER"` |
-| SIA (outpatient) | `sia_data()`: 13 file types, 2008--2026 | 12 file types |
-| CNES (facilities) | `cnes_data()`: 13 file types, 2005--2026 | 13 file types |
-| SINAN (notifiable diseases) | `sinan_data()`: 31 diseases, 2007--2026 | 8 diseases (dengue, chikungunya, zika, malaria, Chagas, visceral and cutaneous leishmaniasis, leptospirosis) |
-| SI-PNI (vaccination) | `sipni_data()`: 1994--2026 | -- |
-| SISAB (primary care) | `sisab_data()` | -- |
-| Surveys | VIGITEL, PNS, PNAD Continua, POF, Censo denominators | -- |
-| Regulatory agencies | ANS, ANVISA | -- |
-| Auxiliary tables | `*_dictionary()`, `*_variables()` per module | SIGTAP (`fetch_sigtab()`), CADGER (`fetch_cadger()`), `tabMun`, `tabCBO`, `tabOcupacao`, `tabNaturalidade` |
+| read.dbc: `curl_download()` + `read.dbc()` | 0.9 s | 9.7 s |
+| microdatasus: `fetch_datasus()` | 2.7 s | 18.0 s |
+| healthbR from the FTP: `sih_data(source = "datasus")` | 1.3 s | 16.4 s |
+| healthbR from the mirror: `sih_data()` | 7.4 s | 7.7 s |
+| No package: `arrow::read_parquet(<mirror URL>)` | 0.4 s | 1.1 s |
 
-microdatasus goes deeper into SIM and SIH (the fetal, external-cause,
-infant and maternal SIM extracts; the RJ, SP and ER SIH files) and ships the
-SIGTAP procedure table. healthbR goes wider: more SINAN diseases, SI-PNI,
-SISAB, the household surveys and the regulatory agencies, all under one
-`*_years()` / `*_data()` / `*_dictionary()` API.
+**The same file again:**
 
-## The same reader, two philosophies
+| Route | RR | SP |
+|---|---|---|
+| read.dbc, microdatasus | download again | download again |
+| healthbR, new R session, cache on disk | 2.3 s | 3.5 s |
+| healthbR, same R session | 0.8 s | 2.3--2.8 s |
 
-Both packages decompress the Ministry's `.dbc` files (DBF compressed with
-PKWare DCL) with the same vendored C code: microdatasus 3.0.0 dropped its
-dependency on `read.dbc` and adopted the implementation from healthbR (its
-NEWS says so, and thanks the author). So the *bytes* the two packages read
-are identical; the difference starts right after.
+**Decompression only**, the `.dbc` already on disk (`bench::mark()`, five
+iterations): read.dbc, `microdatasus::read_dbc()` and healthbR's internal
+reader took 40--49 ms on RR and 5.2--5.8 s on SP -- the same algorithm,
+within 10% of each other. Reading the mirror's Parquet of the same file
+from disk took 25 ms and 0.73 s.
 
-**healthbR keeps the codes and types the columns.** `SEXO` stays `1`/`3`,
-`MORTE` stays `0`/`1`, `DT_INTER` becomes a `Date`, `VAL_TOT` a double,
+What the tables say:
+
+- **For one small file the FTP wins.** read.dbc is the fastest route from
+  nothing to a data frame on RR; healthbR's first call to the mirror pays
+  for its manifest (11 MB, one entry per published file with MD5, size and
+  timestamp), which it downloads once and revalidates by ETag afterwards.
+- **For a large file the mirror wins.** On SP the Parquet is 10 MB against
+  16 MB of `.dbc`, and it needs no decompression: healthbR from the mirror
+  (7.7 s) beats every FTP route, including its own (16.4 s, which also
+  writes the cache and types the columns).
+- **Repetition is where a cache counts.** read.dbc and microdatasus download
+  and decompress again every time; healthbR reads its local Parquet.
+- **Typing has a cost, and healthbR pays it at read time.** The gap between
+  `arrow::read_parquet()` (1.1 s on SP) and a warm `sih_data()` (2.3--2.8 s)
+  is mostly converting dates and numbers and attaching provenance.
+  `sih_data(parse = FALSE)` skips the conversion.
+
+These measurements found three slow paths in healthbR -- date parsing row
+by row, a needless copy of every cached row, and a lazy query that listed
+the whole mirror before reading one year -- fixed in the version measured
+here (see NEWS); before the fixes a warm SP read took 7.7 s and the lazy
+year below 16.7 s.
+
+## The same tasks, side by side
+
+### Read one month of SIH for one state
+
+```{r}
+# read.dbc: you build the FTP path and download
+f <- tempfile(fileext = ".dbc")
+curl::curl_download(
+  "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR2301.dbc", f
+)
+rr_r <- read.dbc::read.dbc(f, as.is = TRUE)
+
+# microdatasus
+rr_m <- microdatasus::fetch_datasus(
+  year_start = 2023, month_start = 1, year_end = 2023, month_end = 1,
+  uf = "RR", information_system = "SIH-RD"
+)
+
+# healthbR
+rr_h <- healthbR::sih_data(year = 2023, month = 1, uf = "RR")
+```
+
+The file name encodes the system, file type, state and competence
+(`RD` + `RR` + `23` + `01`); read.dbc leaves that and the directory, which
+changes by system and period, to you. Column types differ:
+
+```{r}
+table(vapply(rr_r, function(x) class(x)[1], ""))   # read.dbc
+#> character   integer   numeric
+#>        77        17        19
+table(vapply(rr_m, function(x) class(x)[1], ""))   # microdatasus
+#> character
+#>       113
+table(vapply(rr_h, function(x) class(x)[1], ""))   # healthbR
+#> character      Date   integer   numeric
+#>       101         3         7         5
+```
+
+read.dbc parses what the DBF declares numeric: the values and counts, but
+also some coded fields -- `MORTE` comes back an integer while `SEXO` stays
+text -- and it leaves dates as text (`DT_INTER` is `"20221213"`). healthbR
+decides by meaning: dates become `Date`, values and counts numeric, codes
+stay character (`MORTE` is `"0"`/`"1"`), so they join with
+`sih_dictionary()` and do not change type between years.
+
+### Deaths per competence for a year
+
+```{r}
+# read.dbc: twelve downloads, all rows read
+deaths_r <- vapply(1:12, function(m) {
+  f <- tempfile(fileext = ".dbc")
+  curl::curl_download(sprintf(
+    "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR23%02d.dbc", m
+  ), f)
+  sum(read.dbc::read.dbc(f, as.is = TRUE)$MORTE == 1)
+}, numeric(1))
+
+# microdatasus: twelve downloads, all rows in memory, then filter
+deaths_m <- microdatasus::fetch_datasus(
+  2023, 1, 2023, 12, uf = "RR", information_system = "SIH-RD"
+) |>
+  dplyr::filter(MORTE == "1") |>
+  dplyr::count(MES_CMPT)
+
+# healthbR: lazy query over the mirror, only the matching rows travel
+deaths_h <- healthbR::sih_data(year = 2023, uf = "RR", lazy = TRUE) |>
+  dplyr::filter(MORTE == "1") |>
+  dplyr::count(month) |>
+  dplyr::collect()
+```
+
+| Route | RR 2023, 12 competences |
+|---|---|
+| read.dbc loop | 10.2 s |
+| microdatasus | 12.7 s |
+| healthbR, `lazy = TRUE` | 3.7 s |
+| duckdb over the 12 mirror URLs, no package (next section) | 1.4 s |
+
+All four return the same 1,450 deaths, month by month (113, 120, 175, 166,
+118, 78, 97, 144, 105, 104, 128, 102).
+
+### Labels
+
+```{r}
+# microdatasus: one call
+rr_mp <- microdatasus::process_sih(rr_m)
+
+# healthbR: a join with the dictionary, when you want it
+rr_h |>
+  dplyr::count(MORTE) |>
+  dplyr::left_join(healthbR::sih_dictionary("MORTE"), by = c("MORTE" = "code"))
+
+# read.dbc: labels are yours to bring
+```
+
+## The mirror without healthbR
+
+The Parquet files healthbR reads are public. The
+[healthbr-data](https://github.com/SidneyBissoli/healthbr-data) mirror
+publishes one file per DATASUS file, at a path that follows the FTP's
+competence and state, with every column as the original string:
+
+```{r}
+url <- "https://data.sidneybissoli.com/sih/rd/ano=2023/mes=01/uf=RR/part-0.parquet"
+rr_a <- arrow::read_parquet(url)
+dim(rr_a)
+#> [1] 4734  113
+
+# a year in one SQL query, nothing downloaded but the matching bytes
+con <- DBI::dbConnect(duckdb::duckdb())
+DBI::dbExecute(con, "INSTALL httpfs; LOAD httpfs;")
+urls <- sprintf(
+  "'https://data.sidneybissoli.com/sih/rd/ano=2023/mes=%02d/uf=RR/part-0.parquet'", 1:12
+)
+DBI::dbGetQuery(con, paste0(
+  "SELECT count(*) AS deaths FROM read_parquet([", toString(urls), "]) ",
+  "WHERE MORTE = '1'"
+))
+#>   deaths
+#> 1   1450
+DBI::dbDisconnect(con, shutdown = TRUE)
+```
+
+Which files exist, and what each came from (FTP URL, MD5 and size of the
+`.dbc`, record count, Parquet SHA-256), is in
+`https://data.sidneybissoli.com/sih/rd/manifest.json` -- what
+`healthbR::sih_status()` reads. If you know the files you want, this is the
+fastest route in this vignette (0.4 s for RR, 1.1 s for SP, 1.4 s for the
+year). What healthbR adds on top: the paths and the manifest handled for
+you, types, the local cache, `year`/`month`/`uf_source` columns, the
+provenance attached to the result, years whose schemas differ, and the FTP
+fallback when the mirror does not answer. The mirror covers SIH-RD
+(1992--present) and SI-PNI; for SIM, SINASC, SIA, SINAN and CNES all three
+packages read the FTP.
+
+## The same reader, three philosophies
+
+All three read the same bytes. What differs is what happens after.
+
+**read.dbc returns the DBF as it is declared.** The DBF header types each
+field; `foreign::read.dbf()` turns numeric fields into numbers and keeps
+the rest as text (`as.is = TRUE` stops it from making factors). Nothing is
+added or renamed.
+
+**healthbR keeps the codes and types the columns.** `SEXO` stays `"1"`/`"3"`,
+`MORTE` stays `"0"`/`"1"`, `DT_INTER` becomes a `Date`, `VAL_TOT` a double,
 `IDADE` an integer. Labels live in `sih_dictionary()`, `sim_dictionary()`,
 `sinasc_dictionary()`, joined when you want them. The default `parse = TRUE`
 converts only genuinely quantitative and date fields; coded categorical
@@ -80,16 +309,19 @@ with labels (`SEXO` becomes `"Masculino"`/`"Feminino"`, `MORTE` becomes
 unit and, with `municipality_data = TRUE`, join municipality names,
 coordinates and altitude. The result is a tibble of character columns.
 
-Neither is wrong. Labels are what you want for a table in a report; codes
+None is wrong. Labels are what you want for a table in a report; codes
 are what you want to join against a dictionary, compare years, or feed a
-model. The trap is mixing the two: after `process_sih()`, `MORTE == 1` is
+model; the DBF as declared is what you want when you are building your own
+pipeline. The trap is mixing them: after `process_sih()`, `MORTE == 1` is
 `FALSE` on every row, and `substr(DT_INTER, 5, 6)` is no longer the month,
 because both were rewritten. Read the outputs below before choosing.
 
-## One download in both packages: SIH, Roraima, competence 2023-01
+## One download, compared: SIH, Roraima, competence 2023-01
 
-Roraima is the smallest SIH file; January 2023 has 4,734 admissions. Both
-runs start from an empty cache.
+*Measured on 2026-09-05 (healthbR 0.3.1 dev); dimensions, record sets and
+types re-measured on 2026-10-14.*
+
+Roraima is the smallest SIH file; January 2023 has 4,734 admissions.
 
 ```{r}
 library(healthbR)
@@ -102,9 +334,6 @@ rr_h <- sih_data(year = 2023, month = 1, uf = "RR")
 
 dim(rr_h)
 #> [1] 4734  116
-table(vapply(rr_h, function(x) class(x)[1], ""))
-#> character      Date   integer   numeric
-#>       101         3         7         5
 
 # microdatasus -------------------------------------------------------------
 rr_m <- fetch_datasus(year_start = 2023, month_start = 1,
@@ -112,20 +341,21 @@ rr_m <- fetch_datasus(year_start = 2023, month_start = 1,
                       uf = "RR", information_system = "SIH-RD")
 dim(rr_m)
 #> [1] 4734  113
-table(vapply(rr_m, function(x) class(x)[1], ""))
-#> character
-#>       113
 
 rr_mp <- process_sih(rr_m)
 dim(rr_mp)
 #> [1] 4734  121
+
+# read.dbc -----------------------------------------------------------------
+dim(rr_r)    # from the side-by-side section above
+#> [1] 4734  113
 ```
 
-Same 4,734 rows; the sets of `N_AIH` are identical. healthbR adds three
-columns (`year`, `month`, `uf_source`: the competence and state the file
-belongs to, which the AIH record itself does not carry); `process_sih()`
-adds eight (`munResStatus`, `munResTipo`, `munResNome`, `munResUf`,
-`munResLat`, `munResLon`, `munResAlt`, `munResArea`).
+Same 4,734 rows; the sets of `N_AIH` are identical in the three. healthbR
+adds three columns (`year`, `month`, `uf_source`: the competence and state
+the file belongs to, which the AIH record itself does not carry);
+`process_sih()` adds eight (`munResStatus`, `munResTipo`, `munResNome`,
+`munResUf`, `munResLat`, `munResLon`, `munResAlt`, `munResArea`).
 
 The same five records, three ways:
 
@@ -159,17 +389,20 @@ as.data.frame(head(rr_mp[c(cols, "munResNome")], 5))
 ```
 
 Note `DT_INTER`: the admissions billed in competence 2023-01 happened in
-November and December 2022. In both packages `year`/`month` (or
-`year_start`/`month_start`) select the **billing competence**, not the
-admission date; the admissions of a calendar year keep arriving for a few
-competences after it (measured on the whole mirror: the four competences
-after a year close 99.7--99.9% of its admissions). Neither package can
-change that; both should be used with it in mind.
+November and December 2022. In all three routes the file (or
+`year`/`month`, `year_start`/`month_start`) selects the **billing
+competence**, not the admission date; the admissions of a calendar year
+keep arriving for a few competences after it (measured on the whole
+mirror: the four competences after a year close 99.7--99.9% of its
+admissions). No package can change that; all should be used with it in
+mind.
 
 And the trap, in one line each:
 
 ```{r}
-sum(rr_h$MORTE == 1)          # healthbR: integer code
+sum(rr_h$MORTE == 1)          # healthbR: "1"; R compares it as text
+#> [1] 113
+sum(rr_r$MORTE == 1)          # read.dbc: integer, as the DBF declares it
 #> [1] 113
 sum(rr_m$MORTE == "1")        # microdatasus, raw: character code
 #> [1] 113
@@ -180,7 +413,7 @@ table(rr_mp$MORTE)
 #> 4621  113
 ```
 
-Same 113 deaths; the third line is the one that silently returns zero in a
+Same 113 deaths; the last line is the one that silently returns zero in a
 script written against codes. With healthbR the label is a join away:
 
 ```{r}
@@ -190,27 +423,7 @@ sih_dictionary("MORTE")
 #>   <chr>    <chr>                    <chr> <chr>
 #> 1 MORTE    Óbito durante internação 0     Não
 #> 2 MORTE    Óbito durante internação 1     Sim
-
-rr_h |>
-  count(MORTE) |>
-  left_join(sih_dictionary("MORTE"), by = c("MORTE" = "code"))
 ```
-
-### Timing
-
-| Step | healthbR | microdatasus |
-|---|---|---|
-| Fresh cache, mirror (manifest of 11,157 partitions + one Parquet) | 11.4 s | -- |
-| Fresh cache, DATASUS FTP `.dbc` (`source = "datasus"`) | 1.1 s | 2.7 s |
-| Same call again in the session | 0.5 s (local Parquet cache) | downloads again (no cache) |
-| Labels (`process_sih()`) | -- | 0.8 s |
-| Object size in memory | 4.8 MB | 5.4 MB raw, 5.7 MB processed |
-
-On a 349 KB file the FTP wins the first read: the mirror's price of entry
-is its 10 MB manifest, downloaded once and revalidated by ETag afterwards
-(`sih_status()` reads it in 0.4 s from then on). The mirror pays back on
-repeated reads, on lazy queries over many competences (next section), and
-in what comes with the data.
 
 ## What comes with the data: provenance
 
@@ -239,8 +452,6 @@ file (the MD5 changes):
 st <- sih_status()
 nrow(st)
 #> [1] 11157
-attr(st, "last_updated")
-#> [1] "2026-08-18T12:33:31"
 range(st$year)
 #> [1] 1992 2026
 st |> filter(uf == "RR", year == 2023, month == 1) |>
@@ -252,49 +463,14 @@ st |> filter(uf == "RR", year == 2023, month == 1) |>
 ```
 
 microdatasus 3.0.0 has `track_source = TRUE`, which appends a `source`
-column with the name of the `.dbc` each row came from; it does not record
-hashes or timestamps, and the FTP does not offer them. If your derived
-product needs to say exactly which files it was built from, this is the
-difference that matters.
-
-## Lazy evaluation: a year without downloading it
-
-healthbR's `lazy = TRUE` returns an arrow (or duckdb) dataset over the
-mirror; filters and column selections are pushed down and only the
-matching bytes travel. Deaths per competence in Roraima for all of 2023,
-nothing cached:
-
-```{r}
-sih_data(year = 2023, uf = "RR", lazy = TRUE) |>
-  filter(MORTE == 1) |>
-  count(month) |>
-  collect() |>
-  arrange(month)
-#> # A tibble: 12 × 2
-#>    month     n
-#>    <int> <int>
-#>  1     1   113
-#>  2     2   120
-#>  3     3   175
-#>  4     4   166
-#>  5     5   118
-#>  6     6    78
-#>  7     7    97
-#>  8     8   144
-#>  9     9   105
-#> 10    10   104
-#> 11    11   128
-#> 12    12   102
-```
-
-19.4 s for twelve competences, no local copy left behind. With
-microdatasus the equivalent is `fetch_datasus(2023, 1, 2023, 12, uf =
-"RR", information_system = "SIH-RD")`: twelve `.dbc` downloads, all rows
-in memory, then `filter()`. For one small state that is fine; for the
-whole country (a year of SIH is about 2 GB of `.dbc`) the difference
-decides whether the query is feasible on a laptop.
+column with the name of the `.dbc` each row came from; read.dbc knows only
+the path you gave it. Neither records hashes or timestamps, and the FTP
+does not offer them. If your derived product needs to say exactly which
+files it was built from, this is the difference that matters.
 
 ## SIM: mortality, Acre 2022
+
+*Measured on 2026-09-05.*
 
 ```{r}
 # healthbR
@@ -315,7 +491,8 @@ dim(ac_m); dim(ac_mp)
 Same 4,159 deaths (1.5 s healthbR, 2.1 s + 0.7 s microdatasus). The
 interesting column is age. SIM stores it as three characters: the first is
 the unit (0 minutes, 1 hours, 2 days, 3 months, 4 years, 5 years over 100)
-and the last two the value. The two packages decode it differently:
+and the last two the value. The two packages decode it differently (read.dbc
+leaves it as the three-character field):
 
 ```{r}
 sim_dictionary("IDADE")
@@ -350,6 +527,8 @@ for different columns.
 
 ## SINASC: live births, Acre 2022
 
+*Measured on 2026-09-05; the offline reproduction re-run on 2026-10-14.*
+
 ```{r}
 # healthbR
 ac_n <- sinasc_data(year = 2022, uf = "AC")
@@ -370,36 +549,38 @@ sum(is.na(ac_nm$PESO)); sum(is.na(ac_nmp$PESO))
 ```
 
 Same 14,483 births (3.1 s healthbR; 3.3 s + 3.5 s microdatasus). One
-thing to know before relying on `process_sinasc()` in the versions measured
-here: it returned `PESO` (birth weight) as `NA` on every row, while the raw
+thing to know before relying on `process_sinasc()` in microdatasus 3.0.0:
+it returns `PESO` (birth weight) as `NA` on every row, while the raw
 column had 94 missing values out of 14,483. The behaviour reproduces
 offline with the package's own sample:
 
 ```{r}
-sum(is.na(microdatasus::sinasc_sample$PESO))
+library(microdatasus)   # process_sinasc() looks up its tables on the search path
+sum(is.na(sinasc_sample$PESO))
 #> [1] 2
-sum(is.na(process_sinasc(microdatasus::sinasc_sample)$PESO))
+sum(is.na(process_sinasc(sinasc_sample)$PESO))
 #> [1] 100
 ```
 
 The recode of the sentinel values (`"0"` and `"9999"` to `NA`) is followed
 by an `as.numeric()`, and with dplyr 1.2.1 the whole column comes back
-missing. It is the kind of thing a maintainer fixes in an afternoon once
-reported; check the package's news and issue tracker for your versions, and
+missing. It is reported as
+[rfsaldanha/microdatasus#145](https://github.com/rfsaldanha/microdatasus/issues/145),
+still open on 2026-10-14; check the package's news for your versions, and
 in the meantime take `PESO` from the raw tibble. healthbR does not rewrite
 the column: `PESO` is parsed to integer and the sentinels are left for you
 to treat.
 
 ## Where the bytes come from
 
-| | healthbR | microdatasus |
-|---|---|---|
-| SIM, SINASC, SIA, SINAN, CNES | DATASUS FTP, `.dbc`, decompressed locally | DATASUS FTP, `.dbc`, decompressed locally |
-| SIH, SI-PNI | [healthbr-data](https://github.com/SidneyBissoli/healthbr-data) mirror: hive-partitioned Parquet on Cloudflare R2, one partition per DATASUS file, byte-identical values, provenance per file; DATASUS FTP as fallback (`source = c("r2", "datasus")`) | DATASUS FTP |
-| Local cache | Partitioned Parquet per module (`*_cache_status()`, `*_clear_cache()`); a second call never touches the network | none (every call downloads) |
-| Re-issued files | `sih_status()`: MD5 and size per partition, `last_updated` of the mirror | -- |
-| Lazy queries | `lazy = TRUE`, `backend = "arrow"` or `"duckdb"`, over the cache or the mirror | -- |
-| Parallel downloads | `future::plan(multisession)` + furrr | sequential |
+| | healthbR | microdatasus | read.dbc |
+|---|---|---|---|
+| SIM, SINASC, SIA, SINAN, CNES | DATASUS FTP, `.dbc`, decompressed locally | DATASUS FTP, `.dbc`, decompressed locally | whatever file you downloaded |
+| SIH, SI-PNI | [healthbr-data](https://github.com/SidneyBissoli/healthbr-data) mirror: hive-partitioned Parquet on Cloudflare R2, one partition per DATASUS file, byte-identical values, provenance per file; DATASUS FTP as fallback (`source = c("r2", "datasus")`) | DATASUS FTP | whatever file you downloaded |
+| Local cache | Partitioned Parquet per module (`*_cache_status()`, `*_clear_cache()`); a second call never touches the network | none (every call downloads) | -- |
+| Re-issued files | `sih_status()`: MD5 and size per partition, `last_updated` of the mirror | -- | -- |
+| Lazy queries | `lazy = TRUE`, `backend = "arrow"` or `"duckdb"`, over the cache or the mirror | -- | -- |
+| Parallel downloads | `future::plan(multisession)` + furrr | sequential | -- |
 
 The mirror is refreshed weekly against the FTP by file size (the FTP offers
 neither ETag nor hash), and a re-issued file is republished with a new MD5
@@ -417,6 +598,11 @@ tables and accept the BigQuery account, basedosdados.
 
 ## Which one
 
+- **You already have the `.dbc` files, or want the fewest dependencies**:
+  read.dbc, which needs only `foreign` -- installed from the CRAN archive
+  or GitHub since it left CRAN -- or `microdatasus::read_dbc()`, the same
+  job on a CRAN package. read.dbc is also the only one that *writes*
+  `.dbc`.
 - **You want labels in the tibble and a quick table**: microdatasus.
   `process_*()` does in one call what would take a few joins in healthbR,
   and it also brings municipality names and coordinates.
@@ -424,12 +610,14 @@ tables and accept the BigQuery account, basedosdados.
   are already parsed, dictionaries are functions, and nothing is rewritten
   under you.
 - **You read SIH at scale, or repeatedly**: healthbR. Local Parquet cache,
-  lazy arrow/duckdb queries over the mirror, provenance you can cite.
+  lazy arrow/duckdb queries over the mirror, provenance you can cite -- or
+  the mirror's Parquet directly, with arrow or duckdb, if you know the
+  files you want.
 - **You need the SIM fetal/infant/maternal extracts, the RJ/SP/ER SIH
   files, or SIGTAP**: microdatasus, which has them and healthbR does not
   (yet).
 - **You need SI-PNI, SISAB, the household surveys, ANS or ANVISA**:
-  healthbR; microdatasus stops at DATASUS.
+  healthbR; the other two stop at DATASUS.
 
 They also compose. `fetch_datasus()` and `sih_data(parse = FALSE)` return
 the same character columns for the same file, so a script can read with
@@ -441,18 +629,46 @@ sih_data(year = 2023, month = 1, uf = "RR", parse = FALSE) |>
   process_sih()
 ```
 
+## What each package covers
+
+| | healthbR | microdatasus 3.0.0 |
+|---|---|---|
+| SIM (mortality) | `sim_data()`: DO, 1996--2024 | `"SIM-DO"`, `"SIM-DOFET"`, `"SIM-DOEXT"`, `"SIM-DOINF"`, `"SIM-DOMAT"` |
+| SINASC (live births) | `sinasc_data()`: 1996--2024 | `"SINASC"` |
+| SIH (admissions) | `sih_data()`: RD (reduced AIH), 1992--2026 | `"SIH-RD"`, `"SIH-RJ"`, `"SIH-SP"`, `"SIH-ER"` |
+| SIA (outpatient) | `sia_data()`: 13 file types, 2008--2026 | 12 file types |
+| CNES (facilities) | `cnes_data()`: 13 file types, 2005--2026 | 13 file types |
+| SINAN (notifiable diseases) | `sinan_data()`: 31 diseases, 2007--2026 | 8 diseases (dengue, chikungunya, zika, malaria, Chagas, visceral and cutaneous leishmaniasis, leptospirosis) |
+| SI-PNI (vaccination) | `sipni_data()`: 1994--2026 | -- |
+| SISAB (primary care) | `sisab_data()` | -- |
+| Surveys | VIGITEL, PNS, PNAD Continua, POF, Censo denominators | -- |
+| Regulatory agencies | ANS, ANVISA | -- |
+| Auxiliary tables | `*_dictionary()`, `*_variables()` per module | SIGTAP (`fetch_sigtab()`), CADGER (`fetch_cadger()`), `tabMun`, `tabCBO`, `tabOcupacao`, `tabNaturalidade` |
+
+read.dbc has no catalogue: it reads any `.dbc` you point it at, from any
+system, including the ones neither package wraps. microdatasus goes deeper
+into SIM and SIH (the fetal, external-cause, infant and maternal SIM
+extracts; the RJ, SP and ER SIH files) and ships the SIGTAP procedure
+table. healthbR goes wider: more SINAN diseases, SI-PNI, SISAB, the
+household surveys and the regulatory agencies, all under one `*_years()` /
+`*_data()` / `*_dictionary()` API.
+
 ## Reproducing this vignette
 
-The three downloads are small (the SIH file is 349 KB). To rerun the
-comparison from a fresh cache:
+The two SIH files are 349 KB and 16.4 MB. To rerun the comparison:
 
 ```{r}
-install.packages(c("microdatasus", "arrow"))
+install.packages(c("microdatasus", "arrow", "duckdb", "bench"))
+install.packages(
+  "https://cran.r-project.org/src/contrib/Archive/read.dbc/read.dbc_1.2.0.tar.gz",
+  repos = NULL, type = "source"
+)
 # install.packages("pak"); pak::pak("SidneyBissoli/healthbR")   # dev version
 
-sih_clear_cache(); sim_clear_cache(); sinasc_clear_cache()
-system.time(sih_data(year = 2023, month = 1, uf = "RR"))
-system.time(fetch_datasus(2023, 1, 2023, 1, uf = "RR",
+# a cold healthbR run: a new R session and an empty cache directory
+d <- tempfile(); dir.create(d)
+system.time(sih_data(year = 2023, month = 1, uf = "SP", cache_dir = d))
+system.time(fetch_datasus(2023, 1, 2023, 1, uf = "SP",
                           information_system = "SIH-RD"))
 ```
 

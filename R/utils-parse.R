@@ -33,6 +33,17 @@
 .convert_column <- function(x, target_type) {
   if (target_type == "character") return(x)
 
+  # convert each distinct value once and spread the result back: DATASUS
+  # columns repeat few values over many rows (a month of SIH-SP has 210k
+  # rows and a few hundred distinct DT_INTER), and as.Date(format = ) costs
+  # ~4 us per element -- 2.6 s of the 5 s a warm sih_data() call spent on
+  # SIH-SP 2023-01 (measured 2026-10-14). match() on the strings is cheap,
+  # and every row gets exactly what the conversion gives its value.
+  u <- unique(x)
+  if (length(u) < length(x)) {
+    return(.convert_column(u, target_type)[match(x, u)])
+  }
+
   # normalize empty/whitespace to NA
   x[!is.na(x) & trimws(x) == ""] <- NA_character_
 

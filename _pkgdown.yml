@@ -12,7 +12,7 @@ navbar:
       menu:
         - text: "Getting started"
           href: articles/healthbR.html
-        - text: "healthbR vs microdatasus"
+        - text: "healthbR vs microdatasus vs read.dbc"
           href: articles/healthbr-vs-microdatasus.html
         - text: "---"
         - text: "DATASUS modules"

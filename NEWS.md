@@ -1,5 +1,35 @@
 # healthbR 0.4.0.9000
 
+## Faster type parsing, warm cache reads and lazy SIH queries
+
+Found while measuring healthbR against microdatasus and read.dbc for the
+comparison vignette (SIH-SP 2023-01, 210,225 rows; same results before and
+after, compared with `identical()`):
+
+* `parse = TRUE` converts each distinct value of a column once and spreads
+  the result back, instead of running `as.Date()` on every row. DATASUS
+  date columns repeat a few hundred values over hundreds of thousands of
+  rows; date parsing was 2.6 s of a 5 s warm `sih_data()` call. Applies to
+  every DATASUS module.
+* Reads from the partitioned cache of SIH and SI-PNI no longer slice every
+  row when all of them belong to the requested partitions (0.9 s on the
+  same call). A warm `sih_data(2023, 1, uf = "SP")` went from 7.7 s to
+  2.3-2.8 s in the same session.
+* `sih_data(lazy = TRUE)` opens only the requested years of the mirror
+  instead of listing the whole SIH prefix (11,184 objects, 12.7 s before
+  any data was read), and lists the newest of them once instead of twice.
+  Deaths per competence for a year of Roraima went from 16.7 s to 3.7 s in
+  a new R session; a national two-year query from ~20 s to ~12 s.
+
+## Comparison vignette: read.dbc added
+
+* `vignette("healthbr-vs-microdatasus")` (same address) now compares
+  healthbR, microdatasus and read.dbc: what each layer does, read.dbc's
+  removal from CRAN (2025-12-14) and how to install it, speed measured on
+  the same SIH files (cold, warm and decompression only), the same tasks
+  written in each, and the healthbr-data Parquet mirror read directly with
+  arrow or duckdb.
+
 ## SI-PNI: the national CSV no longer has to fit in RAM (#4)
 
 * `sipni_data(uf = "RJ", source = "datasus")` for a 2020+ month used to hold
