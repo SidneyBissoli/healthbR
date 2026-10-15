@@ -20,7 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/healthbR.html">Getting started</a></li>
-    <li><a class="dropdown-item" href="../articles/healthbr-vs-microdatasus.html">healthbR vs microdatasus</a></li>
+    <li><a class="dropdown-item" href="../articles/healthbr-vs-microdatasus.html">healthbR vs microdatasus vs read.dbc</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>DATASUS modules</h6></li>
     <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS modules overview</a></li>
@@ -61,6 +61,20 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0.9000" id="healthbr-0409000">healthbR 0.4.0.9000<a class="anchor" aria-label="anchor" href="#healthbr-0409000"></a></h2>
+<div class="section level3">
+<h3 id="faster-type-parsing-warm-cache-reads-and-lazy-sih-queries-0-4-0-9000">Faster type parsing, warm cache reads and lazy SIH queries<a class="anchor" aria-label="anchor" href="#faster-type-parsing-warm-cache-reads-and-lazy-sih-queries-0-4-0-9000"></a></h3>
+<p>Found while measuring healthbR against microdatasus and read.dbc for the comparison vignette (SIH-SP 2023-01, 210,225 rows; same results before and after, compared with <code><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical()</a></code>):</p>
+<ul><li>
+<code>parse = TRUE</code> converts each distinct value of a column once and spreads the result back, instead of running <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code> on every row. DATASUS date columns repeat a few hundred values over hundreds of thousands of rows; date parsing was 2.6 s of a 5 s warm <code><a href="../reference/sih_data.html">sih_data()</a></code> call. Applies to every DATASUS module.</li>
+<li>Reads from the partitioned cache of SIH and SI-PNI no longer slice every row when all of them belong to the requested partitions (0.9 s on the same call). A warm <code>sih_data(2023, 1, uf = "SP")</code> went from 7.7 s to 2.3-2.8 s in the same session.</li>
+<li>
+<code>sih_data(lazy = TRUE)</code> opens only the requested years of the mirror instead of listing the whole SIH prefix (11,184 objects, 12.7 s before any data was read), and lists the newest of them once instead of twice. Deaths per competence for a year of Roraima went from 16.7 s to 3.7 s in a new R session; a national two-year query from ~20 s to ~12 s.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="comparison-vignette-readdbc-added-0-4-0-9000">Comparison vignette: read.dbc added<a class="anchor" aria-label="anchor" href="#comparison-vignette-readdbc-added-0-4-0-9000"></a></h3>
+<ul><li>
+<code><a href="../articles/healthbr-vs-microdatasus.html">vignette("healthbr-vs-microdatasus")</a></code> (same address) now compares healthbR, microdatasus and read.dbc: what each layer does, read.dbc’s removal from CRAN (2025-12-14) and how to install it, speed measured on the same SIH files (cold, warm and decompression only), the same tasks written in each, and the healthbr-data Parquet mirror read directly with arrow or duckdb.</li>
+</ul></div>
 <div class="section level3">
 <h3 id="si-pni-the-national-csv-no-longer-has-to-fit-in-ram-0-4-0-9000">SI-PNI: the national CSV no longer has to fit in RAM (<a href="https://github.com/SidneyBissoli/healthbR/issues/4" class="external-link">#4</a>)<a class="anchor" aria-label="anchor" href="#si-pni-the-national-csv-no-longer-has-to-fit-in-ram-0-4-0-9000"></a></h3>
 <ul><li><p><code>sipni_data(uf = "RJ", source = "datasus")</code> for a 2020+ month used to hold all 27 UFs of the national monthly CSV in memory until the end of the read, so campaign months (the June 2021 file has 41.8M rows, 21 GB of CSV) needed more than 16 GB even for one state (<a href="https://github.com/SidneyBissoli/healthbR/issues/4" class="external-link">#4</a>, reported by <a href="https://github.com/EnfRodrigoBruno" class="external-link">@EnfRodrigoBruno</a>). With <code>arrow</code> installed the file is now re-encoded to UTF-8 byte-wise into ~256 MB pieces (arrow’s dataset scanner reads UTF-8 only, and handed the whole file it reads ahead of the writers without bound) and each piece is streamed by arrow into the partitioned cache, one partition per UF, and the requested state is read back from there: no row of the national file is materialised in R, whatever its size. The cache still ends up with all 27 UFs of the month (a later request for another state does not download the ~1.4 GB ZIP again), and the partitions are written to a staging directory first, so an interrupted read never leaves a partial UF in the cache. Without <code>arrow</code> a readr chunked reader keeps only the requested state and discards the others (the partitioned CSV cache was never readable without <code>arrow</code> anyway). Both engines read every column as character and treat <code>""</code> and <code>"NA"</code> as missing, so the cache holds the same values whichever filled it.</p></li>

@@ -12,10 +12,13 @@ and processes data from official sources, returning clean,
 analysis-ready tibbles following tidyverse conventions.
 
 If you already use
-[microdatasus](https://CRAN.R-project.org/package=microdatasus) (or
-PySUS in Python) for DATASUS, see [healthbR vs
-microdatasus](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html)
-– a measured comparison of the two packages on the systems both read.
+[microdatasus](https://CRAN.R-project.org/package=microdatasus) or
+[read.dbc](https://github.com/danicat/read.dbc) (or PySUS in Python) for
+DATASUS, see [healthbR, microdatasus and
+read.dbc](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html)
+– a measured comparison of the three on the same files: what each
+returns, how fast, the same tasks side by side, and the Parquet mirror
+read with no package at all.
 
 ### Surveys (IBGE / Ministry of Health)
 
@@ -54,25 +57,28 @@ provenance: source URL, MD5, timestamp) and fall back to the FTP.
 | **ANS** | ANS Open Data Portal | Supplementary health beneficiaries, consumer complaints, financial statements | 2007–present |
 | **ANVISA** | ANVISA Open Data Portal | Product registrations, pharmacovigilance, hemovigilance, technovigilance, SNGPC | snapshot + 2014–present |
 
-## healthbR and microdatasus
+## healthbR, microdatasus and read.dbc
 
-Two R packages read DATASUS microdata; they overlap on six systems and
-differ in what they do with the bytes. Measured on 2026-09-05 (healthbR
-0.3.1 dev, microdatasus 3.0.0) and detailed in the vignette [healthbR vs
-microdatasus](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html):
+Three R routes read DATASUS microdata, at different layers: read.dbc
+reads a `.dbc` file you downloaded, microdatasus downloads and labels,
+healthbR downloads, caches and types. Measured on 2026-10-14 (healthbR
+0.4.0.9000, microdatasus 3.0.0, read.dbc 1.2.0) and detailed in the
+vignette [healthbR, microdatasus and
+read.dbc](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html):
 
-|  | healthbR | microdatasus |
-|----|----|----|
-| DATASUS systems | SIM, SINASC, SIH, SIA, SINAN (31 diseases), CNES, SI-PNI | SIM, SINASC, SIH, SIA, SINAN (8 diseases), CNES |
-| Beyond DATASUS | VIGITEL, PNS, PNAD Continua, POF, Censo, SISAB, ANS, ANVISA | SIGTAP, CADGER and municipality tables |
-| `.dbc` reader | vendored C (blast) | the same code, adapted from healthbR in 3.0.0 |
-| Codes | kept as codes; typed (`Date`, integer, double); labels via `*_dictionary()` | replaced by labels by `process_*()`; all columns character |
-| Source | healthbr-data Parquet mirror with provenance (SIH, SI-PNI), FTP otherwise | DATASUS FTP |
-| Lazy / cache | `lazy = TRUE` (arrow or duckdb), local Parquet cache | none |
+|  | healthbR | microdatasus | read.dbc |
+|----|----|----|----|
+| DATASUS systems | SIM, SINASC, SIH, SIA, SINAN (31 diseases), CNES, SI-PNI | SIM, SINASC, SIH, SIA, SINAN (8 diseases), CNES | any `.dbc` you download |
+| Beyond DATASUS | VIGITEL, PNS, PNAD Continua, POF, Censo, SISAB, ANS, ANVISA | SIGTAP, CADGER and municipality tables | – |
+| `.dbc` reader | vendored C (blast) | the same code, adapted from healthbR in 3.0.0 | its own C; also writes `.dbc` |
+| Codes | kept as codes; typed (`Date`, integer, double); labels via `*_dictionary()` | replaced by labels by `process_*()`; all columns character | as the DBF declares them |
+| Source | healthbr-data Parquet mirror with provenance (SIH, SI-PNI), FTP otherwise | DATASUS FTP | – |
+| Lazy / cache | `lazy = TRUE` (arrow or duckdb), local Parquet cache | none | none |
+| On CRAN | yes | yes | archived 2025-12-14 |
+| SIH-SP 2023-01, from nothing | 7.7 s (mirror) | 18.0 s | 9.7 s (with the download) |
 
-Same rows, same records, same death counts on the three downloads
-compared. Each package fits a different workflow; the vignette says
-which.
+Same rows and records in all three on every file compared. Each fits a
+different workflow; the vignette says which.
 
 ## Installation
 
@@ -600,8 +606,7 @@ Product registrations, pharmacovigilance, and SNGPC (HTTPS CSV,
 
 - [Introduction to
   healthbR](https://sidneybissoli.github.io/healthbR/articles/healthbR.md):
-- [healthbR vs microdatasus: reading DATASUS microdata (SIM, SINASC,
-  SIH) in
+- [healthbR, microdatasus and read.dbc: reading DATASUS microdata in
   R](https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.md):
 
 ### DATASUS modules

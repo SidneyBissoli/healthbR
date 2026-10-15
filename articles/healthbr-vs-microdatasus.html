@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>healthbR vs microdatasus: reading DATASUS microdata (SIM, SINASC, SIH) in R • healthbR</title>
+<title>healthbR, microdatasus and read.dbc: reading DATASUS microdata in R • healthbR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="healthbR vs microdatasus: reading DATASUS microdata (SIM, SINASC, SIH) in R">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="healthbR, microdatasus and read.dbc: reading DATASUS microdata in R">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -35,7 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/healthbR.html">Getting started</a></li>
-    <li><a class="dropdown-item" href="../articles/healthbr-vs-microdatasus.html">healthbR vs microdatasus</a></li>
+    <li><a class="dropdown-item" href="../articles/healthbr-vs-microdatasus.html">healthbR vs microdatasus vs read.dbc</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>DATASUS modules</h6></li>
     <li><a class="dropdown-item" href="../articles/datasus-modules.html">DATASUS modules overview</a></li>
@@ -79,7 +79,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>healthbR vs microdatasus: reading DATASUS microdata (SIM, SINASC, SIH) in R</h1>
+      <h1>healthbR, microdatasus and read.dbc: reading DATASUS microdata in R</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/healthbR/blob/main/vignettes/healthbr-vs-microdatasus.Rmd" class="external-link"><code>vignettes/healthbr-vs-microdatasus.Rmd</code></a></small>
@@ -92,21 +92,819 @@
 <h2 id="why-this-vignette">Why this vignette<a class="anchor" aria-label="anchor" href="#why-this-vignette"></a>
 </h2>
 <p>If you read DATASUS microdata in R – deaths from SIM, live births
-from SINASC, hospital admissions from SIH – you have two packages to
-choose from: <a href="https://CRAN.R-project.org/package=microdatasus" class="external-link">microdatasus</a>,
-by Raphael Saldanha, described in Saldanha et al. (2019) and the usual
-answer to “how do I get DATASUS into R”, and healthbR. They overlap on
-six DATASUS systems and differ in almost everything they do with the
-bytes after the download. This vignette puts the two side by side on the
-<em>same</em> three downloads and shows what each one returns, so you
-can pick the one that fits your workflow – or use both.</p>
-<p>Everything below was measured on 2026-09-05 with healthbR 0.3.1
-(development version), microdatasus 3.0.0, arrow 25.0.0, dplyr 1.2.1 and
-R 4.6.1 on Windows, from a residential connection in Brazil. Timings are
-single runs and will vary with your network; the row counts, column
-types and values will not. Nothing here runs at build time
-(<code>eval = FALSE</code>): the outputs are pasted from that session,
-and the code is complete so you can rerun it.</p>
+from SINASC, hospital admissions from SIH – there are three routes, and
+they work at different layers:</p>
+<ul>
+<li>
+<a href="https://github.com/danicat/read.dbc" class="external-link">read.dbc</a>, by
+Daniela Petruzalek, is a <strong>reader</strong>: hand it a
+<code>.dbc</code> file you downloaded and it returns a data frame. For a
+decade it was what every other tool called underneath.</li>
+<li>
+<a href="https://CRAN.R-project.org/package=microdatasus" class="external-link">microdatasus</a>,
+by Raphael Saldanha, described in Saldanha et al. (2019),
+<strong>downloads and labels</strong>: <code>fetch_datasus()</code>
+fetches the files from the Ministry’s FTP and <code>process_*()</code>
+replaces codes with labels. It is the usual answer to “how do I get
+DATASUS into R”.</li>
+<li>healthbR <strong>downloads, caches and types</strong>, reads SIH and
+SI-PNI from a Parquet mirror with per-file provenance, and covers
+systems and surveys outside DATASUS.</li>
+</ul>
+<p>This vignette puts the three side by side on the <em>same</em> files:
+what each one returns, how long it takes, the same tasks written in
+each, and the mirror’s Parquet read with no package at all. Pick the one
+that fits your workflow – or combine them.</p>
+<p>Two measurement sessions, same Windows laptop, R 4.6.1, a residential
+connection in Brazil:</p>
+<ul>
+<li>
+<strong>2026-10-14</strong> (read.dbc, speed, side-by-side code,
+Parquet): healthbR 0.4.0.9000 (development version), microdatasus 3.0.0,
+read.dbc 1.2.0, arrow 25.0.1, duckdb 1.5.5, dplyr 1.2.1.</li>
+<li>
+<strong>2026-09-05</strong> (the SIH, SIM and SINASC walk-throughs
+further down): healthbR 0.3.1 (development version), microdatasus 3.0.0,
+which is still the CRAN version, arrow 25.0.0, dplyr 1.2.1. Row counts,
+record sets and column types of the SIH file were measured again on
+2026-10-14 and had not changed.</li>
+</ul>
+<p>Timings depend on your network; row counts, column types and values
+do not. Nothing here runs at build time (<code>eval = FALSE</code>): the
+outputs are pasted from those sessions, and the code is complete so you
+can rerun it.</p>
+</div>
+<div class="section level2">
+<h2 id="three-layers">Three layers<a class="anchor" aria-label="anchor" href="#three-layers"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th></th>
+<th>read.dbc 1.2.0</th>
+<th>microdatasus 3.0.0</th>
+<th>healthbR</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>You give it</td>
+<td>a <code>.dbc</code> path</td>
+<td>system, years, months, UFs</td>
+<td>system, years, months, UFs</td>
+</tr>
+<tr class="even">
+<td>It downloads</td>
+<td>–</td>
+<td>from the DATASUS FTP</td>
+<td>from the FTP, or from the healthbr-data Parquet mirror (SIH,
+SI-PNI)</td>
+</tr>
+<tr class="odd">
+<td>Columns come back</td>
+<td>as the DBF declares them: numeric fields parsed by
+<code>foreign</code>
+</td>
+<td>all character (<code>fetch_datasus()</code>); labels after
+<code>process_*()</code>
+</td>
+<td>typed by meaning: dates as <code>Date</code>, counts and values
+numeric, codes kept as character</td>
+</tr>
+<tr class="even">
+<td>Keeps a copy</td>
+<td>–</td>
+<td>–</td>
+<td>partitioned Parquet cache; a repeated call does not download</td>
+</tr>
+<tr class="odd">
+<td>Dependencies</td>
+<td><code>foreign</code></td>
+<td>12 packages</td>
+<td>more (<code>arrow</code> optional, for the mirror and lazy
+queries)</td>
+</tr>
+<tr class="even">
+<td>Writes <code>.dbc</code>
+</td>
+<td>yes (<code>dbf2dbc()</code>)</td>
+<td>–</td>
+<td>–</td>
+</tr>
+<tr class="odd">
+<td>On CRAN</td>
+<td><strong>no: archived on 2025-12-14</strong></td>
+<td>yes</td>
+<td>yes (0.4.0)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
+<h2 id="read-dbc-today">read.dbc today<a class="anchor" aria-label="anchor" href="#read-dbc-today"></a>
+</h2>
+<p>CRAN archived read.dbc on 2025-12-14, “as issues were not corrected
+in time”; the last release, 1.2.0, is from 2025-11-28. It still works –
+every number below was measured with it – but it now installs from
+source:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># from the CRAN archive (needs Rtools on Windows: the package compiles C)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
+<span>  <span class="st">"https://cran.r-project.org/src/contrib/Archive/read.dbc/read.dbc_1.2.0.tar.gz"</span>,</span>
+<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"source"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># or the development version</span></span>
+<span><span class="co"># remotes::install_github("danicat/read.dbc")</span></span></code></pre></div>
+<p>The other two no longer depend on it. microdatasus 3.0.0 “removes the
+dependency on <code>read.dbc</code> and reads DBC files with vendored C
+code adapted from <code>healthbR</code>” (its NEWS), and exports that
+reader as <code>microdatasus::read_dbc()</code>. healthbR has shipped
+its own decompressor from the start: Mark Adler’s <code>blast.c</code>
+plus a small <code>dbc2dbf.c</code> (see <code>inst/COPYRIGHTS</code>).
+All three decode the same PKWare DCL stream, and on the same file they
+decompress at the same speed (next section). If a script of yours calls
+<code>read.dbc::read.dbc(file)</code> and you would rather not depend on
+an archived package, <code>microdatasus::read_dbc(file)</code> is the
+closest drop-in; it returns every column as character.</p>
+</div>
+<div class="section level2">
+<h2 id="speed">Speed<a class="anchor" aria-label="anchor" href="#speed"></a>
+</h2>
+<p>Two SIH files from the FTP, competence 2023-01: Roraima, the smallest
+(349 KB <code>.dbc</code>, 4,734 admissions), and São Paulo, the largest
+(16.4 MB, 210,225 admissions). Each cold run is a new R process with an
+empty healthbR cache, so nothing is reused between runs; the figures are
+the median of three runs, package loading excluded. All five routes
+returned the same rows, and the same set of <code>N_AIH</code>.</p>
+<p><strong>One file, from nothing:</strong></p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Route</th>
+<th>RR</th>
+<th>SP</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>read.dbc: <code>curl_download()</code> +
+<code>read.dbc()</code>
+</td>
+<td>0.9 s</td>
+<td>9.7 s</td>
+</tr>
+<tr class="even">
+<td>microdatasus: <code>fetch_datasus()</code>
+</td>
+<td>2.7 s</td>
+<td>18.0 s</td>
+</tr>
+<tr class="odd">
+<td>healthbR from the FTP:
+<code>sih_data(source = "datasus")</code>
+</td>
+<td>1.3 s</td>
+<td>16.4 s</td>
+</tr>
+<tr class="even">
+<td>healthbR from the mirror: <code><a href="../reference/sih_data.html">sih_data()</a></code>
+</td>
+<td>7.4 s</td>
+<td>7.7 s</td>
+</tr>
+<tr class="odd">
+<td>No package:
+<code>arrow::read_parquet(&lt;mirror URL&gt;)</code>
+</td>
+<td>0.4 s</td>
+<td>1.1 s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The same file again:</strong></p>
+<table class="table">
+<thead><tr class="header">
+<th>Route</th>
+<th>RR</th>
+<th>SP</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>read.dbc, microdatasus</td>
+<td>download again</td>
+<td>download again</td>
+</tr>
+<tr class="even">
+<td>healthbR, new R session, cache on disk</td>
+<td>2.3 s</td>
+<td>3.5 s</td>
+</tr>
+<tr class="odd">
+<td>healthbR, same R session</td>
+<td>0.8 s</td>
+<td>2.3–2.8 s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decompression only</strong>, the <code>.dbc</code> already on
+disk (<code>bench::mark()</code>, five iterations): read.dbc,
+<code>microdatasus::read_dbc()</code> and healthbR’s internal reader
+took 40–49 ms on RR and 5.2–5.8 s on SP – the same algorithm, within 10%
+of each other. Reading the mirror’s Parquet of the same file from disk
+took 25 ms and 0.73 s.</p>
+<p>What the tables say:</p>
+<ul>
+<li>
+<strong>For one small file the FTP wins.</strong> read.dbc is the
+fastest route from nothing to a data frame on RR; healthbR’s first call
+to the mirror pays for its manifest (11 MB, one entry per published file
+with MD5, size and timestamp), which it downloads once and revalidates
+by ETag afterwards.</li>
+<li>
+<strong>For a large file the mirror wins.</strong> On SP the Parquet
+is 10 MB against 16 MB of <code>.dbc</code>, and it needs no
+decompression: healthbR from the mirror (7.7 s) beats every FTP route,
+including its own (16.4 s, which also writes the cache and types the
+columns).</li>
+<li>
+<strong>Repetition is where a cache counts.</strong> read.dbc and
+microdatasus download and decompress again every time; healthbR reads
+its local Parquet.</li>
+<li>
+<strong>Typing has a cost, and healthbR pays it at read
+time.</strong> The gap between <code><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">arrow::read_parquet()</a></code> (1.1 s
+on SP) and a warm <code><a href="../reference/sih_data.html">sih_data()</a></code> (2.3–2.8 s) is mostly
+converting dates and numbers and attaching provenance.
+<code>sih_data(parse = FALSE)</code> skips the conversion.</li>
+</ul>
+<p>These measurements found three slow paths in healthbR – date parsing
+row by row, a needless copy of every cached row, and a lazy query that
+listed the whole mirror before reading one year – fixed in the version
+measured here (see NEWS); before the fixes a warm SP read took 7.7 s and
+the lazy year below 16.7 s.</p>
+</div>
+<div class="section level2">
+<h2 id="the-same-tasks-side-by-side">The same tasks, side by side<a class="anchor" aria-label="anchor" href="#the-same-tasks-side-by-side"></a>
+</h2>
+<div class="section level3">
+<h3 id="read-one-month-of-sih-for-one-state">Read one month of SIH for one state<a class="anchor" aria-label="anchor" href="#read-one-month-of-sih-for-one-state"></a>
+</h3>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># read.dbc: you build the FTP path and download</span></span>
+<span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".dbc"</span><span class="op">)</span></span>
+<span><span class="fu">curl</span><span class="fu">::</span><span class="fu"><a href="https://jeroen.r-universe.dev/curl/reference/curl_download.html" class="external-link">curl_download</a></span><span class="op">(</span></span>
+<span>  <span class="st">"ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR2301.dbc"</span>, <span class="va">f</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">rr_r</span> <span class="op">&lt;-</span> <span class="fu">read.dbc</span><span class="fu">::</span><span class="fu">read.dbc</span><span class="op">(</span><span class="va">f</span>, as.is <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># microdatasus</span></span>
+<span><span class="va">rr_m</span> <span class="op">&lt;-</span> <span class="fu">microdatasus</span><span class="fu">::</span><span class="fu">fetch_datasus</span><span class="op">(</span></span>
+<span>  year_start <span class="op">=</span> <span class="fl">2023</span>, month_start <span class="op">=</span> <span class="fl">1</span>, year_end <span class="op">=</span> <span class="fl">2023</span>, month_end <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  uf <span class="op">=</span> <span class="st">"RR"</span>, information_system <span class="op">=</span> <span class="st">"SIH-RD"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># healthbR</span></span>
+<span><span class="va">rr_h</span> <span class="op">&lt;-</span> <span class="fu">healthbR</span><span class="fu">::</span><span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"RR"</span><span class="op">)</span></span></code></pre></div>
+<p>The file name encodes the system, file type, state and competence
+(<code>RD</code> + <code>RR</code> + <code>23</code> + <code>01</code>);
+read.dbc leaves that and the directory, which changes by system and
+period, to you. Column types differ:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">rr_r</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span>   <span class="co"># read.dbc</span></span>
+<span><span class="co">#&gt; character   integer   numeric</span></span>
+<span><span class="co">#&gt;        77        17        19</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">rr_m</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span>   <span class="co"># microdatasus</span></span>
+<span><span class="co">#&gt; character</span></span>
+<span><span class="co">#&gt;       113</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">rr_h</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span>   <span class="co"># healthbR</span></span>
+<span><span class="co">#&gt; character      Date   integer   numeric</span></span>
+<span><span class="co">#&gt;       101         3         7         5</span></span></code></pre></div>
+<p>read.dbc parses what the DBF declares numeric: the values and counts,
+but also some coded fields – <code>MORTE</code> comes back an integer
+while <code>SEXO</code> stays text – and it leaves dates as text
+(<code>DT_INTER</code> is <code>"20221213"</code>). healthbR decides by
+meaning: dates become <code>Date</code>, values and counts numeric,
+codes stay character (<code>MORTE</code> is
+<code>"0"</code>/<code>"1"</code>), so they join with
+<code><a href="../reference/sih_dictionary.html">sih_dictionary()</a></code> and do not change type between years.</p>
+</div>
+<div class="section level3">
+<h3 id="deaths-per-competence-for-a-year">Deaths per competence for a year<a class="anchor" aria-label="anchor" href="#deaths-per-competence-for-a-year"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># read.dbc: twelve downloads, all rows read</span></span>
+<span><span class="va">deaths_r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".dbc"</span><span class="op">)</span></span>
+<span>  <span class="fu">curl</span><span class="fu">::</span><span class="fu"><a href="https://jeroen.r-universe.dev/curl/reference/curl_download.html" class="external-link">curl_download</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span></span>
+<span>    <span class="st">"ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR23%02d.dbc"</span>, <span class="va">m</span></span>
+<span>  <span class="op">)</span>, <span class="va">f</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">read.dbc</span><span class="fu">::</span><span class="fu">read.dbc</span><span class="op">(</span><span class="va">f</span>, as.is <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">MORTE</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># microdatasus: twelve downloads, all rows in memory, then filter</span></span>
+<span><span class="va">deaths_m</span> <span class="op">&lt;-</span> <span class="fu">microdatasus</span><span class="fu">::</span><span class="fu">fetch_datasus</span><span class="op">(</span></span>
+<span>  <span class="fl">2023</span>, <span class="fl">1</span>, <span class="fl">2023</span>, <span class="fl">12</span>, uf <span class="op">=</span> <span class="st">"RR"</span>, information_system <span class="op">=</span> <span class="st">"SIH-RD"</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">MORTE</span> <span class="op">==</span> <span class="st">"1"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">MES_CMPT</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># healthbR: lazy query over the mirror, only the matching rows travel</span></span>
+<span><span class="va">deaths_h</span> <span class="op">&lt;-</span> <span class="fu">healthbR</span><span class="fu">::</span><span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, uf <span class="op">=</span> <span class="st">"RR"</span>, lazy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">MORTE</span> <span class="op">==</span> <span class="st">"1"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">month</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th>Route</th>
+<th>RR 2023, 12 competences</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>read.dbc loop</td>
+<td>10.2 s</td>
+</tr>
+<tr class="even">
+<td>microdatasus</td>
+<td>12.7 s</td>
+</tr>
+<tr class="odd">
+<td>healthbR, <code>lazy = TRUE</code>
+</td>
+<td>3.7 s</td>
+</tr>
+<tr class="even">
+<td>duckdb over the 12 mirror URLs, no package (next section)</td>
+<td>1.4 s</td>
+</tr>
+</tbody>
+</table>
+<p>All four return the same 1,450 deaths, month by month (113, 120, 175,
+166, 118, 78, 97, 144, 105, 104, 128, 102).</p>
+</div>
+<div class="section level3">
+<h3 id="labels">Labels<a class="anchor" aria-label="anchor" href="#labels"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># microdatasus: one call</span></span>
+<span><span class="va">rr_mp</span> <span class="op">&lt;-</span> <span class="fu">microdatasus</span><span class="fu">::</span><span class="fu">process_sih</span><span class="op">(</span><span class="va">rr_m</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># healthbR: a join with the dictionary, when you want it</span></span>
+<span><span class="va">rr_h</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">MORTE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="fu">healthbR</span><span class="fu">::</span><span class="fu"><a href="../reference/sih_dictionary.html">sih_dictionary</a></span><span class="op">(</span><span class="st">"MORTE"</span><span class="op">)</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MORTE"</span> <span class="op">=</span> <span class="st">"code"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># read.dbc: labels are yours to bring</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="the-mirror-without-healthbr">The mirror without healthbR<a class="anchor" aria-label="anchor" href="#the-mirror-without-healthbr"></a>
+</h2>
+<p>The Parquet files healthbR reads are public. The <a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a>
+mirror publishes one file per DATASUS file, at a path that follows the
+FTP’s competence and state, with every column as the original
+string:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">url</span> <span class="op">&lt;-</span> <span class="st">"https://data.sidneybissoli.com/sih/rd/ano=2023/mes=01/uf=RR/part-0.parquet"</span></span>
+<span><span class="va">rr_a</span> <span class="op">&lt;-</span> <span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/read_parquet.html" class="external-link">read_parquet</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rr_a</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4734  113</span></span>
+<span></span>
+<span><span class="co"># a year in one SQL query, nothing downloaded but the matching bytes</span></span>
+<span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"INSTALL httpfs; LOAD httpfs;"</span><span class="op">)</span></span>
+<span><span class="va">urls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span></span>
+<span>  <span class="st">"'https://data.sidneybissoli.com/sih/rd/ano=2023/mes=%02d/uf=RR/part-0.parquet'"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">12</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
+<span>  <span class="st">"SELECT count(*) AS deaths FROM read_parquet(["</span>, <span class="fu"><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString</a></span><span class="op">(</span><span class="va">urls</span><span class="op">)</span>, <span class="st">"]) "</span>,</span>
+<span>  <span class="st">"WHERE MORTE = '1'"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   deaths</span></span>
+<span><span class="co">#&gt; 1   1450</span></span>
+<span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Which files exist, and what each came from (FTP URL, MD5 and size of
+the <code>.dbc</code>, record count, Parquet SHA-256), is in
+<code>https://data.sidneybissoli.com/sih/rd/manifest.json</code> – what
+<code><a href="../reference/sih_status.html">healthbR::sih_status()</a></code> reads. If you know the files you
+want, this is the fastest route in this vignette (0.4 s for RR, 1.1 s
+for SP, 1.4 s for the year). What healthbR adds on top: the paths and
+the manifest handled for you, types, the local cache,
+<code>year</code>/<code>month</code>/<code>uf_source</code> columns, the
+provenance attached to the result, years whose schemas differ, and the
+FTP fallback when the mirror does not answer. The mirror covers SIH-RD
+(1992–present) and SI-PNI; for SIM, SINASC, SIA, SINAN and CNES all
+three packages read the FTP.</p>
+</div>
+<div class="section level2">
+<h2 id="the-same-reader-three-philosophies">The same reader, three philosophies<a class="anchor" aria-label="anchor" href="#the-same-reader-three-philosophies"></a>
+</h2>
+<p>All three read the same bytes. What differs is what happens
+after.</p>
+<p><strong>read.dbc returns the DBF as it is declared.</strong> The DBF
+header types each field; <code><a href="https://rdrr.io/pkg/foreign/man/read.dbf.html" class="external-link">foreign::read.dbf()</a></code> turns numeric
+fields into numbers and keeps the rest as text
+(<code>as.is = TRUE</code> stops it from making factors). Nothing is
+added or renamed.</p>
+<p><strong>healthbR keeps the codes and types the columns.</strong>
+<code>SEXO</code> stays <code>"1"</code>/<code>"3"</code>,
+<code>MORTE</code> stays <code>"0"</code>/<code>"1"</code>,
+<code>DT_INTER</code> becomes a <code>Date</code>, <code>VAL_TOT</code>
+a double, <code>IDADE</code> an integer. Labels live in
+<code><a href="../reference/sih_dictionary.html">sih_dictionary()</a></code>, <code><a href="../reference/sim_dictionary.html">sim_dictionary()</a></code>,
+<code><a href="../reference/sinasc_dictionary.html">sinasc_dictionary()</a></code>, joined when you want them. The default
+<code>parse = TRUE</code> converts only genuinely quantitative and date
+fields; coded categorical fields stay character so they join cleanly
+with the dictionaries and with other years.</p>
+<p><strong>microdatasus separates fetching from processing.</strong>
+<code>fetch_datasus()</code> returns every column as character, exactly
+as the DBF has it. <code>process_sih()</code>,
+<code>process_sim()</code>, <code>process_sinasc()</code> then replace
+the codes with labels (<code>SEXO</code> becomes
+<code>"Masculino"</code>/<code>"Feminino"</code>, <code>MORTE</code>
+becomes <code>"Não"</code>/<code>"Sim"</code>), convert dates, split the
+SIM age field into one column per unit and, with
+<code>municipality_data = TRUE</code>, join municipality names,
+coordinates and altitude. The result is a tibble of character
+columns.</p>
+<p>None is wrong. Labels are what you want for a table in a report;
+codes are what you want to join against a dictionary, compare years, or
+feed a model; the DBF as declared is what you want when you are building
+your own pipeline. The trap is mixing them: after
+<code>process_sih()</code>, <code>MORTE == 1</code> is
+<code>FALSE</code> on every row, and <code>substr(DT_INTER, 5, 6)</code>
+is no longer the month, because both were rewritten. Read the outputs
+below before choosing.</p>
+</div>
+<div class="section level2">
+<h2 id="one-download-compared-sih-roraima-competence-2023-01">One download, compared: SIH, Roraima, competence 2023-01<a class="anchor" aria-label="anchor" href="#one-download-compared-sih-roraima-competence-2023-01"></a>
+</h2>
+<p><em>Measured on 2026-09-05 (healthbR 0.3.1 dev); dimensions, record
+sets and types re-measured on 2026-10-14.</em></p>
+<p>Roraima is the smallest SIH file; January 2023 has 4,734
+admissions.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">healthbR</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rfsaldanha/microdatasus" class="external-link">microdatasus</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># healthbR ---------------------------------------------------------------</span></span>
+<span><span class="va">rr_h</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"RR"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ℹ Reading SIH data from R2: 2023/01 (1 UF(s))...</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rr_h</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4734  116</span></span>
+<span></span>
+<span><span class="co"># microdatasus -------------------------------------------------------------</span></span>
+<span><span class="va">rr_m</span> <span class="op">&lt;-</span> <span class="fu">fetch_datasus</span><span class="op">(</span>year_start <span class="op">=</span> <span class="fl">2023</span>, month_start <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                      year_end <span class="op">=</span> <span class="fl">2023</span>, month_end <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                      uf <span class="op">=</span> <span class="st">"RR"</span>, information_system <span class="op">=</span> <span class="st">"SIH-RD"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rr_m</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4734  113</span></span>
+<span></span>
+<span><span class="va">rr_mp</span> <span class="op">&lt;-</span> <span class="fu">process_sih</span><span class="op">(</span><span class="va">rr_m</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rr_mp</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4734  121</span></span>
+<span></span>
+<span><span class="co"># read.dbc -----------------------------------------------------------------</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rr_r</span><span class="op">)</span>    <span class="co"># from the side-by-side section above</span></span>
+<span><span class="co">#&gt; [1] 4734  113</span></span></code></pre></div>
+<p>Same 4,734 rows; the sets of <code>N_AIH</code> are identical in the
+three. healthbR adds three columns (<code>year</code>,
+<code>month</code>, <code>uf_source</code>: the competence and state the
+file belongs to, which the AIH record itself does not carry);
+<code>process_sih()</code> adds eight (<code>munResStatus</code>,
+<code>munResTipo</code>, <code>munResNome</code>, <code>munResUf</code>,
+<code>munResLat</code>, <code>munResLon</code>, <code>munResAlt</code>,
+<code>munResArea</code>).</p>
+<p>The same five records, three ways:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N_AIH"</span>, <span class="st">"SEXO"</span>, <span class="st">"COD_IDADE"</span>, <span class="st">"IDADE"</span>, <span class="st">"MORTE"</span>, <span class="st">"DT_INTER"</span>,</span>
+<span>          <span class="st">"DIAG_PRINC"</span>, <span class="st">"MUNIC_RES"</span>, <span class="st">"VAL_TOT"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rr_h</span><span class="op">[</span><span class="va">cols</span><span class="op">]</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           N_AIH SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT</span></span>
+<span><span class="co">#&gt; 1 1423100411392    3         4    18     0 2022-12-13       O809    140017   568.80</span></span>
+<span><span class="co">#&gt; 2 1423100911661    1         4    83     0 2022-12-26       J189    140010   994.59</span></span>
+<span><span class="co">#&gt; 3 1423100911672    3         4    65     0 2022-12-03       I219    140010   620.12</span></span>
+<span><span class="co">#&gt; 4 1423100911683    1         4    58     0 2022-12-26       I248    140020   333.08</span></span>
+<span><span class="co">#&gt; 5 1423100911694    1         4    35     0 2022-11-01       A499    140010 11202.59</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rr_m</span><span class="op">[</span><span class="va">cols</span><span class="op">]</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           N_AIH SEXO COD_IDADE IDADE MORTE DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT</span></span>
+<span><span class="co">#&gt; 1 1423100411392    3         4    18     0 20221213       O809    140017    568.8</span></span>
+<span><span class="co">#&gt; 2 1423100911661    1         4    83     0 20221226       J189    140010   994.59</span></span>
+<span><span class="co">#&gt; 3 1423100911672    3         4    65     0 20221203       I219    140010   620.12</span></span>
+<span><span class="co">#&gt; 4 1423100911683    1         4    58     0 20221226       I248    140020   333.08</span></span>
+<span><span class="co">#&gt; 5 1423100911694    1         4    35     0 20221101       A499    140010 11202.59</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rr_mp</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cols</span>, <span class="st">"munResNome"</span><span class="op">)</span><span class="op">]</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           N_AIH      SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT munResNome</span></span>
+<span><span class="co">#&gt; 1 1423100411392  Feminino      Anos    18   Não 2022-12-13       O809    140017    568.8      Cantá</span></span>
+<span><span class="co">#&gt; 2 1423100911661 Masculino      Anos    83   Não 2022-12-26       J189    140010   994.59  Boa Vista</span></span>
+<span><span class="co">#&gt; 3 1423100911672  Feminino      Anos    65   Não 2022-12-03       I219    140010   620.12  Boa Vista</span></span>
+<span><span class="co">#&gt; 4 1423100911683 Masculino      Anos    58   Não 2022-12-26       I248    140020   333.08  Caracaraí</span></span>
+<span><span class="co">#&gt; 5 1423100911694 Masculino      Anos    35   Não 2022-11-01       A499    140010 11202.59  Boa Vista</span></span></code></pre></div>
+<p>Note <code>DT_INTER</code>: the admissions billed in competence
+2023-01 happened in November and December 2022. In all three routes the
+file (or <code>year</code>/<code>month</code>,
+<code>year_start</code>/<code>month_start</code>) selects the
+<strong>billing competence</strong>, not the admission date; the
+admissions of a calendar year keep arriving for a few competences after
+it (measured on the whole mirror: the four competences after a year
+close 99.7–99.9% of its admissions). No package can change that; all
+should be used with it in mind.</p>
+<p>And the trap, in one line each:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">rr_h</span><span class="op">$</span><span class="va">MORTE</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span>          <span class="co"># healthbR: "1"; R compares it as text</span></span>
+<span><span class="co">#&gt; [1] 113</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">rr_r</span><span class="op">$</span><span class="va">MORTE</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span>          <span class="co"># read.dbc: integer, as the DBF declares it</span></span>
+<span><span class="co">#&gt; [1] 113</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">rr_m</span><span class="op">$</span><span class="va">MORTE</span> <span class="op">==</span> <span class="st">"1"</span><span class="op">)</span>        <span class="co"># microdatasus, raw: character code</span></span>
+<span><span class="co">#&gt; [1] 113</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">rr_mp</span><span class="op">$</span><span class="va">MORTE</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span>         <span class="co"># microdatasus, processed: the code is gone</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">rr_mp</span><span class="op">$</span><span class="va">MORTE</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Não  Sim</span></span>
+<span><span class="co">#&gt; 4621  113</span></span></code></pre></div>
+<p>Same 113 deaths; the last line is the one that silently returns zero
+in a script written against codes. With healthbR the label is a join
+away:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sih_dictionary.html">sih_dictionary</a></span><span class="op">(</span><span class="st">"MORTE"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 4</span></span>
+<span><span class="co">#&gt;   variable description              code  label</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;                    &lt;chr&gt; &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 MORTE    Óbito durante internação 0     Não</span></span>
+<span><span class="co">#&gt; 2 MORTE    Óbito durante internação 1     Sim</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="what-comes-with-the-data-provenance">What comes with the data: provenance<a class="anchor" aria-label="anchor" href="#what-comes-with-the-data-provenance"></a>
+</h2>
+<p>From the mirror, the tibble carries the source it was served from and
+one row per DATASUS file behind it – URL, MD5 and size of the
+<code>.dbc</code>, record count, when it was processed and by which
+pipeline version:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">rr_h</span>, <span class="st">"healthbr_source"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "r2"</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">rr_h</span>, <span class="st">"healthbr_provenance"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">year</span>, <span class="va">month</span>, <span class="va">uf</span>, <span class="va">records</span>, <span class="va">source_hash_md5</span>, <span class="va">source_size_bytes</span>,</span>
+<span>         <span class="va">processing_timestamp</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 7</span></span>
+<span><span class="co">#&gt;    year month uf    records source_hash_md5                  source_size_bytes processing_timestamp</span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;                                        &lt;dbl&gt; &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1  2023     1 RR       4734 12e74d4b059589ceb47e4136e3b2ce5f            349244 2026-03-09 03:05:34.463049</span></span></code></pre></div>
+<p><code><a href="../reference/sih_status.html">sih_status()</a></code> gives the same for every published
+partition, which is how you find out which competences exist and whether
+the Ministry re-issued a file (the MD5 changes):</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">st</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_status.html">sih_status</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">st</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 11157</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">st</span><span class="op">$</span><span class="va">year</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1992 2026</span></span>
+<span><span class="va">st</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">uf</span> <span class="op">==</span> <span class="st">"RR"</span>, <span class="va">year</span> <span class="op">==</span> <span class="fl">2023</span>, <span class="va">month</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">records</span>, <span class="va">source_hash_md5</span>, <span class="va">parquet_sha256</span>, <span class="va">pipeline_version</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 4</span></span>
+<span><span class="co">#&gt;   records source_hash_md5                  parquet_sha256                                                   pipeline_version</span></span>
+<span><span class="co">#&gt;     &lt;dbl&gt; &lt;chr&gt;                            &lt;chr&gt;                                                            &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1    4734 12e74d4b059589ceb47e4136e3b2ce5f bab1c2fdda7b09a6117169156f51846e095de0bc502fec9adecf90d2e1f08474 1.0.0</span></span></code></pre></div>
+<p>microdatasus 3.0.0 has <code>track_source = TRUE</code>, which
+appends a <code>source</code> column with the name of the
+<code>.dbc</code> each row came from; read.dbc knows only the path you
+gave it. Neither records hashes or timestamps, and the FTP does not
+offer them. If your derived product needs to say exactly which files it
+was built from, this is the difference that matters.</p>
+</div>
+<div class="section level2">
+<h2 id="sim-mortality-acre-2022">SIM: mortality, Acre 2022<a class="anchor" aria-label="anchor" href="#sim-mortality-acre-2022"></a>
+</h2>
+<p><em>Measured on 2026-09-05.</em></p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># healthbR</span></span>
+<span><span class="va">ac_h</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ℹ Downloading SIM data: AC 2022...</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ac_h</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4159   90</span></span>
+<span></span>
+<span><span class="co"># microdatasus</span></span>
+<span><span class="va">ac_m</span>  <span class="op">&lt;-</span> <span class="fu">fetch_datasus</span><span class="op">(</span>year_start <span class="op">=</span> <span class="fl">2022</span>, year_end <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>,</span>
+<span>                       information_system <span class="op">=</span> <span class="st">"SIM-DO"</span><span class="op">)</span></span>
+<span><span class="va">ac_mp</span> <span class="op">&lt;-</span> <span class="fu">process_sim</span><span class="op">(</span><span class="va">ac_m</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ac_m</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ac_mp</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4159   87</span></span>
+<span><span class="co">#&gt; [1] 4159  100</span></span></code></pre></div>
+<p>Same 4,159 deaths (1.5 s healthbR, 2.1 s + 0.7 s microdatasus). The
+interesting column is age. SIM stores it as three characters: the first
+is the unit (0 minutes, 1 hours, 2 days, 3 months, 4 years, 5 years over
+100) and the last two the value. The two packages decode it differently
+(read.dbc leaves it as the three-character field):</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sim_dictionary.html">sim_dictionary</a></span><span class="op">(</span><span class="st">"IDADE"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 4</span></span>
+<span><span class="co">#&gt;   variable description                 code  label</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;                       &lt;chr&gt; &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 IDADE    Idade (1º dígito = unidade) 0     Minutos (&lt; 1 hora)</span></span>
+<span><span class="co">#&gt; 2 IDADE    Idade (1º dígito = unidade) 1     Horas</span></span>
+<span><span class="co">#&gt; 3 IDADE    Idade (1º dígito = unidade) 2     Dias</span></span>
+<span><span class="co">#&gt; 4 IDADE    Idade (1º dígito = unidade) 3     Meses</span></span>
+<span><span class="co">#&gt; 5 IDADE    Idade (1º dígito = unidade) 4     Anos (0-99)</span></span>
+<span><span class="co">#&gt; 6 IDADE    Idade (1º dígito = unidade) 5     Anos (100+)</span></span>
+<span></span>
+<span><span class="co"># six infant deaths, the same rows in both</span></span>
+<span><span class="co">#&gt;   IDADE healthbR_age_years md_IDADEanos md_IDADEmeses md_IDADEdias md_IDADEhoras</span></span>
+<span><span class="co">#&gt; 1   021       3.992699e-05         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;          &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2   101       1.140771e-04         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;             1</span></span>
+<span><span class="co">#&gt; 3   201       2.737851e-03         &lt;NA&gt;          &lt;NA&gt;            1          &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4   302       1.666667e-01         &lt;NA&gt;             2         &lt;NA&gt;          &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5   102       2.281542e-04         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;             2</span></span>
+<span><span class="co">#&gt; 6   108       9.126169e-04         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;             8</span></span></code></pre></div>
+<p>healthbR (<code>decode_age = TRUE</code>, the default) adds one
+numeric <code>age_years</code> that is continuous – 21 minutes is
+0.00004 years, 2 months is 0.167 – so age bands and rates come out of
+one column; <code>IDADE</code> itself is kept. microdatasus splits the
+field into <code>IDADEminutos</code>, <code>IDADEhoras</code>,
+<code>IDADEdias</code>, <code>IDADEmeses</code>, <code>IDADEanos</code>,
+each <code>NA</code> outside its unit, which is closer to how the DO
+form reads and keeps the unit explicit. For adult mortality the two
+agree to the year; for infant mortality you will reach for different
+columns.</p>
+</div>
+<div class="section level2">
+<h2 id="sinasc-live-births-acre-2022">SINASC: live births, Acre 2022<a class="anchor" aria-label="anchor" href="#sinasc-live-births-acre-2022"></a>
+</h2>
+<p><em>Measured on 2026-09-05; the offline reproduction re-run on
+2026-10-14.</em></p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># healthbR</span></span>
+<span><span class="va">ac_n</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinasc_data.html">sinasc_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ac_n</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 14483    63</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ac_n</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">ac_n</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">ac_n</span><span class="op">$</span><span class="va">PESO</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "integer"</span></span>
+<span><span class="co">#&gt; [1] 94</span></span>
+<span><span class="co">#&gt; [1] 3230</span></span>
+<span></span>
+<span><span class="co"># microdatasus</span></span>
+<span><span class="va">ac_nm</span>  <span class="op">&lt;-</span> <span class="fu">fetch_datasus</span><span class="op">(</span>year_start <span class="op">=</span> <span class="fl">2022</span>, year_end <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>,</span>
+<span>                        information_system <span class="op">=</span> <span class="st">"SINASC"</span><span class="op">)</span></span>
+<span><span class="va">ac_nmp</span> <span class="op">&lt;-</span> <span class="fu">process_sinasc</span><span class="op">(</span><span class="va">ac_nm</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">ac_nm</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">ac_nmp</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 94</span></span>
+<span><span class="co">#&gt; [1] 14483</span></span></code></pre></div>
+<p>Same 14,483 births (3.1 s healthbR; 3.3 s + 3.5 s microdatasus). One
+thing to know before relying on <code>process_sinasc()</code> in
+microdatasus 3.0.0: it returns <code>PESO</code> (birth weight) as
+<code>NA</code> on every row, while the raw column had 94 missing values
+out of 14,483. The behaviour reproduces offline with the package’s own
+sample:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rfsaldanha/microdatasus" class="external-link">microdatasus</a></span><span class="op">)</span>   <span class="co"># process_sinasc() looks up its tables on the search path</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">sinasc_sample</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu">process_sinasc</span><span class="op">(</span><span class="va">sinasc_sample</span><span class="op">)</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 100</span></span></code></pre></div>
+<p>The recode of the sentinel values (<code>"0"</code> and
+<code>"9999"</code> to <code>NA</code>) is followed by an
+<code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric()</a></code>, and with dplyr 1.2.1 the whole column comes
+back missing. It is reported as <a href="https://github.com/rfsaldanha/microdatasus/issues/145" class="external-link">rfsaldanha/microdatasus#145</a>,
+still open on 2026-10-14; check the package’s news for your versions,
+and in the meantime take <code>PESO</code> from the raw tibble. healthbR
+does not rewrite the column: <code>PESO</code> is parsed to integer and
+the sentinels are left for you to treat.</p>
+</div>
+<div class="section level2">
+<h2 id="where-the-bytes-come-from">Where the bytes come from<a class="anchor" aria-label="anchor" href="#where-the-bytes-come-from"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th></th>
+<th>healthbR</th>
+<th>microdatasus</th>
+<th>read.dbc</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>SIM, SINASC, SIA, SINAN, CNES</td>
+<td>DATASUS FTP, <code>.dbc</code>, decompressed locally</td>
+<td>DATASUS FTP, <code>.dbc</code>, decompressed locally</td>
+<td>whatever file you downloaded</td>
+</tr>
+<tr class="even">
+<td>SIH, SI-PNI</td>
+<td>
+<a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a>
+mirror: hive-partitioned Parquet on Cloudflare R2, one partition per
+DATASUS file, byte-identical values, provenance per file; DATASUS FTP as
+fallback (<code>source = c("r2", "datasus")</code>)</td>
+<td>DATASUS FTP</td>
+<td>whatever file you downloaded</td>
+</tr>
+<tr class="odd">
+<td>Local cache</td>
+<td>Partitioned Parquet per module (<code>*_cache_status()</code>,
+<code>*_clear_cache()</code>); a second call never touches the
+network</td>
+<td>none (every call downloads)</td>
+<td>–</td>
+</tr>
+<tr class="even">
+<td>Re-issued files</td>
+<td>
+<code><a href="../reference/sih_status.html">sih_status()</a></code>: MD5 and size per partition,
+<code>last_updated</code> of the mirror</td>
+<td>–</td>
+<td>–</td>
+</tr>
+<tr class="odd">
+<td>Lazy queries</td>
+<td>
+<code>lazy = TRUE</code>, <code>backend = "arrow"</code> or
+<code>"duckdb"</code>, over the cache or the mirror</td>
+<td>–</td>
+<td>–</td>
+</tr>
+<tr class="even">
+<td>Parallel downloads</td>
+<td>
+<code>future::plan(multisession)</code> + furrr</td>
+<td>sequential</td>
+<td>–</td>
+</tr>
+</tbody>
+</table>
+<p>The mirror is refreshed weekly against the FTP by file size (the FTP
+offers neither ETag nor hash), and a re-issued file is republished with
+a new MD5 in the manifest – that is what <code><a href="../reference/sih_status.html">sih_status()</a></code>
+reads.</p>
+</div>
+<div class="section level2">
+<h2 id="other-routes">Other routes<a class="anchor" aria-label="anchor" href="#other-routes"></a>
+</h2>
+<p>Two other projects answer the same question and were not measured
+here: <a href="https://github.com/AlertaDengue/PySUS" class="external-link">PySUS</a>, the
+Python package that covers SIM, SINASC, SIH, SIA, CNES and SINAN from
+the same FTP, and <a href="https://basedosdados.org" class="external-link">basedosdados</a>,
+which serves treated SIM and SINASC tables through BigQuery with an R
+client. If your pipeline is in Python, PySUS is the natural pick; if you
+want SQL over already-treated tables and accept the BigQuery account,
+basedosdados.</p>
+</div>
+<div class="section level2">
+<h2 id="which-one">Which one<a class="anchor" aria-label="anchor" href="#which-one"></a>
+</h2>
+<ul>
+<li>
+<strong>You already have the <code>.dbc</code> files, or want the
+fewest dependencies</strong>: read.dbc, which needs only
+<code>foreign</code> – installed from the CRAN archive or GitHub since
+it left CRAN – or <code>microdatasus::read_dbc()</code>, the same job on
+a CRAN package. read.dbc is also the only one that <em>writes</em>
+<code>.dbc</code>.</li>
+<li>
+<strong>You want labels in the tibble and a quick table</strong>:
+microdatasus. <code>process_*()</code> does in one call what would take
+a few joins in healthbR, and it also brings municipality names and
+coordinates.</li>
+<li>
+<strong>You join, compare years, or model</strong>: healthbR. Codes
+stay codes, types are already parsed, dictionaries are functions, and
+nothing is rewritten under you.</li>
+<li>
+<strong>You read SIH at scale, or repeatedly</strong>: healthbR.
+Local Parquet cache, lazy arrow/duckdb queries over the mirror,
+provenance you can cite – or the mirror’s Parquet directly, with arrow
+or duckdb, if you know the files you want.</li>
+<li>
+<strong>You need the SIM fetal/infant/maternal extracts, the
+RJ/SP/ER SIH files, or SIGTAP</strong>: microdatasus, which has them and
+healthbR does not (yet).</li>
+<li>
+<strong>You need SI-PNI, SISAB, the household surveys, ANS or
+ANVISA</strong>: healthbR; the other two stop at DATASUS.</li>
+</ul>
+<p>They also compose. <code>fetch_datasus()</code> and
+<code>sih_data(parse = FALSE)</code> return the same character columns
+for the same file, so a script can read with one and label with the
+other:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># read with healthbR (cache, provenance), label with microdatasus</span></span>
+<span><span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"RR"</span>, parse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">process_sih</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="what-each-package-covers">What each package covers<a class="anchor" aria-label="anchor" href="#what-each-package-covers"></a>
@@ -142,7 +940,7 @@ and the code is complete so you can rerun it.</p>
 <tr class="odd">
 <td>SIH (admissions)</td>
 <td>
-<code><a href="../reference/sih_data.html">sih_data()</a></code>: RD (reduced AIH), 2008–2026</td>
+<code><a href="../reference/sih_data.html">sih_data()</a></code>: RD (reduced AIH), 1992–2026</td>
 <td>
 <code>"SIH-RD"</code>, <code>"SIH-RJ"</code>, <code>"SIH-SP"</code>,
 <code>"SIH-ER"</code>
@@ -200,7 +998,9 @@ module</td>
 </tr>
 </tbody>
 </table>
-<p>microdatasus goes deeper into SIM and SIH (the fetal, external-cause,
+<p>read.dbc has no catalogue: it reads any <code>.dbc</code> you point
+it at, from any system, including the ones neither package wraps.
+microdatasus goes deeper into SIM and SIH (the fetal, external-cause,
 infant and maternal SIM extracts; the RJ, SP and ER SIH files) and ships
 the SIGTAP procedure table. healthbR goes wider: more SINAN diseases,
 SI-PNI, SISAB, the household surveys and the regulatory agencies, all
@@ -208,489 +1008,22 @@ under one <code>*_years()</code> / <code>*_data()</code> /
 <code>*_dictionary()</code> API.</p>
 </div>
 <div class="section level2">
-<h2 id="the-same-reader-two-philosophies">The same reader, two philosophies<a class="anchor" aria-label="anchor" href="#the-same-reader-two-philosophies"></a>
-</h2>
-<p>Both packages decompress the Ministry’s <code>.dbc</code> files (DBF
-compressed with PKWare DCL) with the same vendored C code: microdatasus
-3.0.0 dropped its dependency on <code>read.dbc</code> and adopted the
-implementation from healthbR (its NEWS says so, and thanks the author).
-So the <em>bytes</em> the two packages read are identical; the
-difference starts right after.</p>
-<p><strong>healthbR keeps the codes and types the columns.</strong>
-<code>SEXO</code> stays <code>1</code>/<code>3</code>,
-<code>MORTE</code> stays <code>0</code>/<code>1</code>,
-<code>DT_INTER</code> becomes a <code>Date</code>, <code>VAL_TOT</code>
-a double, <code>IDADE</code> an integer. Labels live in
-<code><a href="../reference/sih_dictionary.html">sih_dictionary()</a></code>, <code><a href="../reference/sim_dictionary.html">sim_dictionary()</a></code>,
-<code><a href="../reference/sinasc_dictionary.html">sinasc_dictionary()</a></code>, joined when you want them. The default
-<code>parse = TRUE</code> converts only genuinely quantitative and date
-fields; coded categorical fields stay character so they join cleanly
-with the dictionaries and with other years.</p>
-<p><strong>microdatasus separates fetching from processing.</strong>
-<code>fetch_datasus()</code> returns every column as character, exactly
-as the DBF has it. <code>process_sih()</code>,
-<code>process_sim()</code>, <code>process_sinasc()</code> then replace
-the codes with labels (<code>SEXO</code> becomes
-<code>"Masculino"</code>/<code>"Feminino"</code>, <code>MORTE</code>
-becomes <code>"Não"</code>/<code>"Sim"</code>), convert dates, split the
-SIM age field into one column per unit and, with
-<code>municipality_data = TRUE</code>, join municipality names,
-coordinates and altitude. The result is a tibble of character
-columns.</p>
-<p>Neither is wrong. Labels are what you want for a table in a report;
-codes are what you want to join against a dictionary, compare years, or
-feed a model. The trap is mixing the two: after
-<code>process_sih()</code>, <code>MORTE == 1</code> is
-<code>FALSE</code> on every row, and <code>substr(DT_INTER, 5, 6)</code>
-is no longer the month, because both were rewritten. Read the outputs
-below before choosing.</p>
-</div>
-<div class="section level2">
-<h2 id="one-download-in-both-packages-sih-roraima-competence-2023-01">One download in both packages: SIH, Roraima, competence 2023-01<a class="anchor" aria-label="anchor" href="#one-download-in-both-packages-sih-roraima-competence-2023-01"></a>
-</h2>
-<p>Roraima is the smallest SIH file; January 2023 has 4,734 admissions.
-Both runs start from an empty cache.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/healthbR" class="external-link">healthbR</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rfsaldanha/microdatasus" class="external-link">microdatasus</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># healthbR ---------------------------------------------------------------</span></span>
-<span><span class="va">rr_h</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"RR"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ℹ Reading SIH data from R2: 2023/01 (1 UF(s))...</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rr_h</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4734  116</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">rr_h</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; character      Date   integer   numeric</span></span>
-<span><span class="co">#&gt;       101         3         7         5</span></span>
-<span></span>
-<span><span class="co"># microdatasus -------------------------------------------------------------</span></span>
-<span><span class="va">rr_m</span> <span class="op">&lt;-</span> <span class="fu">fetch_datasus</span><span class="op">(</span>year_start <span class="op">=</span> <span class="fl">2023</span>, month_start <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>                      year_end <span class="op">=</span> <span class="fl">2023</span>, month_end <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>                      uf <span class="op">=</span> <span class="st">"RR"</span>, information_system <span class="op">=</span> <span class="st">"SIH-RD"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rr_m</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4734  113</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">rr_m</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; character</span></span>
-<span><span class="co">#&gt;       113</span></span>
-<span></span>
-<span><span class="va">rr_mp</span> <span class="op">&lt;-</span> <span class="fu">process_sih</span><span class="op">(</span><span class="va">rr_m</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rr_mp</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4734  121</span></span></code></pre></div>
-<p>Same 4,734 rows; the sets of <code>N_AIH</code> are identical.
-healthbR adds three columns (<code>year</code>, <code>month</code>,
-<code>uf_source</code>: the competence and state the file belongs to,
-which the AIH record itself does not carry); <code>process_sih()</code>
-adds eight (<code>munResStatus</code>, <code>munResTipo</code>,
-<code>munResNome</code>, <code>munResUf</code>, <code>munResLat</code>,
-<code>munResLon</code>, <code>munResAlt</code>,
-<code>munResArea</code>).</p>
-<p>The same five records, three ways:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N_AIH"</span>, <span class="st">"SEXO"</span>, <span class="st">"COD_IDADE"</span>, <span class="st">"IDADE"</span>, <span class="st">"MORTE"</span>, <span class="st">"DT_INTER"</span>,</span>
-<span>          <span class="st">"DIAG_PRINC"</span>, <span class="st">"MUNIC_RES"</span>, <span class="st">"VAL_TOT"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rr_h</span><span class="op">[</span><span class="va">cols</span><span class="op">]</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;           N_AIH SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT</span></span>
-<span><span class="co">#&gt; 1 1423100411392    3         4    18     0 2022-12-13       O809    140017   568.80</span></span>
-<span><span class="co">#&gt; 2 1423100911661    1         4    83     0 2022-12-26       J189    140010   994.59</span></span>
-<span><span class="co">#&gt; 3 1423100911672    3         4    65     0 2022-12-03       I219    140010   620.12</span></span>
-<span><span class="co">#&gt; 4 1423100911683    1         4    58     0 2022-12-26       I248    140020   333.08</span></span>
-<span><span class="co">#&gt; 5 1423100911694    1         4    35     0 2022-11-01       A499    140010 11202.59</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rr_m</span><span class="op">[</span><span class="va">cols</span><span class="op">]</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;           N_AIH SEXO COD_IDADE IDADE MORTE DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT</span></span>
-<span><span class="co">#&gt; 1 1423100411392    3         4    18     0 20221213       O809    140017    568.8</span></span>
-<span><span class="co">#&gt; 2 1423100911661    1         4    83     0 20221226       J189    140010   994.59</span></span>
-<span><span class="co">#&gt; 3 1423100911672    3         4    65     0 20221203       I219    140010   620.12</span></span>
-<span><span class="co">#&gt; 4 1423100911683    1         4    58     0 20221226       I248    140020   333.08</span></span>
-<span><span class="co">#&gt; 5 1423100911694    1         4    35     0 20221101       A499    140010 11202.59</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rr_mp</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cols</span>, <span class="st">"munResNome"</span><span class="op">)</span><span class="op">]</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;           N_AIH      SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT munResNome</span></span>
-<span><span class="co">#&gt; 1 1423100411392  Feminino      Anos    18   Não 2022-12-13       O809    140017    568.8      Cantá</span></span>
-<span><span class="co">#&gt; 2 1423100911661 Masculino      Anos    83   Não 2022-12-26       J189    140010   994.59  Boa Vista</span></span>
-<span><span class="co">#&gt; 3 1423100911672  Feminino      Anos    65   Não 2022-12-03       I219    140010   620.12  Boa Vista</span></span>
-<span><span class="co">#&gt; 4 1423100911683 Masculino      Anos    58   Não 2022-12-26       I248    140020   333.08  Caracaraí</span></span>
-<span><span class="co">#&gt; 5 1423100911694 Masculino      Anos    35   Não 2022-11-01       A499    140010 11202.59  Boa Vista</span></span></code></pre></div>
-<p>Note <code>DT_INTER</code>: the admissions billed in competence
-2023-01 happened in November and December 2022. In both packages
-<code>year</code>/<code>month</code> (or
-<code>year_start</code>/<code>month_start</code>) select the
-<strong>billing competence</strong>, not the admission date; the
-admissions of a calendar year keep arriving for a few competences after
-it (measured on the whole mirror: the four competences after a year
-close 99.7–99.9% of its admissions). Neither package can change that;
-both should be used with it in mind.</p>
-<p>And the trap, in one line each:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">rr_h</span><span class="op">$</span><span class="va">MORTE</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span>          <span class="co"># healthbR: integer code</span></span>
-<span><span class="co">#&gt; [1] 113</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">rr_m</span><span class="op">$</span><span class="va">MORTE</span> <span class="op">==</span> <span class="st">"1"</span><span class="op">)</span>        <span class="co"># microdatasus, raw: character code</span></span>
-<span><span class="co">#&gt; [1] 113</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">rr_mp</span><span class="op">$</span><span class="va">MORTE</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span>         <span class="co"># microdatasus, processed: the code is gone</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">rr_mp</span><span class="op">$</span><span class="va">MORTE</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Não  Sim</span></span>
-<span><span class="co">#&gt; 4621  113</span></span></code></pre></div>
-<p>Same 113 deaths; the third line is the one that silently returns zero
-in a script written against codes. With healthbR the label is a join
-away:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/sih_dictionary.html">sih_dictionary</a></span><span class="op">(</span><span class="st">"MORTE"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 4</span></span>
-<span><span class="co">#&gt;   variable description              code  label</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;                    &lt;chr&gt; &lt;chr&gt;</span></span>
-<span><span class="co">#&gt; 1 MORTE    Óbito durante internação 0     Não</span></span>
-<span><span class="co">#&gt; 2 MORTE    Óbito durante internação 1     Sim</span></span>
-<span></span>
-<span><span class="va">rr_h</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">MORTE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="fu"><a href="../reference/sih_dictionary.html">sih_dictionary</a></span><span class="op">(</span><span class="st">"MORTE"</span><span class="op">)</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MORTE"</span> <span class="op">=</span> <span class="st">"code"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="timing">Timing<a class="anchor" aria-label="anchor" href="#timing"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr class="header">
-<th>Step</th>
-<th>healthbR</th>
-<th>microdatasus</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Fresh cache, mirror (manifest of 11,157 partitions + one
-Parquet)</td>
-<td>11.4 s</td>
-<td>–</td>
-</tr>
-<tr class="even">
-<td>Fresh cache, DATASUS FTP <code>.dbc</code>
-(<code>source = "datasus"</code>)</td>
-<td>1.1 s</td>
-<td>2.7 s</td>
-</tr>
-<tr class="odd">
-<td>Same call again in the session</td>
-<td>0.5 s (local Parquet cache)</td>
-<td>downloads again (no cache)</td>
-</tr>
-<tr class="even">
-<td>Labels (<code>process_sih()</code>)</td>
-<td>–</td>
-<td>0.8 s</td>
-</tr>
-<tr class="odd">
-<td>Object size in memory</td>
-<td>4.8 MB</td>
-<td>5.4 MB raw, 5.7 MB processed</td>
-</tr>
-</tbody>
-</table>
-<p>On a 349 KB file the FTP wins the first read: the mirror’s price of
-entry is its 10 MB manifest, downloaded once and revalidated by ETag
-afterwards (<code><a href="../reference/sih_status.html">sih_status()</a></code> reads it in 0.4 s from then on).
-The mirror pays back on repeated reads, on lazy queries over many
-competences (next section), and in what comes with the data.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="what-comes-with-the-data-provenance">What comes with the data: provenance<a class="anchor" aria-label="anchor" href="#what-comes-with-the-data-provenance"></a>
-</h2>
-<p>From the mirror, the tibble carries the source it was served from and
-one row per DATASUS file behind it – URL, MD5 and size of the
-<code>.dbc</code>, record count, when it was processed and by which
-pipeline version:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">rr_h</span>, <span class="st">"healthbr_source"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "r2"</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">rr_h</span>, <span class="st">"healthbr_provenance"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">year</span>, <span class="va">month</span>, <span class="va">uf</span>, <span class="va">records</span>, <span class="va">source_hash_md5</span>, <span class="va">source_size_bytes</span>,</span>
-<span>         <span class="va">processing_timestamp</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 1 × 7</span></span>
-<span><span class="co">#&gt;    year month uf    records source_hash_md5                  source_size_bytes processing_timestamp</span></span>
-<span><span class="co">#&gt;   &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;                                        &lt;dbl&gt; &lt;chr&gt;</span></span>
-<span><span class="co">#&gt; 1  2023     1 RR       4734 12e74d4b059589ceb47e4136e3b2ce5f            349244 2026-03-09 03:05:34.463049</span></span></code></pre></div>
-<p><code><a href="../reference/sih_status.html">sih_status()</a></code> gives the same for every published
-partition, which is how you find out which competences exist and whether
-the Ministry re-issued a file (the MD5 changes):</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">st</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sih_status.html">sih_status</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">st</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 11157</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">st</span>, <span class="st">"last_updated"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "2026-08-18T12:33:31"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">st</span><span class="op">$</span><span class="va">year</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1992 2026</span></span>
-<span><span class="va">st</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">uf</span> <span class="op">==</span> <span class="st">"RR"</span>, <span class="va">year</span> <span class="op">==</span> <span class="fl">2023</span>, <span class="va">month</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">records</span>, <span class="va">source_hash_md5</span>, <span class="va">parquet_sha256</span>, <span class="va">pipeline_version</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 1 × 4</span></span>
-<span><span class="co">#&gt;   records source_hash_md5                  parquet_sha256                                                   pipeline_version</span></span>
-<span><span class="co">#&gt;     &lt;dbl&gt; &lt;chr&gt;                            &lt;chr&gt;                                                            &lt;chr&gt;</span></span>
-<span><span class="co">#&gt; 1    4734 12e74d4b059589ceb47e4136e3b2ce5f bab1c2fdda7b09a6117169156f51846e095de0bc502fec9adecf90d2e1f08474 1.0.0</span></span></code></pre></div>
-<p>microdatasus 3.0.0 has <code>track_source = TRUE</code>, which
-appends a <code>source</code> column with the name of the
-<code>.dbc</code> each row came from; it does not record hashes or
-timestamps, and the FTP does not offer them. If your derived product
-needs to say exactly which files it was built from, this is the
-difference that matters.</p>
-</div>
-<div class="section level2">
-<h2 id="lazy-evaluation-a-year-without-downloading-it">Lazy evaluation: a year without downloading it<a class="anchor" aria-label="anchor" href="#lazy-evaluation-a-year-without-downloading-it"></a>
-</h2>
-<p>healthbR’s <code>lazy = TRUE</code> returns an arrow (or duckdb)
-dataset over the mirror; filters and column selections are pushed down
-and only the matching bytes travel. Deaths per competence in Roraima for
-all of 2023, nothing cached:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, uf <span class="op">=</span> <span class="st">"RR"</span>, lazy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">MORTE</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">month</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">month</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 12 × 2</span></span>
-<span><span class="co">#&gt;    month     n</span></span>
-<span><span class="co">#&gt;    &lt;int&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt;  1     1   113</span></span>
-<span><span class="co">#&gt;  2     2   120</span></span>
-<span><span class="co">#&gt;  3     3   175</span></span>
-<span><span class="co">#&gt;  4     4   166</span></span>
-<span><span class="co">#&gt;  5     5   118</span></span>
-<span><span class="co">#&gt;  6     6    78</span></span>
-<span><span class="co">#&gt;  7     7    97</span></span>
-<span><span class="co">#&gt;  8     8   144</span></span>
-<span><span class="co">#&gt;  9     9   105</span></span>
-<span><span class="co">#&gt; 10    10   104</span></span>
-<span><span class="co">#&gt; 11    11   128</span></span>
-<span><span class="co">#&gt; 12    12   102</span></span></code></pre></div>
-<p>19.4 s for twelve competences, no local copy left behind. With
-microdatasus the equivalent is
-<code>fetch_datasus(2023, 1, 2023, 12, uf = "RR", information_system = "SIH-RD")</code>:
-twelve <code>.dbc</code> downloads, all rows in memory, then
-<code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>. For one small state that is fine; for the whole
-country (a year of SIH is about 2 GB of <code>.dbc</code>) the
-difference decides whether the query is feasible on a laptop.</p>
-</div>
-<div class="section level2">
-<h2 id="sim-mortality-acre-2022">SIM: mortality, Acre 2022<a class="anchor" aria-label="anchor" href="#sim-mortality-acre-2022"></a>
-</h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># healthbR</span></span>
-<span><span class="va">ac_h</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_data.html">sim_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ℹ Downloading SIM data: AC 2022...</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ac_h</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4159   90</span></span>
-<span></span>
-<span><span class="co"># microdatasus</span></span>
-<span><span class="va">ac_m</span>  <span class="op">&lt;-</span> <span class="fu">fetch_datasus</span><span class="op">(</span>year_start <span class="op">=</span> <span class="fl">2022</span>, year_end <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>,</span>
-<span>                       information_system <span class="op">=</span> <span class="st">"SIM-DO"</span><span class="op">)</span></span>
-<span><span class="va">ac_mp</span> <span class="op">&lt;-</span> <span class="fu">process_sim</span><span class="op">(</span><span class="va">ac_m</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ac_m</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ac_mp</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4159   87</span></span>
-<span><span class="co">#&gt; [1] 4159  100</span></span></code></pre></div>
-<p>Same 4,159 deaths (1.5 s healthbR, 2.1 s + 0.7 s microdatasus). The
-interesting column is age. SIM stores it as three characters: the first
-is the unit (0 minutes, 1 hours, 2 days, 3 months, 4 years, 5 years over
-100) and the last two the value. The two packages decode it
-differently:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/sim_dictionary.html">sim_dictionary</a></span><span class="op">(</span><span class="st">"IDADE"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 4</span></span>
-<span><span class="co">#&gt;   variable description                 code  label</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;                       &lt;chr&gt; &lt;chr&gt;</span></span>
-<span><span class="co">#&gt; 1 IDADE    Idade (1º dígito = unidade) 0     Minutos (&lt; 1 hora)</span></span>
-<span><span class="co">#&gt; 2 IDADE    Idade (1º dígito = unidade) 1     Horas</span></span>
-<span><span class="co">#&gt; 3 IDADE    Idade (1º dígito = unidade) 2     Dias</span></span>
-<span><span class="co">#&gt; 4 IDADE    Idade (1º dígito = unidade) 3     Meses</span></span>
-<span><span class="co">#&gt; 5 IDADE    Idade (1º dígito = unidade) 4     Anos (0-99)</span></span>
-<span><span class="co">#&gt; 6 IDADE    Idade (1º dígito = unidade) 5     Anos (100+)</span></span>
-<span></span>
-<span><span class="co"># six infant deaths, the same rows in both</span></span>
-<span><span class="co">#&gt;   IDADE healthbR_age_years md_IDADEanos md_IDADEmeses md_IDADEdias md_IDADEhoras</span></span>
-<span><span class="co">#&gt; 1   021       3.992699e-05         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;          &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2   101       1.140771e-04         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;             1</span></span>
-<span><span class="co">#&gt; 3   201       2.737851e-03         &lt;NA&gt;          &lt;NA&gt;            1          &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 4   302       1.666667e-01         &lt;NA&gt;             2         &lt;NA&gt;          &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 5   102       2.281542e-04         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;             2</span></span>
-<span><span class="co">#&gt; 6   108       9.126169e-04         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;             8</span></span></code></pre></div>
-<p>healthbR (<code>decode_age = TRUE</code>, the default) adds one
-numeric <code>age_years</code> that is continuous – 21 minutes is
-0.00004 years, 2 months is 0.167 – so age bands and rates come out of
-one column; <code>IDADE</code> itself is kept. microdatasus splits the
-field into <code>IDADEminutos</code>, <code>IDADEhoras</code>,
-<code>IDADEdias</code>, <code>IDADEmeses</code>, <code>IDADEanos</code>,
-each <code>NA</code> outside its unit, which is closer to how the DO
-form reads and keeps the unit explicit. For adult mortality the two
-agree to the year; for infant mortality you will reach for different
-columns.</p>
-</div>
-<div class="section level2">
-<h2 id="sinasc-live-births-acre-2022">SINASC: live births, Acre 2022<a class="anchor" aria-label="anchor" href="#sinasc-live-births-acre-2022"></a>
-</h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># healthbR</span></span>
-<span><span class="va">ac_n</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sinasc_data.html">sinasc_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ac_n</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 14483    63</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ac_n</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">ac_n</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">ac_n</span><span class="op">$</span><span class="va">PESO</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "integer"</span></span>
-<span><span class="co">#&gt; [1] 94</span></span>
-<span><span class="co">#&gt; [1] 3230</span></span>
-<span></span>
-<span><span class="co"># microdatasus</span></span>
-<span><span class="va">ac_nm</span>  <span class="op">&lt;-</span> <span class="fu">fetch_datasus</span><span class="op">(</span>year_start <span class="op">=</span> <span class="fl">2022</span>, year_end <span class="op">=</span> <span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"AC"</span>,</span>
-<span>                        information_system <span class="op">=</span> <span class="st">"SINASC"</span><span class="op">)</span></span>
-<span><span class="va">ac_nmp</span> <span class="op">&lt;-</span> <span class="fu">process_sinasc</span><span class="op">(</span><span class="va">ac_nm</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">ac_nm</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">ac_nmp</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 94</span></span>
-<span><span class="co">#&gt; [1] 14483</span></span></code></pre></div>
-<p>Same 14,483 births (3.1 s healthbR; 3.3 s + 3.5 s microdatasus). One
-thing to know before relying on <code>process_sinasc()</code> in the
-versions measured here: it returned <code>PESO</code> (birth weight) as
-<code>NA</code> on every row, while the raw column had 94 missing values
-out of 14,483. The behaviour reproduces offline with the package’s own
-sample:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu">microdatasus</span><span class="fu">::</span><span class="va">sinasc_sample</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 2</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu">process_sinasc</span><span class="op">(</span><span class="fu">microdatasus</span><span class="fu">::</span><span class="va">sinasc_sample</span><span class="op">)</span><span class="op">$</span><span class="va">PESO</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 100</span></span></code></pre></div>
-<p>The recode of the sentinel values (<code>"0"</code> and
-<code>"9999"</code> to <code>NA</code>) is followed by an
-<code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric()</a></code>, and with dplyr 1.2.1 the whole column comes
-back missing. It is the kind of thing a maintainer fixes in an afternoon
-once reported; check the package’s news and issue tracker for your
-versions, and in the meantime take <code>PESO</code> from the raw
-tibble. healthbR does not rewrite the column: <code>PESO</code> is
-parsed to integer and the sentinels are left for you to treat.</p>
-</div>
-<div class="section level2">
-<h2 id="where-the-bytes-come-from">Where the bytes come from<a class="anchor" aria-label="anchor" href="#where-the-bytes-come-from"></a>
-</h2>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr class="header">
-<th></th>
-<th>healthbR</th>
-<th>microdatasus</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>SIM, SINASC, SIA, SINAN, CNES</td>
-<td>DATASUS FTP, <code>.dbc</code>, decompressed locally</td>
-<td>DATASUS FTP, <code>.dbc</code>, decompressed locally</td>
-</tr>
-<tr class="even">
-<td>SIH, SI-PNI</td>
-<td>
-<a href="https://github.com/SidneyBissoli/healthbr-data" class="external-link">healthbr-data</a>
-mirror: hive-partitioned Parquet on Cloudflare R2, one partition per
-DATASUS file, byte-identical values, provenance per file; DATASUS FTP as
-fallback (<code>source = c("r2", "datasus")</code>)</td>
-<td>DATASUS FTP</td>
-</tr>
-<tr class="odd">
-<td>Local cache</td>
-<td>Partitioned Parquet per module (<code>*_cache_status()</code>,
-<code>*_clear_cache()</code>); a second call never touches the
-network</td>
-<td>none (every call downloads)</td>
-</tr>
-<tr class="even">
-<td>Re-issued files</td>
-<td>
-<code><a href="../reference/sih_status.html">sih_status()</a></code>: MD5 and size per partition,
-<code>last_updated</code> of the mirror</td>
-<td>–</td>
-</tr>
-<tr class="odd">
-<td>Lazy queries</td>
-<td>
-<code>lazy = TRUE</code>, <code>backend = "arrow"</code> or
-<code>"duckdb"</code>, over the cache or the mirror</td>
-<td>–</td>
-</tr>
-<tr class="even">
-<td>Parallel downloads</td>
-<td>
-<code>future::plan(multisession)</code> + furrr</td>
-<td>sequential</td>
-</tr>
-</tbody>
-</table>
-<p>The mirror is refreshed weekly against the FTP by file size (the FTP
-offers neither ETag nor hash), and a re-issued file is republished with
-a new MD5 in the manifest – that is what <code><a href="../reference/sih_status.html">sih_status()</a></code>
-reads.</p>
-</div>
-<div class="section level2">
-<h2 id="other-routes">Other routes<a class="anchor" aria-label="anchor" href="#other-routes"></a>
-</h2>
-<p>Two other projects answer the same question and were not measured
-here: <a href="https://github.com/AlertaDengue/PySUS" class="external-link">PySUS</a>, the
-Python package that covers SIM, SINASC, SIH, SIA, CNES and SINAN from
-the same FTP, and <a href="https://basedosdados.org" class="external-link">basedosdados</a>,
-which serves treated SIM and SINASC tables through BigQuery with an R
-client. If your pipeline is in Python, PySUS is the natural pick; if you
-want SQL over already-treated tables and accept the BigQuery account,
-basedosdados.</p>
-</div>
-<div class="section level2">
-<h2 id="which-one">Which one<a class="anchor" aria-label="anchor" href="#which-one"></a>
-</h2>
-<ul>
-<li>
-<strong>You want labels in the tibble and a quick table</strong>:
-microdatasus. <code>process_*()</code> does in one call what would take
-a few joins in healthbR, and it also brings municipality names and
-coordinates.</li>
-<li>
-<strong>You join, compare years, or model</strong>: healthbR. Codes
-stay codes, types are already parsed, dictionaries are functions, and
-nothing is rewritten under you.</li>
-<li>
-<strong>You read SIH at scale, or repeatedly</strong>: healthbR.
-Local Parquet cache, lazy arrow/duckdb queries over the mirror,
-provenance you can cite.</li>
-<li>
-<strong>You need the SIM fetal/infant/maternal extracts, the
-RJ/SP/ER SIH files, or SIGTAP</strong>: microdatasus, which has them and
-healthbR does not (yet).</li>
-<li>
-<strong>You need SI-PNI, SISAB, the household surveys, ANS or
-ANVISA</strong>: healthbR; microdatasus stops at DATASUS.</li>
-</ul>
-<p>They also compose. <code>fetch_datasus()</code> and
-<code>sih_data(parse = FALSE)</code> return the same character columns
-for the same file, so a script can read with one and label with the
-other:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># read with healthbR (cache, provenance), label with microdatasus</span></span>
-<span><span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"RR"</span>, parse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">process_sih</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
 <h2 id="reproducing-this-vignette">Reproducing this vignette<a class="anchor" aria-label="anchor" href="#reproducing-this-vignette"></a>
 </h2>
-<p>The three downloads are small (the SIH file is 349 KB). To rerun the
-comparison from a fresh cache:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"microdatasus"</span>, <span class="st">"arrow"</span><span class="op">)</span><span class="op">)</span></span>
+<p>The two SIH files are 349 KB and 16.4 MB. To rerun the
+comparison:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"microdatasus"</span>, <span class="st">"arrow"</span>, <span class="st">"duckdb"</span>, <span class="st">"bench"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
+<span>  <span class="st">"https://cran.r-project.org/src/contrib/Archive/read.dbc/read.dbc_1.2.0.tar.gz"</span>,</span>
+<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"source"</span></span>
+<span><span class="op">)</span></span>
 <span><span class="co"># install.packages("pak"); pak::pak("SidneyBissoli/healthbR")   # dev version</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/sih_clear_cache.html">sih_clear_cache</a></span><span class="op">(</span><span class="op">)</span>; <span class="fu"><a href="../reference/sim_clear_cache.html">sim_clear_cache</a></span><span class="op">(</span><span class="op">)</span>; <span class="fu"><a href="../reference/sinasc_clear_cache.html">sinasc_clear_cache</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"RR"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="fu">fetch_datasus</span><span class="op">(</span><span class="fl">2023</span>, <span class="fl">1</span>, <span class="fl">2023</span>, <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"RR"</span>,</span>
+<span><span class="co"># a cold healthbR run: a new R session and an empty cache directory</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="fu"><a href="../reference/sih_data.html">sih_data</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2023</span>, month <span class="op">=</span> <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"SP"</span>, cache_dir <span class="op">=</span> <span class="va">d</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="fu">fetch_datasus</span><span class="op">(</span><span class="fl">2023</span>, <span class="fl">1</span>, <span class="fl">2023</span>, <span class="fl">1</span>, uf <span class="op">=</span> <span class="st">"SP"</span>,</span>
 <span>                          information_system <span class="op">=</span> <span class="st">"SIH-RD"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Related: <a href="sih-hospital-admissions.html">SIH – Hospital
 admissions</a>, <a href="sim-mortality.html">SIM – Mortality</a>, <a href="sinasc-live-births.html">SINASC – Live births</a>, <a href="datasus-modules.html">DATASUS modules overview</a>.</p>

@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Access Brazilian Public Health Data">
-<meta name="description" content="Provides easy access to Brazilian public health data from multiple sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases by Telephone Survey), PNS (National Health Survey), PNAD Continua (Continuous National Household Sample Survey), POF (Household Budget Survey with food security and consumption data), Censo Demografico (population denominators via SIDRA API), SIM (Mortality Information System), SINASC (Live Birth Information System), SIH (Hospital Information System), SIA (Outpatient Information System), SINAN (Notifiable Diseases Surveillance), CNES (National Health Facility Registry), SI-PNI (National Immunization Program - aggregated 1994-2019 via FTP, individual-level microdata 2020+ via OpenDataSUS API), SISAB (Primary Care Health Information System - coverage indicators via REST API), ANS (Agencia Nacional de Saude Suplementar - supplementary health beneficiaries, consumer complaints, and financial statements), ANVISA (Agencia Nacional de Vigilancia Sanitaria - product registrations, pharmacovigilance, hemovigilance, technovigilance, and controlled substance sales via SNGPC), and other health information systems. Data is downloaded from DATASUS (the Ministry of Healths informatics department: compressed .dbc microdata read natively, or the healthbr-data Parquet mirror with per-file provenance) and from IBGE repositories, and is returned in tidy format following tidyverse conventions. A vignette compares the package with microdatasus on the DATASUS' systems both read.">
-<meta property="og:description" content="Provides easy access to Brazilian public health data from multiple sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases by Telephone Survey), PNS (National Health Survey), PNAD Continua (Continuous National Household Sample Survey), POF (Household Budget Survey with food security and consumption data), Censo Demografico (population denominators via SIDRA API), SIM (Mortality Information System), SINASC (Live Birth Information System), SIH (Hospital Information System), SIA (Outpatient Information System), SINAN (Notifiable Diseases Surveillance), CNES (National Health Facility Registry), SI-PNI (National Immunization Program - aggregated 1994-2019 via FTP, individual-level microdata 2020+ via OpenDataSUS API), SISAB (Primary Care Health Information System - coverage indicators via REST API), ANS (Agencia Nacional de Saude Suplementar - supplementary health beneficiaries, consumer complaints, and financial statements), ANVISA (Agencia Nacional de Vigilancia Sanitaria - product registrations, pharmacovigilance, hemovigilance, technovigilance, and controlled substance sales via SNGPC), and other health information systems. Data is downloaded from DATASUS (the Ministry of Healths informatics department: compressed .dbc microdata read natively, or the healthbr-data Parquet mirror with per-file provenance) and from IBGE repositories, and is returned in tidy format following tidyverse conventions. A vignette compares the package with microdatasus on the DATASUS' systems both read.">
+<meta name="description" content="Provides easy access to Brazilian public health data from multiple sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases by Telephone Survey), PNS (National Health Survey), PNAD Continua (Continuous National Household Sample Survey), POF (Household Budget Survey with food security and consumption data), Censo Demografico (population denominators via SIDRA API), SIM (Mortality Information System), SINASC (Live Birth Information System), SIH (Hospital Information System), SIA (Outpatient Information System), SINAN (Notifiable Diseases Surveillance), CNES (National Health Facility Registry), SI-PNI (National Immunization Program - aggregated 1994-2019 via FTP, individual-level microdata 2020+ via OpenDataSUS API), SISAB (Primary Care Health Information System - coverage indicators via REST API), ANS (Agencia Nacional de Saude Suplementar - supplementary health beneficiaries, consumer complaints, and financial statements), ANVISA (Agencia Nacional de Vigilancia Sanitaria - product registrations, pharmacovigilance, hemovigilance, technovigilance, and controlled substance sales via SNGPC), and other health information systems. Data is downloaded from DATASUS (the Ministry of Healths informatics department: compressed .dbc microdata read natively, or the healthbr-data Parquet mirror with per-file provenance) and from IBGE repositories, and is returned in tidy format following tidyverse conventions. A vignette compares the package with microdatasus and read.dbc on the DATASUS' files they read.">
+<meta property="og:description" content="Provides easy access to Brazilian public health data from multiple sources including VIGITEL (Surveillance of Risk Factors for Chronic Diseases by Telephone Survey), PNS (National Health Survey), PNAD Continua (Continuous National Household Sample Survey), POF (Household Budget Survey with food security and consumption data), Censo Demografico (population denominators via SIDRA API), SIM (Mortality Information System), SINASC (Live Birth Information System), SIH (Hospital Information System), SIA (Outpatient Information System), SINAN (Notifiable Diseases Surveillance), CNES (National Health Facility Registry), SI-PNI (National Immunization Program - aggregated 1994-2019 via FTP, individual-level microdata 2020+ via OpenDataSUS API), SISAB (Primary Care Health Information System - coverage indicators via REST API), ANS (Agencia Nacional de Saude Suplementar - supplementary health beneficiaries, consumer complaints, and financial statements), ANVISA (Agencia Nacional de Vigilancia Sanitaria - product registrations, pharmacovigilance, hemovigilance, technovigilance, and controlled substance sales via SNGPC), and other health information systems. Data is downloaded from DATASUS (the Ministry of Healths informatics department: compressed .dbc microdata read natively, or the healthbr-data Parquet mirror with per-file provenance) and from IBGE repositories, and is returned in tidy format following tidyverse conventions. A vignette compares the package with microdatasus and read.dbc on the DATASUS' files they read.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -37,7 +37,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/healthbR.html">Getting started</a></li>
-    <li><a class="dropdown-item" href="articles/healthbr-vs-microdatasus.html">healthbR vs microdatasus</a></li>
+    <li><a class="dropdown-item" href="articles/healthbr-vs-microdatasus.html">healthbR vs microdatasus vs read.dbc</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>DATASUS modules</h6></li>
     <li><a class="dropdown-item" href="articles/datasus-modules.html">DATASUS modules overview</a></li>
@@ -84,7 +84,7 @@
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <p>healthbR provides easy access to Brazilian public health data directly from R: the DATASUS microdata systems (SIM mortality, SINASC live births, SIH hospital admissions, SIA outpatient production, SINAN notifiable diseases, CNES facilities, SI-PNI vaccination), the IBGE and Ministry of Health surveys (VIGITEL, PNS, PNAD Continua, POF, Censo) and the regulatory agencies (ANS, ANVISA). The package downloads, caches, and processes data from official sources, returning clean, analysis-ready tibbles following tidyverse conventions.</p>
-<p>If you already use <a href="https://CRAN.R-project.org/package=microdatasus" class="external-link">microdatasus</a> (or PySUS in Python) for DATASUS, see <a href="https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html">healthbR vs microdatasus</a> – a measured comparison of the two packages on the systems both read.</p>
+<p>If you already use <a href="https://CRAN.R-project.org/package=microdatasus" class="external-link">microdatasus</a> or <a href="https://github.com/danicat/read.dbc" class="external-link">read.dbc</a> (or PySUS in Python) for DATASUS, see <a href="https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html">healthbR, microdatasus and read.dbc</a> – a measured comparison of the three on the same files: what each returns, how fast, the same tasks side by side, and the Parquet mirror read with no package at all.</p>
 <div class="section level3">
 <h3 id="surveys-ibge--ministry-of-health">Surveys (IBGE / Ministry of Health)<a class="anchor" aria-label="anchor" href="#surveys-ibge--ministry-of-health"></a>
 </h3>
@@ -231,57 +231,78 @@
 </div>
 </div>
 <div class="section level2">
-<h2 id="healthbr-and-microdatasus">healthbR and microdatasus<a class="anchor" aria-label="anchor" href="#healthbr-and-microdatasus"></a>
+<h2 id="healthbr-microdatasus-and-readdbc">healthbR, microdatasus and read.dbc<a class="anchor" aria-label="anchor" href="#healthbr-microdatasus-and-readdbc"></a>
 </h2>
-<p>Two R packages read DATASUS microdata; they overlap on six systems and differ in what they do with the bytes. Measured on 2026-09-05 (healthbR 0.3.1 dev, microdatasus 3.0.0) and detailed in the vignette <a href="https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html">healthbR vs microdatasus</a>:</p>
+<p>Three R routes read DATASUS microdata, at different layers: read.dbc reads a <code>.dbc</code> file you downloaded, microdatasus downloads and labels, healthbR downloads, caches and types. Measured on 2026-10-14 (healthbR 0.4.0.9000, microdatasus 3.0.0, read.dbc 1.2.0) and detailed in the vignette <a href="https://sidneybissoli.github.io/healthbR/articles/healthbr-vs-microdatasus.html">healthbR, microdatasus and read.dbc</a>:</p>
 <table class="table">
 <colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
 </colgroup>
 <thead><tr>
 <th></th>
 <th>healthbR</th>
 <th>microdatasus</th>
+<th>read.dbc</th>
 </tr></thead>
 <tbody>
 <tr>
 <td>DATASUS systems</td>
 <td>SIM, SINASC, SIH, SIA, SINAN (31 diseases), CNES, SI-PNI</td>
 <td>SIM, SINASC, SIH, SIA, SINAN (8 diseases), CNES</td>
+<td>any <code>.dbc</code> you download</td>
 </tr>
 <tr>
 <td>Beyond DATASUS</td>
 <td>VIGITEL, PNS, PNAD Continua, POF, Censo, SISAB, ANS, ANVISA</td>
 <td>SIGTAP, CADGER and municipality tables</td>
+<td>–</td>
 </tr>
 <tr>
 <td>
 <code>.dbc</code> reader</td>
 <td>vendored C (blast)</td>
 <td>the same code, adapted from healthbR in 3.0.0</td>
+<td>its own C; also writes <code>.dbc</code>
+</td>
 </tr>
 <tr>
 <td>Codes</td>
 <td>kept as codes; typed (<code>Date</code>, integer, double); labels via <code>*_dictionary()</code>
 </td>
 <td>replaced by labels by <code>process_*()</code>; all columns character</td>
+<td>as the DBF declares them</td>
 </tr>
 <tr>
 <td>Source</td>
 <td>healthbr-data Parquet mirror with provenance (SIH, SI-PNI), FTP otherwise</td>
 <td>DATASUS FTP</td>
+<td>–</td>
 </tr>
 <tr>
 <td>Lazy / cache</td>
 <td>
 <code>lazy = TRUE</code> (arrow or duckdb), local Parquet cache</td>
 <td>none</td>
+<td>none</td>
+</tr>
+<tr>
+<td>On CRAN</td>
+<td>yes</td>
+<td>yes</td>
+<td>archived 2025-12-14</td>
+</tr>
+<tr>
+<td>SIH-SP 2023-01, from nothing</td>
+<td>7.7 s (mirror)</td>
+<td>18.0 s</td>
+<td>9.7 s (with the download)</td>
 </tr>
 </tbody>
 </table>
-<p>Same rows, same records, same death counts on the three downloads compared. Each package fits a different workflow; the vignette says which.</p>
+<p>Same rows and records in all three on every file compared. Each fits a different workflow; the vignette says which.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
