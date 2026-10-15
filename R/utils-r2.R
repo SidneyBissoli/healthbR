@@ -54,6 +54,21 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
 .r2_env <- new.env(parent = emptyenv())
 
 
+#' Trim rows read from the partitioned cache to the wanted partitions
+#'
+#' The cache read filters each key with `%in%`, which can bring combinations
+#' that were not asked for (years 2022-2023 x months 1 and 12 asked as two
+#' pairs). Rows are sliced only when such extra combinations exist: slicing a
+#' collected arrow table touches every string column (210k rows x 113 columns
+#' for one month of SIH-SP, 0.9 s), and in the usual call every row is wanted.
+#' @noRd
+.r2_trim_to_wanted <- function(cached, wanted, by) {
+  extra <- dplyr::anti_join(dplyr::distinct(cached[by]), wanted, by = by)
+  if (nrow(extra) == 0) return(cached)
+  dplyr::semi_join(cached, wanted, by = by)
+}
+
+
 # ============================================================================
 # source parameter resolution (shared by *_data() functions)
 # ============================================================================

@@ -260,3 +260,16 @@ test_that("sih_status lists the published competences", {
   expect_true(all(grepl("^sih/rd/ano=\\d{4}/mes=\\d{2}/uf=[A-Z]{2}/", st$parquet_path)))
   expect_match(attr(st, "last_updated"), "^\\d{4}-\\d{2}-\\d{2}")
 })
+
+test_that(".r2_trim_to_wanted keeps only the wanted partitions", {
+  cached <- tibble::tibble(
+    year = c(2023L, 2023L, 2024L, 2024L), month = c(1L, 2L, 1L, 2L),
+    uf_source = "RR", N_AIH = c("a", "b", "c", "d")
+  )
+  by <- c("year", "month", "uf_source")
+  # the coarse %in% read brought two combinations that were not asked for
+  wanted <- tibble::tibble(year = c(2023L, 2024L), month = c(1L, 2L), uf_source = "RR")
+  expect_identical(.r2_trim_to_wanted(cached, wanted, by)$N_AIH, c("a", "d"))
+  # every row wanted: returned untouched
+  expect_identical(.r2_trim_to_wanted(cached, cached[by], by), cached)
+})

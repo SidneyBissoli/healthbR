@@ -212,3 +212,18 @@ test_that(".parse_date_iso handles valid dates", {
   expect_equal(.parse_date_iso("2022-12-25"), as.Date("2022-12-25"))
   expect_true(is.na(.parse_date_iso(NA)))
 })
+
+test_that(".convert_column gives the same result through the distinct-value path", {
+  x <- c("20230101", NA, "", "  ", "20230101", "x", "20221231", NA, "20230101")
+  plain <- function(v, type) {
+    v[!is.na(v) & trimws(v) == ""] <- NA_character_
+    switch(type, integer = suppressWarnings(as.integer(v)),
+      double = suppressWarnings(as.double(v)), date_ymd = .parse_date_ymd(v))
+  }
+  for (type in c("integer", "double", "date_ymd")) {
+    expect_identical(.convert_column(x, type), plain(x, type))
+  }
+  # all-distinct input takes the direct path
+  expect_identical(.convert_column(c("1", "2", ""), "integer"), c(1L, 2L, NA))
+  expect_identical(.convert_column(character(0), "date_ymd"), as.Date(character(0)))
+})

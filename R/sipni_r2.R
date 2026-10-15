@@ -218,8 +218,8 @@ sipni_r2_manifest_paths <- c(
                         .data$uf_source %in% !!unique(have$uf_source)) |>
           dplyr::collect()
         # the coarse filter may bring extra combos; trim to the wanted set
-        cached <- dplyr::semi_join(cached, wanted,
-                                   by = c("year", "month", "uf_source"))
+        cached <- .r2_trim_to_wanted(cached, wanted,
+                                     c("year", "month", "uf_source"))
         cached <- .sipni_front_cols(cached, c("year", "month", "uf_source"))
         if (nrow(cached) > 0) results <- c(results, list(cached))
       }
@@ -314,8 +314,7 @@ sipni_r2_manifest_paths <- c(
           dplyr::filter(.data$year %in% !!unique(have$year),
                         .data$uf_source %in% !!unique(have$uf_source)) |>
           dplyr::collect()
-        cached <- dplyr::semi_join(cached, wanted,
-                                   by = c("year", "uf_source"))
+        cached <- .r2_trim_to_wanted(cached, wanted, c("year", "uf_source"))
         cached <- .sipni_front_cols(cached, c("year", "uf_source"))
         if (nrow(cached) > 0) results <- c(results, list(cached))
       }
