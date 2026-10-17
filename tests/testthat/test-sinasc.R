@@ -49,7 +49,9 @@ test_that("sinasc_info returns expected structure", {
 test_that("sinasc_variables returns tibble with expected columns", {
   vars <- sinasc_variables()
   expect_s3_class(vars, "tbl_df")
-  expect_true(all(c("variable", "description", "type", "section") %in% names(vars)))
+  expect_true(all(
+    c("variable", "description", "type", "section") %in% names(vars)
+  ))
   expect_gt(nrow(vars), 0)
   expect_true("DTNASC" %in% vars$variable)
   expect_true("SEXO" %in% vars$variable)
@@ -94,7 +96,9 @@ test_that("sinasc_variables has expected sections", {
 test_that("sinasc_dictionary returns tibble with expected columns", {
   dict <- sinasc_dictionary()
   expect_s3_class(dict, "tbl_df")
-  expect_true(all(c("variable", "description", "code", "label") %in% names(dict)))
+  expect_true(all(
+    c("variable", "description", "code", "label") %in% names(dict)
+  ))
   expect_gt(nrow(dict), 0)
 })
 
@@ -247,8 +251,7 @@ test_that(".sinasc_cache_dir creates directory", {
 test_that("sinasc_data downloads and reads data from FTP", {
   skip_if_no_integration()
 
-  data <- sinasc_data(year = 2022, uf = "AC",
-                      cache_dir = tempdir())
+  data <- sinasc_data(year = 2022, uf = "AC", cache_dir = tempdir())
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("DTNASC" %in% names(data))
@@ -264,8 +267,12 @@ test_that("sinasc_data downloads and reads data from FTP", {
 test_that("sinasc_data filters by anomaly", {
   skip_if_no_integration()
 
-  anomalies <- sinasc_data(year = 2022, uf = "AC", anomaly = "Q",
-                           cache_dir = tempdir())
+  anomalies <- sinasc_data(
+    year = 2022,
+    uf = "AC",
+    anomaly = "Q",
+    cache_dir = tempdir()
+  )
   if (nrow(anomalies) > 0) {
     expect_true(all(grepl("^Q", anomalies$CODANOMAL)))
   }
@@ -274,9 +281,12 @@ test_that("sinasc_data filters by anomaly", {
 test_that("sinasc_data selects variables", {
   skip_if_no_integration()
 
-  data <- sinasc_data(year = 2022, uf = "AC",
-                      vars = c("DTNASC", "SEXO", "PESO"),
-                      cache_dir = tempdir())
+  data <- sinasc_data(
+    year = 2022,
+    uf = "AC",
+    vars = c("DTNASC", "SEXO", "PESO"),
+    cache_dir = tempdir()
+  )
   expect_true("DTNASC" %in% names(data))
   expect_true("SEXO" %in% names(data))
   expect_true("PESO" %in% names(data))
@@ -299,8 +309,7 @@ test_that("sinasc_data cache works (second call faster)", {
 test_that("sinasc_data handles multiple UFs", {
   skip_if_no_integration()
 
-  data <- sinasc_data(year = 2022, uf = c("AC", "RR"),
-                      cache_dir = tempdir())
+  data <- sinasc_data(year = 2022, uf = c("AC", "RR"), cache_dir = tempdir())
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true(all(c("AC", "RR") %in% data$uf_source))
@@ -323,9 +332,13 @@ test_that("sinasc_variables type column has non-character types", {
 
 test_that("sinasc parse converts mock data correctly", {
   mock_data <- tibble::tibble(
-    year = 2022L, uf_source = "AC",
-    DTNASC = "25122022", PESO = "3500", APGAR1 = "8",
-    SEXO = "1", IDADEMAE = "30"
+    year = 2022L,
+    uf_source = "AC",
+    DTNASC = "25122022",
+    PESO = "3500",
+    APGAR1 = "8",
+    SEXO = "1",
+    IDADEMAE = "30"
   )
   spec <- .build_type_spec(sinasc_variables_metadata)
   parsed <- .parse_columns(mock_data, spec)
@@ -346,7 +359,9 @@ test_that("sinasc_data reports partial download failures", {
     .sinasc_validate_year = function(year, ...) as.integer(year),
     .sinasc_validate_uf = function(uf) toupper(uf),
     .sinasc_download_and_read = function(year, uf, ...) {
-      if (uf == "XX") stop("Not found")
+      if (uf == "XX") {
+        stop("Not found")
+      }
       tibble::tibble(year = as.integer(year), uf_source = uf, CODANOMAL = "Q00")
     }
   )

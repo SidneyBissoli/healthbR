@@ -13,7 +13,9 @@ NULL
     healthbR.verbose = TRUE
   )
   toset <- !(names(op_healthbR) %in% names(op))
-  if (any(toset)) options(op_healthbR[toset])
+  if (any(toset)) {
+    options(op_healthbR[toset])
+  }
 
   invisible()
 }

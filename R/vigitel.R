@@ -53,7 +53,9 @@ vigitel_download_data <- function(format, destfile) {
       cli::cli_alert_success("Download complete: {.file {destfile}}")
     },
     error = function(e) {
-      if (file.exists(destfile)) file.remove(destfile)
+      if (file.exists(destfile)) {
+        file.remove(destfile)
+      }
       cli::cli_abort("Download failed: {e$message}")
     }
   )
@@ -99,7 +101,10 @@ vigitel_read_data <- function(path, format) {
 
   if (format == "dta") {
     # stata format - preserves labels
-    rlang::check_installed("haven", reason = "to read VIGITEL .dta (Stata) files")
+    rlang::check_installed(
+      "haven",
+      reason = "to read VIGITEL .dta (Stata) files"
+    )
     df <- haven::read_dta(path)
   } else {
     # csv format
@@ -156,7 +161,9 @@ vigitel_identify_year_column_from_schema <- function(dataset) {
 #' @return Validated integer vector or NULL. Errors on invalid years.
 #' @noRd
 .vigitel_validate_year <- function(year) {
-  if (is.null(year)) return(invisible(NULL))
+  if (is.null(year)) {
+    return(invisible(NULL))
+  }
 
   available_years <- vigitel_years()
   year <- as.integer(year)
@@ -185,12 +192,18 @@ vigitel_identify_year_column_from_schema <- function(dataset) {
 #' @return Lazy query object or NULL.
 #' @noRd
 .vigitel_try_lazy <- function(lazy, force, backend, cache_dir, year, vars) {
-  if (!isTRUE(lazy) || force) return(NULL)
+  if (!isTRUE(lazy) || force) {
+    return(NULL)
+  }
 
   backend_choice <- match.arg(backend, c("arrow", "duckdb"))
-  .lazy_return(cache_dir, "vigitel_data", backend_choice,
-               filters = if (!is.null(year)) list(ano = as.integer(year)) else list(),
-               select_cols = vars)
+  .lazy_return(
+    cache_dir,
+    "vigitel_data",
+    backend_choice,
+    filters = if (!is.null(year)) list(ano = as.integer(year)) else list(),
+    select_cols = vars
+  )
 }
 
 #' Read VIGITEL data from partitioned Arrow cache
@@ -317,7 +330,9 @@ create_partitioned_cache <- function(df, cache_dir) {
   }
 
   year_col <- vigitel_identify_year_column(df)
-  cli::cli_inform("Creating partitioned parquet cache for faster future reads...")
+  cli::cli_inform(
+    "Creating partitioned parquet cache for faster future reads..."
+  )
   result <- .cache_write_partitioned(df, cache_dir, "vigitel_data", year_col)
   cli::cli_alert_success("Partitioned cache created.")
   invisible(result)
@@ -427,21 +442,27 @@ vigitel_years <- function() {
 #'   vars = c("ano", "cidade", "sexo", "idade", "pesorake"),
 #'   cache_dir = tempdir()
 #' )
-vigitel_data <- function(year = NULL,
-                         format = c("dta", "csv"),
-                         vars = NULL,
-                         cache_dir = NULL,
-                         force = FALSE,
-                         lazy = FALSE, backend = c("arrow", "duckdb")) {
-
+vigitel_data <- function(
+  year = NULL,
+  format = c("dta", "csv"),
+  vars = NULL,
+  cache_dir = NULL,
+  force = FALSE,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   format <- match.arg(format)
   cache_dir <- vigitel_cache_dir(cache_dir)
   .vigitel_validate_year(year)
-  if (!is.null(year)) year <- as.integer(year)
+  if (!is.null(year)) {
+    year <- as.integer(year)
+  }
 
   # try lazy return from existing cache
   ds <- .vigitel_try_lazy(lazy, force, backend, cache_dir, year, vars)
-  if (!is.null(ds)) return(ds)
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # read from partitioned cache or download
   if (!force && has_partitioned_cache(cache_dir) && .has_arrow()) {
@@ -495,9 +516,7 @@ vigitel_data <- function(year = NULL,
 #' @examplesIf interactive()
 #' dict <- vigitel_dictionary(cache_dir = tempdir())
 #' head(dict)
-vigitel_dictionary <- function(cache_dir = NULL,
-                               force = FALSE) {
-
+vigitel_dictionary <- function(cache_dir = NULL, force = FALSE) {
   cache_dir <- vigitel_cache_dir(cache_dir)
   dict_url <- str_c(vigitel_base_url(), "dicionario-vigitel-2006-2024.xlsx")
   dict_path <- file.path(cache_dir, "dicionario-vigitel-2006-2024.xlsx")
@@ -511,7 +530,9 @@ vigitel_dictionary <- function(cache_dir = NULL,
         cli::cli_alert_success("Dictionary downloaded: {.file {dict_path}}")
       },
       error = function(e) {
-        if (file.exists(dict_path)) file.remove(dict_path)
+        if (file.exists(dict_path)) {
+          file.remove(dict_path)
+        }
         cli::cli_abort("Download failed: {e$message}")
       }
     )
@@ -541,9 +562,7 @@ vigitel_dictionary <- function(cache_dir = NULL,
 #' @examplesIf interactive()
 #' vars <- vigitel_variables(cache_dir = tempdir())
 #' head(vars)
-vigitel_variables <- function(cache_dir = NULL,
-                              force = FALSE) {
-
+vigitel_variables <- function(cache_dir = NULL, force = FALSE) {
   dict <- vigitel_dictionary(cache_dir = cache_dir, force = force)
 
   # return dictionary (structure depends on actual dictionary format)
@@ -616,8 +635,12 @@ vigitel_clear_cache <- function(keep_parquet = FALSE, cache_dir = NULL) {
 
   if (keep_parquet) {
     # remove only source files
-    files <- list.files(cache_dir, pattern = "\\.(zip|dta|csv|xlsx?)$",
-                        full.names = TRUE, ignore.case = TRUE)
+    files <- list.files(
+      cache_dir,
+      pattern = "\\.(zip|dta|csv|xlsx?)$",
+      full.names = TRUE,
+      ignore.case = TRUE
+    )
   } else {
     # remove all files and directories
     files <- list.files(cache_dir, full.names = TRUE)
@@ -628,7 +651,10 @@ vigitel_clear_cache <- function(keep_parquet = FALSE, cache_dir = NULL) {
     }
   }
 
-  if (length(files) == 0 && (!keep_parquet || length(list.dirs(cache_dir, recursive = FALSE)) == 0)) {
+  if (
+    length(files) == 0 &&
+      (!keep_parquet || length(list.dirs(cache_dir, recursive = FALSE)) == 0)
+  ) {
     cli::cli_alert_info("Cache is already empty")
     return(invisible(NULL))
   }
@@ -698,8 +724,14 @@ vigitel_cache_status <- function(cache_dir = NULL) {
   }
 
   tibble::tibble(
-    file_type = c("ZIP (Stata)", "ZIP (CSV)", "Data (Stata)", "Data (CSV)",
-                  "Dictionary", "Parquet cache"),
+    file_type = c(
+      "ZIP (Stata)",
+      "ZIP (CSV)",
+      "Data (Stata)",
+      "Data (CSV)",
+      "Dictionary",
+      "Parquet cache"
+    ),
     exists = c(
       file.exists(zip_dta),
       file.exists(zip_csv),
@@ -722,7 +754,11 @@ vigitel_cache_status <- function(cache_dir = NULL) {
       NA_character_,
       NA_character_,
       NA_character_,
-      if (parquet_years > 0) str_c(parquet_years, " year partitions") else NA_character_
+      if (parquet_years > 0) {
+        str_c(parquet_years, " year partitions")
+      } else {
+        NA_character_
+      }
     )
   )
 }

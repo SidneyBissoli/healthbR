@@ -53,7 +53,9 @@ test_that("sipni_info mentions both data sources", {
 test_that("sipni_variables returns tibble with expected columns", {
   vars <- sipni_variables()
   expect_s3_class(vars, "tbl_df")
-  expect_true(all(c("variable", "description", "type", "section") %in% names(vars)))
+  expect_true(all(
+    c("variable", "description", "type", "section") %in% names(vars)
+  ))
   expect_gt(nrow(vars), 0)
 })
 
@@ -81,7 +83,9 @@ test_that("sipni_variables API has expected variables", {
   # default (R2 mirror): 56 JSON-export fields
   vars <- sipni_variables(type = "API")
   expect_s3_class(vars, "tbl_df")
-  expect_true(all(c("variable", "description", "type", "section") %in% names(vars)))
+  expect_true(all(
+    c("variable", "description", "type", "section") %in% names(vars)
+  ))
   expect_equal(nrow(vars), 56)
   # DATASUS CSV exports: 47 fields
   vars_csv <- sipni_variables(type = "API", source = "datasus")
@@ -138,7 +142,9 @@ test_that("sipni_variables search returns empty tibble for no match", {
 test_that("sipni_dictionary returns tibble with expected columns", {
   dict <- sipni_dictionary()
   expect_s3_class(dict, "tbl_df")
-  expect_true(all(c("variable", "description", "code", "label") %in% names(dict)))
+  expect_true(all(
+    c("variable", "description", "code", "label") %in% names(dict)
+  ))
   expect_gt(nrow(dict), 0)
 })
 
@@ -202,8 +208,10 @@ test_that(".sipni_build_ftp_url errors on pre-1994", {
 
 test_that(".sipni_csv_build_url constructs correct URL", {
   url <- .sipni_csv_build_url(2024, 1)
-  expect_equal(url,
-    "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv/vacinacao_jan_2024_csv.zip")
+  expect_equal(
+    url,
+    "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv/vacinacao_jan_2024_csv.zip"
+  )
 })
 
 test_that(".sipni_csv_build_url works for different months", {
@@ -215,8 +223,20 @@ test_that(".sipni_csv_build_url works for different months", {
 })
 
 test_that(".sipni_csv_build_url uses correct Portuguese month names", {
-  months <- c("jan", "fev", "mar", "abr", "mai", "jun",
-              "jul", "ago", "set", "out", "nov", "dez")
+  months <- c(
+    "jan",
+    "fev",
+    "mar",
+    "abr",
+    "mai",
+    "jun",
+    "jul",
+    "ago",
+    "set",
+    "out",
+    "nov",
+    "dez"
+  )
   for (i in seq_along(months)) {
     url <- .sipni_csv_build_url(2024, i)
     expect_match(url, months[i], info = paste("Month", i))
@@ -263,8 +283,7 @@ test_that(".sipni_validate_year accepts valid API years", {
 })
 
 test_that(".sipni_validate_year accepts mixed FTP and API years", {
-  expect_equal(.sipni_validate_year(c(2019, 2020)),
-               c(2019L, 2020L))
+  expect_equal(.sipni_validate_year(c(2019, 2020)), c(2019L, 2020L))
 })
 
 test_that(".sipni_validate_year errors on invalid years", {
@@ -337,8 +356,10 @@ test_that(".sipni_validate_vars works for API type", {
     .sipni_validate_vars("data_vacina", type = "API")
   )
   expect_no_warning(
-    .sipni_validate_vars(c("descricao_vacina", "tipo_sexo_paciente"),
-                         type = "API")
+    .sipni_validate_vars(
+      c("descricao_vacina", "tipo_sexo_paciente"),
+      type = "API"
+    )
   )
   expect_warning(
     .sipni_validate_vars("IMUNO", type = "API"),
@@ -352,7 +373,9 @@ test_that(".sipni_validate_vars works for API type", {
 
 test_that("sipni_valid_types has correct structure", {
   expect_equal(nrow(sipni_valid_types), 3)
-  expect_true(all(c("code", "name", "description") %in% names(sipni_valid_types)))
+  expect_true(all(
+    c("code", "name", "description") %in% names(sipni_valid_types)
+  ))
   expect_true("DPNI" %in% sipni_valid_types$code)
   expect_true("CPNI" %in% sipni_valid_types$code)
   expect_true("API" %in% sipni_valid_types$code)
@@ -382,8 +405,10 @@ test_that("sipni_label_maps are consistent with dictionary", {
   for (var_name in names(sipni_label_maps)) {
     dict_rows <- sipni_dictionary(var_name, source = "datasus")
     map_codes <- names(sipni_label_maps[[var_name]])
-    expect_true(all(map_codes %in% dict_rows$code),
-                info = paste(var_name, "label_maps codes not in dictionary"))
+    expect_true(
+      all(map_codes %in% dict_rows$code),
+      info = paste(var_name, "label_maps codes not in dictionary")
+    )
   }
 })
 
@@ -452,10 +477,22 @@ test_that(".sipni_cache_dir creates directory", {
 
 test_that("API cache naming follows expected pattern", {
   # verify that the cache base naming for API data uses the right format
-  cache_base <- stringr::str_c("sipni_API_", "AC", "_", 2024, sprintf("%02d", 1))
+  cache_base <- stringr::str_c(
+    "sipni_API_",
+    "AC",
+    "_",
+    2024,
+    sprintf("%02d", 1)
+  )
   expect_equal(cache_base, "sipni_API_AC_202401")
 
-  cache_base2 <- stringr::str_c("sipni_API_", "SP", "_", 2025, sprintf("%02d", 12))
+  cache_base2 <- stringr::str_c(
+    "sipni_API_",
+    "SP",
+    "_",
+    2025,
+    sprintf("%02d", 12)
+  )
   expect_equal(cache_base2, "sipni_API_SP_202512")
 })
 
@@ -464,8 +501,10 @@ test_that("API cache naming follows expected pattern", {
 # ============================================================================
 
 test_that("sipni_csv_base_url is correct", {
-  expect_equal(sipni_csv_base_url,
-               "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv")
+  expect_equal(
+    sipni_csv_base_url,
+    "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv"
+  )
 })
 
 test_that("sipni_month_names has 12 Portuguese month abbreviations", {
@@ -494,8 +533,12 @@ test_that("sipni_data downloads DPNI single year single UF", {
 test_that("sipni_data downloads CPNI single year single UF", {
   skip_if_no_integration()
 
-  data <- sipni_data(year = 2019, type = "CPNI", uf = "AC",
-                     cache_dir = tempdir())
+  data <- sipni_data(
+    year = 2019,
+    type = "CPNI",
+    uf = "AC",
+    cache_dir = tempdir()
+  )
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("year" %in% names(data))
@@ -505,9 +548,12 @@ test_that("sipni_data downloads CPNI single year single UF", {
 test_that("sipni_data selects variables", {
   skip_if_no_integration()
 
-  data <- sipni_data(year = 2019, uf = "AC",
-                     vars = c("IMUNO", "QT_DOSE"),
-                     cache_dir = tempdir())
+  data <- sipni_data(
+    year = 2019,
+    uf = "AC",
+    vars = c("IMUNO", "QT_DOSE"),
+    cache_dir = tempdir()
+  )
   expect_true("IMUNO" %in% names(data))
   expect_true("QT_DOSE" %in% names(data))
   expect_true("year" %in% names(data))
@@ -521,10 +567,8 @@ test_that("sipni_data cache works (second call faster)", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  t1 <- system.time(sipni_data(year = 2019, uf = "AC",
-                                cache_dir = cache_dir))
-  t2 <- system.time(sipni_data(year = 2019, uf = "AC",
-                                cache_dir = cache_dir))
+  t1 <- system.time(sipni_data(year = 2019, uf = "AC", cache_dir = cache_dir))
+  t2 <- system.time(sipni_data(year = 2019, uf = "AC", cache_dir = cache_dir))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
 
@@ -539,8 +583,7 @@ test_that("sipni_data downloads API data for single month", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  data <- sipni_data(year = 2024, uf = "AC", month = 1,
-                     cache_dir = cache_dir)
+  data <- sipni_data(year = 2024, uf = "AC", month = 1, cache_dir = cache_dir)
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("year" %in% names(data))
@@ -561,8 +604,7 @@ test_that("sipni_data API column names match expected", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  data <- sipni_data(year = 2024, uf = "AC", month = 1,
-                     cache_dir = cache_dir)
+  data <- sipni_data(year = 2024, uf = "AC", month = 1, cache_dir = cache_dir)
   # all 56 R2 microdata vars should be in data (plus year/month/uf_source)
   data_vars <- setdiff(names(data), c("year", "month", "uf_source"))
   expect_setequal(data_vars, sipni_variables_microdados$variable)
@@ -577,10 +619,18 @@ test_that("sipni_data API cache works", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  t1 <- system.time(sipni_data(year = 2024, uf = "AC", month = 1,
-                                cache_dir = cache_dir))
-  t2 <- system.time(sipni_data(year = 2024, uf = "AC", month = 1,
-                                cache_dir = cache_dir))
+  t1 <- system.time(sipni_data(
+    year = 2024,
+    uf = "AC",
+    month = 1,
+    cache_dir = cache_dir
+  ))
+  t2 <- system.time(sipni_data(
+    year = 2024,
+    uf = "AC",
+    month = 1,
+    cache_dir = cache_dir
+  ))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
 
@@ -610,8 +660,11 @@ test_that("sipni_variables type column has non-character types (API)", {
 
 test_that("sipni parse converts mock FTP data correctly", {
   mock_data <- tibble::tibble(
-    year = 2019L, uf_source = "AC",
-    QT_DOSE = "100", IMUNO = "09", MUNIC = "120040"
+    year = 2019L,
+    uf_source = "AC",
+    QT_DOSE = "100",
+    IMUNO = "09",
+    MUNIC = "120040"
   )
   spec <- .build_type_spec(sipni_variables_dpni)
   parsed <- .parse_columns(mock_data, spec)
@@ -622,7 +675,9 @@ test_that("sipni parse converts mock FTP data correctly", {
 
 test_that("sipni parse converts mock API data correctly", {
   mock_data <- tibble::tibble(
-    year = 2024L, month = 1L, uf_source = "AC",
+    year = 2024L,
+    month = 1L,
+    uf_source = "AC",
     data_vacina = "2024-01-15",
     numero_idade_paciente = "30",
     tipo_sexo_paciente = "F"
@@ -645,7 +700,9 @@ test_that("sipni_data reports partial download failures (FTP)", {
     .sipni_validate_year = function(year) as.integer(year),
     .sipni_validate_uf = function(uf) toupper(uf),
     .sipni_download_and_read = function(year, uf, ...) {
-      if (uf == "XX") stop("Not found")
+      if (uf == "XX") {
+        stop("Not found")
+      }
       tibble::tibble(year = as.integer(year), uf_source = uf, IMUNO = "001")
     }
   )
@@ -674,9 +731,15 @@ test_that("sipni_info returns invisible", {
 test_that("sipni_info list has all expected fields", {
   info <- sipni_info()
   expected_fields <- c(
-    "name", "source", "years", "n_types",
-    "n_variables_dpni", "n_variables_cpni", "n_variables_api",
-    "url_ftp", "url_csv"
+    "name",
+    "source",
+    "years",
+    "n_types",
+    "n_variables_dpni",
+    "n_variables_cpni",
+    "n_variables_api",
+    "url_ftp",
+    "url_csv"
   )
   for (f in expected_fields) {
     expect_true(f %in% names(info), info = paste("Missing field:", f))
@@ -697,8 +760,12 @@ test_that("sipni_info n_types matches valid types", {
 
 test_that(".sipni_resolve_params splits years into FTP and API groups", {
   params <- healthbR:::.sipni_resolve_params(
-    year = c(2019, 2020), type = "DPNI", uf = "AC",
-    month = NULL, vars = NULL, missing_type = TRUE
+    year = c(2019, 2020),
+    type = "DPNI",
+    uf = "AC",
+    month = NULL,
+    vars = NULL,
+    missing_type = TRUE
   )
 
   expect_equal(params$ftp_years, 2019L)
@@ -708,8 +775,12 @@ test_that(".sipni_resolve_params splits years into FTP and API groups", {
 
 test_that(".sipni_resolve_params FTP only years", {
   params <- healthbR:::.sipni_resolve_params(
-    year = c(2018, 2019), type = "DPNI", uf = NULL,
-    month = NULL, vars = NULL, missing_type = TRUE
+    year = c(2018, 2019),
+    type = "DPNI",
+    uf = NULL,
+    month = NULL,
+    vars = NULL,
+    missing_type = TRUE
   )
 
   expect_equal(params$ftp_years, c(2018L, 2019L))
@@ -719,8 +790,12 @@ test_that(".sipni_resolve_params FTP only years", {
 
 test_that(".sipni_resolve_params API only years", {
   params <- healthbR:::.sipni_resolve_params(
-    year = c(2024, 2025), type = "DPNI", uf = "SP",
-    month = 1:3, vars = NULL, missing_type = TRUE
+    year = c(2024, 2025),
+    type = "DPNI",
+    uf = "SP",
+    month = 1:3,
+    vars = NULL,
+    missing_type = TRUE
   )
 
   expect_equal(params$ftp_years, integer(0))
@@ -731,8 +806,12 @@ test_that(".sipni_resolve_params API only years", {
 test_that(".sipni_resolve_params validates type for FTP years", {
   expect_error(
     healthbR:::.sipni_resolve_params(
-      year = 2019, type = "INVALID", uf = NULL,
-      month = NULL, vars = NULL, missing_type = FALSE
+      year = 2019,
+      type = "INVALID",
+      uf = NULL,
+      month = NULL,
+      vars = NULL,
+      missing_type = FALSE
     ),
     "Invalid"
   )
@@ -741,8 +820,12 @@ test_that(".sipni_resolve_params validates type for FTP years", {
 test_that(".sipni_resolve_params validates UF", {
   expect_error(
     healthbR:::.sipni_resolve_params(
-      year = 2019, type = "DPNI", uf = "XX",
-      month = NULL, vars = NULL, missing_type = TRUE
+      year = 2019,
+      type = "DPNI",
+      uf = "XX",
+      month = NULL,
+      vars = NULL,
+      missing_type = TRUE
     ),
     "Invalid"
   )
@@ -751,8 +834,12 @@ test_that(".sipni_resolve_params validates UF", {
 test_that(".sipni_resolve_params warns when type set for API years", {
   expect_warning(
     healthbR:::.sipni_resolve_params(
-      year = 2024, type = "DPNI", uf = "AC",
-      month = NULL, vars = NULL, missing_type = FALSE
+      year = 2024,
+      type = "DPNI",
+      uf = "AC",
+      month = NULL,
+      vars = NULL,
+      missing_type = FALSE
     ),
     "ignored"
   )
@@ -761,8 +848,12 @@ test_that(".sipni_resolve_params warns when type set for API years", {
 test_that(".sipni_resolve_params does not warn when type is missing for API", {
   expect_no_warning(
     healthbR:::.sipni_resolve_params(
-      year = 2024, type = "DPNI", uf = "AC",
-      month = NULL, vars = NULL, missing_type = TRUE
+      year = 2024,
+      type = "DPNI",
+      uf = "AC",
+      month = NULL,
+      vars = NULL,
+      missing_type = TRUE
     )
   )
 })
@@ -770,8 +861,12 @@ test_that(".sipni_resolve_params does not warn when type is missing for API", {
 test_that(".sipni_resolve_params validates vars with warning", {
   expect_warning(
     healthbR:::.sipni_resolve_params(
-      year = 2019, type = "DPNI", uf = "AC",
-      month = NULL, vars = c("FAKECOL"), missing_type = TRUE
+      year = 2019,
+      type = "DPNI",
+      uf = "AC",
+      month = NULL,
+      vars = c("FAKECOL"),
+      missing_type = TRUE
     ),
     "not in known"
   )
@@ -780,24 +875,36 @@ test_that(".sipni_resolve_params validates vars with warning", {
 test_that(".sipni_resolve_params validates API vars correctly", {
   expect_no_warning(
     healthbR:::.sipni_resolve_params(
-      year = 2024, type = "DPNI", uf = "AC",
-      month = 1, vars = c("data_vacina"), missing_type = TRUE
+      year = 2024,
+      type = "DPNI",
+      uf = "AC",
+      month = 1,
+      vars = c("data_vacina"),
+      missing_type = TRUE
     )
   )
 })
 
 test_that(".sipni_resolve_params month validation passes through", {
   params <- healthbR:::.sipni_resolve_params(
-    year = 2024, type = "DPNI", uf = "AC",
-    month = c(1, 6), vars = NULL, missing_type = TRUE
+    year = 2024,
+    type = "DPNI",
+    uf = "AC",
+    month = c(1, 6),
+    vars = NULL,
+    missing_type = TRUE
   )
   expect_equal(params$month_vals, c(1L, 6L))
 })
 
 test_that(".sipni_resolve_params NULL month returns 1:12", {
   params <- healthbR:::.sipni_resolve_params(
-    year = 2024, type = "DPNI", uf = "AC",
-    month = NULL, vars = NULL, missing_type = TRUE
+    year = 2024,
+    type = "DPNI",
+    uf = "AC",
+    month = NULL,
+    vars = NULL,
+    missing_type = TRUE
   )
   expect_equal(params$month_vals, 1L:12L)
 })
@@ -806,12 +913,18 @@ test_that(".sipni_resolve_params NULL month returns 1:12", {
 
 test_that(".sipni_try_lazy_pre returns NULL when lazy=FALSE", {
   params <- list(
-    ftp_years = 2019L, api_years = integer(0),
-    type = "DPNI", target_ufs = "AC", month_vals = 1L:12L
+    ftp_years = 2019L,
+    api_years = integer(0),
+    type = "DPNI",
+    target_ufs = "AC",
+    month_vals = 1L:12L
   )
   result <- healthbR:::.sipni_try_lazy_pre(
-    params, lazy = FALSE, backend = "arrow",
-    cache_dir = tempdir(), parse = FALSE
+    params,
+    lazy = FALSE,
+    backend = "arrow",
+    cache_dir = tempdir(),
+    parse = FALSE
   )
   expect_null(result)
 })
@@ -819,12 +932,18 @@ test_that(".sipni_try_lazy_pre returns NULL when lazy=FALSE", {
 test_that(".sipni_try_lazy_pre returns NULL when no cache exists", {
   temp_dir <- withr::local_tempdir()
   params <- list(
-    ftp_years = 2019L, api_years = integer(0),
-    type = "DPNI", target_ufs = "AC", month_vals = 1L:12L
+    ftp_years = 2019L,
+    api_years = integer(0),
+    type = "DPNI",
+    target_ufs = "AC",
+    month_vals = 1L:12L
   )
   result <- healthbR:::.sipni_try_lazy_pre(
-    params, lazy = TRUE, backend = "arrow",
-    cache_dir = temp_dir, parse = FALSE
+    params,
+    lazy = TRUE,
+    backend = "arrow",
+    cache_dir = temp_dir,
+    parse = FALSE
   )
   expect_null(result)
 })
@@ -832,13 +951,19 @@ test_that(".sipni_try_lazy_pre returns NULL when no cache exists", {
 test_that(".sipni_try_lazy_pre informs when parse=TRUE and lazy=TRUE", {
   temp_dir <- withr::local_tempdir()
   params <- list(
-    ftp_years = 2019L, api_years = integer(0),
-    type = "DPNI", target_ufs = "AC", month_vals = 1L:12L
+    ftp_years = 2019L,
+    api_years = integer(0),
+    type = "DPNI",
+    target_ufs = "AC",
+    month_vals = 1L:12L
   )
   expect_message(
     healthbR:::.sipni_try_lazy_pre(
-      params, lazy = TRUE, backend = "arrow",
-      cache_dir = temp_dir, parse = TRUE
+      params,
+      lazy = TRUE,
+      backend = "arrow",
+      cache_dir = temp_dir,
+      parse = TRUE
     ),
     "parse.*ignored"
   )
@@ -847,12 +972,18 @@ test_that(".sipni_try_lazy_pre informs when parse=TRUE and lazy=TRUE", {
 test_that(".sipni_try_lazy_pre returns NULL for API years with no cache", {
   temp_dir <- withr::local_tempdir()
   params <- list(
-    ftp_years = integer(0), api_years = 2024L,
-    type = "DPNI", target_ufs = "AC", month_vals = 1L:3L
+    ftp_years = integer(0),
+    api_years = 2024L,
+    type = "DPNI",
+    target_ufs = "AC",
+    month_vals = 1L:3L
   )
   result <- healthbR:::.sipni_try_lazy_pre(
-    params, lazy = TRUE, backend = "arrow",
-    cache_dir = temp_dir, parse = FALSE
+    params,
+    lazy = TRUE,
+    backend = "arrow",
+    cache_dir = temp_dir,
+    parse = FALSE
   )
   expect_null(result)
 })
@@ -861,8 +992,13 @@ test_that(".sipni_try_lazy_pre returns NULL for API years with no cache", {
 
 test_that(".sipni_try_lazy_post returns NULL when lazy=FALSE", {
   result <- healthbR:::.sipni_try_lazy_post(
-    lazy = FALSE, backend = "arrow", year = 2019L,
-    type = "DPNI", uf = "AC", month = NULL, vars = NULL,
+    lazy = FALSE,
+    backend = "arrow",
+    year = 2019L,
+    type = "DPNI",
+    uf = "AC",
+    month = NULL,
+    vars = NULL,
     cache_dir = tempdir()
   )
   expect_null(result)
@@ -871,8 +1007,13 @@ test_that(".sipni_try_lazy_post returns NULL when lazy=FALSE", {
 test_that(".sipni_try_lazy_post returns NULL when no cache (FTP)", {
   temp_dir <- withr::local_tempdir()
   result <- healthbR:::.sipni_try_lazy_post(
-    lazy = TRUE, backend = "arrow", year = 2019L,
-    type = "DPNI", uf = "AC", month = NULL, vars = NULL,
+    lazy = TRUE,
+    backend = "arrow",
+    year = 2019L,
+    type = "DPNI",
+    uf = "AC",
+    month = NULL,
+    vars = NULL,
     cache_dir = temp_dir
   )
   expect_null(result)
@@ -881,8 +1022,13 @@ test_that(".sipni_try_lazy_post returns NULL when no cache (FTP)", {
 test_that(".sipni_try_lazy_post returns NULL when no cache (API)", {
   temp_dir <- withr::local_tempdir()
   result <- healthbR:::.sipni_try_lazy_post(
-    lazy = TRUE, backend = "arrow", year = 2024L,
-    type = "DPNI", uf = "AC", month = 1L, vars = NULL,
+    lazy = TRUE,
+    backend = "arrow",
+    year = 2024L,
+    type = "DPNI",
+    uf = "AC",
+    month = 1L,
+    vars = NULL,
     cache_dir = temp_dir
   )
   expect_null(result)
@@ -891,8 +1037,13 @@ test_that(".sipni_try_lazy_post returns NULL when no cache (API)", {
 test_that(".sipni_try_lazy_post returns NULL for mixed years (no cache)", {
   temp_dir <- withr::local_tempdir()
   result <- healthbR:::.sipni_try_lazy_post(
-    lazy = TRUE, backend = "arrow", year = c(2019L, 2024L),
-    type = "DPNI", uf = "AC", month = NULL, vars = NULL,
+    lazy = TRUE,
+    backend = "arrow",
+    year = c(2019L, 2024L),
+    type = "DPNI",
+    uf = "AC",
+    month = NULL,
+    vars = NULL,
     cache_dir = temp_dir
   )
   expect_null(result)
@@ -914,10 +1065,18 @@ test_that(".sipni_bind_results binds FTP results only", {
 })
 
 test_that(".sipni_bind_results binds API results only", {
-  api1 <- tibble::tibble(year = 2024L, month = 1L, uf_source = "AC",
-                          data_vacina = "2024-01-15")
-  api2 <- tibble::tibble(year = 2024L, month = 2L, uf_source = "AC",
-                          data_vacina = "2024-02-15")
+  api1 <- tibble::tibble(
+    year = 2024L,
+    month = 1L,
+    uf_source = "AC",
+    data_vacina = "2024-01-15"
+  )
+  api2 <- tibble::tibble(
+    year = 2024L,
+    month = 2L,
+    uf_source = "AC",
+    data_vacina = "2024-02-15"
+  )
 
   result <- healthbR:::.sipni_bind_results(
     ftp_results = list(),
@@ -929,10 +1088,18 @@ test_that(".sipni_bind_results binds API results only", {
 })
 
 test_that(".sipni_bind_results combines FTP and API with different columns", {
-  ftp1 <- tibble::tibble(year = 2019L, uf_source = "AC", IMUNO = "01",
-                          QT_DOSE = "100")
-  api1 <- tibble::tibble(year = 2024L, month = 1L, uf_source = "AC",
-                          data_vacina = "2024-01-15")
+  ftp1 <- tibble::tibble(
+    year = 2019L,
+    uf_source = "AC",
+    IMUNO = "01",
+    QT_DOSE = "100"
+  )
+  api1 <- tibble::tibble(
+    year = 2024L,
+    month = 1L,
+    uf_source = "AC",
+    data_vacina = "2024-01-15"
+  )
 
   result <- healthbR:::.sipni_bind_results(
     ftp_results = list(ftp1),
@@ -959,13 +1126,20 @@ test_that(".sipni_bind_results errors when both empty", {
 
 test_that(".sipni_apply_parsing with parse=FALSE returns unchanged", {
   mock_data <- tibble::tibble(
-    year = 2019L, uf_source = "AC",
-    QT_DOSE = "100", IMUNO = "09"
+    year = 2019L,
+    uf_source = "AC",
+    QT_DOSE = "100",
+    IMUNO = "09"
   )
 
   result <- healthbR:::.sipni_apply_parsing(
-    mock_data, has_ftp = TRUE, has_api = FALSE,
-    type = "DPNI", parse = FALSE, col_types = NULL, lazy = FALSE
+    mock_data,
+    has_ftp = TRUE,
+    has_api = FALSE,
+    type = "DPNI",
+    parse = FALSE,
+    col_types = NULL,
+    lazy = FALSE
   )
 
   expect_type(result$QT_DOSE, "character")
@@ -973,13 +1147,20 @@ test_that(".sipni_apply_parsing with parse=FALSE returns unchanged", {
 
 test_that(".sipni_apply_parsing with parse=TRUE converts FTP DPNI data", {
   mock_data <- tibble::tibble(
-    year = 2019L, uf_source = "AC",
-    QT_DOSE = "100", IMUNO = "09"
+    year = 2019L,
+    uf_source = "AC",
+    QT_DOSE = "100",
+    IMUNO = "09"
   )
 
   result <- healthbR:::.sipni_apply_parsing(
-    mock_data, has_ftp = TRUE, has_api = FALSE,
-    type = "DPNI", parse = TRUE, col_types = NULL, lazy = FALSE
+    mock_data,
+    has_ftp = TRUE,
+    has_api = FALSE,
+    type = "DPNI",
+    parse = TRUE,
+    col_types = NULL,
+    lazy = FALSE
   )
 
   expect_type(result$QT_DOSE, "integer")
@@ -988,13 +1169,21 @@ test_that(".sipni_apply_parsing with parse=TRUE converts FTP DPNI data", {
 
 test_that(".sipni_apply_parsing with parse=TRUE converts CPNI data", {
   mock_data <- tibble::tibble(
-    year = 2019L, uf_source = "AC",
-    QT_DOSE = "50", POP = "10000", COBERT = "85.5"
+    year = 2019L,
+    uf_source = "AC",
+    QT_DOSE = "50",
+    POP = "10000",
+    COBERT = "85.5"
   )
 
   result <- healthbR:::.sipni_apply_parsing(
-    mock_data, has_ftp = TRUE, has_api = FALSE,
-    type = "CPNI", parse = TRUE, col_types = NULL, lazy = FALSE
+    mock_data,
+    has_ftp = TRUE,
+    has_api = FALSE,
+    type = "CPNI",
+    parse = TRUE,
+    col_types = NULL,
+    lazy = FALSE
   )
 
   expect_type(result$QT_DOSE, "integer")
@@ -1004,15 +1193,22 @@ test_that(".sipni_apply_parsing with parse=TRUE converts CPNI data", {
 
 test_that(".sipni_apply_parsing with parse=TRUE converts API data", {
   mock_data <- tibble::tibble(
-    year = 2024L, month = 1L, uf_source = "AC",
+    year = 2024L,
+    month = 1L,
+    uf_source = "AC",
     data_vacina = "2024-01-15",
     numero_idade_paciente = "30",
     tipo_sexo_paciente = "F"
   )
 
   result <- healthbR:::.sipni_apply_parsing(
-    mock_data, has_ftp = FALSE, has_api = TRUE,
-    type = "DPNI", parse = TRUE, col_types = NULL, lazy = FALSE
+    mock_data,
+    has_ftp = FALSE,
+    has_api = TRUE,
+    type = "DPNI",
+    parse = TRUE,
+    col_types = NULL,
+    lazy = FALSE
   )
 
   expect_s3_class(result$data_vacina, "Date")
@@ -1022,13 +1218,19 @@ test_that(".sipni_apply_parsing with parse=TRUE converts API data", {
 
 test_that(".sipni_apply_parsing returns unchanged when lazy=TRUE", {
   mock_data <- tibble::tibble(
-    year = 2019L, uf_source = "AC",
+    year = 2019L,
+    uf_source = "AC",
     QT_DOSE = "100"
   )
 
   result <- healthbR:::.sipni_apply_parsing(
-    mock_data, has_ftp = TRUE, has_api = FALSE,
-    type = "DPNI", parse = TRUE, col_types = NULL, lazy = TRUE
+    mock_data,
+    has_ftp = TRUE,
+    has_api = FALSE,
+    type = "DPNI",
+    parse = TRUE,
+    col_types = NULL,
+    lazy = TRUE
   )
 
   # should not parse since lazy=TRUE
@@ -1037,14 +1239,20 @@ test_that(".sipni_apply_parsing returns unchanged when lazy=TRUE", {
 
 test_that(".sipni_apply_parsing with col_types override", {
   mock_data <- tibble::tibble(
-    year = 2019L, uf_source = "AC",
-    QT_DOSE = "100", IMUNO = "09"
+    year = 2019L,
+    uf_source = "AC",
+    QT_DOSE = "100",
+    IMUNO = "09"
   )
 
   result <- healthbR:::.sipni_apply_parsing(
-    mock_data, has_ftp = TRUE, has_api = FALSE,
-    type = "DPNI", parse = TRUE,
-    col_types = list(QT_DOSE = "character"), lazy = FALSE
+    mock_data,
+    has_ftp = TRUE,
+    has_api = FALSE,
+    type = "DPNI",
+    parse = TRUE,
+    col_types = list(QT_DOSE = "character"),
+    lazy = FALSE
   )
 
   # QT_DOSE should remain character due to override
@@ -1053,14 +1261,20 @@ test_that(".sipni_apply_parsing with col_types override", {
 
 test_that(".sipni_apply_parsing with mixed FTP+API specs", {
   mock_data <- tibble::tibble(
-    year = c(2019L, 2024L), uf_source = c("AC", "AC"),
+    year = c(2019L, 2024L),
+    uf_source = c("AC", "AC"),
     QT_DOSE = c("100", NA_character_),
     data_vacina = c(NA_character_, "2024-01-15")
   )
 
   result <- healthbR:::.sipni_apply_parsing(
-    mock_data, has_ftp = TRUE, has_api = TRUE,
-    type = "DPNI", parse = TRUE, col_types = NULL, lazy = FALSE
+    mock_data,
+    has_ftp = TRUE,
+    has_api = TRUE,
+    type = "DPNI",
+    parse = TRUE,
+    col_types = NULL,
+    lazy = FALSE
   )
 
   expect_type(result$QT_DOSE, "integer")
@@ -1071,8 +1285,11 @@ test_that(".sipni_apply_parsing with mixed FTP+API specs", {
 
 test_that(".sipni_download_ftp returns empty for no FTP years", {
   result <- healthbR:::.sipni_download_ftp(
-    ftp_years = integer(0), target_ufs = "AC",
-    type = "DPNI", cache = FALSE, cache_dir = tempdir()
+    ftp_years = integer(0),
+    target_ufs = "AC",
+    type = "DPNI",
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_equal(result$results, list())
@@ -1090,8 +1307,11 @@ test_that(".sipni_download_ftp returns results for single UF/year", {
   )
 
   result <- healthbR:::.sipni_download_ftp(
-    ftp_years = 2019L, target_ufs = "AC",
-    type = "DPNI", cache = FALSE, cache_dir = tempdir()
+    ftp_years = 2019L,
+    target_ufs = "AC",
+    type = "DPNI",
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_equal(length(result$results), 1)
@@ -1103,7 +1323,9 @@ test_that(".sipni_download_ftp returns results for single UF/year", {
 test_that(".sipni_download_ftp records failures", {
   local_mocked_bindings(
     .sipni_download_and_read = function(year, uf, type, cache, cache_dir) {
-      if (uf == "XX") stop("File not found")
+      if (uf == "XX") {
+        stop("File not found")
+      }
       tibble::tibble(year = as.integer(year), uf_source = uf, IMUNO = "01")
     },
     .map_parallel = function(.x, .f, ..., .delay = NULL) {
@@ -1112,8 +1334,11 @@ test_that(".sipni_download_ftp records failures", {
   )
 
   result <- healthbR:::.sipni_download_ftp(
-    ftp_years = 2019L, target_ufs = c("AC", "XX"),
-    type = "DPNI", cache = FALSE, cache_dir = tempdir()
+    ftp_years = 2019L,
+    target_ufs = c("AC", "XX"),
+    type = "DPNI",
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_equal(length(result$results), 1)
@@ -1131,11 +1356,14 @@ test_that(".sipni_download_ftp multiple UFs x years", {
   )
 
   result <- healthbR:::.sipni_download_ftp(
-    ftp_years = c(2018L, 2019L), target_ufs = c("AC", "SP"),
-    type = "DPNI", cache = FALSE, cache_dir = tempdir()
+    ftp_years = c(2018L, 2019L),
+    target_ufs = c("AC", "SP"),
+    type = "DPNI",
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
-  expect_equal(length(result$results), 4)  # 2 years x 2 UFs
+  expect_equal(length(result$results), 4) # 2 years x 2 UFs
   expect_equal(length(result$failed_labels), 0)
 })
 
@@ -1143,8 +1371,11 @@ test_that(".sipni_download_ftp multiple UFs x years", {
 
 test_that(".sipni_download_api returns empty for no API years", {
   result <- healthbR:::.sipni_download_api(
-    api_years = integer(0), target_ufs = "AC",
-    month_vals = 1L:12L, cache = FALSE, cache_dir = tempdir()
+    api_years = integer(0),
+    target_ufs = "AC",
+    month_vals = 1L:12L,
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_equal(result$results, list())
@@ -1154,8 +1385,12 @@ test_that(".sipni_download_api returns empty for no API years", {
 test_that(".sipni_download_api returns results for single UF/year", {
   local_mocked_bindings(
     .sipni_api_download_and_read = function(year, uf, month, cache, cache_dir) {
-      tibble::tibble(year = as.integer(year), month = 1L, uf_source = uf,
-                      data_vacina = "2024-01-15")
+      tibble::tibble(
+        year = as.integer(year),
+        month = 1L,
+        uf_source = uf,
+        data_vacina = "2024-01-15"
+      )
     },
     .map_parallel = function(.x, .f, ..., .delay = NULL) {
       lapply(.x, .f)
@@ -1163,8 +1398,11 @@ test_that(".sipni_download_api returns results for single UF/year", {
   )
 
   result <- healthbR:::.sipni_download_api(
-    api_years = 2024L, target_ufs = "AC",
-    month_vals = 1L, cache = FALSE, cache_dir = tempdir()
+    api_years = 2024L,
+    target_ufs = "AC",
+    month_vals = 1L,
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_equal(length(result$results), 1)
@@ -1175,9 +1413,15 @@ test_that(".sipni_download_api returns results for single UF/year", {
 test_that(".sipni_download_api records failures", {
   local_mocked_bindings(
     .sipni_api_download_and_read = function(year, uf, month, cache, cache_dir) {
-      if (uf == "XX") stop("Download failed")
-      tibble::tibble(year = as.integer(year), month = 1L, uf_source = uf,
-                      data_vacina = "2024-01-15")
+      if (uf == "XX") {
+        stop("Download failed")
+      }
+      tibble::tibble(
+        year = as.integer(year),
+        month = 1L,
+        uf_source = uf,
+        data_vacina = "2024-01-15"
+      )
     },
     .map_parallel = function(.x, .f, ..., .delay = NULL) {
       lapply(.x, .f)
@@ -1185,8 +1429,11 @@ test_that(".sipni_download_api records failures", {
   )
 
   result <- healthbR:::.sipni_download_api(
-    api_years = 2024L, target_ufs = c("AC", "XX"),
-    month_vals = 1L, cache = FALSE, cache_dir = tempdir()
+    api_years = 2024L,
+    target_ufs = c("AC", "XX"),
+    month_vals = 1L,
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_equal(length(result$results), 1)
@@ -1204,8 +1451,11 @@ test_that(".sipni_download_api treats empty tibble return as failure", {
   )
 
   result <- healthbR:::.sipni_download_api(
-    api_years = 2024L, target_ufs = "AC",
-    month_vals = 1L, cache = FALSE, cache_dir = tempdir()
+    api_years = 2024L,
+    target_ufs = "AC",
+    month_vals = 1L,
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   # empty tibble should be treated as NULL (nrow == 0 => return(NULL))
@@ -1256,8 +1506,11 @@ test_that("sipni_data returns parsed FTP data via mock", {
   local_mocked_bindings(
     .sipni_download_and_read = function(year, uf, type, cache, cache_dir) {
       tibble::tibble(
-        year = as.integer(year), uf_source = uf,
-        IMUNO = "09", QT_DOSE = "100", MUNIC = "120040"
+        year = as.integer(year),
+        uf_source = uf,
+        IMUNO = "09",
+        QT_DOSE = "100",
+        MUNIC = "120040"
       )
     },
     .map_parallel = function(.x, .f, ..., .delay = NULL) {
@@ -1265,8 +1518,13 @@ test_that("sipni_data returns parsed FTP data via mock", {
     }
   )
 
-  result <- sipni_data(year = 2019, uf = "AC", parse = TRUE,
-                        cache = FALSE, source = "datasus")
+  result <- sipni_data(
+    year = 2019,
+    uf = "AC",
+    parse = TRUE,
+    cache = FALSE,
+    source = "datasus"
+  )
 
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 1)
@@ -1278,8 +1536,10 @@ test_that("sipni_data returns unparsed FTP data via mock", {
   local_mocked_bindings(
     .sipni_download_and_read = function(year, uf, type, cache, cache_dir) {
       tibble::tibble(
-        year = as.integer(year), uf_source = uf,
-        IMUNO = "09", QT_DOSE = "100"
+        year = as.integer(year),
+        uf_source = uf,
+        IMUNO = "09",
+        QT_DOSE = "100"
       )
     },
     .map_parallel = function(.x, .f, ..., .delay = NULL) {
@@ -1287,8 +1547,13 @@ test_that("sipni_data returns unparsed FTP data via mock", {
     }
   )
 
-  result <- sipni_data(year = 2019, uf = "AC", parse = FALSE,
-                        cache = FALSE, source = "datasus")
+  result <- sipni_data(
+    year = 2019,
+    uf = "AC",
+    parse = FALSE,
+    cache = FALSE,
+    source = "datasus"
+  )
 
   expect_type(result$QT_DOSE, "character")
 })
@@ -1297,8 +1562,11 @@ test_that("sipni_data selects vars via mock", {
   local_mocked_bindings(
     .sipni_download_and_read = function(year, uf, type, cache, cache_dir) {
       tibble::tibble(
-        year = as.integer(year), uf_source = uf,
-        IMUNO = "09", QT_DOSE = "100", MUNIC = "120040"
+        year = as.integer(year),
+        uf_source = uf,
+        IMUNO = "09",
+        QT_DOSE = "100",
+        MUNIC = "120040"
       )
     },
     .map_parallel = function(.x, .f, ..., .delay = NULL) {
@@ -1306,8 +1574,14 @@ test_that("sipni_data selects vars via mock", {
     }
   )
 
-  result <- sipni_data(year = 2019, uf = "AC", vars = "IMUNO",
-                        parse = FALSE, cache = FALSE, source = "datasus")
+  result <- sipni_data(
+    year = 2019,
+    uf = "AC",
+    vars = "IMUNO",
+    parse = FALSE,
+    cache = FALSE,
+    source = "datasus"
+  )
 
   expect_true("IMUNO" %in% names(result))
   expect_true("year" %in% names(result))
@@ -1321,7 +1595,9 @@ test_that("sipni_data returns parsed API data via mock", {
   local_mocked_bindings(
     .sipni_api_download_and_read = function(year, uf, month, cache, cache_dir) {
       tibble::tibble(
-        year = as.integer(year), month = 1L, uf_source = uf,
+        year = as.integer(year),
+        month = 1L,
+        uf_source = uf,
         data_vacina = "2024-01-15",
         numero_idade_paciente = "30",
         tipo_sexo_paciente = "F"
@@ -1332,8 +1608,14 @@ test_that("sipni_data returns parsed API data via mock", {
     }
   )
 
-  result <- sipni_data(year = 2024, uf = "AC", month = 1,
-                        parse = TRUE, cache = FALSE, source = "datasus")
+  result <- sipni_data(
+    year = 2024,
+    uf = "AC",
+    month = 1,
+    parse = TRUE,
+    cache = FALSE,
+    source = "datasus"
+  )
 
   expect_s3_class(result, "tbl_df")
   expect_s3_class(result$data_vacina, "Date")
@@ -1346,13 +1628,17 @@ test_that("sipni_data handles mixed FTP and API years via mock", {
   local_mocked_bindings(
     .sipni_download_and_read = function(year, uf, type, cache, cache_dir) {
       tibble::tibble(
-        year = as.integer(year), uf_source = uf,
-        IMUNO = "09", QT_DOSE = "100"
+        year = as.integer(year),
+        uf_source = uf,
+        IMUNO = "09",
+        QT_DOSE = "100"
       )
     },
     .sipni_api_download_and_read = function(year, uf, month, cache, cache_dir) {
       tibble::tibble(
-        year = as.integer(year), month = 1L, uf_source = uf,
+        year = as.integer(year),
+        month = 1L,
+        uf_source = uf,
         data_vacina = "2024-01-15"
       )
     },
@@ -1361,8 +1647,14 @@ test_that("sipni_data handles mixed FTP and API years via mock", {
     }
   )
 
-  result <- sipni_data(year = c(2019, 2024), uf = "AC", month = 1,
-                        parse = FALSE, cache = FALSE, source = "datasus")
+  result <- sipni_data(
+    year = c(2019, 2024),
+    uf = "AC",
+    month = 1,
+    parse = FALSE,
+    cache = FALSE,
+    source = "datasus"
+  )
 
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 2)
@@ -1375,8 +1667,11 @@ test_that(".sipni_read_dbf returns tibble with character columns", {
   # create a minimal DBF using foreign
   temp_dir <- withr::local_tempdir()
   dbf_path <- file.path(temp_dir, "test.dbf")
-  df <- data.frame(COL1 = c(1L, 2L), COL2 = c("A", "B"),
-                    stringsAsFactors = FALSE)
+  df <- data.frame(
+    COL1 = c(1L, 2L),
+    COL2 = c("A", "B"),
+    stringsAsFactors = FALSE
+  )
   foreign::write.dbf(df, dbf_path)
 
   result <- healthbR:::.sipni_read_dbf(dbf_path)
@@ -1394,8 +1689,10 @@ test_that("sipni_dictionary returns full dictionary when variable=NULL", {
   dict <- sipni_dictionary()
   expect_s3_class(dict, "tbl_df")
   expect_gt(nrow(dict), 0)
-  expect_true(all(c("variable", "description", "code", "label") %in%
-                    names(dict)))
+  expect_true(all(
+    c("variable", "description", "code", "label") %in%
+      names(dict)
+  ))
 })
 
 test_that("sipni_dictionary filters by variable name (uppercase)", {
@@ -1418,7 +1715,7 @@ test_that("sipni_dictionary warns on nonexistent variable", {
 test_that("sipni_variables returns different results for each type", {
   dpni <- sipni_variables(type = "DPNI")
   cpni <- sipni_variables(type = "CPNI")
-  api  <- sipni_variables(type = "API")
+  api <- sipni_variables(type = "API")
 
   expect_false(identical(dpni, cpni))
   expect_false(identical(dpni, api))
@@ -1457,8 +1754,11 @@ test_that(".sipni_csv_process_national reads CSV from zip and splits by UF", {
 
   # call with pre-downloaded zip_path
   result <- healthbR:::.sipni_csv_process_national(
-    year = 2024, month = 1, uf = "AC",
-    cache = FALSE, cache_dir = cache_dir,
+    year = 2024,
+    month = 1,
+    uf = "AC",
+    cache = FALSE,
+    cache_dir = cache_dir,
     zip_path = zip_path
   )
 
@@ -1489,8 +1789,11 @@ test_that(".sipni_csv_process_national returns empty tibble for missing UF", {
 
   result <- suppressWarnings(
     healthbR:::.sipni_csv_process_national(
-      year = 2024, month = 1, uf = "AC",
-      cache = FALSE, cache_dir = cache_dir,
+      year = 2024,
+      month = 1,
+      uf = "AC",
+      cache = FALSE,
+      cache_dir = cache_dir,
       zip_path = zip_path
     )
   )
@@ -1518,8 +1821,11 @@ test_that(".sipni_csv_process_national handles uf_estabelecimento alt column", {
   })
 
   result <- healthbR:::.sipni_csv_process_national(
-    year = 2024, month = 1, uf = "AC",
-    cache = FALSE, cache_dir = cache_dir,
+    year = 2024,
+    month = 1,
+    uf = "AC",
+    cache = FALSE,
+    cache_dir = cache_dir,
     zip_path = zip_path
   )
 
@@ -1549,8 +1855,11 @@ test_that(".sipni_csv_process_national handles CSV with no UF column", {
   # no recognisable UF column: say so from the header, return empty
   warns <- testthat::capture_warnings(
     result <- healthbR:::.sipni_csv_process_national(
-      year = 2024, month = 1, uf = "AC",
-      cache = FALSE, cache_dir = cache_dir,
+      year = 2024,
+      month = 1,
+      uf = "AC",
+      cache = FALSE,
+      cache_dir = cache_dir,
       zip_path = zip_path
     )
   )
@@ -1580,8 +1889,12 @@ test_that(".sipni_csv_process_national recognises the 56-field header (sg_uf_est
   withr::with_dir(temp_dir, utils::zip(zip_path, "vacinacao.csv", flags = "-q"))
 
   result <- suppressMessages(healthbR:::.sipni_csv_process_national(
-    year = 2021, month = 6, uf = "RJ",
-    cache = FALSE, cache_dir = cache_dir, zip_path = zip_path
+    year = 2021,
+    month = 6,
+    uf = "RJ",
+    cache = FALSE,
+    cache_dir = cache_dir,
+    zip_path = zip_path
   ))
 
   # establishment UF, not patient UF; case-insensitive
@@ -1608,8 +1921,11 @@ test_that(".sipni_csv_process_national caches when cache=TRUE", {
   })
 
   result <- healthbR:::.sipni_csv_process_national(
-    year = 2024, month = 1, uf = "AC",
-    cache = TRUE, cache_dir = cache_dir,
+    year = 2024,
+    month = 1,
+    uf = "AC",
+    cache = TRUE,
+    cache_dir = cache_dir,
     zip_path = zip_path
   )
 
@@ -1649,8 +1965,12 @@ test_that(".sipni_csv_process_national (arrow) caches every UF and returns the r
   fx <- .sipni_csv_fixture_zip(temp_dir)
 
   result <- suppressMessages(healthbR:::.sipni_csv_process_national(
-    year = 2024, month = 1, uf = "AC",
-    cache = TRUE, cache_dir = cache_dir, zip_path = fx$zip
+    year = 2024,
+    month = 1,
+    uf = "AC",
+    cache = TRUE,
+    cache_dir = cache_dir,
+    zip_path = fx$zip
   ))
 
   expect_s3_class(result, "tbl_df")
@@ -1658,15 +1978,19 @@ test_that(".sipni_csv_process_national (arrow) caches every UF and returns the r
   expect_equal(unique(result$uf_source), "AC")
   expect_equal(names(result)[1:3], c("year", "month", "uf_source"))
   expect_true(all(vapply(result, is.character, logical(1))[-(1:3)]))
-  expect_equal(sort(result$data_vacina),
-               c("2024-01-01", "2024-01-05", "2024-01-09"))
+  expect_equal(
+    sort(result$data_vacina),
+    c("2024-01-01", "2024-01-05", "2024-01-09")
+  )
 
   # the other UFs are in the cache, complete and not duplicated
   sp <- healthbR:::.sipni_csv_check_cache("SP", 2024, 1, TRUE, cache_dir)
   rj <- healthbR:::.sipni_csv_check_cache("RJ", 2024, 1, TRUE, cache_dir)
   expect_equal(nrow(sp), 4)
-  expect_equal(sort(sp$data_vacina),
-               c("2024-01-02", "2024-01-04", "2024-01-06", "2024-01-08"))
+  expect_equal(
+    sort(sp$data_vacina),
+    c("2024-01-02", "2024-01-04", "2024-01-06", "2024-01-08")
+  )
   expect_equal(nrow(rj), 2)
 
   # the staging area and the re-encoded copy are gone, and a second call is
@@ -1674,8 +1998,12 @@ test_that(".sipni_csv_process_national (arrow) caches every UF and returns the r
   expect_false(dir.exists(file.path(cache_dir, "sipni_csv_staging")))
   expect_length(grep("\\.utf8$", list.dirs(tempdir(), recursive = TRUE)), 0)
   again <- healthbR:::.sipni_csv_process_national(
-    year = 2024, month = 1, uf = "SP",
-    cache = TRUE, cache_dir = cache_dir, zip_path = "does-not-exist.zip"
+    year = 2024,
+    month = 1,
+    uf = "SP",
+    cache = TRUE,
+    cache_dir = cache_dir,
+    zip_path = "does-not-exist.zip"
   )
   expect_equal(nrow(again), 4)
 })
@@ -1686,8 +2014,12 @@ test_that(".sipni_csv_process_national with cache = FALSE writes nothing to disk
   fx <- .sipni_csv_fixture_zip(temp_dir)
 
   result <- suppressMessages(healthbR:::.sipni_csv_process_national(
-    year = 2024, month = 1, uf = "SP",
-    cache = FALSE, cache_dir = cache_dir, zip_path = fx$zip
+    year = 2024,
+    month = 1,
+    uf = "SP",
+    cache = FALSE,
+    cache_dir = cache_dir,
+    zip_path = fx$zip
   ))
 
   expect_equal(nrow(result), 4)
@@ -1704,8 +2036,12 @@ test_that(".sipni_csv_process_national without arrow keeps only the requested UF
   local_mocked_bindings(.has_arrow = function() FALSE)
 
   result <- suppressMessages(healthbR:::.sipni_csv_process_national(
-    year = 2024, month = 1, uf = "RJ",
-    cache = FALSE, cache_dir = cache_dir, zip_path = fx$zip
+    year = 2024,
+    month = 1,
+    uf = "RJ",
+    cache = FALSE,
+    cache_dir = cache_dir,
+    zip_path = fx$zip
   ))
 
   expect_equal(nrow(result), 2)
@@ -1727,10 +2063,15 @@ test_that(".sipni_csv_to_utf8 cuts headerless pieces at line ends and drops the 
   expect_false(file.exists(fx$csv))
 
   lines <- unlist(lapply(pieces, readLines, encoding = "UTF-8"))
-  expect_equal(lines, original[-1])                  # every row, no header
-  expect_true(all(vapply(pieces, function(p) {
-    b <- readBin(p, "raw", file.size(p)); b[length(b)] == as.raw(0x0a)
-  }, logical(1))))                                     # whole lines only
+  expect_equal(lines, original[-1]) # every row, no header
+  expect_true(all(vapply(
+    pieces,
+    function(p) {
+      b <- readBin(p, "raw", file.size(p))
+      b[length(b)] == as.raw(0x0a)
+    },
+    logical(1)
+  ))) # whole lines only
 
   # the pieces read as one dataset give the whole file back
   hdr <- strsplit(original[1], ";", fixed = TRUE)[[1]]
@@ -1742,15 +2083,23 @@ test_that(".sipni_csv_to_utf8 cuts headerless pieces at line ends and drops the 
 
 test_that(".latin1_to_utf8 matches iconv byte for byte", {
   set.seed(4)
-  bytes <- as.raw(sample(c(32:126, 128:255), 50000, replace = TRUE,
-                         prob = c(rep(20, 95), rep(1, 128))))
-  expect_identical(healthbR:::.latin1_to_utf8(bytes),
-                   iconv(list(bytes), "latin1", "UTF-8", toRaw = TRUE)[[1]])
+  bytes <- as.raw(sample(
+    c(32:126, 128:255),
+    50000,
+    replace = TRUE,
+    prob = c(rep(20, 95), rep(1, 128))
+  ))
+  expect_identical(
+    healthbR:::.latin1_to_utf8(bytes),
+    iconv(list(bytes), "latin1", "UTF-8", toRaw = TRUE)[[1]]
+  )
   ascii <- charToRaw("plain ascii;only")
   expect_identical(healthbR:::.latin1_to_utf8(ascii), ascii)
   # a block boundary inside the file never splits a character (single-byte)
-  half <- c(healthbR:::.latin1_to_utf8(bytes[1:25000]),
-            healthbR:::.latin1_to_utf8(bytes[25001:50000]))
+  half <- c(
+    healthbR:::.latin1_to_utf8(bytes[1:25000]),
+    healthbR:::.latin1_to_utf8(bytes[25001:50000])
+  )
   expect_identical(half, healthbR:::.latin1_to_utf8(bytes))
 })
 
@@ -1766,20 +2115,36 @@ test_that("arrow and readr engines read the same values", {
     sep = "\n"
   )
   csv_path <- file.path(temp_dir, "vacinacao.csv")
-  writeLines(iconv(csv_content, from = "UTF-8", to = "latin1"), csv_path,
-             useBytes = TRUE)
+  writeLines(
+    iconv(csv_content, from = "UTF-8", to = "latin1"),
+    csv_path,
+    useBytes = TRUE
+  )
   hdr <- healthbR:::.sipni_csv_header(csv_path)
   expect_equal(hdr$uf_col, "sigla_uf_estabelecimento")
 
   # readr first: the arrow engine re-encodes the file in place (latin1 -> UTF-8)
   via_readr <- healthbR:::.sipni_csv_ingest_readr(
-    csv_path, hdr$uf_col, "AC", 2024, 1, cache = FALSE, cache_dir = NULL
+    csv_path,
+    hdr$uf_col,
+    "AC",
+    2024,
+    1,
+    cache = FALSE,
+    cache_dir = NULL
   )
   via_arrow <- healthbR:::.sipni_csv_ingest_arrow(
-    csv_path, hdr$header, hdr$uf_col, "AC", 2024, 1, cache = FALSE, cache_dir = NULL
+    csv_path,
+    hdr$header,
+    hdr$uf_col,
+    "AC",
+    2024,
+    1,
+    cache = FALSE,
+    cache_dir = NULL
   )
-  expect_false(file.exists(csv_path))                       # latin1 original gone
-  expect_false(dir.exists(paste0(csv_path, ".utf8")))        # and so are the pieces
+  expect_false(file.exists(csv_path)) # latin1 original gone
+  expect_false(dir.exists(paste0(csv_path, ".utf8"))) # and so are the pieces
   expect_equal(nrow(via_arrow), 2)
   expect_equal(as.data.frame(via_arrow), as.data.frame(via_readr))
   expect_equal(via_arrow$descricao_dose, c("1ª Dose", "Reforço"))
@@ -1795,13 +2160,24 @@ test_that(".sipni_csv_spill_commit replaces a stale partition and moves the rest
 
   # a stale (say, partial) SP partition already in the cache
   stale <- tibble::tibble(year = 2024L, month = 1L, uf_source = "SP", x = "old")
-  healthbR:::.cache_append_partitioned(stale, cache_dir, "sipni_csv_data", parts)
+  healthbR:::.cache_append_partitioned(
+    stale,
+    cache_dir,
+    "sipni_csv_data",
+    parts
+  )
 
   # staged: a complete SP, plus RJ
   healthbR:::.cache_append_partitioned(
-    tibble::tibble(year = 2024L, month = 1L, uf_source = c("SP", "SP", "RJ"),
-                   x = c("new1", "new2", "rj")),
-    spill_dir, "sipni_csv_data", parts
+    tibble::tibble(
+      year = 2024L,
+      month = 1L,
+      uf_source = c("SP", "SP", "RJ"),
+      x = c("new1", "new2", "rj")
+    ),
+    spill_dir,
+    "sipni_csv_data",
+    parts
   )
 
   n <- healthbR:::.sipni_csv_spill_commit(spill_dir, cache_dir)
@@ -1812,8 +2188,14 @@ test_that(".sipni_csv_spill_commit replaces a stale partition and moves the rest
   rj <- healthbR:::.sipni_csv_check_cache("RJ", 2024, 1, TRUE, cache_dir)
   expect_equal(rj$x, "rj")
   # nothing left behind in the staging dataset
-  expect_length(list.files(file.path(spill_dir, "sipni_csv_data"),
-                           pattern = "\\.parquet$", recursive = TRUE), 0)
+  expect_length(
+    list.files(
+      file.path(spill_dir, "sipni_csv_data"),
+      pattern = "\\.parquet$",
+      recursive = TRUE
+    ),
+    0
+  )
 })
 
 # ============================================================================
@@ -1822,18 +2204,29 @@ test_that(".sipni_csv_spill_commit replaces a stale partition and moves the rest
 
 test_that(".sipni_csv_download_months processes single month via mock", {
   local_mocked_bindings(
-    .sipni_csv_process_national = function(year, month, uf,
-                                            cache, cache_dir, zip_path = NULL) {
+    .sipni_csv_process_national = function(
+      year,
+      month,
+      uf,
+      cache,
+      cache_dir,
+      zip_path = NULL
+    ) {
       tibble::tibble(
-        year = as.integer(year), month = as.integer(month),
-        uf_source = uf, data_vacina = "2024-01-15"
+        year = as.integer(year),
+        month = as.integer(month),
+        uf_source = uf,
+        data_vacina = "2024-01-15"
       )
     }
   )
 
   result <- healthbR:::.sipni_csv_download_months(
-    year = 2024, months = 1L, uf = "AC",
-    cache = FALSE, cache_dir = tempdir()
+    year = 2024,
+    months = 1L,
+    uf = "AC",
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_s3_class(result, "tbl_df")
@@ -1843,19 +2236,30 @@ test_that(".sipni_csv_download_months processes single month via mock", {
 
 test_that(".sipni_csv_download_months processes multiple months via mock", {
   local_mocked_bindings(
-    .sipni_csv_process_national = function(year, month, uf,
-                                            cache, cache_dir, zip_path = NULL) {
+    .sipni_csv_process_national = function(
+      year,
+      month,
+      uf,
+      cache,
+      cache_dir,
+      zip_path = NULL
+    ) {
       tibble::tibble(
-        year = as.integer(year), month = as.integer(month),
-        uf_source = uf, data_vacina = paste0("2024-0", month, "-15")
+        year = as.integer(year),
+        month = as.integer(month),
+        uf_source = uf,
+        data_vacina = paste0("2024-0", month, "-15")
       )
     },
     .multi_download = function(urls, destfiles, ...) {
       # create empty files to simulate successful downloads
-      for (d in destfiles) writeLines("fake", d)
+      for (d in destfiles) {
+        writeLines("fake", d)
+      }
       data.frame(
         success = rep(TRUE, length(urls)),
-        url = urls, destfile = destfiles,
+        url = urls,
+        destfile = destfiles,
         status_code = rep(200L, length(urls)),
         error = rep(NA_character_, length(urls)),
         stringsAsFactors = FALSE
@@ -1864,8 +2268,11 @@ test_that(".sipni_csv_download_months processes multiple months via mock", {
   )
 
   result <- healthbR:::.sipni_csv_download_months(
-    year = 2024, months = 1L:3L, uf = "AC",
-    cache = FALSE, cache_dir = tempdir()
+    year = 2024,
+    months = 1L:3L,
+    uf = "AC",
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_s3_class(result, "tbl_df")
@@ -1875,15 +2282,24 @@ test_that(".sipni_csv_download_months processes multiple months via mock", {
 
 test_that(".sipni_csv_download_months returns empty for all failures", {
   local_mocked_bindings(
-    .sipni_csv_process_national = function(year, month, uf,
-                                            cache, cache_dir, zip_path = NULL) {
+    .sipni_csv_process_national = function(
+      year,
+      month,
+      uf,
+      cache,
+      cache_dir,
+      zip_path = NULL
+    ) {
       stop("Download failed")
     }
   )
 
   result <- healthbR:::.sipni_csv_download_months(
-    year = 2024, months = 1L, uf = "AC",
-    cache = FALSE, cache_dir = tempdir()
+    year = 2024,
+    months = 1L,
+    uf = "AC",
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_s3_class(result, "tbl_df")
@@ -1929,8 +2345,11 @@ test_that(".sipni_download_and_read reads DBF and adds partition cols", {
   )
 
   result <- healthbR:::.sipni_download_and_read(
-    year = 2019, uf = "AC", type = "DPNI",
-    cache = FALSE, cache_dir = cache_dir
+    year = 2019,
+    uf = "AC",
+    type = "DPNI",
+    cache = FALSE,
+    cache_dir = cache_dir
   )
 
   expect_s3_class(result, "tbl_df")
@@ -1951,7 +2370,9 @@ test_that(".sipni_download_and_read falls back to lowercase .dbf extension", {
   local_mocked_bindings(
     .datasus_download = function(url, destfile, ...) {
       call_count <<- call_count + 1L
-      if (call_count == 1L) stop("Not found (.DBF)")
+      if (call_count == 1L) {
+        stop("Not found (.DBF)")
+      }
       # second call (lowercase .dbf) succeeds
       writeBin(dbf_bytes, destfile)
       invisible(destfile)
@@ -1959,8 +2380,11 @@ test_that(".sipni_download_and_read falls back to lowercase .dbf extension", {
   )
 
   result <- healthbR:::.sipni_download_and_read(
-    year = 2019, uf = "AC", type = "DPNI",
-    cache = FALSE, cache_dir = cache_dir
+    year = 2019,
+    uf = "AC",
+    type = "DPNI",
+    cache = FALSE,
+    cache_dir = cache_dir
   )
 
   expect_s3_class(result, "tbl_df")
@@ -1980,8 +2404,11 @@ test_that(".sipni_download_and_read fixes CPNI comma in COBERT", {
   )
 
   result <- healthbR:::.sipni_download_and_read(
-    year = 2019, uf = "AC", type = "CPNI",
-    cache = FALSE, cache_dir = cache_dir
+    year = 2019,
+    uf = "AC",
+    type = "CPNI",
+    cache = FALSE,
+    cache_dir = cache_dir
   )
 
   expect_equal(result$COBERT, "85.5")
@@ -2000,8 +2427,11 @@ test_that(".sipni_download_and_read aborts on tiny file", {
 
   expect_error(
     healthbR:::.sipni_download_and_read(
-      year = 2019, uf = "AC", type = "DPNI",
-      cache = FALSE, cache_dir = cache_dir
+      year = 2019,
+      uf = "AC",
+      type = "DPNI",
+      cache = FALSE,
+      cache_dir = cache_dir
     ),
     "corrupted"
   )
@@ -2015,7 +2445,9 @@ test_that("sipni_data API path selects vars via mock", {
   local_mocked_bindings(
     .sipni_api_download_and_read = function(year, uf, month, cache, cache_dir) {
       tibble::tibble(
-        year = as.integer(year), month = 1L, uf_source = uf,
+        year = as.integer(year),
+        month = 1L,
+        uf_source = uf,
         data_vacina = "2024-01-15",
         descricao_vacina = "BCG",
         tipo_sexo_paciente = "F"
@@ -2027,9 +2459,13 @@ test_that("sipni_data API path selects vars via mock", {
   )
 
   result <- sipni_data(
-    year = 2024, uf = "AC", month = 1,
+    year = 2024,
+    uf = "AC",
+    month = 1,
     vars = c("data_vacina", "descricao_vacina"),
-    parse = FALSE, cache = FALSE, source = "datasus"
+    parse = FALSE,
+    cache = FALSE,
+    source = "datasus"
   )
 
   expect_true("data_vacina" %in% names(result))
@@ -2050,8 +2486,13 @@ test_that("sipni_data reports all failures as error", {
   )
 
   expect_error(
-    sipni_data(year = 2019, uf = "AC", parse = FALSE, cache = FALSE,
-               source = "datasus"),
+    sipni_data(
+      year = 2019,
+      uf = "AC",
+      parse = FALSE,
+      cache = FALSE,
+      source = "datasus"
+    ),
     "No data"
   )
 })
@@ -2060,7 +2501,9 @@ test_that("sipni_data with col_types override in API path", {
   local_mocked_bindings(
     .sipni_api_download_and_read = function(year, uf, month, cache, cache_dir) {
       tibble::tibble(
-        year = as.integer(year), month = 1L, uf_source = uf,
+        year = as.integer(year),
+        month = 1L,
+        uf_source = uf,
         data_vacina = "2024-01-15",
         numero_idade_paciente = "30"
       )
@@ -2071,9 +2514,13 @@ test_that("sipni_data with col_types override in API path", {
   )
 
   result <- sipni_data(
-    year = 2024, uf = "AC", month = 1,
-    parse = TRUE, col_types = list(numero_idade_paciente = "character"),
-    cache = FALSE, source = "datasus"
+    year = 2024,
+    uf = "AC",
+    month = 1,
+    parse = TRUE,
+    col_types = list(numero_idade_paciente = "character"),
+    cache = FALSE,
+    source = "datasus"
   )
 
   # override should keep it as character
@@ -2088,15 +2535,20 @@ test_that(".sipni_api_download_and_read delegates to csv_download_months", {
   local_mocked_bindings(
     .sipni_csv_download_months = function(year, months, uf, cache, cache_dir) {
       tibble::tibble(
-        year = as.integer(year), month = months[1],
-        uf_source = uf, data_vacina = "2024-01-15"
+        year = as.integer(year),
+        month = months[1],
+        uf_source = uf,
+        data_vacina = "2024-01-15"
       )
     }
   )
 
   result <- healthbR:::.sipni_api_download_and_read(
-    year = 2024, uf = "AC", month = 1L,
-    cache = FALSE, cache_dir = tempdir()
+    year = 2024,
+    uf = "AC",
+    month = 1L,
+    cache = FALSE,
+    cache_dir = tempdir()
   )
 
   expect_s3_class(result, "tbl_df")
@@ -2110,9 +2562,13 @@ test_that(".sipni_api_download_and_read delegates to csv_download_months", {
 test_that("sipni_data reports partial download failures (API)", {
   local_mocked_bindings(
     .sipni_api_download_and_read = function(year, uf, month, cache, cache_dir) {
-      if (uf == "RJ") stop("Server error")
+      if (uf == "RJ") {
+        stop("Server error")
+      }
       tibble::tibble(
-        year = as.integer(year), month = 1L, uf_source = uf,
+        year = as.integer(year),
+        month = 1L,
+        uf_source = uf,
         data_vacina = "2024-01-15"
       )
     },
@@ -2122,8 +2578,14 @@ test_that("sipni_data reports partial download failures (API)", {
   )
 
   result <- suppressWarnings(
-    sipni_data(2024, uf = c("AC", "RJ"), month = 1, parse = FALSE,
-               cache = FALSE, source = "datasus")
+    sipni_data(
+      2024,
+      uf = c("AC", "RJ"),
+      month = 1,
+      parse = FALSE,
+      cache = FALSE,
+      source = "datasus"
+    )
   )
   expect_s3_class(result, "data.frame")
   failures <- attr(result, "download_failures")

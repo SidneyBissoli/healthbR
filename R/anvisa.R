@@ -26,8 +26,11 @@
 #' Validate ANVISA SNGPC year parameter
 #' @noRd
 .anvisa_validate_sngpc_year <- function(year) {
-  .validate_year(year, anvisa_sngpc_years,
-                 years_fn_hint = "SNGPC data: 2014-2026")
+  .validate_year(
+    year,
+    anvisa_sngpc_years,
+    years_fn_hint = "SNGPC data: 2014-2026"
+  )
 }
 
 #' Validate ANVISA SNGPC month parameter
@@ -109,7 +112,9 @@
 
   delim <- anvisa_csv_delim[[type]]
   data <- readr::read_delim(
-    temp_csv, delim = delim, show_col_types = FALSE,
+    temp_csv,
+    delim = delim,
+    show_col_types = FALSE,
     locale = readr::locale(encoding = "latin1"),
     col_types = readr::cols(.default = "c")
   )
@@ -125,8 +130,13 @@
 
 #' Download and read an ANVISA SNGPC CSV for one year/month
 #' @noRd
-.anvisa_download_sngpc <- function(type, year, month,
-                                   cache = TRUE, cache_dir = NULL) {
+.anvisa_download_sngpc <- function(
+  type,
+  year,
+  month,
+  cache = TRUE,
+  cache_dir = NULL
+) {
   cache_dir <- .anvisa_cache_dir(cache_dir)
   dataset_name <- if (type == "sngpc") {
     "anvisa_sngpc_data"
@@ -137,12 +147,14 @@
   target_month <- as.integer(month)
 
   # 1. check partitioned cache
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
-      dplyr::filter(.data$year == target_year,
-                     .data$month == target_month) |>
+      dplyr::filter(.data$year == target_year, .data$month == target_month) |>
       dplyr::collect()
     if (nrow(cached) > 0) return(cached)
   }
@@ -161,7 +173,9 @@
 
   delim <- anvisa_csv_delim[[type]]
   data <- readr::read_delim(
-    temp_csv, delim = delim, show_col_types = FALSE,
+    temp_csv,
+    delim = delim,
+    show_col_types = FALSE,
     locale = readr::locale(encoding = "latin1"),
     col_types = readr::cols(.default = "c")
   )
@@ -170,13 +184,11 @@
   data$year <- target_year
   data$month <- target_month
   cols <- names(data)
-  data <- data[, c("year", "month",
-                    setdiff(cols, c("year", "month")))]
+  data <- data[, c("year", "month", setdiff(cols, c("year", "month")))]
 
   # 3. write to partitioned cache
   if (isTRUE(cache)) {
-    .cache_append_partitioned(data, cache_dir, dataset_name,
-                              c("year", "month"))
+    .cache_append_partitioned(data, cache_dir, dataset_name, c("year", "month"))
   }
 
   data
@@ -190,7 +202,9 @@
 #' Dispatch snapshot data download
 #' @noRd
 .anvisa_data_snapshot <- function(type, vars, cache, cache_dir) {
-  if (!is.null(vars)) .anvisa_validate_vars(vars, type)
+  if (!is.null(vars)) {
+    .anvisa_validate_vars(vars, type)
+  }
 
   data <- .anvisa_download_snapshot(type, cache = cache, cache_dir = cache_dir)
 
@@ -210,12 +224,21 @@
 
 #' Dispatch SNGPC data download
 #' @noRd
-.anvisa_data_sngpc <- function(type, year, month, vars,
-                               cache, cache_dir,
-                               lazy, backend) {
+.anvisa_data_sngpc <- function(
+  type,
+  year,
+  month,
+  vars,
+  cache,
+  cache_dir,
+  lazy,
+  backend
+) {
   year <- .anvisa_validate_sngpc_year(year)
   month <- .anvisa_validate_sngpc_month(month)
-  if (!is.null(vars)) .anvisa_validate_vars(vars, type)
+  if (!is.null(vars)) {
+    .anvisa_validate_vars(vars, type)
+  }
 
   cache_dir_resolved <- .anvisa_cache_dir(cache_dir)
   dataset_name <- if (type == "sngpc") {
@@ -231,13 +254,22 @@
   }
 
   # pre-download lazy check
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved,
-                        dataset_name, lazy_filters, lazy_select)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    dataset_name,
+    lazy_filters,
+    lazy_select
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # build year/month combinations
   combinations <- expand.grid(
-    year = year, month = month,
+    year = year,
+    month = month,
     stringsAsFactors = FALSE
   )
 
@@ -246,18 +278,27 @@
     cli::cli_inform(c("i" = "Downloading {n_combos} file(s)..."))
   }
 
-  labels <- paste0(combinations$year, "/",
-                   sprintf("%02d", combinations$month))
+  labels <- paste0(combinations$year, "/", sprintf("%02d", combinations$month))
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    tryCatch({
-      .anvisa_download_sngpc(
-        type, combinations$year[i], combinations$month[i],
-        cache = cache, cache_dir = cache_dir
+  results <- .map_parallel(
+    seq_len(n_combos),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      tryCatch(
+        {
+          .anvisa_download_sngpc(
+            type,
+            combinations$year[i],
+            combinations$month[i],
+            cache = cache,
+            cache_dir = cache_dir
+          )
+        },
+        error = function(e) NULL
       )
-    }, error = function(e) NULL)
-  })
+    }
+  )
 
   succeeded <- !vapply(results, is.null, logical(1))
   failed_labels <- labels[!succeeded]
@@ -269,11 +310,23 @@
 
   data <- dplyr::bind_rows(results)
 
-  type_label <- if (type == "sngpc") "ANVISA SNGPC" else "ANVISA SNGPC Manipulados"
+  type_label <- if (type == "sngpc") {
+    "ANVISA SNGPC"
+  } else {
+    "ANVISA SNGPC Manipulados"
+  }
 
-  .data_return(data, lazy, backend, cache_dir_resolved,
-               dataset_name,
-               lazy_filters, lazy_select, failed_labels, type_label)
+  .data_return(
+    data,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    dataset_name,
+    lazy_filters,
+    lazy_select,
+    failed_labels,
+    type_label
+  )
 }
 
 
@@ -312,12 +365,18 @@ anvisa_types <- function() {
 #' @examples
 #' anvisa_info()
 anvisa_info <- function() {
-  cli::cli_h1("ANVISA \u2014 Ag\u00eancia Nacional de Vigil\u00e2ncia Sanit\u00e1ria")
+  cli::cli_h1(
+    "ANVISA \u2014 Ag\u00eancia Nacional de Vigil\u00e2ncia Sanit\u00e1ria"
+  )
 
   cli::cli_text("")
-  cli::cli_text("Fonte:    Ag\u00eancia Nacional de Vigil\u00e2ncia Sanit\u00e1ria (ANVISA)")
+  cli::cli_text(
+    "Fonte:    Ag\u00eancia Nacional de Vigil\u00e2ncia Sanit\u00e1ria (ANVISA)"
+  )
   cli::cli_text("Acesso:   Portal de Dados Abertos (HTTPS)")
-  cli::cli_text("Conte\u00fado: Registros de produtos, vigil\u00e2ncia p\u00f3s-mercado, SNGPC")
+  cli::cli_text(
+    "Conte\u00fado: Registros de produtos, vigil\u00e2ncia p\u00f3s-mercado, SNGPC"
+  )
 
   cli::cli_h2("Fun\u00e7\u00f5es dispon\u00edveis")
   cli::cli_bullets(c(
@@ -329,7 +388,9 @@ anvisa_info <- function() {
   cli::cli_h2("Categorias de dados")
 
   cli::cli_text("{.strong Registros de produtos} (snapshot):")
-  types_reg <- anvisa_valid_types[anvisa_valid_types$category == "product_registration", ]
+  types_reg <- anvisa_valid_types[
+    anvisa_valid_types$category == "product_registration",
+  ]
   for (i in seq_len(nrow(types_reg))) {
     cli::cli_text("  {types_reg$code[i]} \u2014 {types_reg$name[i]}")
   }
@@ -343,20 +404,26 @@ anvisa_info <- function() {
 
   cli::cli_text("")
   cli::cli_text("{.strong Vigil\u00e2ncia p\u00f3s-mercado} (snapshot):")
-  types_surv <- anvisa_valid_types[anvisa_valid_types$category == "surveillance", ]
+  types_surv <- anvisa_valid_types[
+    anvisa_valid_types$category == "surveillance",
+  ]
   for (i in seq_len(nrow(types_surv))) {
     cli::cli_text("  {types_surv$code[i]} \u2014 {types_surv$name[i]}")
   }
 
   cli::cli_text("")
-  cli::cli_text("{.strong SNGPC - Subst\u00e2ncias controladas} (s\u00e9rie temporal):")
+  cli::cli_text(
+    "{.strong SNGPC - Subst\u00e2ncias controladas} (s\u00e9rie temporal):"
+  )
   types_sngpc <- anvisa_valid_types[anvisa_valid_types$category == "sngpc", ]
   for (i in seq_len(nrow(types_sngpc))) {
     cli::cli_text("  {types_sngpc$code[i]} \u2014 {types_sngpc$name[i]}")
   }
 
   cli::cli_h2("Per\u00edodos dispon\u00edveis")
-  cli::cli_text("  Registros/Vigil\u00e2ncia: Instant\u00e2neo (snapshot atual)")
+  cli::cli_text(
+    "  Registros/Vigil\u00e2ncia: Instant\u00e2neo (snapshot atual)"
+  )
   cli::cli_text("  SNGPC:                2014\u20132026 (mensal)")
 
   cli::cli_text("")
@@ -474,12 +541,16 @@ anvisa_variables <- function(type = "medicines", search = NULL) {
 #'
 #' # SNGPC controlled substance sales, Jan 2020
 #' sngpc <- anvisa_data(type = "sngpc", year = 2020, month = 1)
-anvisa_data <- function(type = "medicines",
-                        year = NULL, month = NULL,
-                        vars = NULL,
-                        cache = TRUE, cache_dir = NULL,
-                        lazy = FALSE, backend = c("arrow", "duckdb")) {
-
+anvisa_data <- function(
+  type = "medicines",
+  year = NULL,
+  month = NULL,
+  vars = NULL,
+  cache = TRUE,
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   type <- .anvisa_validate_type(type)
   is_sngpc <- type %in% anvisa_sngpc_types
 
@@ -492,7 +563,9 @@ anvisa_data <- function(type = "medicines",
       cli::cli_warn("{.arg month} is ignored for snapshot type {.val {type}}.")
     }
     if (isTRUE(lazy)) {
-      cli::cli_warn("{.arg lazy} is ignored for snapshot type {.val {type}} (flat cache).")
+      cli::cli_warn(
+        "{.arg lazy} is ignored for snapshot type {.val {type}} (flat cache)."
+      )
     }
   }
 
@@ -506,8 +579,7 @@ anvisa_data <- function(type = "medicines",
 
   # dispatch
   if (is_sngpc) {
-    .anvisa_data_sngpc(type, year, month, vars,
-                       cache, cache_dir, lazy, backend)
+    .anvisa_data_sngpc(type, year, month, vars, cache, cache_dir, lazy, backend)
   } else {
     .anvisa_data_snapshot(type, vars, cache, cache_dir)
   }

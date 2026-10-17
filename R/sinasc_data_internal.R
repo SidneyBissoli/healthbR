@@ -19,9 +19,33 @@ sinasc_available_years <- list(
 #' Brazilian state (UF) abbreviations
 #' @noRd
 sinasc_uf_list <- c(
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
-  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
-  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO"
 )
 
 # ============================================================================
@@ -33,24 +57,55 @@ sinasc_uf_list <- c(
 sinasc_variables_metadata <- tibble::tibble(
   variable = c(
     # recem_nascido
-    "DTNASC", "HORANASC", "SEXO", "RACACOR", "PESO",
-    "APGAR1", "APGAR5", "IDANOMAL", "CODANOMAL",
+    "DTNASC",
+    "HORANASC",
+    "SEXO",
+    "RACACOR",
+    "PESO",
+    "APGAR1",
+    "APGAR5",
+    "IDANOMAL",
+    "CODANOMAL",
     # materna
-    "IDADEMAE", "ESTCIVMAE", "ESCMAE", "ESCMAE2010",
-    "RACACORMAE", "CODOCUPMAE", "QTDFILVIVO", "QTDFILMORT",
+    "IDADEMAE",
+    "ESTCIVMAE",
+    "ESCMAE",
+    "ESCMAE2010",
+    "RACACORMAE",
+    "CODOCUPMAE",
+    "QTDFILVIVO",
+    "QTDFILMORT",
     "SERIESCMAE",
     # gestacao
-    "GESTACAO", "SEMAGESTAC", "GRAVIDEZ", "CONSULTAS",
-    "MESPRENAT", "TPNASCASSI",
+    "GESTACAO",
+    "SEMAGESTAC",
+    "GRAVIDEZ",
+    "CONSULTAS",
+    "MESPRENAT",
+    "TPNASCASSI",
     # parto
-    "PARTO", "TPROBSON", "STCESPARTO", "STTRABPART",
+    "PARTO",
+    "TPROBSON",
+    "STCESPARTO",
+    "STTRABPART",
     # localizacao
-    "LOCNASC", "CODESTAB", "CODMUNNASC", "CODMUNRES",
+    "LOCNASC",
+    "CODESTAB",
+    "CODMUNNASC",
+    "CODMUNRES",
     "CODMUNNATU",
     # administrativa
-    "NUMERODO", "ORIGEM", "NUMEROLOTE", "DTCADASTRO",
-    "DTRECEBIM", "DIFDATA", "KOTELCHUCK", "STDNEPIDEM",
-    "STDNNOVA", "TPFUNCRESP", "TPDOCRESP"
+    "NUMERODO",
+    "ORIGEM",
+    "NUMEROLOTE",
+    "DTCADASTRO",
+    "DTRECEBIM",
+    "DIFDATA",
+    "KOTELCHUCK",
+    "STDNEPIDEM",
+    "STDNNOVA",
+    "TPFUNCRESP",
+    "TPDOCRESP"
   ),
   description = c(
     # recem_nascido
@@ -106,24 +161,55 @@ sinasc_variables_metadata <- tibble::tibble(
   ),
   type = c(
     # recem_nascido
-    "date_dmy", "character", "character", "character", "integer",
-    "integer", "integer", "character", "character",
+    "date_dmy",
+    "character",
+    "character",
+    "character",
+    "integer",
+    "integer",
+    "integer",
+    "character",
+    "character",
     # materna
-    "integer", "character", "character", "character",
-    "character", "character", "integer", "integer",
+    "integer",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "integer",
+    "integer",
     "character",
     # gestacao
-    "character", "integer", "character", "character",
-    "integer", "character",
+    "character",
+    "integer",
+    "character",
+    "character",
+    "integer",
+    "character",
     # parto
-    "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # localizacao
-    "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
     "character",
     # administrativa
-    "character", "character", "character", "date_dmy",
-    "date_dmy", "integer", "character", "character",
-    "character", "character", "character"
+    "character",
+    "character",
+    "character",
+    "date_dmy",
+    "date_dmy",
+    "integer",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character"
   ),
   section = c(
     # recem_nascido
@@ -199,70 +285,175 @@ sinasc_dictionary_data <- tibble::tibble(
   ),
   code = c(
     # SEXO
-    "1", "2", "0",
+    "1",
+    "2",
+    "0",
     # RACACOR
-    "1", "2", "3", "4", "5",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
     # RACACORMAE
-    "1", "2", "3", "4", "5",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
     # LOCNASC
-    "1", "2", "3", "4", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "9",
     # ESTCIVMAE
-    "1", "2", "3", "4", "5", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "9",
     # ESCMAE
-    "1", "2", "3", "4", "5", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "9",
     # GESTACAO
-    "1", "2", "3", "4", "5", "6", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "9",
     # GRAVIDEZ
-    "1", "2", "3", "9",
+    "1",
+    "2",
+    "3",
+    "9",
     # PARTO
-    "1", "2", "9",
+    "1",
+    "2",
+    "9",
     # CONSULTAS
-    "1", "2", "3", "4", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "9",
     # IDANOMAL
-    "1", "2", "9",
+    "1",
+    "2",
+    "9",
     # STCESPARTO
-    "1", "2", "3", "9",
+    "1",
+    "2",
+    "3",
+    "9",
     # STTRABPART
-    "1", "2", "3", "9",
+    "1",
+    "2",
+    "3",
+    "9",
     # TPNASCASSI
-    "1", "2", "3", "9",
+    "1",
+    "2",
+    "3",
+    "9",
     # KOTELCHUCK
-    "1", "2", "3", "4", "9"
+    "1",
+    "2",
+    "3",
+    "4",
+    "9"
   ),
   label = c(
     # SEXO
-    "Masculino", "Feminino", "Ignorado",
+    "Masculino",
+    "Feminino",
+    "Ignorado",
     # RACACOR
-    "Branca", "Preta", "Amarela", "Parda", "Ind\u00edgena",
+    "Branca",
+    "Preta",
+    "Amarela",
+    "Parda",
+    "Ind\u00edgena",
     # RACACORMAE
-    "Branca", "Preta", "Amarela", "Parda", "Ind\u00edgena",
+    "Branca",
+    "Preta",
+    "Amarela",
+    "Parda",
+    "Ind\u00edgena",
     # LOCNASC
-    "Hospital", "Outro estab. sa\u00fade", "Domic\u00edlio", "Outros", "Ignorado",
+    "Hospital",
+    "Outro estab. sa\u00fade",
+    "Domic\u00edlio",
+    "Outros",
+    "Ignorado",
     # ESTCIVMAE
-    "Solteira", "Casada", "Vi\u00fava",
-    "Separada judicialmente", "Uni\u00e3o est\u00e1vel", "Ignorado",
+    "Solteira",
+    "Casada",
+    "Vi\u00fava",
+    "Separada judicialmente",
+    "Uni\u00e3o est\u00e1vel",
+    "Ignorado",
     # ESCMAE
-    "Nenhuma", "1 a 3 anos", "4 a 7 anos",
-    "8 a 11 anos", "12 e mais", "Ignorado",
+    "Nenhuma",
+    "1 a 3 anos",
+    "4 a 7 anos",
+    "8 a 11 anos",
+    "12 e mais",
+    "Ignorado",
     # GESTACAO
-    "Menos de 22 semanas", "22 a 27 semanas", "28 a 31 semanas",
-    "32 a 36 semanas", "37 a 41 semanas", "42 e mais semanas", "Ignorado",
+    "Menos de 22 semanas",
+    "22 a 27 semanas",
+    "28 a 31 semanas",
+    "32 a 36 semanas",
+    "37 a 41 semanas",
+    "42 e mais semanas",
+    "Ignorado",
     # GRAVIDEZ
-    "\u00danica", "Dupla", "Tripla e mais", "Ignorada",
+    "\u00danica",
+    "Dupla",
+    "Tripla e mais",
+    "Ignorada",
     # PARTO
-    "Vaginal", "Ces\u00e1reo", "Ignorado",
+    "Vaginal",
+    "Ces\u00e1reo",
+    "Ignorado",
     # CONSULTAS
-    "Nenhuma", "1 a 3", "4 a 6", "7 e mais", "Ignorado",
+    "Nenhuma",
+    "1 a 3",
+    "4 a 6",
+    "7 e mais",
+    "Ignorado",
     # IDANOMAL
-    "Sim", "N\u00e3o", "Ignorado",
+    "Sim",
+    "N\u00e3o",
+    "Ignorado",
     # STCESPARTO
-    "Sim, antes", "Sim, durante/ap\u00f3s", "N\u00e3o", "Ignorado",
+    "Sim, antes",
+    "Sim, durante/ap\u00f3s",
+    "N\u00e3o",
+    "Ignorado",
     # STTRABPART
-    "Sim, espont\u00e2neo", "Sim, induzido", "N\u00e3o", "Ignorado",
+    "Sim, espont\u00e2neo",
+    "Sim, induzido",
+    "N\u00e3o",
+    "Ignorado",
     # TPNASCASSI
-    "M\u00e9dico", "Enfermeira/obstetriz", "Parteira", "Outros/Ignorado",
+    "M\u00e9dico",
+    "Enfermeira/obstetriz",
+    "Parteira",
+    "Outros/Ignorado",
     # KOTELCHUCK
-    "Inadequado", "Intermedi\u00e1rio", "Adequado", "Mais que adequado", "N\u00e3o classificado"
+    "Inadequado",
+    "Intermedi\u00e1rio",
+    "Adequado",
+    "Mais que adequado",
+    "N\u00e3o classificado"
   )
 )
 
@@ -275,40 +466,64 @@ sinasc_dictionary_data <- tibble::tibble(
 sinasc_label_maps <- list(
   SEXO = c("1" = "Masculino", "2" = "Feminino", "0" = "Ignorado"),
   RACACOR = c(
-    "1" = "Branca", "2" = "Preta", "3" = "Amarela",
-    "4" = "Parda", "5" = "Ind\u00edgena"
+    "1" = "Branca",
+    "2" = "Preta",
+    "3" = "Amarela",
+    "4" = "Parda",
+    "5" = "Ind\u00edgena"
   ),
   RACACORMAE = c(
-    "1" = "Branca", "2" = "Preta", "3" = "Amarela",
-    "4" = "Parda", "5" = "Ind\u00edgena"
+    "1" = "Branca",
+    "2" = "Preta",
+    "3" = "Amarela",
+    "4" = "Parda",
+    "5" = "Ind\u00edgena"
   ),
   LOCNASC = c(
-    "1" = "Hospital", "2" = "Outro estab. sa\u00fade",
-    "3" = "Domic\u00edlio", "4" = "Outros", "9" = "Ignorado"
+    "1" = "Hospital",
+    "2" = "Outro estab. sa\u00fade",
+    "3" = "Domic\u00edlio",
+    "4" = "Outros",
+    "9" = "Ignorado"
   ),
   ESTCIVMAE = c(
-    "1" = "Solteira", "2" = "Casada", "3" = "Vi\u00fava",
-    "4" = "Separada judicialmente", "5" = "Uni\u00e3o est\u00e1vel",
+    "1" = "Solteira",
+    "2" = "Casada",
+    "3" = "Vi\u00fava",
+    "4" = "Separada judicialmente",
+    "5" = "Uni\u00e3o est\u00e1vel",
     "9" = "Ignorado"
   ),
   ESCMAE = c(
-    "1" = "Nenhuma", "2" = "1 a 3 anos", "3" = "4 a 7 anos",
-    "4" = "8 a 11 anos", "5" = "12 e mais", "9" = "Ignorado"
+    "1" = "Nenhuma",
+    "2" = "1 a 3 anos",
+    "3" = "4 a 7 anos",
+    "4" = "8 a 11 anos",
+    "5" = "12 e mais",
+    "9" = "Ignorado"
   ),
   GESTACAO = c(
-    "1" = "Menos de 22 semanas", "2" = "22 a 27 semanas",
-    "3" = "28 a 31 semanas", "4" = "32 a 36 semanas",
-    "5" = "37 a 41 semanas", "6" = "42 e mais semanas",
+    "1" = "Menos de 22 semanas",
+    "2" = "22 a 27 semanas",
+    "3" = "28 a 31 semanas",
+    "4" = "32 a 36 semanas",
+    "5" = "37 a 41 semanas",
+    "6" = "42 e mais semanas",
     "9" = "Ignorado"
   ),
   GRAVIDEZ = c(
-    "1" = "\u00danica", "2" = "Dupla",
-    "3" = "Tripla e mais", "9" = "Ignorada"
+    "1" = "\u00danica",
+    "2" = "Dupla",
+    "3" = "Tripla e mais",
+    "9" = "Ignorada"
   ),
   PARTO = c("1" = "Vaginal", "2" = "Ces\u00e1reo", "9" = "Ignorado"),
   CONSULTAS = c(
-    "1" = "Nenhuma", "2" = "1 a 3", "3" = "4 a 6",
-    "4" = "7 e mais", "9" = "Ignorado"
+    "1" = "Nenhuma",
+    "2" = "1 a 3",
+    "3" = "4 a 6",
+    "4" = "7 e mais",
+    "9" = "Ignorado"
   ),
   IDANOMAL = c("1" = "Sim", "2" = "N\u00e3o", "9" = "Ignorado")
 )

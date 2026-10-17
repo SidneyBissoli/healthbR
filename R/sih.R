@@ -9,8 +9,11 @@
 #' Validate SIH year parameter
 #' @noRd
 .sih_validate_year <- function(year, status = "all") {
-  .validate_year(year, sih_years(status = status),
-                 years_fn_hint = "sih_years(status = 'all')")
+  .validate_year(
+    year,
+    sih_years(status = status),
+    years_fn_hint = "sih_years(status = 'all')"
+  )
 }
 
 #' Validate SIH UF parameter
@@ -55,7 +58,11 @@
 
   stringr::str_c(
     "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/",
-    "RD", uf, yy, mm, ".dbc"
+    "RD",
+    uf,
+    yy,
+    mm,
+    ".dbc"
   )
 }
 
@@ -74,8 +81,13 @@
 #' flat cache as migration fallback.
 #'
 #' @noRd
-.sih_download_and_read <- function(year, month, uf, cache = TRUE,
-                                   cache_dir = NULL) {
+.sih_download_and_read <- function(
+  year,
+  month,
+  uf,
+  cache = TRUE,
+  cache_dir = NULL
+) {
   cache_dir <- .sih_cache_dir(cache_dir)
   dataset_name <- "sih_data"
   target_year <- as.integer(year)
@@ -83,13 +95,18 @@
   target_uf <- uf
 
   # 1. check partitioned cache first (preferred path)
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
-      dplyr::filter(.data$uf_source == target_uf,
-                     .data$year == target_year,
-                     .data$month == target_month) |>
+      dplyr::filter(
+        .data$uf_source == target_uf,
+        .data$year == target_year,
+        .data$month == target_month
+      ) |>
       dplyr::collect()
     if (nrow(cached) > 0) return(cached)
   }
@@ -122,13 +139,21 @@
   data$month <- target_month
   data$uf_source <- target_uf
   cols <- names(data)
-  data <- data[, c("year", "month", "uf_source",
-                    setdiff(cols, c("year", "month", "uf_source")))]
+  data <- data[, c(
+    "year",
+    "month",
+    "uf_source",
+    setdiff(cols, c("year", "month", "uf_source"))
+  )]
 
   # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    .cache_append_partitioned(data, cache_dir, dataset_name,
-                              c("uf_source", "year", "month"))
+    .cache_append_partitioned(
+      data,
+      cache_dir,
+      dataset_name,
+      c("uf_source", "year", "month")
+    )
   }
 
   data
@@ -165,7 +190,8 @@
 sih_years <- function(status = "final") {
   status <- match.arg(status, c("final", "preliminary", "all"))
 
-  switch(status,
+  switch(
+    status,
     "final" = sih_available_years$final,
     "preliminary" = sih_available_years$preliminary,
     "all" = sort(c(sih_available_years$final, sih_available_years$preliminary))
@@ -193,8 +219,12 @@ sih_info <- function() {
 
   cli::cli_text("")
   cli::cli_text("Fonte:          Minist\u00e9rio da Sa\u00fade / DATASUS")
-  cli::cli_text("Acesso:         Espelho R2 healthbr-data (padr\u00e3o) com fallback FTP DATASUS")
-  cli::cli_text("Documento base: Autoriza\u00e7\u00e3o de Interna\u00e7\u00e3o Hospitalar (AIH)")
+  cli::cli_text(
+    "Acesso:         Espelho R2 healthbr-data (padr\u00e3o) com fallback FTP DATASUS"
+  )
+  cli::cli_text(
+    "Documento base: Autoriza\u00e7\u00e3o de Interna\u00e7\u00e3o Hospitalar (AIH)"
+  )
   cli::cli_text("Granularidade:  Mensal (um arquivo por UF/m\u00eas)")
 
   cli::cli_h2("Dados dispon\u00edveis")
@@ -310,7 +340,9 @@ sih_dictionary <- function(variable = NULL) {
 #' @noRd
 .sih_download_loop <- function(year, month, target_ufs, cache, cache_dir) {
   combinations <- expand.grid(
-    year = year, month = month, uf = target_ufs,
+    year = year,
+    month = month,
+    uf = target_ufs,
     stringsAsFactors = FALSE
   )
 
@@ -321,29 +353,45 @@ sih_dictionary <- function(variable = NULL) {
     ))
   }
 
-  labels <- paste(combinations$uf,
-                  paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
+  labels <- paste(
+    combinations$uf,
+    paste0(combinations$year, "/", sprintf("%02d", combinations$month))
+  )
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    yr <- combinations$year[i]
-    mo <- combinations$month[i]
-    st <- combinations$uf[i]
+  results <- .map_parallel(
+    seq_len(n_combos),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      yr <- combinations$year[i]
+      mo <- combinations$month[i]
+      st <- combinations$uf[i]
 
-    tryCatch({
-      .sih_download_and_read(yr, mo, st, cache = cache,
-                             cache_dir = cache_dir)
-    }, error = function(e) {
-      NULL
-    })
-  })
+      tryCatch(
+        {
+          .sih_download_and_read(
+            yr,
+            mo,
+            st,
+            cache = cache,
+            cache_dir = cache_dir
+          )
+        },
+        error = function(e) {
+          NULL
+        }
+      )
+    }
+  )
 
   succeeded <- !vapply(results, is.null, logical(1))
   failed_labels <- labels[!succeeded]
   results <- results[succeeded]
 
   if (length(results) == 0) {
-    cli::cli_abort("No data could be downloaded for the requested year(s)/month(s)/UF(s).")
+    cli::cli_abort(
+      "No data could be downloaded for the requested year(s)/month(s)/UF(s)."
+    )
   }
 
   list(data = dplyr::bind_rows(results), failed_labels = failed_labels)
@@ -358,30 +406,48 @@ sih_dictionary <- function(variable = NULL) {
 #' @return list(data = tibble, failed_labels = character, source = character
 #'   or NA if every source failed).
 #' @noRd
-.sih_fetch <- function(sources, year, month, target_ufs, cache, cache_dir,
-                       creds) {
-  empty <- list(data = tibble::tibble(), failed_labels = character(0),
-                source = NA_character_)
+.sih_fetch <- function(
+  sources,
+  year,
+  month,
+  target_ufs,
+  cache,
+  cache_dir,
+  creds
+) {
+  empty <- list(
+    data = tibble::tibble(),
+    failed_labels = character(0),
+    source = NA_character_
+  )
   last <- empty
   for (i in seq_along(sources)) {
     s <- sources[i]
-    res <- tryCatch({
-      if (s == "r2") {
-        r <- .sih_r2_fetch(year, month, target_ufs, cache, cache_dir, creds)
-        list(data = dplyr::bind_rows(r$results), failed_labels = r$failed_labels)
-      } else {
-        .sih_download_loop(year, month, target_ufs, cache, cache_dir)
+    res <- tryCatch(
+      {
+        if (s == "r2") {
+          r <- .sih_r2_fetch(year, month, target_ufs, cache, cache_dir, creds)
+          list(
+            data = dplyr::bind_rows(r$results),
+            failed_labels = r$failed_labels
+          )
+        } else {
+          .sih_download_loop(year, month, target_ufs, cache, cache_dir)
+        }
+      },
+      error = function(e) {
+        cli::cli_warn("Source {.val {s}} failed: {conditionMessage(e)}")
+        NULL
       }
-    }, error = function(e) {
-      cli::cli_warn("Source {.val {s}} failed: {conditionMessage(e)}")
-      NULL
-    })
+    )
 
     if (!is.null(res) && nrow(res$data) > 0) {
       res$source <- s
       return(res)
     }
-    if (!is.null(res)) last <- res
+    if (!is.null(res)) {
+      last <- res
+    }
     if (i < length(sources)) {
       cli::cli_warn(c(
         "!" = "No data from source {.val {s}}; falling back to {.val {sources[i + 1]}}."
@@ -389,7 +455,9 @@ sih_dictionary <- function(variable = NULL) {
     }
   }
   if (nrow(last$data) == 0) {
-    cli::cli_abort("No data could be downloaded for the requested year(s)/month(s)/UF(s).")
+    cli::cli_abort(
+      "No data could be downloaded for the requested year(s)/month(s)/UF(s)."
+    )
   }
   last$source <- NA_character_
   last
@@ -519,18 +587,30 @@ sih_dictionary <- function(variable = NULL) {
 #' sih_data(year = 2022, month = 3, uf = "RJ",
 #'          vars = c("DIAG_PRINC", "DT_INTER", "SEXO",
 #'                   "IDADE", "MORTE", "VAL_TOT"))
-sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
-                     diagnosis = NULL,
-                     parse = TRUE, col_types = NULL,
-                     cache = TRUE, cache_dir = NULL,
-                     lazy = FALSE, backend = c("arrow", "duckdb"),
-                     source = c("r2", "datasus"), r2_credentials = NULL) {
-
+sih_data <- function(
+  year,
+  month = NULL,
+  vars = NULL,
+  uf = NULL,
+  diagnosis = NULL,
+  parse = TRUE,
+  col_types = NULL,
+  cache = TRUE,
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb"),
+  source = c("r2", "datasus"),
+  r2_credentials = NULL
+) {
   # validate inputs
   year <- .sih_validate_year(year)
   month <- .validate_month(month)
-  if (!is.null(uf)) uf <- .sih_validate_uf(uf)
-  if (!is.null(vars)) .sih_validate_vars(vars)
+  if (!is.null(uf)) {
+    uf <- .sih_validate_uf(uf)
+  }
+  if (!is.null(vars)) {
+    .sih_validate_vars(vars)
+  }
   backend <- match.arg(backend)
 
   # resolve sources; without arrow the mirror cannot be read
@@ -554,16 +634,26 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
   # compute lazy args once
   cache_dir_resolved <- .sih_cache_dir(cache_dir)
   lazy_filters <- list(year = year, uf_source = target_ufs)
-  if (!is.null(month)) lazy_filters$month <- as.integer(month)
-  lazy_select <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
+  if (!is.null(month)) {
+    lazy_filters$month <- as.integer(month)
+  }
+  lazy_select <- if (!is.null(vars)) {
+    unique(c("year", "month", "uf_source", vars))
+  } else {
+    NULL
+  }
 
   # lazy return: remote R2 dataset (nothing downloaded), else local cache
   if (isTRUE(lazy) && sources[1] == "r2") {
-    ds <- tryCatch(.sih_r2_lazy(year, month, target_ufs, backend, creds),
-                   error = function(e) {
-                     cli::cli_warn("Could not open the R2 mirror lazily: {conditionMessage(e)}")
-                     NULL
-                   })
+    ds <- tryCatch(
+      .sih_r2_lazy(year, month, target_ufs, backend, creds),
+      error = function(e) {
+        cli::cli_warn(
+          "Could not open the R2 mirror lazily: {conditionMessage(e)}"
+        )
+        NULL
+      }
+    )
     if (!is.null(ds)) {
       if (isTRUE(parse)) {
         cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
@@ -574,9 +664,18 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
       return(ds)
     }
   }
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved, "sih_data",
-                        lazy_filters, lazy_select, parse = parse)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sih_data",
+    lazy_filters,
+    lazy_select,
+    parse = parse
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # fetch through the source chain, bind, and collect failures
   dl <- .sih_fetch(sources, year, month, target_ufs, cache, cache_dir, creds)
@@ -592,7 +691,9 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
   # filter by diagnosis if requested
   if (!is.null(diagnosis)) {
     diag_pattern <- stringr::str_c(
-      "^(", stringr::str_c(diagnosis, collapse = "|"), ")"
+      "^(",
+      stringr::str_c(diagnosis, collapse = "|"),
+      ")"
     )
     if ("DIAG_PRINC" %in% names(results)) {
       results <- results[grepl(diag_pattern, results$DIAG_PRINC), ]
@@ -603,8 +704,17 @@ sih_data <- function(year, month = NULL, vars = NULL, uf = NULL,
     }
   }
 
-  out <- .data_return(results, lazy, backend, cache_dir_resolved, "sih_data",
-                      lazy_filters, lazy_select, failed_labels, "SIH")
+  out <- .data_return(
+    results,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sih_data",
+    lazy_filters,
+    lazy_select,
+    failed_labels,
+    "SIH"
+  )
 
   # record the source that served the data + manifest provenance (mirror)
   if (is.data.frame(out)) {

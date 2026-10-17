@@ -31,13 +31,18 @@
 #' @return Filtered data.frame.
 #' @noRd
 .search_metadata <- function(data, search, columns) {
-  if (is.null(search)) return(data)
+  if (is.null(search)) {
+    return(data)
+  }
   search_lower <- tolower(search)
   search_ascii <- .strip_accents(search_lower)
-  match_idx <- Reduce(`|`, lapply(columns, function(col) {
-    col_lower <- tolower(data[[col]])
-    grepl(search_lower, col_lower, fixed = TRUE) |
-      grepl(search_ascii, .strip_accents(col_lower), fixed = TRUE)
-  }))
+  match_idx <- Reduce(
+    `|`,
+    lapply(columns, function(col) {
+      col_lower <- tolower(data[[col]])
+      grepl(search_lower, col_lower, fixed = TRUE) |
+        grepl(search_ascii, .strip_accents(col_lower), fixed = TRUE)
+    })
+  )
   data[match_idx, ]
 }

@@ -49,7 +49,9 @@ test_that("sim_info returns expected structure", {
 test_that("sim_variables returns tibble with expected columns", {
   vars <- sim_variables()
   expect_s3_class(vars, "tbl_df")
-  expect_true(all(c("variable", "description", "type", "section") %in% names(vars)))
+  expect_true(all(
+    c("variable", "description", "type", "section") %in% names(vars)
+  ))
   expect_gt(nrow(vars), 0)
   expect_true("CAUSABAS" %in% vars$variable)
   expect_true("DTOBITO" %in% vars$variable)
@@ -78,7 +80,9 @@ test_that("sim_variables search returns empty tibble for no match", {
 test_that("sim_dictionary returns tibble with expected columns", {
   dict <- sim_dictionary()
   expect_s3_class(dict, "tbl_df")
-  expect_true(all(c("variable", "description", "code", "label") %in% names(dict)))
+  expect_true(all(
+    c("variable", "description", "code", "label") %in% names(dict)
+  ))
   expect_gt(nrow(dict), 0)
 })
 
@@ -235,8 +239,7 @@ test_that("sim_clear_cache works with empty cache", {
 test_that("sim_data downloads and reads data from FTP", {
   skip_if_no_integration()
 
-  data <- sim_data(year = 2022, uf = "AC",
-                   cache_dir = tempdir())
+  data <- sim_data(year = 2022, uf = "AC", cache_dir = tempdir())
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("CAUSABAS" %in% names(data))
@@ -252,8 +255,12 @@ test_that("sim_data downloads and reads data from FTP", {
 test_that("sim_data filters by cause", {
   skip_if_no_integration()
 
-  infarct <- sim_data(year = 2022, uf = "AC", cause = "I21",
-                      cache_dir = tempdir())
+  infarct <- sim_data(
+    year = 2022,
+    uf = "AC",
+    cause = "I21",
+    cache_dir = tempdir()
+  )
   if (nrow(infarct) > 0) {
     expect_true(all(grepl("^I21", infarct$CAUSABAS)))
   }
@@ -262,9 +269,12 @@ test_that("sim_data filters by cause", {
 test_that("sim_data selects variables", {
   skip_if_no_integration()
 
-  data <- sim_data(year = 2022, uf = "AC",
-                   vars = c("CAUSABAS", "SEXO", "IDADE"),
-                   cache_dir = tempdir())
+  data <- sim_data(
+    year = 2022,
+    uf = "AC",
+    vars = c("CAUSABAS", "SEXO", "IDADE"),
+    cache_dir = tempdir()
+  )
   # should have year, uf_source, requested vars, and age_years (from IDADE)
   expect_true("CAUSABAS" %in% names(data))
   expect_true("SEXO" %in% names(data))
@@ -305,9 +315,13 @@ test_that("sim_variables type column has non-character types", {
 test_that("sim_data parse = FALSE returns all character", {
   # create mock data as if downloaded
   mock_data <- tibble::tibble(
-    year = 2022L, uf_source = "AC",
-    DTOBITO = "25122022", PESO = "3500", SEXO = "M",
-    IDADE = "4025", IDADEMAE = "30"
+    year = 2022L,
+    uf_source = "AC",
+    DTOBITO = "25122022",
+    PESO = "3500",
+    SEXO = "M",
+    IDADE = "4025",
+    IDADEMAE = "30"
   )
 
   # simulate what parse = FALSE should preserve
@@ -330,7 +344,9 @@ test_that("sim_data reports partial download failures", {
     .sim_validate_year = function(year, ...) as.integer(year),
     .sim_validate_uf = function(uf) toupper(uf),
     .sim_download_and_read = function(year, uf, ...) {
-      if (uf == "XX") stop("Not found")
+      if (uf == "XX") {
+        stop("Not found")
+      }
       tibble::tibble(year = as.integer(year), uf_source = uf, CAUSABAS = "X00")
     }
   )
@@ -385,11 +401,11 @@ test_that(".sim_decode_age handles unit 5 (100+ years)", {
 })
 
 test_that(".sim_decode_age handles zero value for each unit", {
-  expect_equal(.sim_decode_age("400"), 0)  # 0 years
-  expect_equal(.sim_decode_age("300"), 0)  # 0 months
-  expect_equal(.sim_decode_age("200"), 0)  # 0 days
-  expect_equal(.sim_decode_age("100"), 0)  # 0 hours
-  expect_equal(.sim_decode_age("000"), 0)  # 0 minutes
+  expect_equal(.sim_decode_age("400"), 0) # 0 years
+  expect_equal(.sim_decode_age("300"), 0) # 0 months
+  expect_equal(.sim_decode_age("200"), 0) # 0 days
+  expect_equal(.sim_decode_age("100"), 0) # 0 hours
+  expect_equal(.sim_decode_age("000"), 0) # 0 minutes
 })
 
 # --- .sim_download_loop --- mocked tests ---
@@ -398,15 +414,19 @@ test_that(".sim_download_loop binds results from multiple UFs", {
   local_mocked_bindings(
     .sim_download_and_read = function(year, uf, ...) {
       tibble::tibble(
-        year = as.integer(year), uf_source = uf,
-        CAUSABAS = "X00", SEXO = "M"
+        year = as.integer(year),
+        uf_source = uf,
+        CAUSABAS = "X00",
+        SEXO = "M"
       )
     }
   )
 
   result <- .sim_download_loop(
-    year = 2022L, target_ufs = c("AC", "RJ"),
-    cache = FALSE, cache_dir = NULL
+    year = 2022L,
+    target_ufs = c("AC", "RJ"),
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_true(is.list(result))
@@ -420,15 +440,18 @@ test_that(".sim_download_loop binds results from multiple years", {
   local_mocked_bindings(
     .sim_download_and_read = function(year, uf, ...) {
       tibble::tibble(
-        year = as.integer(year), uf_source = uf,
+        year = as.integer(year),
+        uf_source = uf,
         CAUSABAS = "X00"
       )
     }
   )
 
   result <- .sim_download_loop(
-    year = c(2020L, 2021L), target_ufs = "AC",
-    cache = FALSE, cache_dir = NULL
+    year = c(2020L, 2021L),
+    target_ufs = "AC",
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_equal(nrow(result$data), 2)
@@ -438,17 +461,22 @@ test_that(".sim_download_loop binds results from multiple years", {
 test_that(".sim_download_loop tracks failures correctly", {
   local_mocked_bindings(
     .sim_download_and_read = function(year, uf, ...) {
-      if (uf == "ZZ") stop("FTP error")
+      if (uf == "ZZ") {
+        stop("FTP error")
+      }
       tibble::tibble(
-        year = as.integer(year), uf_source = uf,
+        year = as.integer(year),
+        uf_source = uf,
         CAUSABAS = "X00"
       )
     }
   )
 
   result <- .sim_download_loop(
-    year = 2022L, target_ufs = c("AC", "ZZ"),
-    cache = FALSE, cache_dir = NULL
+    year = 2022L,
+    target_ufs = c("AC", "ZZ"),
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_equal(nrow(result$data), 1)
@@ -463,8 +491,10 @@ test_that(".sim_download_loop aborts when all downloads fail", {
 
   expect_error(
     .sim_download_loop(
-      year = 2022L, target_ufs = "AC",
-      cache = FALSE, cache_dir = NULL
+      year = 2022L,
+      target_ufs = "AC",
+      cache = FALSE,
+      cache_dir = NULL
     ),
     "No data could be downloaded"
   )
@@ -476,15 +506,18 @@ test_that(".sim_download_loop generates correct labels for year x uf grid", {
     .sim_download_and_read = function(year, uf, ...) {
       call_count <<- call_count + 1L
       tibble::tibble(
-        year = as.integer(year), uf_source = uf,
+        year = as.integer(year),
+        uf_source = uf,
         CAUSABAS = "X00"
       )
     }
   )
 
   result <- .sim_download_loop(
-    year = c(2020L, 2021L), target_ufs = c("AC", "SP"),
-    cache = FALSE, cache_dir = NULL
+    year = c(2020L, 2021L),
+    target_ufs = c("AC", "SP"),
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_equal(nrow(result$data), 4)
@@ -495,15 +528,22 @@ test_that(".sim_download_loop generates correct labels for year x uf grid", {
 
 test_that(".sim_post_process filters by cause", {
   mock_data <- tibble::tibble(
-    year = rep(2022L, 5), uf_source = rep("AC", 5),
+    year = rep(2022L, 5),
+    uf_source = rep("AC", 5),
     CAUSABAS = c("I210", "I219", "J180", "C509", "I211"),
-    SEXO = rep("M", 5), IDADE = rep("462", 5)
+    SEXO = rep("M", 5),
+    IDADE = rep("462", 5)
   )
 
   result <- .sim_post_process(
-    data = mock_data, cause = "I21",
-    decode_age = FALSE, parse = FALSE, col_types = NULL,
-    lazy = FALSE, vars = NULL, lazy_select = NULL
+    data = mock_data,
+    cause = "I21",
+    decode_age = FALSE,
+    parse = FALSE,
+    col_types = NULL,
+    lazy = FALSE,
+    vars = NULL,
+    lazy_select = NULL
   )
 
   expect_equal(nrow(result$data), 3)
@@ -512,15 +552,22 @@ test_that(".sim_post_process filters by cause", {
 
 test_that(".sim_post_process filters by multiple causes", {
   mock_data <- tibble::tibble(
-    year = rep(2022L, 5), uf_source = rep("AC", 5),
+    year = rep(2022L, 5),
+    uf_source = rep("AC", 5),
     CAUSABAS = c("I210", "J180", "C509", "I211", "J181"),
-    SEXO = rep("M", 5), IDADE = rep("462", 5)
+    SEXO = rep("M", 5),
+    IDADE = rep("462", 5)
   )
 
   result <- .sim_post_process(
-    data = mock_data, cause = c("I21", "J18"),
-    decode_age = FALSE, parse = FALSE, col_types = NULL,
-    lazy = FALSE, vars = NULL, lazy_select = NULL
+    data = mock_data,
+    cause = c("I21", "J18"),
+    decode_age = FALSE,
+    parse = FALSE,
+    col_types = NULL,
+    lazy = FALSE,
+    vars = NULL,
+    lazy_select = NULL
   )
 
   expect_equal(nrow(result$data), 4)
@@ -529,15 +576,22 @@ test_that(".sim_post_process filters by multiple causes", {
 
 test_that(".sim_post_process warns when CAUSABAS column not found", {
   mock_data <- tibble::tibble(
-    year = 2022L, uf_source = "AC",
-    SEXO = "M", IDADE = "462"
+    year = 2022L,
+    uf_source = "AC",
+    SEXO = "M",
+    IDADE = "462"
   )
 
   expect_warning(
     .sim_post_process(
-      data = mock_data, cause = "I21",
-      decode_age = FALSE, parse = FALSE, col_types = NULL,
-      lazy = FALSE, vars = NULL, lazy_select = NULL
+      data = mock_data,
+      cause = "I21",
+      decode_age = FALSE,
+      parse = FALSE,
+      col_types = NULL,
+      lazy = FALSE,
+      vars = NULL,
+      lazy_select = NULL
     ),
     "CAUSABAS"
   )
@@ -545,14 +599,22 @@ test_that(".sim_post_process warns when CAUSABAS column not found", {
 
 test_that(".sim_post_process decode_age adds age_years column", {
   mock_data <- tibble::tibble(
-    year = 2022L, uf_source = "AC",
-    CAUSABAS = "I210", SEXO = "M", IDADE = "462"
+    year = 2022L,
+    uf_source = "AC",
+    CAUSABAS = "I210",
+    SEXO = "M",
+    IDADE = "462"
   )
 
   result <- .sim_post_process(
-    data = mock_data, cause = NULL,
-    decode_age = TRUE, parse = FALSE, col_types = NULL,
-    lazy = FALSE, vars = NULL, lazy_select = NULL
+    data = mock_data,
+    cause = NULL,
+    decode_age = TRUE,
+    parse = FALSE,
+    col_types = NULL,
+    lazy = FALSE,
+    vars = NULL,
+    lazy_select = NULL
   )
 
   expect_true("age_years" %in% names(result$data))
@@ -561,14 +623,22 @@ test_that(".sim_post_process decode_age adds age_years column", {
 
 test_that(".sim_post_process decode_age places age_years after IDADE", {
   mock_data <- tibble::tibble(
-    year = 2022L, uf_source = "AC",
-    CAUSABAS = "I210", SEXO = "M", IDADE = "462"
+    year = 2022L,
+    uf_source = "AC",
+    CAUSABAS = "I210",
+    SEXO = "M",
+    IDADE = "462"
   )
 
   result <- .sim_post_process(
-    data = mock_data, cause = NULL,
-    decode_age = TRUE, parse = FALSE, col_types = NULL,
-    lazy = FALSE, vars = NULL, lazy_select = NULL
+    data = mock_data,
+    cause = NULL,
+    decode_age = TRUE,
+    parse = FALSE,
+    col_types = NULL,
+    lazy = FALSE,
+    vars = NULL,
+    lazy_select = NULL
   )
 
   col_positions <- which(names(result$data) %in% c("IDADE", "age_years"))
@@ -577,14 +647,22 @@ test_that(".sim_post_process decode_age places age_years after IDADE", {
 
 test_that(".sim_post_process decode_age=FALSE does not add age_years", {
   mock_data <- tibble::tibble(
-    year = 2022L, uf_source = "AC",
-    CAUSABAS = "I210", SEXO = "M", IDADE = "462"
+    year = 2022L,
+    uf_source = "AC",
+    CAUSABAS = "I210",
+    SEXO = "M",
+    IDADE = "462"
   )
 
   result <- .sim_post_process(
-    data = mock_data, cause = NULL,
-    decode_age = FALSE, parse = FALSE, col_types = NULL,
-    lazy = FALSE, vars = NULL, lazy_select = NULL
+    data = mock_data,
+    cause = NULL,
+    decode_age = FALSE,
+    parse = FALSE,
+    col_types = NULL,
+    lazy = FALSE,
+    vars = NULL,
+    lazy_select = NULL
   )
 
   expect_false("age_years" %in% names(result$data))
@@ -592,13 +670,19 @@ test_that(".sim_post_process decode_age=FALSE does not add age_years", {
 
 test_that(".sim_post_process updates lazy_select with age_years when relevant", {
   mock_data <- tibble::tibble(
-    year = 2022L, uf_source = "AC",
-    CAUSABAS = "I210", SEXO = "M", IDADE = "462"
+    year = 2022L,
+    uf_source = "AC",
+    CAUSABAS = "I210",
+    SEXO = "M",
+    IDADE = "462"
   )
 
   result <- .sim_post_process(
-    data = mock_data, cause = NULL,
-    decode_age = TRUE, parse = FALSE, col_types = NULL,
+    data = mock_data,
+    cause = NULL,
+    decode_age = TRUE,
+    parse = FALSE,
+    col_types = NULL,
     lazy = FALSE,
     vars = c("IDADE", "SEXO"),
     lazy_select = c("year", "uf_source", "IDADE", "SEXO")
@@ -609,14 +693,23 @@ test_that(".sim_post_process updates lazy_select with age_years when relevant", 
 
 test_that(".sim_post_process parse=TRUE converts types", {
   mock_data <- tibble::tibble(
-    year = 2022L, uf_source = "AC",
-    DTOBITO = "25122022", PESO = "3500", SEXO = "M", IDADE = "462"
+    year = 2022L,
+    uf_source = "AC",
+    DTOBITO = "25122022",
+    PESO = "3500",
+    SEXO = "M",
+    IDADE = "462"
   )
 
   result <- .sim_post_process(
-    data = mock_data, cause = NULL,
-    decode_age = FALSE, parse = TRUE, col_types = NULL,
-    lazy = FALSE, vars = NULL, lazy_select = NULL
+    data = mock_data,
+    cause = NULL,
+    decode_age = FALSE,
+    parse = TRUE,
+    col_types = NULL,
+    lazy = FALSE,
+    vars = NULL,
+    lazy_select = NULL
   )
 
   expect_s3_class(result$data$DTOBITO, "Date")
@@ -626,14 +719,23 @@ test_that(".sim_post_process parse=TRUE converts types", {
 
 test_that(".sim_post_process parse skipped when lazy=TRUE", {
   mock_data <- tibble::tibble(
-    year = 2022L, uf_source = "AC",
-    DTOBITO = "25122022", PESO = "3500", SEXO = "M", IDADE = "462"
+    year = 2022L,
+    uf_source = "AC",
+    DTOBITO = "25122022",
+    PESO = "3500",
+    SEXO = "M",
+    IDADE = "462"
   )
 
   result <- .sim_post_process(
-    data = mock_data, cause = NULL,
-    decode_age = FALSE, parse = TRUE, col_types = NULL,
-    lazy = TRUE, vars = NULL, lazy_select = NULL
+    data = mock_data,
+    cause = NULL,
+    decode_age = FALSE,
+    parse = TRUE,
+    col_types = NULL,
+    lazy = TRUE,
+    vars = NULL,
+    lazy_select = NULL
   )
 
   # parse should be skipped when lazy=TRUE, so DTOBITO stays character
@@ -646,15 +748,24 @@ test_that("sim_data with vars selects columns", {
   local_mocked_bindings(
     .sim_download_and_read = function(year, uf, ...) {
       tibble::tibble(
-        year = as.integer(year), uf_source = uf,
-        CAUSABAS = "X00", SEXO = "M", IDADE = "462",
-        DTOBITO = "01012022", CODMUNRES = "120040"
+        year = as.integer(year),
+        uf_source = uf,
+        CAUSABAS = "X00",
+        SEXO = "M",
+        IDADE = "462",
+        DTOBITO = "01012022",
+        CODMUNRES = "120040"
       )
     }
   )
 
-  result <- sim_data(2022, uf = "AC", vars = c("CAUSABAS", "SEXO"),
-                     parse = FALSE, decode_age = FALSE)
+  result <- sim_data(
+    2022,
+    uf = "AC",
+    vars = c("CAUSABAS", "SEXO"),
+    parse = FALSE,
+    decode_age = FALSE
+  )
 
   expect_true("CAUSABAS" %in% names(result))
   expect_true("SEXO" %in% names(result))

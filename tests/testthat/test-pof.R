@@ -104,7 +104,9 @@ test_that("pof_registers returns tibble with expected columns", {
   registers <- pof_registers()
 
   expect_s3_class(registers, "tbl_df")
-  expect_true(all(c("register", "description", "health_related") %in% names(registers)))
+  expect_true(all(
+    c("register", "description", "health_related") %in% names(registers)
+  ))
   expect_true(nrow(registers) > 0)
 })
 
@@ -211,7 +213,11 @@ test_that("pof_dictionary validates year parameter", {
 
 test_that("pof_dictionary validates register parameter", {
   expect_error(
-    pof_dictionary(year = "2017-2018", register = "invalid", cache_dir = tempdir()),
+    pof_dictionary(
+      year = "2017-2018",
+      register = "invalid",
+      cache_dir = tempdir()
+    ),
     "not available"
   )
 })
@@ -233,7 +239,11 @@ test_that("pof_dictionary filters by register", {
   skip_if_no_integration()
 
   dict_all <- pof_dictionary(year = "2017-2018", cache_dir = tempdir())
-  dict_morador <- pof_dictionary(year = "2017-2018", register = "morador", cache_dir = tempdir())
+  dict_morador <- pof_dictionary(
+    year = "2017-2018",
+    register = "morador",
+    cache_dir = tempdir()
+  )
 
   expect_true(nrow(dict_morador) < nrow(dict_all))
   expect_true(all(tolower(dict_morador$register) == "morador"))
@@ -279,7 +289,11 @@ test_that("pof_variables filters by register", {
   skip_on_cran()
   skip_if_no_integration()
 
-  vars <- pof_variables(year = "2017-2018", register = "morador", cache_dir = tempdir())
+  vars <- pof_variables(
+    year = "2017-2018",
+    register = "morador",
+    cache_dir = tempdir()
+  )
 
   expect_s3_class(vars, "tbl_df")
   expect_true(nrow(vars) > 0)
@@ -289,7 +303,11 @@ test_that("pof_variables filters by search term", {
   skip_on_cran()
   skip_if_no_integration()
 
-  vars <- pof_variables(year = "2017-2018", search = "uf", cache_dir = tempdir())
+  vars <- pof_variables(
+    year = "2017-2018",
+    search = "uf",
+    cache_dir = tempdir()
+  )
 
   expect_s3_class(vars, "tbl_df")
   # should find at least UF variable
@@ -336,7 +354,11 @@ test_that("pof_data downloads and returns tibble", {
   on.exit(unlink(test_cache, recursive = TRUE), add = TRUE)
 
   # test with morador register (essential for survey design)
-  df <- pof_data(year = "2017-2018", register = "morador", cache_dir = test_cache)
+  df <- pof_data(
+    year = "2017-2018",
+    register = "morador",
+    cache_dir = test_cache
+  )
 
   expect_s3_class(df, "tbl_df")
   expect_true(nrow(df) > 0)
@@ -374,15 +396,26 @@ test_that("pof_data uses cache on second call", {
   on.exit(unlink(test_cache, recursive = TRUE), add = TRUE)
 
   # first call downloads
-  df1 <- pof_data(year = "2017-2018", register = "morador", cache_dir = test_cache)
+  df1 <- pof_data(
+    year = "2017-2018",
+    register = "morador",
+    cache_dir = test_cache
+  )
 
   # verify partitioned cache exists
-  cache_files <- list.files(file.path(test_cache, "pof_morador_data"),
-                            recursive = TRUE, pattern = "\\.parquet$")
+  cache_files <- list.files(
+    file.path(test_cache, "pof_morador_data"),
+    recursive = TRUE,
+    pattern = "\\.parquet$"
+  )
   expect_true(length(cache_files) > 0)
 
   # second call should use cache
-  df2 <- pof_data(year = "2017-2018", register = "morador", cache_dir = test_cache)
+  df2 <- pof_data(
+    year = "2017-2018",
+    register = "morador",
+    cache_dir = test_cache
+  )
 
   expect_equal(nrow(df1), nrow(df2))
   expect_equal(ncol(df1), ncol(df2))
@@ -415,7 +448,11 @@ test_that("pof_data can download domicilio register", {
   unlink(test_cache, recursive = TRUE)
   on.exit(unlink(test_cache, recursive = TRUE), add = TRUE)
 
-  df <- pof_data(year = "2017-2018", register = "domicilio", cache_dir = test_cache)
+  df <- pof_data(
+    year = "2017-2018",
+    register = "domicilio",
+    cache_dir = test_cache
+  )
 
   expect_s3_class(df, "tbl_df")
   expect_true(nrow(df) > 0)
@@ -448,9 +485,20 @@ test_that("pof_info returns correct structure for all years", {
 
 test_that("pof_info contains all expected top-level keys", {
   info <- pof_info("2017-2018")
-  expected_keys <- c("name", "name_en", "acronym", "source", "year",
-                     "description", "url", "ftp_url", "available_registers",
-                     "health_modules", "sample_design", "year_details")
+  expected_keys <- c(
+    "name",
+    "name_en",
+    "acronym",
+    "source",
+    "year",
+    "description",
+    "url",
+    "ftp_url",
+    "available_registers",
+    "health_modules",
+    "sample_design",
+    "year_details"
+  )
   for (key in expected_keys) {
     expect_true(key %in% names(info), info = paste("missing key:", key))
   }
@@ -498,9 +546,18 @@ test_that("pof_registers returns different counts per year", {
   reg_2008 <- pof_registers("2008-2009")
   reg_2017 <- pof_registers("2017-2018")
 
-  expect_equal(nrow(reg_2002), length(healthbR:::pof_valid_registers[["2002-2003"]]))
-  expect_equal(nrow(reg_2008), length(healthbR:::pof_valid_registers[["2008-2009"]]))
-  expect_equal(nrow(reg_2017), length(healthbR:::pof_valid_registers[["2017-2018"]]))
+  expect_equal(
+    nrow(reg_2002),
+    length(healthbR:::pof_valid_registers[["2002-2003"]])
+  )
+  expect_equal(
+    nrow(reg_2008),
+    length(healthbR:::pof_valid_registers[["2008-2009"]])
+  )
+  expect_equal(
+    nrow(reg_2017),
+    length(healthbR:::pof_valid_registers[["2017-2018"]])
+  )
 })
 
 test_that("pof_registers 2002-2003 does not have consumo_alimentar", {
@@ -526,8 +583,13 @@ test_that("pof_registers health_only returns only health-related", {
     # all rows should have health_related == TRUE
     expect_true(all(health$health_related))
     # health registers should be a subset of the known health registers
-    known_health <- c("domicilio", "morador", "consumo_alimentar",
-                      "despesa_individual", "caderneta_coletiva")
+    known_health <- c(
+      "domicilio",
+      "morador",
+      "consumo_alimentar",
+      "despesa_individual",
+      "caderneta_coletiva"
+    )
     expect_true(all(health$register %in% known_health))
   }
 })
@@ -548,11 +610,22 @@ test_that(".pof_validate_year returns invisible NULL on valid years", {
 })
 
 test_that(".pof_validate_year rejects various invalid years", {
-  invalid_years <- c("2017", "2018", "1990-1991", "2020-2021", "abc",
-                     "2017-2019", "", "2017 - 2018")
+  invalid_years <- c(
+    "2017",
+    "2018",
+    "1990-1991",
+    "2020-2021",
+    "abc",
+    "2017-2019",
+    "",
+    "2017 - 2018"
+  )
   for (yr in invalid_years) {
-    expect_error(healthbR:::.pof_validate_year(yr), "not available",
-                 info = paste("should reject:", yr))
+    expect_error(
+      healthbR:::.pof_validate_year(yr),
+      "not available",
+      info = paste("should reject:", yr)
+    )
   }
 })
 
@@ -569,14 +642,20 @@ test_that(".pof_validate_register accepts all valid registers for each year", {
 
 test_that(".pof_validate_register rejects year-specific registers", {
   # 2002-2003 has no consumo_alimentar
-  expect_error(healthbR:::.pof_validate_register("consumo_alimentar", "2002-2003"),
-               "not available")
+  expect_error(
+    healthbR:::.pof_validate_register("consumo_alimentar", "2002-2003"),
+    "not available"
+  )
   # 2017-2018 has no despesa_90dias
-  expect_error(healthbR:::.pof_validate_register("despesa_90dias", "2017-2018"),
-               "not available")
+  expect_error(
+    healthbR:::.pof_validate_register("despesa_90dias", "2017-2018"),
+    "not available"
+  )
   # 2008-2009 has no aluguel_estimado
-  expect_error(healthbR:::.pof_validate_register("aluguel_estimado", "2008-2009"),
-               "not available")
+  expect_error(
+    healthbR:::.pof_validate_register("aluguel_estimado", "2008-2009"),
+    "not available"
+  )
 })
 
 test_that(".pof_validate_register is case-insensitive via tolower", {
@@ -588,8 +667,10 @@ test_that(".pof_validate_register handles NULL year (fallback registers)", {
   # when year is not in pof_valid_registers, function falls back to default list
   # this tests the fallback path (line 124-127)
   expect_silent(healthbR:::.pof_validate_register("morador", "unknown-year"))
-  expect_error(healthbR:::.pof_validate_register("xyz_invalid", "unknown-year"),
-               "not available")
+  expect_error(
+    healthbR:::.pof_validate_register("xyz_invalid", "unknown-year"),
+    "not available"
+  )
 })
 
 # --- .pof_build_url() extended tests ---
@@ -834,8 +915,12 @@ test_that(".pof_select_vars handles df without year column", {
 
 test_that(".pof_try_lazy_return returns NULL when lazy is FALSE", {
   result <- healthbR:::.pof_try_lazy_return(
-    lazy = FALSE, backend = "arrow", register = "morador",
-    vars = NULL, year = "2017-2018", cache_dir = tempdir()
+    lazy = FALSE,
+    backend = "arrow",
+    register = "morador",
+    vars = NULL,
+    year = "2017-2018",
+    cache_dir = tempdir()
   )
   expect_null(result)
 })
@@ -843,8 +928,12 @@ test_that(".pof_try_lazy_return returns NULL when lazy is FALSE", {
 test_that(".pof_try_lazy_return returns NULL with empty cache", {
   temp_cache <- withr::local_tempdir()
   result <- healthbR:::.pof_try_lazy_return(
-    lazy = TRUE, backend = "arrow", register = "morador",
-    vars = NULL, year = "2017-2018", cache_dir = temp_cache
+    lazy = TRUE,
+    backend = "arrow",
+    register = "morador",
+    vars = NULL,
+    year = "2017-2018",
+    cache_dir = temp_cache
   )
   expect_null(result)
 })
@@ -854,10 +943,14 @@ test_that(".pof_try_lazy_return builds correct dataset name", {
   temp_cache <- withr::local_tempdir()
   for (reg in c("morador", "domicilio", "consumo_alimentar")) {
     result <- healthbR:::.pof_try_lazy_return(
-      lazy = TRUE, backend = "arrow", register = reg,
-      vars = NULL, year = "2017-2018", cache_dir = temp_cache
+      lazy = TRUE,
+      backend = "arrow",
+      register = reg,
+      vars = NULL,
+      year = "2017-2018",
+      cache_dir = temp_cache
     )
-    expect_null(result)  # no cache, so always NULL
+    expect_null(result) # no cache, so always NULL
   }
 })
 
@@ -866,8 +959,11 @@ test_that(".pof_try_lazy_return builds correct dataset name", {
 test_that(".pof_check_cache returns NULL when no cache exists", {
   temp_cache <- withr::local_tempdir()
   result <- healthbR:::.pof_check_cache(
-    cache_dir = temp_cache, dataset_name = "pof_morador_data",
-    year = "2017-2018", register = "morador", refresh = FALSE
+    cache_dir = temp_cache,
+    dataset_name = "pof_morador_data",
+    year = "2017-2018",
+    register = "morador",
+    refresh = FALSE
   )
   expect_null(result)
 })
@@ -875,8 +971,11 @@ test_that(".pof_check_cache returns NULL when no cache exists", {
 test_that(".pof_check_cache returns NULL when refresh is TRUE", {
   temp_cache <- withr::local_tempdir()
   result <- healthbR:::.pof_check_cache(
-    cache_dir = temp_cache, dataset_name = "pof_morador_data",
-    year = "2017-2018", register = "morador", refresh = TRUE
+    cache_dir = temp_cache,
+    dataset_name = "pof_morador_data",
+    year = "2017-2018",
+    register = "morador",
+    refresh = TRUE
   )
   expect_null(result)
 })
@@ -885,8 +984,11 @@ test_that(".pof_check_cache returns NULL when arrow is not available", {
   temp_cache <- withr::local_tempdir()
   local_mocked_bindings(.has_arrow = function() FALSE, .package = "healthbR")
   result <- healthbR:::.pof_check_cache(
-    cache_dir = temp_cache, dataset_name = "pof_morador_data",
-    year = "2017-2018", register = "morador", refresh = FALSE
+    cache_dir = temp_cache,
+    dataset_name = "pof_morador_data",
+    year = "2017-2018",
+    register = "morador",
+    refresh = FALSE
   )
   expect_null(result)
 })
@@ -894,8 +996,10 @@ test_that(".pof_check_cache returns NULL when arrow is not available", {
 # --- .pof_create_survey_design() extended tests ---
 
 test_that(".pof_create_survey_design errors when survey is not available", {
-  skip_if(requireNamespace("survey", quietly = TRUE),
-          "Test requires survey to NOT be installed")
+  skip_if(
+    requireNamespace("survey", quietly = TRUE),
+    "Test requires survey to NOT be installed"
+  )
 
   df <- tibble::tibble(PESO_FINAL = 1, ESTRATO_POF = 1, COD_UPA = 1)
   expect_error(
@@ -905,8 +1009,10 @@ test_that(".pof_create_survey_design errors when survey is not available", {
 })
 
 test_that(".pof_create_survey_design errors when srvyr is not available", {
-  skip_if(requireNamespace("srvyr", quietly = TRUE),
-          "Test requires srvyr to NOT be installed")
+  skip_if(
+    requireNamespace("srvyr", quietly = TRUE),
+    "Test requires srvyr to NOT be installed"
+  )
 
   df <- tibble::tibble(PESO_FINAL = 1, ESTRATO_POF = 1, COD_UPA = 1)
   expect_error(
@@ -1039,31 +1145,48 @@ test_that("pof_cache_dir appends 'pof' to custom dir", {
 # --- pof_data() parameter validation extended tests ---
 
 test_that("pof_data errors on invalid year", {
-  expect_error(pof_data(year = "2020-2021", cache_dir = tempdir()), "not available")
+  expect_error(
+    pof_data(year = "2020-2021", cache_dir = tempdir()),
+    "not available"
+  )
   expect_error(pof_data(year = "1990", cache_dir = tempdir()), "not available")
 })
 
 test_that("pof_data errors on register not available for year", {
   expect_error(
-    pof_data(year = "2002-2003", register = "consumo_alimentar", cache_dir = tempdir()),
+    pof_data(
+      year = "2002-2003",
+      register = "consumo_alimentar",
+      cache_dir = tempdir()
+    ),
     "not available"
   )
   expect_error(
-    pof_data(year = "2017-2018", register = "despesa_90dias", cache_dir = tempdir()),
+    pof_data(
+      year = "2017-2018",
+      register = "despesa_90dias",
+      cache_dir = tempdir()
+    ),
     "not available"
   )
 })
 
 test_that("pof_data errors on completely invalid register", {
   expect_error(
-    pof_data(year = "2017-2018", register = "nonexistent", cache_dir = tempdir()),
+    pof_data(
+      year = "2017-2018",
+      register = "nonexistent",
+      cache_dir = tempdir()
+    ),
     "not available"
   )
 })
 
 test_that("pof_data with as_survey=TRUE checks srvyr", {
-  skip_if(requireNamespace("srvyr", quietly = TRUE),
-          "Test requires srvyr to NOT be installed")
+  skip_if(
+    requireNamespace("srvyr", quietly = TRUE),
+    "Test requires srvyr to NOT be installed"
+  )
   expect_error(
     pof_data(year = "2017-2018", as_survey = TRUE, cache_dir = tempdir()),
     "srvyr"
@@ -1073,19 +1196,30 @@ test_that("pof_data with as_survey=TRUE checks srvyr", {
 # --- pof_dictionary() parameter validation tests ---
 
 test_that("pof_dictionary validates year parameter", {
-  expect_error(pof_dictionary(year = "2000-2001", cache_dir = tempdir()), "not available")
+  expect_error(
+    pof_dictionary(year = "2000-2001", cache_dir = tempdir()),
+    "not available"
+  )
 })
 
 test_that("pof_dictionary validates register parameter when given", {
   expect_error(
-    pof_dictionary(year = "2017-2018", register = "invalid_reg", cache_dir = tempdir()),
+    pof_dictionary(
+      year = "2017-2018",
+      register = "invalid_reg",
+      cache_dir = tempdir()
+    ),
     "not available"
   )
 })
 
 test_that("pof_dictionary validates register availability per year", {
   expect_error(
-    pof_dictionary(year = "2002-2003", register = "consumo_alimentar", cache_dir = tempdir()),
+    pof_dictionary(
+      year = "2002-2003",
+      register = "consumo_alimentar",
+      cache_dir = tempdir()
+    ),
     "not available"
   )
 })
@@ -1101,7 +1235,11 @@ test_that("pof_variables validates year", {
 
 test_that("pof_variables validates register", {
   expect_error(
-    pof_variables(year = "2017-2018", register = "bad_register", cache_dir = tempdir()),
+    pof_variables(
+      year = "2017-2018",
+      register = "bad_register",
+      cache_dir = tempdir()
+    ),
     "not available"
   )
 })
@@ -1131,22 +1269,34 @@ test_that(".pof_download_documentation uses cached file when present", {
 test_that(".pof_download_register builds correct dataset_name", {
   # mock all the download functions
   temp_cache <- withr::local_tempdir()
-  fake_df <- tibble::tibble(COD_UPA = "1", ESTRATO_POF = "1",
-                            PESO_FINAL = "100", UF = "33")
+  fake_df <- tibble::tibble(
+    COD_UPA = "1",
+    ESTRATO_POF = "1",
+    PESO_FINAL = "100",
+    UF = "33"
+  )
 
   local_mocked_bindings(
     .pof_download_data = function(year, cache_dir) "fake.zip",
-    pof_dictionary = function(...) tibble::tibble(
-      variable = "COD_UPA", position = 1L, length = 3L,
-      register = "morador", description = "UPA"
-    ),
+    pof_dictionary = function(...) {
+      tibble::tibble(
+        variable = "COD_UPA",
+        position = 1L,
+        length = 3L,
+        register = "morador",
+        description = "UPA"
+      )
+    },
     .pof_read_fwf = function(...) fake_df,
     .cache_append_partitioned = function(...) invisible(NULL),
     .package = "healthbR"
   )
 
   result <- healthbR:::.pof_download_register(
-    "2017-2018", "morador", temp_cache, "pof_morador_data"
+    "2017-2018",
+    "morador",
+    temp_cache,
+    "pof_morador_data"
   )
   expect_s3_class(result, "tbl_df")
   expect_true("year" %in% names(result))
@@ -1166,8 +1316,11 @@ test_that("pof_register_files entries match pof_valid_registers", {
   for (yr in pof_years()) {
     file_regs <- names(healthbR:::pof_register_files[[yr]])
     valid_regs <- healthbR:::pof_valid_registers[[yr]]
-    expect_equal(sort(file_regs), sort(valid_regs),
-                 info = paste("mismatch for", yr))
+    expect_equal(
+      sort(file_regs),
+      sort(valid_regs),
+      info = paste("mismatch for", yr)
+    )
   }
 })
 
@@ -1324,8 +1477,7 @@ test_that(".pof_parse_dictionary parses Excel with standard header", {
 
   # sheet: "Morador" with standard header at row 3
   morador_df <- data.frame(
-    X1 = c("REGISTRO - MORADOR", NA,
-            "Posicao Inicial", "1", "4"),
+    X1 = c("REGISTRO - MORADOR", NA, "Posicao Inicial", "1", "4"),
     X2 = c(NA, NA, "Tamanho", "3", "2"),
     X3 = c(NA, NA, "Codigo da variavel", "COD_UPA", "V0403"),
     X4 = c(NA, NA, "Descricao da variavel", "Codigo UPA", "Idade"),
@@ -1359,8 +1511,7 @@ test_that(".pof_parse_dictionary maps sheet names to register names correctly", 
   # create two sheets: Domicilio and Rendimento
   make_sheet <- function(title) {
     data.frame(
-      X1 = c(paste("REGISTRO -", title), NA,
-              "Posicao Inicial", "1"),
+      X1 = c(paste("REGISTRO -", title), NA, "Posicao Inicial", "1"),
       X2 = c(NA, NA, "Tamanho", "5"),
       X3 = c(NA, NA, "Codigo da variavel", "VAR1"),
       X4 = c(NA, NA, "Descricao da variavel", "Variable 1"),
@@ -1368,10 +1519,13 @@ test_that(".pof_parse_dictionary maps sheet names to register names correctly", 
     )
   }
 
-  writexl::write_xlsx(list(
-    "Domicilio" = make_sheet("DOMICILIO"),
-    "Rendimento" = make_sheet("RENDIMENTO")
-  ), dict_path)
+  writexl::write_xlsx(
+    list(
+      "Domicilio" = make_sheet("DOMICILIO"),
+      "Rendimento" = make_sheet("RENDIMENTO")
+    ),
+    dict_path
+  )
 
   result <- healthbR:::.pof_parse_dictionary(dict_path, "2017-2018")
 
@@ -1464,10 +1618,13 @@ test_that(".pof_parse_dictionary skips non-register sheets", {
     stringsAsFactors = FALSE
   )
 
-  writexl::write_xlsx(list(
-    "Morador" = valid_sheet,
-    "Notas" = invalid_sheet
-  ), dict_path)
+  writexl::write_xlsx(
+    list(
+      "Morador" = valid_sheet,
+      "Notas" = invalid_sheet
+    ),
+    dict_path
+  )
 
   result <- healthbR:::.pof_parse_dictionary(dict_path, "2017-2018")
   expect_equal(unique(result$register), "morador")
@@ -1482,10 +1639,13 @@ test_that(".pof_parse_dictionary aborts when no parseable sheets", {
   dict_path <- file.path(temp_dir, "dictionary.xlsx")
 
   # only non-matching sheets
-  writexl::write_xlsx(list(
-    "Notas" = data.frame(X1 = "Notes"),
-    "Instrucoes" = data.frame(X1 = "Instructions")
-  ), dict_path)
+  writexl::write_xlsx(
+    list(
+      "Notas" = data.frame(X1 = "Notes"),
+      "Instrucoes" = data.frame(X1 = "Instructions")
+    ),
+    dict_path
+  )
 
   expect_error(
     healthbR:::.pof_parse_dictionary(dict_path, "2017-2018"),
@@ -1638,7 +1798,9 @@ test_that(".pof_download_and_parse_dictionary orchestrates download + parse", {
 
   # Create a real Excel dictionary file in a temp zip
   dict_excel_dir <- file.path(tempdir(), "pof_mock_dict")
-  if (dir.exists(dict_excel_dir)) unlink(dict_excel_dir, recursive = TRUE)
+  if (dir.exists(dict_excel_dir)) {
+    unlink(dict_excel_dir, recursive = TRUE)
+  }
   dir.create(dict_excel_dir, recursive = TRUE)
 
   sheet_df <- data.frame(
@@ -1664,7 +1826,10 @@ test_that(".pof_download_and_parse_dictionary orchestrates download + parse", {
     .package = "healthbR"
   )
 
-  result <- healthbR:::.pof_download_and_parse_dictionary("2017-2018", temp_cache)
+  result <- healthbR:::.pof_download_and_parse_dictionary(
+    "2017-2018",
+    temp_cache
+  )
 
   expect_s3_class(result, "tbl_df")
   expect_true(nrow(result) > 0)
@@ -1680,7 +1845,9 @@ test_that(".pof_download_and_parse_dictionary aborts when no dict file found", {
 
   # create a zip with only a .txt file (no Excel)
   txt_dir <- file.path(tempdir(), "pof_no_dict")
-  if (dir.exists(txt_dir)) unlink(txt_dir, recursive = TRUE)
+  if (dir.exists(txt_dir)) {
+    unlink(txt_dir, recursive = TRUE)
+  }
   dir.create(txt_dir, recursive = TRUE)
   writeLines("readme", file.path(txt_dir, "README.txt"))
 
@@ -1766,16 +1933,24 @@ test_that(".pof_read_fwf reads fixed-width data correctly", {
 
 test_that(".pof_read_fwf errors on unknown year", {
   expect_error(
-    healthbR:::.pof_read_fwf("fake.zip", "morador",
-                              tibble::tibble(), "1990-1991"),
+    healthbR:::.pof_read_fwf(
+      "fake.zip",
+      "morador",
+      tibble::tibble(),
+      "1990-1991"
+    ),
     "No file mapping"
   )
 })
 
 test_that(".pof_read_fwf errors on unknown register", {
   expect_error(
-    healthbR:::.pof_read_fwf("fake.zip", "nonexistent",
-                              tibble::tibble(), "2017-2018"),
+    healthbR:::.pof_read_fwf(
+      "fake.zip",
+      "nonexistent",
+      tibble::tibble(),
+      "2017-2018"
+    ),
     "Unknown register"
   )
 })
@@ -1791,8 +1966,11 @@ test_that(".pof_read_fwf errors when file not found in zip", {
   })
 
   dict <- tibble::tibble(
-    variable = "VAR1", position = 1L, length = 3L,
-    register = "morador", description = "test"
+    variable = "VAR1",
+    position = 1L,
+    length = 3L,
+    register = "morador",
+    description = "test"
   )
 
   expect_error(
@@ -1812,8 +1990,11 @@ test_that(".pof_read_fwf errors when dictionary has no specs for register", {
 
   # dictionary with different register
   dict <- tibble::tibble(
-    variable = "VAR1", position = 1L, length = 3L,
-    register = "domicilio", description = "test"
+    variable = "VAR1",
+    position = 1L,
+    length = 3L,
+    register = "domicilio",
+    description = "test"
   )
 
   expect_error(
@@ -1857,7 +2038,9 @@ test_that(".pof_download_post_strat returns NULL when no post-strat file exists"
 
   # create a zip with only a README
   txt_dir <- file.path(tempdir(), "pof_ps_test")
-  if (dir.exists(txt_dir)) unlink(txt_dir, recursive = TRUE)
+  if (dir.exists(txt_dir)) {
+    unlink(txt_dir, recursive = TRUE)
+  }
   dir.create(txt_dir, recursive = TRUE)
   writeLines("readme", file.path(txt_dir, "readme.txt"))
 
@@ -1905,7 +2088,9 @@ test_that(".pof_download_post_strat reads Excel post-strat file", {
 
   temp_cache <- withr::local_tempdir()
   ps_dir <- file.path(tempdir(), "pof_ps_excel_test")
-  if (dir.exists(ps_dir)) unlink(ps_dir, recursive = TRUE)
+  if (dir.exists(ps_dir)) {
+    unlink(ps_dir, recursive = TRUE)
+  }
   dir.create(ps_dir, recursive = TRUE)
 
   # create an Excel post-strat file
@@ -1937,11 +2122,16 @@ test_that(".pof_download_post_strat reads Excel post-strat file", {
 test_that(".pof_download_post_strat reads text post-strat file", {
   temp_cache <- withr::local_tempdir()
   ps_dir <- file.path(tempdir(), "pof_ps_txt_test")
-  if (dir.exists(ps_dir)) unlink(ps_dir, recursive = TRUE)
+  if (dir.exists(ps_dir)) {
+    unlink(ps_dir, recursive = TRUE)
+  }
   dir.create(ps_dir, recursive = TRUE)
 
   # create a semicolon-delimited text post-strat file
-  writeLines("ESTRATO;TOTAL\n1;1000\n2;2000", file.path(ps_dir, "pos_estratificacao.txt"))
+  writeLines(
+    "ESTRATO;TOTAL\n1;1000\n2;2000",
+    file.path(ps_dir, "pos_estratificacao.txt")
+  )
 
   mock_zip <- file.path(temp_cache, "pof_2017-2018_doc.zip")
   withr::with_dir(ps_dir, {
@@ -1979,14 +2169,16 @@ test_that("pof_data orchestration works with mocked downloads", {
   local_mocked_bindings(
     .pof_download_data = function(...) "fake.zip",
     .pof_read_fwf = function(...) mock_data,
-    pof_dictionary = function(...) tibble::tibble(
-      variable = c("COD_UPA", "V0403"),
-      description = c("UPA", "Age"),
-      position = 1:2,
-      length = c(3L, 1L),
-      register = "morador",
-      year = "2017-2018"
-    ),
+    pof_dictionary = function(...) {
+      tibble::tibble(
+        variable = c("COD_UPA", "V0403"),
+        description = c("UPA", "Age"),
+        position = 1:2,
+        length = c(3L, 1L),
+        register = "morador",
+        year = "2017-2018"
+      )
+    },
     .cache_append_partitioned = function(...) invisible(NULL),
     .has_arrow = function() FALSE,
     .has_partitioned_cache = function(...) FALSE,
@@ -2016,22 +2208,28 @@ test_that("pof_data with vars selects requested variables", {
   local_mocked_bindings(
     .pof_download_data = function(...) "fake.zip",
     .pof_read_fwf = function(...) mock_data,
-    pof_dictionary = function(...) tibble::tibble(
-      variable = c("COD_UPA", "V0403", "V0404", "EXTRA"),
-      description = c("UPA", "Age", "Sex", "Extra"),
-      position = 1:4,
-      length = rep(3L, 4),
-      register = "morador",
-      year = "2017-2018"
-    ),
+    pof_dictionary = function(...) {
+      tibble::tibble(
+        variable = c("COD_UPA", "V0403", "V0404", "EXTRA"),
+        description = c("UPA", "Age", "Sex", "Extra"),
+        position = 1:4,
+        length = rep(3L, 4),
+        register = "morador",
+        year = "2017-2018"
+      )
+    },
     .cache_append_partitioned = function(...) invisible(NULL),
     .has_arrow = function() FALSE,
     .has_partitioned_cache = function(...) FALSE,
     .package = "healthbR"
   )
 
-  result <- pof_data("2017-2018", "morador", vars = c("V0403"),
-                     cache_dir = temp_cache)
+  result <- pof_data(
+    "2017-2018",
+    "morador",
+    vars = c("V0403"),
+    cache_dir = temp_cache
+  )
   expect_true("V0403" %in% names(result))
   # design vars should still be there
   expect_true("COD_UPA" %in% names(result))
@@ -2058,14 +2256,16 @@ test_that("pof_data with as_survey returns tbl_svy via mocking", {
   local_mocked_bindings(
     .pof_download_data = function(...) "fake.zip",
     .pof_read_fwf = function(...) mock_data,
-    pof_dictionary = function(...) tibble::tibble(
-      variable = c("COD_UPA", "V0403"),
-      description = c("UPA", "Age"),
-      position = 1:2,
-      length = c(3L, 1L),
-      register = "morador",
-      year = "2017-2018"
-    ),
+    pof_dictionary = function(...) {
+      tibble::tibble(
+        variable = c("COD_UPA", "V0403"),
+        description = c("UPA", "Age"),
+        position = 1:2,
+        length = c(3L, 1L),
+        register = "morador",
+        year = "2017-2018"
+      )
+    },
     .cache_append_partitioned = function(...) invisible(NULL),
     .has_arrow = function() FALSE,
     .has_partitioned_cache = function(...) FALSE,
@@ -2073,8 +2273,12 @@ test_that("pof_data with as_survey returns tbl_svy via mocking", {
     .package = "healthbR"
   )
 
-  result <- pof_data("2017-2018", "morador", as_survey = TRUE,
-                     cache_dir = temp_cache)
+  result <- pof_data(
+    "2017-2018",
+    "morador",
+    as_survey = TRUE,
+    cache_dir = temp_cache
+  )
   expect_s3_class(result, "tbl_svy")
 })
 
@@ -2140,8 +2344,11 @@ test_that("pof_dictionary downloads and caches when no cache exists", {
   expect_equal(nrow(result), 1)
 
   # verify cache was created (pof_cache_dir(temp_cache) returns temp_cache directly)
-  cache_files <- list.files(temp_cache,
-                            pattern = "pof_dictionary", recursive = TRUE)
+  cache_files <- list.files(
+    temp_cache,
+    pattern = "pof_dictionary",
+    recursive = TRUE
+  )
   expect_true(length(cache_files) > 0)
 })
 
@@ -2221,8 +2428,11 @@ test_that("pof_dictionary filters by register", {
     .package = "healthbR"
   )
 
-  result <- pof_dictionary("2017-2018", register = "morador",
-                           cache_dir = temp_cache)
+  result <- pof_dictionary(
+    "2017-2018",
+    register = "morador",
+    cache_dir = temp_cache
+  )
   expect_true(all(tolower(result$register) == "morador"))
   expect_equal(nrow(result), 2)
 })
@@ -2252,7 +2462,13 @@ test_that("pof_variables returns simplified view", {
 
   result <- pof_variables("2017-2018", cache_dir = temp_cache)
   expect_s3_class(result, "tbl_df")
-  expected_cols <- c("variable", "description", "position", "length", "register")
+  expected_cols <- c(
+    "variable",
+    "description",
+    "position",
+    "length",
+    "register"
+  )
   expect_true(all(expected_cols %in% names(result)))
   # should not include year, decimals, categories
   expect_false("year" %in% names(result))
@@ -2276,8 +2492,7 @@ test_that("pof_variables search filters by term", {
     .package = "healthbR"
   )
 
-  result <- pof_variables("2017-2018", search = "idade",
-                          cache_dir = temp_cache)
+  result <- pof_variables("2017-2018", search = "idade", cache_dir = temp_cache)
   expect_true(nrow(result) >= 1)
   # should match V0403 (description contains "Idade")
   expect_true("V0403" %in% result$variable)
@@ -2301,8 +2516,11 @@ test_that("pof_variables search warns when no match", {
   )
 
   expect_message(
-    result <- pof_variables("2017-2018", search = "zzzznotfound",
-                            cache_dir = temp_cache),
+    result <- pof_variables(
+      "2017-2018",
+      search = "zzzznotfound",
+      cache_dir = temp_cache
+    ),
     "No variables found"
   )
   expect_equal(nrow(result), 0)
@@ -2326,8 +2544,7 @@ test_that("pof_variables search reports count when found", {
   )
 
   expect_message(
-    result <- pof_variables("2017-2018", search = "uf",
-                            cache_dir = temp_cache),
+    result <- pof_variables("2017-2018", search = "uf", cache_dir = temp_cache),
     "Found.*variable"
   )
   expect_true(nrow(result) >= 1)
@@ -2350,8 +2567,11 @@ test_that("pof_variables filters by register", {
     .package = "healthbR"
   )
 
-  result <- pof_variables("2017-2018", register = "domicilio",
-                          cache_dir = temp_cache)
+  result <- pof_variables(
+    "2017-2018",
+    register = "domicilio",
+    cache_dir = temp_cache
+  )
   expect_equal(nrow(result), 1)
   expect_equal(result$variable, "ITEM1")
 })
@@ -2426,12 +2646,20 @@ test_that("pof_data with lazy=TRUE returns lazy query from cache", {
   )
   arrow::write_parquet(mock_df, file.path(ds_dir, "part-0.parquet"))
 
-  result <- pof_data("2017-2018", "morador", lazy = TRUE,
-                     cache_dir = temp_cache)
+  result <- pof_data(
+    "2017-2018",
+    "morador",
+    lazy = TRUE,
+    cache_dir = temp_cache
+  )
   # lazy result should not be a tibble yet
-  expect_true(!inherits(result, "tbl_df") || inherits(result, "ArrowObject") ||
-              inherits(result, "arrow_dplyr_query") || inherits(result, "Dataset") ||
-              inherits(result, "FileSystemDataset"))
+  expect_true(
+    !inherits(result, "tbl_df") ||
+      inherits(result, "ArrowObject") ||
+      inherits(result, "arrow_dplyr_query") ||
+      inherits(result, "Dataset") ||
+      inherits(result, "FileSystemDataset")
+  )
   # collecting should give a tibble
   collected <- dplyr::collect(result)
   expect_s3_class(collected, "tbl_df")

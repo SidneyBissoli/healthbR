@@ -4,7 +4,6 @@
 # columns as character. These utilities convert columns to their appropriate
 # types based on metadata type specifications.
 
-
 #' Build a named type spec vector from a metadata tibble
 #'
 #' Extracts the `variable` and `type` columns from a metadata tibble
@@ -31,7 +30,9 @@
 #' @return Converted vector.
 #' @noRd
 .convert_column <- function(x, target_type) {
-  if (target_type == "character") return(x)
+  if (target_type == "character") {
+    return(x)
+  }
 
   # convert each distinct value once and spread the result back: DATASUS
   # columns repeat few values over many rows (a month of SIH-SP has 210k
@@ -47,13 +48,14 @@
   # normalize empty/whitespace to NA
   x[!is.na(x) & trimws(x) == ""] <- NA_character_
 
-  switch(target_type,
+  switch(
+    target_type,
     "integer" = suppressWarnings(as.integer(x)),
-    "double"  = suppressWarnings(as.double(x)),
+    "double" = suppressWarnings(as.double(x)),
     "date_dmy" = .parse_date_dmy(x),
     "date_ymd" = .parse_date_ymd(x),
-    "date_ym"  = .parse_date_ym(x),
-    "date"     = .parse_date_iso(x),
+    "date_ym" = .parse_date_ym(x),
+    "date" = .parse_date_iso(x),
     {
       cli::cli_warn("Unknown type {.val {target_type}}, keeping as character.")
       x

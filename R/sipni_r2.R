@@ -54,21 +54,33 @@ sipni_r2_manifest_paths <- c(
 #' @noRd
 .sipni_r2_manifest_summary <- function(which, cache_dir) {
   manifest <- .r2_manifest(sipni_r2_manifest_paths[[which]], cache_dir)
-  if (is.null(manifest) || is.null(manifest$partitions)) return(NULL)
+  if (is.null(manifest) || is.null(manifest$partitions)) {
+    return(NULL)
+  }
 
   parts <- manifest$partitions
   keys <- names(parts)
 
   get_chr <- function(field) {
-    vapply(parts, function(p) {
-      v <- p[[field]]
-      if (is.null(v) || length(v) == 0) NA_character_ else as.character(v[1])
-    }, character(1), USE.NAMES = FALSE)
+    vapply(
+      parts,
+      function(p) {
+        v <- p[[field]]
+        if (is.null(v) || length(v) == 0) NA_character_ else as.character(v[1])
+      },
+      character(1),
+      USE.NAMES = FALSE
+    )
   }
-  records <- vapply(parts, function(p) {
-    v <- p[["total_records"]]
-    if (is.null(v) || length(v) == 0) NA_real_ else as.numeric(v[1])
-  }, numeric(1), USE.NAMES = FALSE)
+  records <- vapply(
+    parts,
+    function(p) {
+      v <- p[["total_records"]]
+      if (is.null(v) || length(v) == 0) NA_real_ else as.numeric(v[1])
+    },
+    numeric(1),
+    USE.NAMES = FALSE
+  )
 
   if (which == "microdados") {
     year <- as.integer(substr(keys, 1, 4))
@@ -104,25 +116,38 @@ sipni_r2_manifest_paths <- c(
 #' @noRd
 .sipni_r2_provenance <- function(ftp_source, api_source, params, cache_dir) {
   out <- list()
-  tryCatch({
-    if (identical(api_source, "r2") && length(params$api_years) > 0) {
-      s <- .sipni_r2_manifest_summary("microdados", cache_dir)
-      if (!is.null(s)) {
-        out <- c(out, list(s[s$year %in% params$api_years &
-                               s$month %in% params$month_vals, ]))
+  tryCatch(
+    {
+      if (identical(api_source, "r2") && length(params$api_years) > 0) {
+        s <- .sipni_r2_manifest_summary("microdados", cache_dir)
+        if (!is.null(s)) {
+          out <- c(
+            out,
+            list(s[
+              s$year %in% params$api_years & s$month %in% params$month_vals,
+            ])
+          )
+        }
       }
-    }
-    if (identical(ftp_source, "r2") && length(params$ftp_years) > 0) {
-      which <- if (toupper(params$type) == "CPNI") "cobertura" else "doses"
-      s <- .sipni_r2_manifest_summary(which, cache_dir)
-      if (!is.null(s)) {
-        out <- c(out, list(s[s$year %in% params$ftp_years &
-                               s$uf %in% params$target_ufs, ]))
+      if (identical(ftp_source, "r2") && length(params$ftp_years) > 0) {
+        which <- if (toupper(params$type) == "CPNI") "cobertura" else "doses"
+        s <- .sipni_r2_manifest_summary(which, cache_dir)
+        if (!is.null(s)) {
+          out <- c(
+            out,
+            list(s[
+              s$year %in% params$ftp_years & s$uf %in% params$target_ufs,
+            ])
+          )
+        }
       }
-    }
-    if (length(out) == 0) return(NULL)
-    dplyr::bind_rows(out)
-  }, error = function(e) NULL)
+      if (length(out) == 0) {
+        return(NULL)
+      }
+      dplyr::bind_rows(out)
+    },
+    error = function(e) NULL
+  )
 }
 
 
@@ -145,20 +170,24 @@ sipni_r2_manifest_paths <- c(
 #' @return A tibble of distinct combos (possibly empty).
 #' @noRd
 .sipni_r2_cached_combos <- function(cache_dir, dataset_name, cols) {
-  proto <- list(year = integer(0), month = integer(0),
-                uf_source = character(0))
+  proto <- list(year = integer(0), month = integer(0), uf_source = character(0))
   empty <- tibble::as_tibble(proto[cols])
   if (!.has_arrow() || !.has_partitioned_cache(cache_dir, dataset_name)) {
     return(empty)
   }
-  tryCatch({
-    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
-                              unify_schemas = TRUE)
-    ds |>
-      dplyr::select(dplyr::all_of(cols)) |>
-      dplyr::distinct() |>
-      dplyr::collect()
-  }, error = function(e) empty)
+  tryCatch(
+    {
+      ds <- arrow::open_dataset(
+        file.path(cache_dir, dataset_name),
+        unify_schemas = TRUE
+      )
+      ds |>
+        dplyr::select(dplyr::all_of(cols)) |>
+        dplyr::distinct() |>
+        dplyr::collect()
+    },
+    error = function(e) empty
+  )
 }
 
 
@@ -178,8 +207,12 @@ sipni_r2_manifest_paths <- c(
   df$mes <- NULL
   df$uf <- NULL
   cols <- names(df)
-  df[, c("year", "month", "uf_source",
-         setdiff(cols, c("year", "month", "uf_source")))]
+  df[, c(
+    "year",
+    "month",
+    "uf_source",
+    setdiff(cols, c("year", "month", "uf_source"))
+  )]
 }
 
 
@@ -191,35 +224,61 @@ sipni_r2_manifest_paths <- c(
 #'
 #' @return list(results = list of tibbles, failed_labels = character).
 #' @noRd
-.sipni_r2_fetch_microdados <- function(years, months, ufs,
-                                       cache, cache_dir, creds) {
+.sipni_r2_fetch_microdados <- function(
+  years,
+  months,
+  ufs,
+  cache,
+  cache_dir,
+  creds
+) {
   cache_dir <- .sipni_cache_dir(cache_dir)
   dataset_name <- "sipni_r2_data"
   results <- list()
   failed <- character(0)
 
   # 1. serve cached combos locally
-  wanted <- expand.grid(year = as.integer(years), month = as.integer(months),
-                        uf_source = ufs, stringsAsFactors = FALSE)
-  have <- tibble::tibble(year = integer(0), month = integer(0),
-                         uf_source = character(0))
+  wanted <- expand.grid(
+    year = as.integer(years),
+    month = as.integer(months),
+    uf_source = ufs,
+    stringsAsFactors = FALSE
+  )
+  have <- tibble::tibble(
+    year = integer(0),
+    month = integer(0),
+    uf_source = character(0)
+  )
   if (isTRUE(cache)) {
-    combos <- .sipni_r2_cached_combos(cache_dir, dataset_name,
-                                      c("year", "month", "uf_source"))
+    combos <- .sipni_r2_cached_combos(
+      cache_dir,
+      dataset_name,
+      c("year", "month", "uf_source")
+    )
     if (nrow(combos) > 0) {
-      have <- dplyr::inner_join(wanted, combos,
-                                by = c("year", "month", "uf_source"))
+      have <- dplyr::inner_join(
+        wanted,
+        combos,
+        by = c("year", "month", "uf_source")
+      )
       if (nrow(have) > 0) {
-        ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
-                                  unify_schemas = TRUE)
+        ds <- arrow::open_dataset(
+          file.path(cache_dir, dataset_name),
+          unify_schemas = TRUE
+        )
         cached <- ds |>
-          dplyr::filter(.data$year %in% !!unique(have$year),
-                        .data$month %in% !!unique(have$month),
-                        .data$uf_source %in% !!unique(have$uf_source)) |>
+          dplyr::filter(
+            .data$year %in% !!unique(have$year),
+            .data$month %in% !!unique(have$month),
+            .data$uf_source %in% !!unique(have$uf_source)
+          ) |>
           dplyr::collect()
         # the coarse filter may bring extra combos; trim to the wanted set
-        cached <- .r2_trim_to_wanted(cached, wanted,
-                                     c("year", "month", "uf_source"))
+        cached <- .r2_trim_to_wanted(
+          cached,
+          wanted,
+          c("year", "month", "uf_source")
+        )
         cached <- .sipni_front_cols(cached, c("year", "month", "uf_source"))
         if (nrow(cached) > 0) results <- c(results, list(cached))
       }
@@ -235,13 +294,18 @@ sipni_r2_manifest_paths <- c(
   for (y in sort(unique(todo$year))) {
     todo_y <- todo[todo$year == y, ]
     ds <- tryCatch(
-      .r2_open_dataset(paste0(sipni_r2_prefix_microdados, "/ano=", y), creds,
-                       partition_cols = c("mes", "uf")),
+      .r2_open_dataset(
+        paste0(sipni_r2_prefix_microdados, "/ano=", y),
+        creds,
+        partition_cols = c("mes", "uf")
+      ),
       error = function(e) NULL
     )
     if (is.null(ds)) {
-      failed <- c(failed, paste0("R2 ", y, "-",
-                                 sprintf("%02d", sort(unique(todo_y$month)))))
+      failed <- c(
+        failed,
+        paste0("R2 ", y, "-", sprintf("%02d", sort(unique(todo_y$month))))
+      )
       next
     }
 
@@ -251,12 +315,14 @@ sipni_r2_manifest_paths <- c(
       cli::cli_inform(c(
         "i" = "Reading SI-PNI microdata from R2: {y}-{mes_chr} ({length(need_ufs)} UF(s))..."
       ))
-      df <- tryCatch({
-        ds |>
-          dplyr::filter(.data$mes == !!mes_chr,
-                        .data$uf %in% !!need_ufs) |>
-          dplyr::collect()
-      }, error = function(e) NULL)
+      df <- tryCatch(
+        {
+          ds |>
+            dplyr::filter(.data$mes == !!mes_chr, .data$uf %in% !!need_ufs) |>
+            dplyr::collect()
+        },
+        error = function(e) NULL
+      )
 
       if (is.null(df) || nrow(df) == 0) {
         failed <- c(failed, paste0("R2 ", y, "-", mes_chr))
@@ -265,8 +331,12 @@ sipni_r2_manifest_paths <- c(
 
       df <- .sipni_r2_shape_microdados(df, y)
       if (isTRUE(cache)) {
-        .cache_append_partitioned(df, cache_dir, dataset_name,
-                                  c("uf_source", "year", "month"))
+        .cache_append_partitioned(
+          df,
+          cache_dir,
+          dataset_name,
+          c("uf_source", "year", "month")
+        )
       }
       results <- c(results, list(df))
     }
@@ -289,30 +359,50 @@ sipni_r2_manifest_paths <- c(
 #'
 #' @return list(results = list of tibbles, failed_labels = character).
 #' @noRd
-.sipni_r2_fetch_agregados <- function(type, years, ufs,
-                                      cache, cache_dir, creds) {
+.sipni_r2_fetch_agregados <- function(
+  type,
+  years,
+  ufs,
+  cache,
+  cache_dir,
+  creds
+) {
   cache_dir <- .sipni_cache_dir(cache_dir)
   type <- toupper(type)
-  prefix <- if (type == "CPNI") sipni_r2_prefix_cobertura else sipni_r2_prefix_doses
+  prefix <- if (type == "CPNI") {
+    sipni_r2_prefix_cobertura
+  } else {
+    sipni_r2_prefix_doses
+  }
   dataset_name <- stringr::str_c("sipni_", tolower(type), "_data")
   results <- list()
   failed <- character(0)
 
   # 1. serve cached combos locally (cache shared with the FTP path)
-  wanted <- expand.grid(year = as.integer(years), uf_source = ufs,
-                        stringsAsFactors = FALSE)
+  wanted <- expand.grid(
+    year = as.integer(years),
+    uf_source = ufs,
+    stringsAsFactors = FALSE
+  )
   have <- tibble::tibble(year = integer(0), uf_source = character(0))
   if (isTRUE(cache)) {
-    combos <- .sipni_r2_cached_combos(cache_dir, dataset_name,
-                                      c("year", "uf_source"))
+    combos <- .sipni_r2_cached_combos(
+      cache_dir,
+      dataset_name,
+      c("year", "uf_source")
+    )
     if (nrow(combos) > 0) {
       have <- dplyr::inner_join(wanted, combos, by = c("year", "uf_source"))
       if (nrow(have) > 0) {
-        ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
-                                  unify_schemas = TRUE)
+        ds <- arrow::open_dataset(
+          file.path(cache_dir, dataset_name),
+          unify_schemas = TRUE
+        )
         cached <- ds |>
-          dplyr::filter(.data$year %in% !!unique(have$year),
-                        .data$uf_source %in% !!unique(have$uf_source)) |>
+          dplyr::filter(
+            .data$year %in% !!unique(have$year),
+            .data$uf_source %in% !!unique(have$uf_source)
+          ) |>
           dplyr::collect()
         cached <- .r2_trim_to_wanted(cached, wanted, c("year", "uf_source"))
         cached <- .sipni_front_cols(cached, c("year", "uf_source"))
@@ -332,13 +422,19 @@ sipni_r2_manifest_paths <- c(
     cli::cli_inform(c(
       "i" = "Reading SI-PNI {type} from R2: {y} ({length(need_ufs)} UF(s))..."
     ))
-    df <- tryCatch({
-      ds <- .r2_open_dataset(paste0(prefix, "/ano=", y), creds,
-                             partition_cols = "uf")
-      ds |>
-        dplyr::filter(.data$uf %in% !!need_ufs) |>
-        dplyr::collect()
-    }, error = function(e) NULL)
+    df <- tryCatch(
+      {
+        ds <- .r2_open_dataset(
+          paste0(prefix, "/ano=", y),
+          creds,
+          partition_cols = "uf"
+        )
+        ds |>
+          dplyr::filter(.data$uf %in% !!need_ufs) |>
+          dplyr::collect()
+      },
+      error = function(e) NULL
+    )
 
     if (is.null(df) || nrow(df) == 0) {
       failed <- c(failed, paste("R2", type, y))
@@ -356,8 +452,12 @@ sipni_r2_manifest_paths <- c(
     df <- df[, c("year", "uf_source", setdiff(cols, c("year", "uf_source")))]
 
     if (isTRUE(cache)) {
-      .cache_append_partitioned(df, cache_dir, dataset_name,
-                                c("uf_source", "year"))
+      .cache_append_partitioned(
+        df,
+        cache_dir,
+        dataset_name,
+        c("uf_source", "year")
+      )
     }
     results <- c(results, list(df))
   }
@@ -383,14 +483,21 @@ sipni_r2_manifest_paths <- c(
 .sipni_r2_lazy <- function(params, backend, creds) {
   has_ftp <- length(params$ftp_years) > 0
   has_api <- length(params$api_years) > 0
-  if (has_ftp && has_api) return(NULL)
+  if (has_ftp && has_api) {
+    return(NULL)
+  }
 
   if (has_api) {
-    ds <- .r2_open_dataset(sipni_r2_prefix_microdados, creds,
-                           partition_cols = c("ano", "mes", "uf"))
+    ds <- .r2_open_dataset(
+      sipni_r2_prefix_microdados,
+      creds,
+      partition_cols = c("ano", "mes", "uf")
+    )
     ds <- ds |>
-      dplyr::filter(.data$ano %in% !!as.character(params$api_years),
-                    .data$uf %in% !!params$target_ufs)
+      dplyr::filter(
+        .data$ano %in% !!as.character(params$api_years),
+        .data$uf %in% !!params$target_ufs
+      )
     if (length(params$month_vals) < 12) {
       ds <- ds |>
         dplyr::filter(.data$mes %in% !!sprintf("%02d", params$month_vals))
@@ -404,11 +511,17 @@ sipni_r2_manifest_paths <- c(
     # aggregates change layout across years (schema per source file, per
     # the healthbr-data contract) -> union the schemas; costs one footer
     # read per file in the prefix
-    ds <- .r2_open_dataset(prefix, creds, partition_cols = c("ano", "uf"),
-                           unify_schemas = TRUE)
+    ds <- .r2_open_dataset(
+      prefix,
+      creds,
+      partition_cols = c("ano", "uf"),
+      unify_schemas = TRUE
+    )
     ds <- ds |>
-      dplyr::filter(.data$ano %in% !!as.character(params$ftp_years),
-                    .data$uf %in% !!params$target_ufs)
+      dplyr::filter(
+        .data$ano %in% !!as.character(params$ftp_years),
+        .data$uf %in% !!params$target_ufs
+      )
   }
 
   if (backend == "duckdb") {
@@ -474,8 +587,10 @@ sipni_r2_dict_files <- tibble::tibble(
       m <- regmatches(p, regexec("^([0-9]+)-([0-9]+)$", p))[[1]]
       if (length(m) == 3) {
         tibble::tibble(
-          code = sprintf(paste0("%0", nchar(m[2]), "d"),
-                         seq(as.integer(m[2]), as.integer(m[3]))),
+          code = sprintf(
+            paste0("%0", nchar(m[2]), "d"),
+            seq(as.integer(m[2]), as.integer(m[3]))
+          ),
           from_range = TRUE
         )
       } else {
@@ -496,9 +611,13 @@ sipni_r2_dict_files <- tibble::tibble(
   })
 
   dplyr::bind_rows(rows) |>
-    dplyr::arrange(.data$from_range) |>   # explicit claims first (stable)
-    dplyr::distinct(.data$variable, .data$description, .data$code,
-                    .keep_all = TRUE) |>
+    dplyr::arrange(.data$from_range) |> # explicit claims first (stable)
+    dplyr::distinct(
+      .data$variable,
+      .data$description,
+      .data$code,
+      .keep_all = TRUE
+    ) |>
     dplyr::arrange(.data$variable, .data$description, .data$code) |>
     dplyr::select("variable", "description", "code", "label")
 }
@@ -522,8 +641,14 @@ sipni_r2_dict_files <- tibble::tibble(
 
   parts <- lapply(seq_len(nrow(sipni_r2_dict_files)), function(i) {
     row <- sipni_r2_dict_files[i, ]
-    path <- paste0(creds$bucket, "/", sipni_r2_prefix_dicionarios, "/",
-                   row$file, ".parquet")
+    path <- paste0(
+      creds$bucket,
+      "/",
+      sipni_r2_prefix_dicionarios,
+      "/",
+      row$file,
+      ".parquet"
+    )
     d <- arrow::read_parquet(fs$path(path))
     if (row$file == "imunocob") {
       tibble::tibble(
@@ -598,8 +723,10 @@ sipni_r2_dict_files <- tibble::tibble(
 #'
 #' # which 2026 microdata months are published?
 #' dplyr::filter(sipni_status("microdados"), year == 2026)
-sipni_status <- function(dataset = c("microdados", "doses", "cobertura"),
-                         cache_dir = NULL) {
+sipni_status <- function(
+  dataset = c("microdados", "doses", "cobertura"),
+  cache_dir = NULL
+) {
   datasets <- match.arg(dataset, several.ok = TRUE)
   cache_dir <- .sipni_cache_dir(cache_dir)
 
@@ -622,9 +749,13 @@ sipni_status <- function(dataset = c("microdados", "doses", "cobertura"),
   }
   if (length(out) == 0) {
     return(tibble::tibble(
-      dataset = character(0), year = integer(0), month = integer(0),
-      uf = character(0), records = numeric(0),
-      processing_timestamp = character(0), source_url = character(0)
+      dataset = character(0),
+      year = integer(0),
+      month = integer(0),
+      uf = character(0),
+      records = numeric(0),
+      processing_timestamp = character(0),
+      source_url = character(0)
     ))
   }
 

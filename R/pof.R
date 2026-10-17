@@ -66,18 +66,37 @@ pof_register_files <- list(
 #' @noRd
 pof_valid_registers <- list(
   "2017-2018" = c(
-    "domicilio", "morador", "caderneta_coletiva", "despesa_individual",
-    "consumo_alimentar", "rendimento", "inventario", "despesa_coletiva",
-    "aluguel_estimado", "outros_rendimentos"
+    "domicilio",
+    "morador",
+    "caderneta_coletiva",
+    "despesa_individual",
+    "consumo_alimentar",
+    "rendimento",
+    "inventario",
+    "despesa_coletiva",
+    "aluguel_estimado",
+    "outros_rendimentos"
   ),
   "2008-2009" = c(
-    "domicilio", "morador", "caderneta_coletiva", "despesa_individual",
-    "consumo_alimentar", "rendimento", "inventario", "despesa_coletiva",
-    "despesa_90dias", "despesa_12meses"
+    "domicilio",
+    "morador",
+    "caderneta_coletiva",
+    "despesa_individual",
+    "consumo_alimentar",
+    "rendimento",
+    "inventario",
+    "despesa_coletiva",
+    "despesa_90dias",
+    "despesa_12meses"
   ),
   "2002-2003" = c(
-    "domicilio", "morador", "caderneta_coletiva", "despesa_individual",
-    "rendimento", "inventario", "despesa_coletiva"
+    "domicilio",
+    "morador",
+    "caderneta_coletiva",
+    "despesa_individual",
+    "rendimento",
+    "inventario",
+    "despesa_coletiva"
   )
 )
 
@@ -122,8 +141,13 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
   if (is.null(valid_registers)) {
     valid_registers <- c(
-      "domicilio", "morador", "caderneta_coletiva",
-      "despesa_individual", "consumo_alimentar", "rendimento", "inventario"
+      "domicilio",
+      "morador",
+      "caderneta_coletiva",
+      "despesa_individual",
+      "consumo_alimentar",
+      "rendimento",
+      "inventario"
     )
   }
 
@@ -170,7 +194,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
   # download with progress
   cli::cli_inform("Downloading from {.url {url}}...")
-  cli::cli_inform("This may take several minutes depending on your connection...")
+  cli::cli_inform(
+    "This may take several minutes depending on your connection..."
+  )
 
   tryCatch(
     {
@@ -178,7 +204,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
       cli::cli_alert_success("Download complete: {.path {zip_file}}")
     },
     error = function(e) {
-      if (file.exists(zip_file)) file.remove(zip_file)
+      if (file.exists(zip_file)) {
+        file.remove(zip_file)
+      }
       cli::cli_abort(c(
         "Failed to download POF data.",
         "x" = "URL: {.url {url}}",
@@ -216,7 +244,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
       cli::cli_alert_success("Documentation downloaded: {.path {zip_file}}")
     },
     error = function(e) {
-      if (file.exists(zip_file)) file.remove(zip_file)
+      if (file.exists(zip_file)) {
+        file.remove(zip_file)
+      }
       cli::cli_abort(c(
         "Failed to download POF documentation.",
         "x" = "URL: {.url {url}}",
@@ -281,15 +311,27 @@ pof_cache_dir <- function(cache_dir = NULL) {
 .pof_find_dictionary_file <- function(extracted_files, year) {
   # look for dictionary Excel file
   # use flexible patterns to handle encoding issues with Portuguese characters
-  xls_files <- extracted_files[grepl("\\.xls", extracted_files, ignore.case = TRUE, useBytes = TRUE)]
+  xls_files <- extracted_files[grepl(
+    "\\.xls",
+    extracted_files,
+    ignore.case = TRUE,
+    useBytes = TRUE
+  )]
 
   # approach 1: direct pattern matching
-  result <- .pof_match_xls_by_pattern(xls_files, c("dicion", "variav", "variaveis"))
-  if (!is.null(result)) return(result)
+  result <- .pof_match_xls_by_pattern(
+    xls_files,
+    c("dicion", "variav", "variaveis")
+  )
+  if (!is.null(result)) {
+    return(result)
+  }
 
   # approach 2: check raw bytes for "Dicion" (handles encoding issues)
   result <- .pof_match_xls_by_bytes(xls_files)
-  if (!is.null(result)) return(result)
+  if (!is.null(result)) {
+    return(result)
+  }
 
   # approach 3: look for files with "dicion" or "variav" in accent-stripped name
   .pof_match_xls_by_stripped(xls_files)
@@ -307,16 +349,20 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
   # mapping: standard_name -> grep pattern
   rename_map <- list(
-    position    = "posicao|inicio|start|pos",
-    length      = "tamanho|length|tam|size",
-    variable    = "codigo|variavel|variable|var|nome",
+    position = "posicao|inicio|start|pos",
+    length = "tamanho|length|tam|size",
+    variable = "codigo|variavel|variable|var|nome",
     description = "descricao|description|desc|rotulo|label",
-    decimals    = "decimais|decimal|dec",
-    categories  = "categor|categ"
+    decimals = "decimais|decimal|dec",
+    categories = "categor|categ"
   )
 
   for (std_name in names(rename_map)) {
-    matched <- col_names[grepl(rename_map[[std_name]], col_names, ignore.case = TRUE)]
+    matched <- col_names[grepl(
+      rename_map[[std_name]],
+      col_names,
+      ignore.case = TRUE
+    )]
     if (length(matched) > 0) {
       names(df)[names(df) == matched[1]] <- std_name
     }
@@ -358,20 +404,32 @@ pof_cache_dir <- function(cache_dir = NULL) {
 #' Parse POF dictionary from Excel file
 #' @noRd
 .pof_parse_dictionary <- function(dict_path, year) {
-  rlang::check_installed("readxl", reason = "to read POF dictionary Excel files")
+  rlang::check_installed(
+    "readxl",
+    reason = "to read POF dictionary Excel files"
+  )
   # read all sheets from Excel file
   sheets <- readxl::excel_sheets(dict_path)
 
   # filter to relevant sheets (register names)
   register_patterns <- c(
-    "domicilio", "morador", "caderneta", "despesa",
-    "consumo", "rendimento", "inventario", "aluguel"
+    "domicilio",
+    "morador",
+    "caderneta",
+    "despesa",
+    "consumo",
+    "rendimento",
+    "inventario",
+    "aluguel"
   )
 
   all_dicts <- purrr::map(sheets, function(sheet) {
     # strip accents and lowercase for matching
     sheet_ascii <- tolower(.strip_accents(sheet))
-    is_register <- any(purrr::map_lgl(register_patterns, ~ grepl(.x, sheet_ascii)))
+    is_register <- any(purrr::map_lgl(
+      register_patterns,
+      ~ grepl(.x, sheet_ascii)
+    ))
 
     if (!is_register) {
       return(NULL)
@@ -386,7 +444,11 @@ pof_cache_dir <- function(cache_dir = NULL) {
         # row 4+: data
 
         # first detect the header row by scanning for "Posi" pattern
-        raw_df <- readxl::read_excel(dict_path, sheet = sheet, col_names = FALSE)
+        raw_df <- readxl::read_excel(
+          dict_path,
+          sheet = sheet,
+          col_names = FALSE
+        )
         header_row <- NULL
         for (i in seq_len(min(10, nrow(raw_df)))) {
           row_vals <- as.character(raw_df[i, ])
@@ -402,7 +464,11 @@ pof_cache_dir <- function(cache_dir = NULL) {
           names(df) <- .clean_names(names(df))
         } else {
           # read skipping rows before the header so the header row becomes col names
-          df <- readxl::read_excel(dict_path, sheet = sheet, skip = header_row - 1)
+          df <- readxl::read_excel(
+            dict_path,
+            sheet = sheet,
+            skip = header_row - 1
+          )
           names(df) <- .clean_names(names(df))
         }
 
@@ -424,8 +490,15 @@ pof_cache_dir <- function(cache_dir = NULL) {
           dplyr::mutate(register = matched_register)
 
         # select only standard columns and convert to character for safe binding
-        standard_cols <- c("position", "length", "decimals", "variable",
-                           "description", "categories", "register")
+        standard_cols <- c(
+          "position",
+          "length",
+          "decimals",
+          "variable",
+          "description",
+          "categories",
+          "register"
+        )
         available_cols <- intersect(standard_cols, names(df))
         df <- df |>
           dplyr::select(dplyr::all_of(available_cols)) |>
@@ -524,8 +597,10 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
   # rename to ASCII-safe name to avoid invalid UTF-8 issues downstream
   # (cli, readxl, etc. can choke on Latin-1 encoded filenames from unzip on Linux)
-  safe_name <- file.path(dirname(dict_file),
-                         paste0("dictionary_", year, ".", tools::file_ext(dict_file)))
+  safe_name <- file.path(
+    dirname(dict_file),
+    paste0("dictionary_", year, ".", tools::file_ext(dict_file))
+  )
   if (file.rename(dict_file, safe_name)) {
     dict_file <- safe_name
   }
@@ -558,7 +633,11 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
   # list files in ZIP to find the correct one
   zip_contents <- utils::unzip(zip_path, list = TRUE)
-  matching_files <- zip_contents$Name[grepl(file_name, zip_contents$Name, ignore.case = TRUE)]
+  matching_files <- zip_contents$Name[grepl(
+    file_name,
+    zip_contents$Name,
+    ignore.case = TRUE
+  )]
 
   if (length(matching_files) == 0) {
     cli::cli_abort(c(
@@ -569,13 +648,22 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
   # extract file from ZIP to temp location
   temp_dir <- tempdir()
-  utils::unzip(zip_path, files = matching_files[1], exdir = temp_dir, overwrite = TRUE)
+  utils::unzip(
+    zip_path,
+    files = matching_files[1],
+    exdir = temp_dir,
+    overwrite = TRUE
+  )
   txt_path <- file.path(temp_dir, matching_files[1])
 
   # filter dictionary for this register (use base R to avoid dplyr data masking)
-  dict_filtered <- dictionary[tolower(dictionary$register) == tolower(register), ]
+  dict_filtered <- dictionary[
+    tolower(dictionary$register) == tolower(register),
+  ]
   dict_filtered <- dict_filtered[
-    !is.na(dict_filtered$position) & !is.na(dict_filtered$length) & !is.na(dict_filtered$variable),
+    !is.na(dict_filtered$position) &
+      !is.na(dict_filtered$length) &
+      !is.na(dict_filtered$variable),
   ]
 
   if (nrow(dict_filtered) == 0) {
@@ -620,7 +708,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
   df <- df |>
     dplyr::mutate(
       dplyr::across(
-        dplyr::where(\(x) !any(stringr::str_detect(x, "[^0-9.\\-]"), na.rm = TRUE)),
+        dplyr::where(\(x) {
+          !any(stringr::str_detect(x, "[^0-9.\\-]"), na.rm = TRUE)
+        }),
         as.numeric
       )
     )
@@ -648,7 +738,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
   zip_contents <- tryCatch(
     utils::unzip(doc_zip, list = TRUE),
     error = function(e) {
-      cli::cli_warn("Could not read ZIP contents for post-stratification: {e$message}")
+      cli::cli_warn(
+        "Could not read ZIP contents for post-stratification: {e$message}"
+      )
       return(NULL)
     }
   )
@@ -659,11 +751,19 @@ pof_cache_dir <- function(cache_dir = NULL) {
   }
 
   # find post-stratification file in ZIP
-  pos_strat_patterns <- c("pos.*estrat.*\\.xls", "calibra.*\\.xls", "pos.*estrat.*\\.txt")
+  pos_strat_patterns <- c(
+    "pos.*estrat.*\\.xls",
+    "calibra.*\\.xls",
+    "pos.*estrat.*\\.txt"
+  )
   pos_strat_in_zip <- NULL
 
   for (pattern in pos_strat_patterns) {
-    matches <- zip_contents$Name[grepl(pattern, zip_contents$Name, ignore.case = TRUE)]
+    matches <- zip_contents$Name[grepl(
+      pattern,
+      zip_contents$Name,
+      ignore.case = TRUE
+    )]
     if (length(matches) > 0) {
       pos_strat_in_zip <- matches[1]
       break
@@ -673,13 +773,20 @@ pof_cache_dir <- function(cache_dir = NULL) {
   if (is.null(pos_strat_in_zip)) {
     # cleanup
     unlink(temp_dir, recursive = TRUE)
-    cli::cli_warn("Could not find post-stratification file. Survey weights may not be fully calibrated.")
+    cli::cli_warn(
+      "Could not find post-stratification file. Survey weights may not be fully calibrated."
+    )
     return(NULL)
   }
 
   # extract only the post-stratification file
   tryCatch(
-    utils::unzip(doc_zip, files = pos_strat_in_zip, exdir = temp_dir, junkpaths = TRUE),
+    utils::unzip(
+      doc_zip,
+      files = pos_strat_in_zip,
+      exdir = temp_dir,
+      junkpaths = TRUE
+    ),
     error = function(e) {
       cli::cli_warn("Could not extract post-stratification file: {e$message}")
       return(NULL)
@@ -700,7 +807,10 @@ pof_cache_dir <- function(cache_dir = NULL) {
   pos_strat <- tryCatch(
     {
       if (grepl("\\.xlsx?$", pos_strat_file, ignore.case = TRUE)) {
-        rlang::check_installed("readxl", reason = "to read POF post-stratification files")
+        rlang::check_installed(
+          "readxl",
+          reason = "to read POF post-stratification files"
+        )
         readxl::read_excel(pos_strat_file)
       } else {
         readr::read_delim(pos_strat_file, delim = ";", show_col_types = FALSE)
@@ -743,17 +853,24 @@ pof_cache_dir <- function(cache_dir = NULL) {
 .pof_create_survey_design <- function(data, year, cache_dir) {
   # check required packages
   if (!requireNamespace("survey", quietly = TRUE)) {
-    cli::cli_abort("Package {.pkg survey} is required. Install with: {.code install.packages('survey')}")
+    cli::cli_abort(
+      "Package {.pkg survey} is required. Install with: {.code install.packages('survey')}"
+    )
   }
   if (!requireNamespace("srvyr", quietly = TRUE)) {
-    cli::cli_abort("Package {.pkg srvyr} is required. Install with: {.code install.packages('srvyr')}")
+    cli::cli_abort(
+      "Package {.pkg srvyr} is required. Install with: {.code install.packages('srvyr')}"
+    )
   }
 
   # identify design variables in data
   # POF uses different variable names across years
-  weight_var <- .pof_find_design_var(data, c("PESO_FINAL", "PESO", "FATOR_ANUALIZACAO", "V9001"))
+  weight_var <- .pof_find_design_var(
+    data,
+    c("PESO_FINAL", "PESO", "FATOR_ANUALIZACAO", "V9001")
+  )
   strata_var <- .pof_find_design_var(data, c("ESTRATO_POF", "ESTRATO", "V0024"))
-  psu_var    <- .pof_find_design_var(data, c("COD_UPA", "UPA", "V0001"))
+  psu_var <- .pof_find_design_var(data, c("COD_UPA", "UPA", "V0001"))
 
   # check if required variables are found
   if (is.null(weight_var) || is.null(strata_var) || is.null(psu_var)) {
@@ -769,7 +886,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
     ))
   }
 
-  cli::cli_inform("Creating survey design with: weight={.val {weight_var}}, strata={.val {strata_var}}, psu={.val {psu_var}}")
+  cli::cli_inform(
+    "Creating survey design with: weight={.val {weight_var}}, strata={.val {strata_var}}, psu={.val {psu_var}}"
+  )
 
   # create formula objects
   weight_formula <- stats::as.formula(paste0("~", weight_var))
@@ -791,7 +910,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
   if (!is.null(pos_strat)) {
     # note: post-stratification requires matching variables
     # this is a simplified implementation
-    cli::cli_inform("Post-stratification totals available but not automatically applied.")
+    cli::cli_inform(
+      "Post-stratification totals available but not automatically applied."
+    )
     cli::cli_inform("For full calibration, see POF documentation.")
   }
 
@@ -915,7 +1036,11 @@ pof_info <- function(year = "2017-2018") {
 
   for (mod_name in names(info$health_modules)) {
     mod <- info$health_modules[[mod_name]]
-    status <- if (mod$available) cli::col_green("\u2713") else cli::col_red("\u2717")
+    status <- if (mod$available) {
+      cli::col_green("\u2713")
+    } else {
+      cli::col_red("\u2717")
+    }
     cli::cli_text("{status} {mod_name}: {mod$description}")
   }
 
@@ -923,7 +1048,9 @@ pof_info <- function(year = "2017-2018") {
     cli::cli_text("")
     cli::cli_h2("Detalhes da edi\u00e7\u00e3o")
     cli::cli_alert_info("Sample size: {info$year_details$sample_size}")
-    cli::cli_alert_info("Reference period: {info$year_details$reference_period}")
+    cli::cli_alert_info(
+      "Reference period: {info$year_details$reference_period}"
+    )
     if (!is.null(info$year_details$notes)) {
       cli::cli_alert_info("Notes: {info$year_details$notes}")
     }
@@ -960,9 +1087,18 @@ pof_registers <- function(year = "2017-2018", health_only = FALSE) {
   # register descriptions
   register_info <- tibble::tibble(
     register = c(
-      "domicilio", "morador", "caderneta_coletiva", "despesa_individual",
-      "consumo_alimentar", "rendimento", "inventario", "despesa_coletiva",
-      "aluguel_estimado", "outros_rendimentos", "despesa_90dias", "despesa_12meses"
+      "domicilio",
+      "morador",
+      "caderneta_coletiva",
+      "despesa_individual",
+      "consumo_alimentar",
+      "rendimento",
+      "inventario",
+      "despesa_coletiva",
+      "aluguel_estimado",
+      "outros_rendimentos",
+      "despesa_90dias",
+      "despesa_12meses"
     ),
     description = c(
       "Caracter\u00edsticas do domic\u00edlio, saneamento, EBIA (2017-2018)",
@@ -979,9 +1115,18 @@ pof_registers <- function(year = "2017-2018", health_only = FALSE) {
       "Despesas com per\u00edodo de refer\u00eancia de 12 meses"
     ),
     health_related = c(
-      TRUE, TRUE, TRUE, TRUE,
-      TRUE, FALSE, FALSE, FALSE,
-      FALSE, FALSE, FALSE, FALSE
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      FALSE,
+      FALSE,
+      FALSE,
+      FALSE,
+      FALSE,
+      FALSE,
+      FALSE
     )
   )
 
@@ -1027,10 +1172,12 @@ pof_registers <- function(year = "2017-2018", health_only = FALSE) {
 #'
 #' @examplesIf interactive()
 #' pof_dictionary("2017-2018", "morador", cache_dir = tempdir())
-pof_dictionary <- function(year = "2017-2018",
-                           register = NULL,
-                           cache_dir = NULL,
-                           refresh = FALSE) {
+pof_dictionary <- function(
+  year = "2017-2018",
+  register = NULL,
+  cache_dir = NULL,
+  refresh = FALSE
+) {
   # validate year
   .pof_validate_year(year)
 
@@ -1043,7 +1190,10 @@ pof_dictionary <- function(year = "2017-2018",
   cache_dir <- pof_cache_dir(cache_dir)
 
   # check cache first
-  cache_file <- file.path(cache_dir, stringr::str_c("pof_dictionary_", year, ".rds"))
+  cache_file <- file.path(
+    cache_dir,
+    stringr::str_c("pof_dictionary_", year, ".rds")
+  )
 
   if (file.exists(cache_file) && !refresh) {
     cli::cli_inform("Loading dictionary from cache...")
@@ -1093,11 +1243,13 @@ pof_dictionary <- function(year = "2017-2018",
 #' @examplesIf interactive()
 #' pof_variables("2017-2018", "morador", cache_dir = tempdir())
 #' pof_variables("2017-2018", "domicilio", search = "ebia", cache_dir = tempdir())
-pof_variables <- function(year = "2017-2018",
-                          register = NULL,
-                          search = NULL,
-                          cache_dir = NULL,
-                          refresh = FALSE) {
+pof_variables <- function(
+  year = "2017-2018",
+  register = NULL,
+  search = NULL,
+  cache_dir = NULL,
+  refresh = FALSE
+) {
   # validate parameters
   .pof_validate_year(year)
   if (!is.null(register)) {
@@ -1144,31 +1296,45 @@ pof_variables <- function(year = "2017-2018",
 
 #' Try lazy return for POF data
 #' @noRd
-.pof_try_lazy_return <- function(lazy, backend, register, vars, year,
-                                 cache_dir) {
-  if (!isTRUE(lazy)) return(NULL)
+.pof_try_lazy_return <- function(
+  lazy,
+  backend,
+  register,
+  vars,
+  year,
+  cache_dir
+) {
+  if (!isTRUE(lazy)) {
+    return(NULL)
+  }
   backend <- match.arg(backend, c("arrow", "duckdb"))
   cache_dir_resolved <- .module_cache_dir("pof", cache_dir)
   ds_name <- stringr::str_c("pof_", register, "_data")
   select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
-  .lazy_return(cache_dir_resolved, ds_name, backend,
-               filters = list(year = year),
-               select_cols = select_cols)
+  .lazy_return(
+    cache_dir_resolved,
+    ds_name,
+    backend,
+    filters = list(year = year),
+    select_cols = select_cols
+  )
 }
 
 #' Check partitioned cache for POF data
 #' @noRd
-.pof_check_cache <- function(cache_dir, dataset_name, year, register,
-                             refresh) {
-  if (refresh || !.has_arrow() ||
-      !.has_partitioned_cache(cache_dir, dataset_name)) {
+.pof_check_cache <- function(cache_dir, dataset_name, year, register, refresh) {
+  if (
+    refresh || !.has_arrow() || !.has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     return(NULL)
   }
   ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
   cached <- ds |>
     dplyr::filter(.data$year == !!year) |>
     dplyr::collect()
-  if (nrow(cached) == 0) return(NULL)
+  if (nrow(cached) == 0) {
+    return(NULL)
+  }
   cli::cli_inform("Loading {register} data from cache...")
   cached
 }
@@ -1188,7 +1354,9 @@ pof_variables <- function(year = "2017-2018",
 #' Select variables from POF data (case-insensitive, always keeps design vars)
 #' @noRd
 .pof_select_vars <- function(df, vars) {
-  if (is.null(vars)) return(df)
+  if (is.null(vars)) {
+    return(df)
+  }
   design_vars <- c("COD_UPA", "ESTRATO_POF", "PESO_FINAL", "UF")
   all_vars <- unique(c(design_vars, toupper(vars)))
   year_col <- if ("year" %in% names(df)) "year" else NULL
@@ -1286,13 +1454,16 @@ pof_variables <- function(year = "2017-2018",
 #' # with survey design (requires srvyr package)
 #' morador_svy <- pof_data("2017-2018", "morador", as_survey = TRUE,
 #'                          cache_dir = tempdir())
-pof_data <- function(year = "2017-2018",
-                     register = "morador",
-                     vars = NULL,
-                     cache_dir = NULL,
-                     as_survey = FALSE,
-                     refresh = FALSE,
-                     lazy = FALSE, backend = c("arrow", "duckdb")) {
+pof_data <- function(
+  year = "2017-2018",
+  register = "morador",
+  vars = NULL,
+  cache_dir = NULL,
+  as_survey = FALSE,
+  refresh = FALSE,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   # 1. validate parameters
   .pof_validate_year(year)
   .pof_validate_register(register, year)
@@ -1311,7 +1482,9 @@ pof_data <- function(year = "2017-2018",
 
   # 4. pre-download lazy return (if cache already exists)
   ds <- .pof_try_lazy_return(lazy, backend, register, vars, year, cache_dir)
-  if (!is.null(ds)) return(ds)
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # 5. check partitioned cache
   df <- .pof_check_cache(cache_dir, dataset_name, year, register, refresh)
@@ -1323,7 +1496,9 @@ pof_data <- function(year = "2017-2018",
 
   # 7. post-download lazy return
   ds <- .pof_try_lazy_return(lazy, backend, register, vars, year, cache_dir)
-  if (!is.null(ds)) return(ds)
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # 8. select variables
   df <- .pof_select_vars(df, vars)
@@ -1421,7 +1596,9 @@ pof_cache_status <- function(cache_dir = NULL) {
 
   # print summary
   total_size <- sum(result$size_mb)
-  cli::cli_alert_info("POF cache: {nrow(result)} file(s), {round(total_size, 1)} MB total")
+  cli::cli_alert_info(
+    "POF cache: {nrow(result)} file(s), {round(total_size, 1)} MB total"
+  )
 
   result
 }

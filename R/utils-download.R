@@ -24,13 +24,21 @@
 #'   Throws an error on failure.
 #'
 #' @noRd
-.retry_download_loop <- function(url, destfile, retries, download_fn,
-                                 fail_msg) {
+.retry_download_loop <- function(
+  url,
+  destfile,
+  retries,
+  download_fn,
+  fail_msg
+) {
   for (i in seq_len(retries)) {
-    result <- tryCatch({
-      download_fn(url, destfile)
-      TRUE
-    }, error = .make_retry_handler(i, retries))
+    result <- tryCatch(
+      {
+        download_fn(url, destfile)
+        TRUE
+      },
+      error = .make_retry_handler(i, retries)
+    )
 
     if (.download_succeeded(result, destfile)) {
       return(invisible(destfile))
@@ -91,7 +99,9 @@
 #'
 #' @noRd
 .cleanup_failed_download <- function(destfile, fail_msg, envir) {
-  if (file.exists(destfile)) file.remove(destfile)
+  if (file.exists(destfile)) {
+    file.remove(destfile)
+  }
   cli::cli_abort(fail_msg, .envir = envir)
 }
 
@@ -121,7 +131,8 @@
     retries = retries,
     download_fn = function(u, d) {
       curl::curl_download(
-        u, d,
+        u,
+        d,
         handle = curl::new_handle(
           connecttimeout = 30,
           timeout = timeout,
@@ -161,15 +172,22 @@
 #'   Throws an error on failure.
 #'
 #' @noRd
-.http_download <- function(url, destfile, retries = 3L, timeout = 300L,
-                           quiet = TRUE, ssl_verifypeer = TRUE) {
+.http_download <- function(
+  url,
+  destfile,
+  retries = 3L,
+  timeout = 300L,
+  quiet = TRUE,
+  ssl_verifypeer = TRUE
+) {
   .retry_download_loop(
     url = url,
     destfile = destfile,
     retries = retries,
     download_fn = function(u, d) {
       curl::curl_download(
-        u, d,
+        u,
+        d,
         handle = curl::new_handle(
           connecttimeout = 30,
           timeout = timeout,
@@ -227,19 +245,25 @@
   if (resp$status_code == 200L) {
     # server ignored Range, sent full file
     file.copy(tmp_part, destfile, overwrite = TRUE)
-    if (file.exists(tmp_part)) file.remove(tmp_part)
+    if (file.exists(tmp_part)) {
+      file.remove(tmp_part)
+    }
     return(TRUE)
   }
 
   if (resp$status_code == 206L) {
     # 206 Partial Content: append to existing file
     .http_append_partial(tmp_part, destfile)
-    if (file.exists(tmp_part)) file.remove(tmp_part)
+    if (file.exists(tmp_part)) {
+      file.remove(tmp_part)
+    }
     return(TRUE)
   }
 
   # unexpected status code
-  if (file.exists(tmp_part)) file.remove(tmp_part)
+  if (file.exists(tmp_part)) {
+    file.remove(tmp_part)
+  }
   FALSE
 }
 
@@ -257,13 +281,22 @@
 #'
 #' @noRd
 .http_resume_fallback_full <- function(url, destfile, tmp_part, timeout) {
-  if (file.exists(tmp_part)) file.remove(tmp_part)
-  if (file.exists(destfile)) file.remove(destfile)
-  curl::curl_download(url, destfile,
-                      handle = curl::new_handle(
-                        connecttimeout = 30, timeout = timeout,
-                        followlocation = TRUE
-                      ), quiet = TRUE)
+  if (file.exists(tmp_part)) {
+    file.remove(tmp_part)
+  }
+  if (file.exists(destfile)) {
+    file.remove(destfile)
+  }
+  curl::curl_download(
+    url,
+    destfile,
+    handle = curl::new_handle(
+      connecttimeout = 30,
+      timeout = timeout,
+      followlocation = TRUE
+    ),
+    quiet = TRUE
+  )
   TRUE
 }
 
@@ -280,10 +313,13 @@
 .http_append_partial <- function(tmp_part, destfile) {
   con_in <- file(tmp_part, "rb")
   con_out <- file(destfile, "ab")
-  on.exit({
-    close(con_in)
-    close(con_out)
-  }, add = TRUE)
+  on.exit(
+    {
+      close(con_in)
+      close(con_out)
+    },
+    add = TRUE
+  )
   while (length(chunk <- readBin(con_in, "raw", n = 1048576L)) > 0) {
     writeBin(chunk, con_out)
   }
@@ -310,8 +346,12 @@
 #'   Throws an error on failure.
 #'
 #' @noRd
-.http_download_resumable <- function(url, destfile, retries = 3L,
-                                     timeout = 600L) {
+.http_download_resumable <- function(
+  url,
+  destfile,
+  retries = 3L,
+  timeout = 600L
+) {
   .retry_download_loop(
     url = url,
     destfile = destfile,
@@ -322,9 +362,12 @@
         .http_resume_partial(u, d, existing_size, timeout)
       } else {
         curl::curl_download(
-          u, d,
+          u,
+          d,
           handle = curl::new_handle(
-            connecttimeout = 30, timeout = timeout, followlocation = TRUE
+            connecttimeout = 30,
+            timeout = timeout,
+            followlocation = TRUE
           ),
           quiet = TRUE
         )
@@ -360,13 +403,20 @@
 #'   `status_code`, and `error` (character or NA). One row per URL.
 #'
 #' @noRd
-.multi_download <- function(urls, destfiles, max_concurrent = 6L,
-                            timeout = 600L) {
+.multi_download <- function(
+  urls,
+  destfiles,
+  max_concurrent = 6L,
+  timeout = 600L
+) {
   stopifnot(length(urls) == length(destfiles))
   if (length(urls) == 0L) {
     return(data.frame(
-      success = logical(0), url = character(0), destfile = character(0),
-      status_code = integer(0), error = character(0),
+      success = logical(0),
+      url = character(0),
+      destfile = character(0),
+      status_code = integer(0),
+      error = character(0),
       stringsAsFactors = FALSE
     ))
   }
@@ -417,7 +467,9 @@
 #'
 #' @noRd
 .report_download_failures <- function(data, failed_labels, module_name) {
-  if (length(failed_labels) == 0L) return(data)
+  if (length(failed_labels) == 0L) {
+    return(data)
+  }
   n_failed <- length(failed_labels)
   cli::cli_warn(c(
     "!" = "{module_name}: {n_failed} file{?s} failed to download.",

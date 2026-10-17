@@ -20,20 +20,70 @@ sinan_available_years <- list(
 #' @noRd
 sinan_valid_diseases <- tibble::tibble(
   code = c(
-    "ACBI", "ACGR", "ANIM", "BOTU", "CHAG", "CHIK", "COQU", "DENG",
-    "DIFT", "ESQU", "FEAM", "FETI", "FMAC", "HANS", "HANT", "HEPA",
-    "IEXO", "LEIV", "LEIT", "LEPT", "MALA", "MENI", "PEST", "RAIV",
-    "SIFA", "SIFC", "SIFG", "TETA", "TUBE", "VIOL", "ZIKA"
+    "ACBI",
+    "ACGR",
+    "ANIM",
+    "BOTU",
+    "CHAG",
+    "CHIK",
+    "COQU",
+    "DENG",
+    "DIFT",
+    "ESQU",
+    "FEAM",
+    "FETI",
+    "FMAC",
+    "HANS",
+    "HANT",
+    "HEPA",
+    "IEXO",
+    "LEIV",
+    "LEIT",
+    "LEPT",
+    "MALA",
+    "MENI",
+    "PEST",
+    "RAIV",
+    "SIFA",
+    "SIFC",
+    "SIFG",
+    "TETA",
+    "TUBE",
+    "VIOL",
+    "ZIKA"
   ),
   name = c(
-    "Acidente Biologico", "Acidente Grave", "Animais Peconhentos",
-    "Botulismo", "Chagas", "Chikungunya", "Coqueluche", "Dengue",
-    "Difteria", "Esquistossomose", "Febre Amarela", "Febre Tifoide",
-    "Febre Maculosa", "Hanseniase", "Hantavirose", "Hepatites Virais",
-    "Intox. Exogena", "Leishmaniose Visceral", "Leishmaniose Tegumentar",
-    "Leptospirose", "Malaria", "Meningite", "Peste", "Raiva",
-    "Sifilis Adquirida", "Sifilis Congenita", "Sifilis Gestacional",
-    "Tetano", "Tuberculose", "Violencia", "Zika"
+    "Acidente Biologico",
+    "Acidente Grave",
+    "Animais Peconhentos",
+    "Botulismo",
+    "Chagas",
+    "Chikungunya",
+    "Coqueluche",
+    "Dengue",
+    "Difteria",
+    "Esquistossomose",
+    "Febre Amarela",
+    "Febre Tifoide",
+    "Febre Maculosa",
+    "Hanseniase",
+    "Hantavirose",
+    "Hepatites Virais",
+    "Intox. Exogena",
+    "Leishmaniose Visceral",
+    "Leishmaniose Tegumentar",
+    "Leptospirose",
+    "Malaria",
+    "Meningite",
+    "Peste",
+    "Raiva",
+    "Sifilis Adquirida",
+    "Sifilis Congenita",
+    "Sifilis Gestacional",
+    "Tetano",
+    "Tuberculose",
+    "Violencia",
+    "Zika"
   ),
   description = c(
     "Acidente de trabalho com material biologico",
@@ -79,19 +129,42 @@ sinan_valid_diseases <- tibble::tibble(
 sinan_variables_metadata <- tibble::tibble(
   variable = c(
     # notificacao
-    "NU_NOTIFIC", "TP_NOT", "ID_AGRAVO", "DT_NOTIFIC", "SEM_NOT",
-    "NU_ANO", "DT_SIN_PRI", "SEM_PRI",
+    "NU_NOTIFIC",
+    "TP_NOT",
+    "ID_AGRAVO",
+    "DT_NOTIFIC",
+    "SEM_NOT",
+    "NU_ANO",
+    "DT_SIN_PRI",
+    "SEM_PRI",
     # paciente
-    "NM_PACIENT", "DT_NASC", "NU_IDADE_N", "CS_SEXO", "CS_GESTANT",
-    "CS_RACA", "CS_ESCOL_N",
+    "NM_PACIENT",
+    "DT_NASC",
+    "NU_IDADE_N",
+    "CS_SEXO",
+    "CS_GESTANT",
+    "CS_RACA",
+    "CS_ESCOL_N",
     # residencia
-    "SG_UF_NOT", "ID_MUNICIP", "ID_REGIONA", "ID_UNIDADE",
-    "SG_UF", "ID_MN_RESI", "ID_RG_RESI",
+    "SG_UF_NOT",
+    "ID_MUNICIP",
+    "ID_REGIONA",
+    "ID_UNIDADE",
+    "SG_UF",
+    "ID_MN_RESI",
+    "ID_RG_RESI",
     # investigacao
-    "CLASSI_FIN", "CRITERIO", "EVOLUCAO", "DT_OBITO",
-    "DT_ENCERRA", "DT_INVEST",
+    "CLASSI_FIN",
+    "CRITERIO",
+    "EVOLUCAO",
+    "DT_OBITO",
+    "DT_ENCERRA",
+    "DT_INVEST",
     # temporal
-    "DT_DIGITA", "CS_FLXRET", "FLXRECEBI", "TPUNINOT"
+    "DT_DIGITA",
+    "CS_FLXRET",
+    "FLXRECEBI",
+    "TPUNINOT"
   ),
   description = c(
     # notificacao
@@ -134,19 +207,42 @@ sinan_variables_metadata <- tibble::tibble(
   ),
   type = c(
     # notificacao
-    "character", "character", "character", "date_dmy", "character",
-    "integer", "date_dmy", "character",
+    "character",
+    "character",
+    "character",
+    "date_dmy",
+    "character",
+    "integer",
+    "date_dmy",
+    "character",
     # paciente
-    "character", "date_dmy", "character", "character", "character",
-    "character", "character",
+    "character",
+    "date_dmy",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # residencia
-    "character", "character", "character", "character",
-    "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # investigacao
-    "character", "character", "character", "date_dmy",
-    "date_dmy", "date_dmy",
+    "character",
+    "character",
+    "character",
+    "date_dmy",
+    "date_dmy",
+    "date_dmy",
     # temporal
-    "date_dmy", "character", "character", "character"
+    "date_dmy",
+    "character",
+    "character",
+    "character"
   ),
   section = c(
     # notificacao
@@ -202,59 +298,127 @@ sinan_dictionary_data <- tibble::tibble(
   ),
   code = c(
     # TP_NOT
-    "1", "2", "3", "4",
+    "1",
+    "2",
+    "3",
+    "4",
     # CS_SEXO
-    "M", "F", "I",
+    "M",
+    "F",
+    "I",
     # CS_RACA
-    "1", "2", "3", "4", "5", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "9",
     # CS_GESTANT
-    "1", "2", "3", "4", "5", "6", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "9",
     # CS_ESCOL_N
-    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-    "10", "11", "12", "13",
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
     # CLASSI_FIN
-    "1", "2", "3", "5", "8",
+    "1",
+    "2",
+    "3",
+    "5",
+    "8",
     # EVOLUCAO
-    "1", "2", "3", "9",
+    "1",
+    "2",
+    "3",
+    "9",
     # CRITERIO
-    "1", "2", "3", "4",
+    "1",
+    "2",
+    "3",
+    "4",
     # NU_IDADE_N
-    "1", "2", "3", "4"
+    "1",
+    "2",
+    "3",
+    "4"
   ),
   label = c(
     # TP_NOT
-    "Negativa", "Individual", "Surto", "Agregado",
+    "Negativa",
+    "Individual",
+    "Surto",
+    "Agregado",
     # CS_SEXO
-    "Masculino", "Feminino", "Ignorado",
+    "Masculino",
+    "Feminino",
+    "Ignorado",
     # CS_RACA
-    "Branca", "Preta", "Amarela", "Parda", "Ind\u00edgena", "Ignorado",
+    "Branca",
+    "Preta",
+    "Amarela",
+    "Parda",
+    "Ind\u00edgena",
+    "Ignorado",
     # CS_GESTANT
-    "1\u00ba trimestre", "2\u00ba trimestre", "3\u00ba trimestre",
-    "Idade gestacional desconhecida", "N\u00e3o", "N\u00e3o se aplica", "Ignorado",
+    "1\u00ba trimestre",
+    "2\u00ba trimestre",
+    "3\u00ba trimestre",
+    "Idade gestacional desconhecida",
+    "N\u00e3o",
+    "N\u00e3o se aplica",
+    "Ignorado",
     # CS_ESCOL_N
-    "Analfabeto", "1\u00aa a 4\u00aa s\u00e9rie incompleta do EF",
+    "Analfabeto",
+    "1\u00aa a 4\u00aa s\u00e9rie incompleta do EF",
     "4\u00aa s\u00e9rie completa do EF",
     "5\u00aa a 8\u00aa s\u00e9rie incompleta do EF",
     "Ensino fundamental completo",
-    "Ensino m\u00e9dio incompleto", "Ensino m\u00e9dio completo",
-    "Educa\u00e7\u00e3o superior incompleta", "Educa\u00e7\u00e3o superior completa",
+    "Ensino m\u00e9dio incompleto",
+    "Ensino m\u00e9dio completo",
+    "Educa\u00e7\u00e3o superior incompleta",
+    "Educa\u00e7\u00e3o superior completa",
     "Ignorado",
     "1\u00aa a 4\u00aa s\u00e9rie incompleta do EF (antigo)",
     "4\u00aa s\u00e9rie completa do EF (antigo)",
     "5\u00aa a 8\u00aa s\u00e9rie incompleta do EF (antigo)",
     "Ensino fundamental completo (antigo)",
     # CLASSI_FIN
-    "Confirmado", "Descartado", "Inconclusivo",
+    "Confirmado",
+    "Descartado",
+    "Inconclusivo",
     "Confirmado por crit\u00e9rio cl\u00ednico-epidemiol\u00f3gico",
     "Inconclusivo",
     # EVOLUCAO
-    "Cura", "\u00d3bito pelo agravo notificado",
-    "\u00d3bito por outras causas", "Ignorado",
+    "Cura",
+    "\u00d3bito pelo agravo notificado",
+    "\u00d3bito por outras causas",
+    "Ignorado",
     # CRITERIO
-    "Laboratorial", "Cl\u00ednico-epidemiol\u00f3gico",
-    "Cl\u00ednico", "Em investiga\u00e7\u00e3o",
+    "Laboratorial",
+    "Cl\u00ednico-epidemiol\u00f3gico",
+    "Cl\u00ednico",
+    "Em investiga\u00e7\u00e3o",
     # NU_IDADE_N
-    "Hora", "Dia", "M\u00eas", "Ano"
+    "Hora",
+    "Dia",
+    "M\u00eas",
+    "Ano"
   )
 )
 
@@ -267,31 +431,45 @@ sinan_dictionary_data <- tibble::tibble(
 sinan_label_maps <- list(
   CS_SEXO = c("M" = "Masculino", "F" = "Feminino", "I" = "Ignorado"),
   CS_RACA = c(
-    "1" = "Branca", "2" = "Preta", "3" = "Amarela",
-    "4" = "Parda", "5" = "Ind\u00edgena", "9" = "Ignorado"
+    "1" = "Branca",
+    "2" = "Preta",
+    "3" = "Amarela",
+    "4" = "Parda",
+    "5" = "Ind\u00edgena",
+    "9" = "Ignorado"
   ),
   TP_NOT = c(
-    "1" = "Negativa", "2" = "Individual",
-    "3" = "Surto", "4" = "Agregado"
+    "1" = "Negativa",
+    "2" = "Individual",
+    "3" = "Surto",
+    "4" = "Agregado"
   ),
   CS_GESTANT = c(
-    "1" = "1\u00ba trimestre", "2" = "2\u00ba trimestre",
+    "1" = "1\u00ba trimestre",
+    "2" = "2\u00ba trimestre",
     "3" = "3\u00ba trimestre",
     "4" = "Idade gestacional desconhecida",
-    "5" = "N\u00e3o", "6" = "N\u00e3o se aplica", "9" = "Ignorado"
+    "5" = "N\u00e3o",
+    "6" = "N\u00e3o se aplica",
+    "9" = "Ignorado"
   ),
   CLASSI_FIN = c(
-    "1" = "Confirmado", "2" = "Descartado",
+    "1" = "Confirmado",
+    "2" = "Descartado",
     "3" = "Inconclusivo",
     "5" = "Confirmado por crit\u00e9rio cl\u00ednico-epidemiol\u00f3gico",
     "8" = "Inconclusivo"
   ),
   EVOLUCAO = c(
-    "1" = "Cura", "2" = "\u00d3bito pelo agravo notificado",
-    "3" = "\u00d3bito por outras causas", "9" = "Ignorado"
+    "1" = "Cura",
+    "2" = "\u00d3bito pelo agravo notificado",
+    "3" = "\u00d3bito por outras causas",
+    "9" = "Ignorado"
   ),
   CRITERIO = c(
-    "1" = "Laboratorial", "2" = "Cl\u00ednico-epidemiol\u00f3gico",
-    "3" = "Cl\u00ednico", "4" = "Em investiga\u00e7\u00e3o"
+    "1" = "Laboratorial",
+    "2" = "Cl\u00ednico-epidemiol\u00f3gico",
+    "3" = "Cl\u00ednico",
+    "4" = "Em investiga\u00e7\u00e3o"
   )
 )

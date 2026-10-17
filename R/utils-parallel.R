@@ -46,7 +46,8 @@
     pb_id <- cli::cli_progress_bar(
       total = n,
       format = paste0(
-        "{cli::pb_spin} ", label,
+        "{cli::pb_spin} ",
+        label,
         " [{cli::pb_current}/{cli::pb_total}] {cli::pb_bar} | ETA: {cli::pb_eta}"
       )
     )
@@ -56,9 +57,13 @@
 
   if (use_delay || show_progress) {
     purrr::imap(.x, function(elem, idx) {
-      if (use_delay && idx > 1L) Sys.sleep(.delay)
+      if (use_delay && idx > 1L) {
+        Sys.sleep(.delay)
+      }
       result <- .f(elem, ...)
-      if (show_progress) cli::cli_progress_update(id = pb_id)
+      if (show_progress) {
+        cli::cli_progress_update(id = pb_id)
+      }
       result
     })
   } else {

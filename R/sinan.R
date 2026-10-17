@@ -9,8 +9,11 @@
 #' Validate SINAN year parameter
 #' @noRd
 .sinan_validate_year <- function(year, status = "all") {
-  .validate_year(year, sinan_years(status = status),
-                 years_fn_hint = "sinan_years(status = 'all')")
+  .validate_year(
+    year,
+    sinan_years(status = status),
+    years_fn_hint = "sinan_years(status = 'all')"
+  )
 }
 
 
@@ -78,7 +81,12 @@
 
   stringr::str_c(
     "ftp://ftp.datasus.gov.br/dissemin/publicos/SINAN/DADOS/",
-    subdir, "/", disease, "BR", yy, ".dbc"
+    subdir,
+    "/",
+    disease,
+    "BR",
+    yy,
+    ".dbc"
   )
 }
 
@@ -97,20 +105,29 @@
 #' flat cache as migration fallback.
 #'
 #' @noRd
-.sinan_download_and_read <- function(year, disease, cache = TRUE,
-                                     cache_dir = NULL) {
+.sinan_download_and_read <- function(
+  year,
+  disease,
+  cache = TRUE,
+  cache_dir = NULL
+) {
   cache_dir <- .sinan_cache_dir(cache_dir)
   dataset_name <- "sinan_data"
   target_year <- as.integer(year)
   target_disease <- disease
 
   # 1. check partitioned cache first (preferred path)
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
-      dplyr::filter(.data$disease == target_disease,
-                     .data$year == target_year) |>
+      dplyr::filter(
+        .data$disease == target_disease,
+        .data$year == target_year
+      ) |>
       dplyr::collect()
     if (nrow(cached) > 0) return(cached)
   }
@@ -146,8 +163,12 @@
 
   # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    .cache_append_partitioned(data, cache_dir, dataset_name,
-                              c("disease", "year"))
+    .cache_append_partitioned(
+      data,
+      cache_dir,
+      dataset_name,
+      c("disease", "year")
+    )
   }
 
   data
@@ -181,10 +202,14 @@
 sinan_years <- function(status = "final") {
   status <- match.arg(status, c("final", "preliminary", "all"))
 
-  switch(status,
+  switch(
+    status,
     "final" = sinan_available_years$final,
     "preliminary" = sinan_available_years$preliminary,
-    "all" = sort(c(sinan_available_years$final, sinan_available_years$preliminary))
+    "all" = sort(c(
+      sinan_available_years$final,
+      sinan_available_years$preliminary
+    ))
   )
 }
 
@@ -206,13 +231,17 @@ sinan_info <- function() {
   prelim_range <- range(sinan_available_years$preliminary)
   n_diseases <- nrow(sinan_valid_diseases)
 
-  cli::cli_h1("SINAN \u2014 Sistema de Informa\u00e7\u00e3o de Agravos de Notifica\u00e7\u00e3o")
+  cli::cli_h1(
+    "SINAN \u2014 Sistema de Informa\u00e7\u00e3o de Agravos de Notifica\u00e7\u00e3o"
+  )
 
   cli::cli_text("")
   cli::cli_text("Fonte:          Minist\u00e9rio da Sa\u00fade / DATASUS")
   cli::cli_text("Acesso:         FTP DATASUS")
   cli::cli_text("Cobertura:      Nacional (um arquivo por agravo por ano)")
-  cli::cli_text("Agravos:        {n_diseases} doen\u00e7as de notifica\u00e7\u00e3o compuls\u00f3ria")
+  cli::cli_text(
+    "Agravos:        {n_diseases} doen\u00e7as de notifica\u00e7\u00e3o compuls\u00f3ria"
+  )
 
   cli::cli_h2("Dados dispon\u00edveis")
   cli::cli_bullets(c(
@@ -420,25 +449,46 @@ sinan_dictionary <- function(variable = NULL) {
 #' sinan_data(year = 2022, disease = "DENG",
 #'            vars = c("DT_NOTIFIC", "CS_SEXO", "NU_IDADE_N",
 #'                     "CS_RACA", "ID_MUNICIP", "CLASSI_FIN"))
-sinan_data <- function(year, disease = "DENG", vars = NULL,
-                       parse = TRUE, col_types = NULL,
-                       cache = TRUE, cache_dir = NULL,
-                       lazy = FALSE, backend = c("arrow", "duckdb")) {
-
+sinan_data <- function(
+  year,
+  disease = "DENG",
+  vars = NULL,
+  parse = TRUE,
+  col_types = NULL,
+  cache = TRUE,
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   # validate inputs
   year <- .sinan_validate_year(year)
   disease <- .sinan_validate_disease(disease)
-  if (!is.null(vars)) .sinan_validate_vars(vars)
+  if (!is.null(vars)) {
+    .sinan_validate_vars(vars)
+  }
 
   # compute lazy args once
   cache_dir_resolved <- .sinan_cache_dir(cache_dir)
   lazy_filters <- list(year = year, disease = toupper(disease))
-  lazy_select <- if (!is.null(vars)) unique(c("year", "disease", vars)) else NULL
+  lazy_select <- if (!is.null(vars)) {
+    unique(c("year", "disease", vars))
+  } else {
+    NULL
+  }
 
   # pre-download lazy check
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved, "sinan_data",
-                        lazy_filters, lazy_select, parse = parse)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sinan_data",
+    lazy_filters,
+    lazy_select,
+    parse = parse
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   n_years <- length(year)
   if (n_years > 1) {
@@ -450,15 +500,26 @@ sinan_data <- function(year, disease = "DENG", vars = NULL,
   # download and read each year
   labels <- paste(disease, year)
 
-  results <- .map_parallel(year, .delay = 0.5,
-                            .progress = "Downloading", function(yr) {
-    tryCatch({
-      .sinan_download_and_read(yr, disease, cache = cache,
-                               cache_dir = cache_dir)
-    }, error = function(e) {
-      NULL
-    })
-  })
+  results <- .map_parallel(
+    year,
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(yr) {
+      tryCatch(
+        {
+          .sinan_download_and_read(
+            yr,
+            disease,
+            cache = cache,
+            cache_dir = cache_dir
+          )
+        },
+        error = function(e) {
+          NULL
+        }
+      )
+    }
+  )
 
   # remove NULLs and bind
   succeeded <- !vapply(results, is.null, logical(1))
@@ -479,8 +540,17 @@ sinan_data <- function(year, disease = "DENG", vars = NULL,
     results <- .parse_columns(results, type_spec, col_types = col_types)
   }
 
-  .data_return(results, lazy, backend, cache_dir_resolved, "sinan_data",
-               lazy_filters, lazy_select, failed_labels, "SINAN")
+  .data_return(
+    results,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sinan_data",
+    lazy_filters,
+    lazy_select,
+    failed_labels,
+    "SINAN"
+  )
 }
 
 

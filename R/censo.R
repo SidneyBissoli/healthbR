@@ -19,35 +19,48 @@ censo_estimativa_years <- 2001L:2021L
 censo_sidra_catalog_internal <- tibble::tibble(
   table_code = c(
     # population
-    "200", "9514",
+    "200",
+    "9514",
     # population by race
-    "136", "9605",
+    "136",
+    "9605",
     # intercensitary estimates
     "6579",
     # literacy
-    "3540", "9543",
+    "3540",
+    "9543",
     # housing
-    "1288", "9547",
+    "1288",
+    "9547",
     # sanitation
-    "1394", "9560",
+    "1394",
+    "9560",
     # disability
-    "3426", "9567",
+    "3426",
+    "9567",
     # indigenous
-    "3175", "9573",
+    "3175",
+    "9573",
     # quilombola
     "9929",
     # fertility
-    "2445", "9583",
+    "2445",
+    "9583",
     # education
-    "3541", "9544",
+    "3541",
+    "9544",
     # labor
-    "3587", "9574",
+    "3587",
+    "9574",
     # income
-    "3548", "9575",
+    "3548",
+    "9575",
     # age/sex pyramids
-    "1378", "9513",
+    "1378",
+    "9513",
     # urbanization
-    "202", "9515"
+    "202",
+    "9515"
   ),
   table_name = c(
     # population
@@ -278,8 +291,14 @@ censo_sidra_catalog_internal <- tibble::tibble(
 
 #' Fetch data from SIDRA API for Census
 #' @noRd
-.censo_fetch_sidra <- function(table, territorial_level, geo_code,
-                               variable, period, classifications) {
+.censo_fetch_sidra <- function(
+  table,
+  territorial_level,
+  geo_code,
+  variable,
+  period,
+  classifications
+) {
   # validate territorial level
   if (!territorial_level %in% names(sidra_level_map)) {
     cli::cli_abort(c(
@@ -311,7 +330,10 @@ censo_sidra_catalog_internal <- tibble::tibble(
     for (class_id in names(classifications)) {
       class_values <- classifications[[class_id]]
       url <- stringr::str_c(
-        url, "/c", class_id, "/",
+        url,
+        "/c",
+        class_id,
+        "/",
         stringr::str_c(class_values, collapse = ",")
       )
     }
@@ -411,7 +433,6 @@ censo_years <- function() {
 #' censo_info()
 #' censo_info(2022)
 censo_info <- function(year = NULL) {
-
   info <- list(
     name = "Censo Demogr\u00e1fico",
     name_en = "Demographic Census",
@@ -432,12 +453,30 @@ censo_info <- function(year = NULL) {
   )
 
   year_info <- list(
-    "1970" = list(population = "93,134,846", notes = "Primeiro censo digitalizado"),
-    "1980" = list(population = "119,002,706", notes = "Fase de urbaniza\u00e7\u00e3o acelerada"),
-    "1991" = list(population = "146,825,475", notes = "Inclui dados de ra\u00e7a/cor"),
-    "2000" = list(population = "169,799,170", notes = "Primeiro com coleta eletr\u00f4nica parcial"),
-    "2010" = list(population = "190,755,799", notes = "Inclui dados detalhados de defici\u00eancia"),
-    "2022" = list(population = "203,080,756", notes = "Primeiro com dados quilombolas, realizado ap\u00f3s adiamento pela pandemia")
+    "1970" = list(
+      population = "93,134,846",
+      notes = "Primeiro censo digitalizado"
+    ),
+    "1980" = list(
+      population = "119,002,706",
+      notes = "Fase de urbaniza\u00e7\u00e3o acelerada"
+    ),
+    "1991" = list(
+      population = "146,825,475",
+      notes = "Inclui dados de ra\u00e7a/cor"
+    ),
+    "2000" = list(
+      population = "169,799,170",
+      notes = "Primeiro com coleta eletr\u00f4nica parcial"
+    ),
+    "2010" = list(
+      population = "190,755,799",
+      notes = "Inclui dados detalhados de defici\u00eancia"
+    ),
+    "2022" = list(
+      population = "203,080,756",
+      notes = "Primeiro com dados quilombolas, realizado ap\u00f3s adiamento pela pandemia"
+    )
   )
 
   # display information
@@ -446,7 +485,9 @@ censo_info <- function(year = NULL) {
   cli::cli_text(info$description)
   cli::cli_text("")
   cli::cli_alert_info("Institution: {info$institution}")
-  cli::cli_alert_info("Available years: {stringr::str_c(info$available_years, collapse = ', ')}")
+  cli::cli_alert_info(
+    "Available years: {stringr::str_c(info$available_years, collapse = ', ')}"
+  )
   cli::cli_text("")
   cli::cli_h2("Data access")
   cli::cli_alert("Population by sex/age/race: {.fn censo_populacao}")
@@ -536,12 +577,13 @@ censo_info <- function(year = NULL) {
 #'
 #' # population by race, 2022
 #' censo_populacao(year = 2022, variables = "race")
-censo_populacao <- function(year,
-                            variables = "total",
-                            territorial_level = "state",
-                            geo_code = "all",
-                            raw = FALSE) {
-
+censo_populacao <- function(
+  year,
+  variables = "total",
+  territorial_level = "state",
+  geo_code = "all",
+  raw = FALSE
+) {
   # validate year
   year <- .censo_validate_year(year)
   if (length(year) > 1) {
@@ -631,11 +673,12 @@ censo_populacao <- function(year,
 #'
 #' # estimates by municipality
 #' censo_estimativa(year = 2021, territorial_level = "municipality")
-censo_estimativa <- function(year,
-                             territorial_level = "state",
-                             geo_code = "all",
-                             raw = FALSE) {
-
+censo_estimativa <- function(
+  year,
+  territorial_level = "state",
+  geo_code = "all",
+  raw = FALSE
+) {
   # validate year
   year <- .censo_validate_estimativa_year(year)
 
@@ -699,7 +742,6 @@ censo_estimativa <- function(year,
 #' # tables with 2022 data
 #' censo_sidra_tables(year = 2022)
 censo_sidra_tables <- function(theme = NULL, year = NULL) {
-
   catalog <- censo_sidra_catalog_internal
 
   # validate and filter by theme
@@ -724,7 +766,13 @@ censo_sidra_tables <- function(theme = NULL, year = NULL) {
   }
 
   catalog |>
-    dplyr::select("table_code", "table_name", "theme", "years", "territorial_levels") |>
+    dplyr::select(
+      "table_code",
+      "table_name",
+      "theme",
+      "years",
+      "territorial_levels"
+    ) |>
     dplyr::arrange(.data$theme, .data$table_code)
 }
 
@@ -747,7 +795,6 @@ censo_sidra_tables <- function(theme = NULL, year = NULL) {
 #' censo_sidra_search("raca")
 #' censo_sidra_search("indigena")
 censo_sidra_search <- function(keyword, year = NULL) {
-
   # validate keyword
   if (missing(keyword) || is.null(keyword) || nchar(keyword) < 2) {
     cli::cli_abort("Please provide a keyword with at least 2 characters.")
@@ -777,7 +824,13 @@ censo_sidra_search <- function(keyword, year = NULL) {
   }
 
   catalog |>
-    dplyr::select("table_code", "table_name", "theme", "years", "territorial_levels") |>
+    dplyr::select(
+      "table_code",
+      "table_name",
+      "theme",
+      "years",
+      "territorial_levels"
+    ) |>
     dplyr::arrange(.data$table_code)
 }
 
@@ -826,14 +879,15 @@ censo_sidra_search <- function(keyword, year = NULL) {
 #'   variable = 93,
 #'   classifications = list("86" = "allxt")
 #' )
-censo_sidra_data <- function(table,
-                             territorial_level = "brazil",
-                             geo_code = "all",
-                             year = NULL,
-                             variable = NULL,
-                             classifications = NULL,
-                             raw = FALSE) {
-
+censo_sidra_data <- function(
+  table,
+  territorial_level = "brazil",
+  geo_code = "all",
+  year = NULL,
+  variable = NULL,
+  classifications = NULL,
+  raw = FALSE
+) {
   table <- as.character(table)
 
   # check if table exists in catalog (soft warning)

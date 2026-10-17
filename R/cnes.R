@@ -9,8 +9,11 @@
 #' Validate CNES year parameter
 #' @noRd
 .cnes_validate_year <- function(year, status = "all") {
-  .validate_year(year, cnes_years(status = status),
-                 years_fn_hint = "cnes_years(status = 'all')")
+  .validate_year(
+    year,
+    cnes_years(status = status),
+    years_fn_hint = "cnes_years(status = 'all')"
+  )
 }
 
 #' Validate CNES UF parameter
@@ -72,7 +75,13 @@
 
   stringr::str_c(
     "ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/",
-    type, "/", type, uf, yy, mm, ".dbc"
+    type,
+    "/",
+    type,
+    uf,
+    yy,
+    mm,
+    ".dbc"
   )
 }
 
@@ -91,8 +100,14 @@
 #' flat cache as migration fallback.
 #'
 #' @noRd
-.cnes_download_and_read <- function(year, month, uf, type = "ST",
-                                    cache = TRUE, cache_dir = NULL) {
+.cnes_download_and_read <- function(
+  year,
+  month,
+  uf,
+  type = "ST",
+  cache = TRUE,
+  cache_dir = NULL
+) {
   cache_dir <- .cnes_cache_dir(cache_dir)
   dataset_name <- "cnes_data"
   target_year <- as.integer(year)
@@ -100,13 +115,18 @@
   target_uf <- uf
 
   # 1. check partitioned cache first (preferred path)
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
-      dplyr::filter(.data$uf_source == target_uf,
-                     .data$year == target_year,
-                     .data$month == target_month) |>
+      dplyr::filter(
+        .data$uf_source == target_uf,
+        .data$year == target_year,
+        .data$month == target_month
+      ) |>
       dplyr::collect()
     if (nrow(cached) > 0) return(cached)
   }
@@ -139,13 +159,21 @@
   data$month <- target_month
   data$uf_source <- target_uf
   cols <- names(data)
-  data <- data[, c("year", "month", "uf_source",
-                    setdiff(cols, c("year", "month", "uf_source")))]
+  data <- data[, c(
+    "year",
+    "month",
+    "uf_source",
+    setdiff(cols, c("year", "month", "uf_source"))
+  )]
 
   # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    .cache_append_partitioned(data, cache_dir, dataset_name,
-                              c("uf_source", "year", "month"))
+    .cache_append_partitioned(
+      data,
+      cache_dir,
+      dataset_name,
+      c("uf_source", "year", "month")
+    )
   }
 
   data
@@ -179,10 +207,14 @@
 cnes_years <- function(status = "final") {
   status <- match.arg(status, c("final", "preliminary", "all"))
 
-  switch(status,
+  switch(
+    status,
     "final" = cnes_available_years$final,
     "preliminary" = cnes_available_years$preliminary,
-    "all" = sort(c(cnes_available_years$final, cnes_available_years$preliminary))
+    "all" = sort(c(
+      cnes_available_years$final,
+      cnes_available_years$preliminary
+    ))
   )
 }
 
@@ -208,7 +240,9 @@ cnes_info <- function() {
   cli::cli_text("")
   cli::cli_text("Fonte:          Minist\u00e9rio da Sa\u00fade / DATASUS")
   cli::cli_text("Acesso:         FTP DATASUS")
-  cli::cli_text("Documento base: Cadastro Nacional de Estabelecimentos de Sa\u00fade")
+  cli::cli_text(
+    "Documento base: Cadastro Nacional de Estabelecimentos de Sa\u00fade"
+  )
   cli::cli_text("Granularidade:  Mensal (um arquivo por tipo/UF/m\u00eas)")
 
   cli::cli_h2("Dados dispon\u00edveis")
@@ -399,17 +433,29 @@ cnes_dictionary <- function(variable = NULL) {
 #'
 #' # health professionals
 #' prof <- cnes_data(year = 2023, month = 1, uf = "AC", type = "PF")
-cnes_data <- function(year, type = "ST", month = NULL, vars = NULL, uf = NULL,
-                      parse = TRUE, col_types = NULL,
-                      cache = TRUE, cache_dir = NULL,
-                      lazy = FALSE, backend = c("arrow", "duckdb")) {
-
+cnes_data <- function(
+  year,
+  type = "ST",
+  month = NULL,
+  vars = NULL,
+  uf = NULL,
+  parse = TRUE,
+  col_types = NULL,
+  cache = TRUE,
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   # validate inputs
   year <- .cnes_validate_year(year)
   type <- .cnes_validate_type(type)
   month <- .validate_month(month)
-  if (!is.null(uf)) uf <- .cnes_validate_uf(uf)
-  if (!is.null(vars)) .cnes_validate_vars(vars)
+  if (!is.null(uf)) {
+    uf <- .cnes_validate_uf(uf)
+  }
+  if (!is.null(vars)) {
+    .cnes_validate_vars(vars)
+  }
 
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else cnes_uf_list
@@ -417,17 +463,34 @@ cnes_data <- function(year, type = "ST", month = NULL, vars = NULL, uf = NULL,
   # compute lazy args once
   cache_dir_resolved <- .cnes_cache_dir(cache_dir)
   lazy_filters <- list(year = year, uf_source = target_ufs)
-  if (!is.null(month)) lazy_filters$month <- as.integer(month)
-  lazy_select <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
+  if (!is.null(month)) {
+    lazy_filters$month <- as.integer(month)
+  }
+  lazy_select <- if (!is.null(vars)) {
+    unique(c("year", "month", "uf_source", vars))
+  } else {
+    NULL
+  }
 
   # pre-download lazy check
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved, "cnes_data",
-                        lazy_filters, lazy_select, parse = parse)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "cnes_data",
+    lazy_filters,
+    lazy_select,
+    parse = parse
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # build all year x month x UF combinations
   combinations <- expand.grid(
-    year = year, month = month, uf = target_ufs,
+    year = year,
+    month = month,
+    uf = target_ufs,
     stringsAsFactors = FALSE
   )
 
@@ -439,22 +502,38 @@ cnes_data <- function(year, type = "ST", month = NULL, vars = NULL, uf = NULL,
   }
 
   # download and read each combination
-  labels <- paste(type, combinations$uf,
-                  paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
+  labels <- paste(
+    type,
+    combinations$uf,
+    paste0(combinations$year, "/", sprintf("%02d", combinations$month))
+  )
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    yr <- combinations$year[i]
-    mo <- combinations$month[i]
-    st <- combinations$uf[i]
+  results <- .map_parallel(
+    seq_len(n_combos),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      yr <- combinations$year[i]
+      mo <- combinations$month[i]
+      st <- combinations$uf[i]
 
-    tryCatch({
-      .cnes_download_and_read(yr, mo, st, type = type,
-                              cache = cache, cache_dir = cache_dir)
-    }, error = function(e) {
-      NULL
-    })
-  })
+      tryCatch(
+        {
+          .cnes_download_and_read(
+            yr,
+            mo,
+            st,
+            type = type,
+            cache = cache,
+            cache_dir = cache_dir
+          )
+        },
+        error = function(e) {
+          NULL
+        }
+      )
+    }
+  )
 
   # remove NULLs and bind
   succeeded <- !vapply(results, is.null, logical(1))
@@ -475,8 +554,17 @@ cnes_data <- function(year, type = "ST", month = NULL, vars = NULL, uf = NULL,
     results <- .parse_columns(results, type_spec, col_types = col_types)
   }
 
-  .data_return(results, lazy, backend, cache_dir_resolved, "cnes_data",
-               lazy_filters, lazy_select, failed_labels, "CNES")
+  .data_return(
+    results,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "cnes_data",
+    lazy_filters,
+    lazy_select,
+    failed_labels,
+    "CNES"
+  )
 }
 
 

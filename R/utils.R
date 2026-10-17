@@ -22,7 +22,6 @@ NULL
 #' @examples
 #' list_sources()
 list_sources <- function() {
-
   tibble::tibble(
     source = c(
       "vigitel",

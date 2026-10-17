@@ -48,9 +48,33 @@ ans_valid_types <- tibble::tibble(
 #' Brazilian state (UF) abbreviations for ANS
 #' @noRd
 ans_uf_list <- c(
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
-  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
-  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO"
 )
 
 #' UF list including XX (unidentified/foreign) for beneficiaries
@@ -65,14 +89,28 @@ ans_uf_list_xx <- c(ans_uf_list, "XX")
 #' @noRd
 ans_beneficiaries_metadata <- tibble::tibble(
   variable = c(
-    "ID_CMPT_MOVEL", "CD_OPERADORA", "NM_RAZAO_SOCIAL", "NR_CNPJ",
-    "MODALIDADE_OPERADORA", "SG_UF", "CD_MUNICIPIO", "NM_MUNICIPIO",
-    "TP_SEXO", "DE_FAIXA_ETARIA", "DE_FAIXA_ETARIA_REAJ",
-    "CD_PLANO", "TP_VIGENCIA_PLANO", "DE_CONTRATACAO_PLANO",
-    "DE_SEGMENTACAO_PLANO", "DE_ABRG_GEOGRAFICA_PLANO",
-    "COBERTURA_ASSIST_PLAN", "TIPO_VINCULO",
-    "QT_BENEFICIARIO_ATIVO", "QT_BENEFICIARIO_ADERIDO",
-    "QT_BENEFICIARIO_CANCELADO", "DT_CARGA"
+    "ID_CMPT_MOVEL",
+    "CD_OPERADORA",
+    "NM_RAZAO_SOCIAL",
+    "NR_CNPJ",
+    "MODALIDADE_OPERADORA",
+    "SG_UF",
+    "CD_MUNICIPIO",
+    "NM_MUNICIPIO",
+    "TP_SEXO",
+    "DE_FAIXA_ETARIA",
+    "DE_FAIXA_ETARIA_REAJ",
+    "CD_PLANO",
+    "TP_VIGENCIA_PLANO",
+    "DE_CONTRATACAO_PLANO",
+    "DE_SEGMENTACAO_PLANO",
+    "DE_ABRG_GEOGRAFICA_PLANO",
+    "COBERTURA_ASSIST_PLAN",
+    "TIPO_VINCULO",
+    "QT_BENEFICIARIO_ATIVO",
+    "QT_BENEFICIARIO_ADERIDO",
+    "QT_BENEFICIARIO_CANCELADO",
+    "DT_CARGA"
   ),
   description = c(
     "Compet\u00eancia (AAAA-MM)",
@@ -99,14 +137,28 @@ ans_beneficiaries_metadata <- tibble::tibble(
     "Data de carga dos dados"
   ),
   type = c(
-    "character", "character", "character", "character",
-    "character", "character", "character", "character",
-    "character", "character", "character",
-    "character", "character", "character",
-    "character", "character",
-    "character", "character",
-    "integer", "integer",
-    "integer", "date"
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "integer",
+    "integer",
+    "integer",
+    "date"
   ),
   section = c(
     rep("operadora", 5),
@@ -126,16 +178,32 @@ ans_beneficiaries_metadata <- tibble::tibble(
 #' @noRd
 ans_complaints_metadata <- tibble::tibble(
   variable = c(
-    "NUMERO_DA_DEMANDA", "ABERTURA_DA_DEMANDA", "ANO_DE_REFERENCIA",
-    "MES_DE_REFERENCIA", "SITUACAO_DA_DEMANDA", "FORMA_DE_CONTATO_COM_A_ANS",
-    "ASSUNTO", "REGISTRO_OPERADORA", "NOME_OPERADORA",
-    "MODALIDADE_DA_OPERADORA", "TIPO_DE_PLANO_CONTRATADO",
-    "EPOCA_DE_ADESAO_AO_PLANO", "TIPOS_DE_COBER_CONTRATADAS",
-    "IDADE_BENEFICIARIO", "SEXO", "ESTADO_DO_BENEFICIARIO",
-    "MUNICIPIO_DO_BENEFICIARIO", "UF_ONDE_CONSUMIDOR",
-    "MUNIC_CONSUMIDOR_ATEND", "CD_MUNICIPIO_ATEND",
-    "CLASSIFICACAO_DA_NIP", "NATUREZA_DA_NIP", "SITUACAO_DA_NIP",
-    "DATA_DO_AUTO", "STATUS_AUTO", "NUMERO_PROCESSO",
+    "NUMERO_DA_DEMANDA",
+    "ABERTURA_DA_DEMANDA",
+    "ANO_DE_REFERENCIA",
+    "MES_DE_REFERENCIA",
+    "SITUACAO_DA_DEMANDA",
+    "FORMA_DE_CONTATO_COM_A_ANS",
+    "ASSUNTO",
+    "REGISTRO_OPERADORA",
+    "NOME_OPERADORA",
+    "MODALIDADE_DA_OPERADORA",
+    "TIPO_DE_PLANO_CONTRATADO",
+    "EPOCA_DE_ADESAO_AO_PLANO",
+    "TIPOS_DE_COBER_CONTRATADAS",
+    "IDADE_BENEFICIARIO",
+    "SEXO",
+    "ESTADO_DO_BENEFICIARIO",
+    "MUNICIPIO_DO_BENEFICIARIO",
+    "UF_ONDE_CONSUMIDOR",
+    "MUNIC_CONSUMIDOR_ATEND",
+    "CD_MUNICIPIO_ATEND",
+    "CLASSIFICACAO_DA_NIP",
+    "NATUREZA_DA_NIP",
+    "SITUACAO_DA_NIP",
+    "DATA_DO_AUTO",
+    "STATUS_AUTO",
+    "NUMERO_PROCESSO",
     "RESPOSTA_BENEFICIARIO"
   ),
   description = c(
@@ -168,16 +236,32 @@ ans_complaints_metadata <- tibble::tibble(
     "Resposta do benefici\u00e1rio"
   ),
   type = c(
-    "character", "date", "integer",
-    "integer", "character", "character",
-    "character", "character", "character",
-    "character", "character",
-    "character", "character",
-    "integer", "character", "character",
-    "character", "character",
-    "character", "character",
-    "character", "character", "character",
-    "date", "character", "character",
+    "character",
+    "date",
+    "integer",
+    "integer",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "integer",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "date",
+    "character",
+    "character",
     "character"
   ),
   section = c(
@@ -200,8 +284,12 @@ ans_complaints_metadata <- tibble::tibble(
 #' @noRd
 ans_financial_metadata <- tibble::tibble(
   variable = c(
-    "DATA", "REG_ANS", "CD_CONTA_CONTABIL",
-    "DESCRICAO", "VL_SALDO_INICIAL", "VL_SALDO_FINAL"
+    "DATA",
+    "REG_ANS",
+    "CD_CONTA_CONTABIL",
+    "DESCRICAO",
+    "VL_SALDO_INICIAL",
+    "VL_SALDO_FINAL"
   ),
   description = c(
     "Data de refer\u00eancia",
@@ -212,12 +300,20 @@ ans_financial_metadata <- tibble::tibble(
     "Valor do saldo final"
   ),
   type = c(
-    "date", "character", "character",
-    "character", "double", "double"
+    "date",
+    "character",
+    "character",
+    "character",
+    "double",
+    "double"
   ),
   section = c(
-    "temporal", "operadora", "conta",
-    "conta", "valor", "valor"
+    "temporal",
+    "operadora",
+    "conta",
+    "conta",
+    "valor",
+    "valor"
   )
 )
 
@@ -229,11 +325,26 @@ ans_financial_metadata <- tibble::tibble(
 #' @noRd
 ans_operators_metadata <- tibble::tibble(
   variable = c(
-    "REGISTRO_OPERADORA", "CNPJ", "Razao_Social", "Nome_Fantasia",
-    "Modalidade", "Logradouro", "Numero", "Complemento", "Bairro",
-    "Cidade", "UF", "CEP", "DDD", "Telefone", "Fax",
-    "Endereco_eletronico", "Representante", "Cargo_Representante",
-    "Regiao_de_Comercializacao", "Data_Registro_ANS"
+    "REGISTRO_OPERADORA",
+    "CNPJ",
+    "Razao_Social",
+    "Nome_Fantasia",
+    "Modalidade",
+    "Logradouro",
+    "Numero",
+    "Complemento",
+    "Bairro",
+    "Cidade",
+    "UF",
+    "CEP",
+    "DDD",
+    "Telefone",
+    "Fax",
+    "Endereco_eletronico",
+    "Representante",
+    "Cargo_Representante",
+    "Regiao_de_Comercializacao",
+    "Data_Registro_ANS"
   ),
   description = c(
     "Registro da operadora na ANS",
@@ -258,12 +369,26 @@ ans_operators_metadata <- tibble::tibble(
     "Data de registro na ANS"
   ),
   type = c(
-    "character", "character", "character", "character",
-    "character", "character", "character", "character", "character",
-    "character", "character", "character", "character", "character",
     "character",
-    "character", "character", "character",
-    "character", "date"
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "date"
   ),
   section = c(
     rep("identificacao", 5),

@@ -16,7 +16,9 @@ test_that(".dbc2dbf decompresses a .dbc file (integration)", {
   temp_dbc <- tempfile(fileext = ".dbc")
   temp_dbf <- tempfile(fileext = ".dbf")
   on.exit({
-    if (file.exists(temp_dbc)) file.remove(temp_dbc)
+    if (file.exists(temp_dbc)) {
+      file.remove(temp_dbc)
+    }
     if (file.exists(temp_dbf)) file.remove(temp_dbf)
   })
 
@@ -80,13 +82,11 @@ test_that(".datasus_download errors on bad URL (integration)", {
 # --- .dbc2dbf --- error paths ---
 
 test_that(".dbc2dbf errors with descriptive message for nonexistent file", {
-  expect_error(.dbc2dbf("/tmp/does_not_exist_xyz.dbc", "out.dbf"),
-               "not found")
+  expect_error(.dbc2dbf("/tmp/does_not_exist_xyz.dbc", "out.dbf"), "not found")
 })
 
 test_that(".read_dbc errors with descriptive message for nonexistent file", {
-  expect_error(.read_dbc("/tmp/does_not_exist_xyz.dbc"),
-               "not found")
+  expect_error(.read_dbc("/tmp/does_not_exist_xyz.dbc"), "not found")
 })
 
 test_that(".dbc2dbf returns FALSE on corrupt/invalid file", {

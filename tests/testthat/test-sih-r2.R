@@ -12,24 +12,34 @@ fake_manifest <- list(
   partitions = list(
     "2024-04-RR" = list(
       source_url = "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR2404.dbc",
-      total_records = 4001, processing_timestamp = "2026-03-09 04:10:00",
-      source_hash_md5 = "md5-rr-2404", source_size_bytes = 300000,
+      total_records = 4001,
+      processing_timestamp = "2026-03-09 04:10:00",
+      source_hash_md5 = "md5-rr-2404",
+      source_size_bytes = 300000,
       output_files = data.frame(
         path = "sih/rd/ano=2024/mes=04/uf=RR/part-0.parquet",
-        size_bytes = 250000, sha256 = "sha-rr-2404", record_count = 4001,
+        size_bytes = 250000,
+        sha256 = "sha-rr-2404",
+        record_count = 4001,
         stringsAsFactors = FALSE
       ),
-      pipeline_version = "1.0.0", git_commit = "020ee5cc"
+      pipeline_version = "1.0.0",
+      git_commit = "020ee5cc"
     ),
     "2023-01-AC" = list(
       source_url = "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDAC2301.dbc",
-      total_records = 4165, processing_timestamp = "2026-03-09 03:02:56",
-      source_hash_md5 = "md5-ac-2301", source_size_bytes = 294939,
+      total_records = 4165,
+      processing_timestamp = "2026-03-09 03:02:56",
+      source_hash_md5 = "md5-ac-2301",
+      source_size_bytes = 294939,
       output_files = list(list(
         path = "sih/rd/ano=2023/mes=01/uf=AC/part-0.parquet",
-        size_bytes = 240000, sha256 = "sha-ac-2301", record_count = 4165
+        size_bytes = 240000,
+        sha256 = "sha-ac-2301",
+        record_count = 4165
       )),
-      pipeline_version = "1.0.0", git_commit = "020ee5cc"
+      pipeline_version = "1.0.0",
+      git_commit = "020ee5cc"
     )
   )
 )
@@ -59,8 +69,13 @@ test_that(".sih_r2_manifest_summary turns the manifest into one row per partitio
   expect_equal(unique(s$dataset), "sih_rd")
   # the Parquet behind each partition and the pipeline that wrote it, read
   # from both shapes of `output_files`
-  expect_equal(s$parquet_path, c("sih/rd/ano=2023/mes=01/uf=AC/part-0.parquet",
-                                 "sih/rd/ano=2024/mes=04/uf=RR/part-0.parquet"))
+  expect_equal(
+    s$parquet_path,
+    c(
+      "sih/rd/ano=2023/mes=01/uf=AC/part-0.parquet",
+      "sih/rd/ano=2024/mes=04/uf=RR/part-0.parquet"
+    )
+  )
   expect_equal(s$parquet_sha256, c("sha-ac-2301", "sha-rr-2404"))
   expect_equal(s$parquet_size_bytes, c(240000, 250000))
   expect_equal(s$pipeline_version, c("1.0.0", "1.0.0"))
@@ -129,8 +144,12 @@ test_that("sih_status warns and returns a typed empty tibble when the manifest i
 })
 
 test_that(".sih_r2_shape mirrors the FTP path's columns", {
-  df <- tibble::tibble(N_AIH = c("1", "2"), DT_INTER = c("20230105", "20221228"),
-                       mes = c("01", "01"), uf = c("AC", "AC"))
+  df <- tibble::tibble(
+    N_AIH = c("1", "2"),
+    DT_INTER = c("20230105", "20221228"),
+    mes = c("01", "01"),
+    uf = c("AC", "AC")
+  )
   out <- .sih_r2_shape(df, 2023L, 1L)
   expect_equal(names(out)[1:3], c("year", "month", "uf_source"))
   expect_false(any(c("mes", "uf") %in% names(out)))
@@ -143,14 +162,31 @@ test_that(".sih_r2_shape mirrors the FTP path's columns", {
 
 test_that(".sih_fetch falls back to datasus when the mirror yields nothing", {
   local_mocked_bindings(
-    .sih_r2_fetch = function(...) list(results = list(), failed_labels = "AC 2023/01"),
-    .sih_download_loop = function(...) list(
-      data = tibble::tibble(year = 2023L, month = 1L, uf_source = "AC", N_AIH = "1"),
-      failed_labels = character(0)
-    )
+    .sih_r2_fetch = function(...) {
+      list(results = list(), failed_labels = "AC 2023/01")
+    },
+    .sih_download_loop = function(...) {
+      list(
+        data = tibble::tibble(
+          year = 2023L,
+          month = 1L,
+          uf_source = "AC",
+          N_AIH = "1"
+        ),
+        failed_labels = character(0)
+      )
+    }
   )
   expect_warning(
-    res <- .sih_fetch(c("r2", "datasus"), 2023, 1, "AC", FALSE, tempdir(), NULL),
+    res <- .sih_fetch(
+      c("r2", "datasus"),
+      2023,
+      1,
+      "AC",
+      FALSE,
+      tempdir(),
+      NULL
+    ),
     "falling back"
   )
   expect_equal(res$source, "datasus")
@@ -159,10 +195,17 @@ test_that(".sih_fetch falls back to datasus when the mirror yields nothing", {
 
 test_that(".sih_fetch serves the mirror first and reports its source", {
   local_mocked_bindings(
-    .sih_r2_fetch = function(...) list(
-      results = list(tibble::tibble(year = 2023L, month = 1L, uf_source = "AC", N_AIH = "1")),
-      failed_labels = character(0)
-    ),
+    .sih_r2_fetch = function(...) {
+      list(
+        results = list(tibble::tibble(
+          year = 2023L,
+          month = 1L,
+          uf_source = "AC",
+          N_AIH = "1"
+        )),
+        failed_labels = character(0)
+      )
+    },
     .sih_download_loop = function(...) stop("must not be called")
   )
   res <- .sih_fetch(c("r2", "datasus"), 2023, 1, "AC", FALSE, tempdir(), NULL)
@@ -172,11 +215,23 @@ test_that(".sih_fetch serves the mirror first and reports its source", {
 
 test_that(".sih_fetch aborts when every source fails", {
   local_mocked_bindings(
-    .sih_r2_fetch = function(...) list(results = list(), failed_labels = "AC 2023/01"),
-    .sih_download_loop = function(...) cli::cli_abort("No data could be downloaded")
+    .sih_r2_fetch = function(...) {
+      list(results = list(), failed_labels = "AC 2023/01")
+    },
+    .sih_download_loop = function(...) {
+      cli::cli_abort("No data could be downloaded")
+    }
   )
   expect_error(
-    suppressWarnings(.sih_fetch(c("r2", "datasus"), 2023, 1, "AC", FALSE, tempdir(), NULL)),
+    suppressWarnings(.sih_fetch(
+      c("r2", "datasus"),
+      2023,
+      1,
+      "AC",
+      FALSE,
+      tempdir(),
+      NULL
+    )),
     "No data could be downloaded"
   )
 })
@@ -191,8 +246,13 @@ test_that("sih_data reads one competence from R2 with provenance", {
   expected <- st$records[st$year == 2023 & st$month == 1 & st$uf == "RR"]
   expect_length(expected, 1)
 
-  data <- sih_data(year = 2023, month = 1, uf = "RR", cache_dir = cache,
-                   parse = FALSE)
+  data <- sih_data(
+    year = 2023,
+    month = 1,
+    uf = "RR",
+    cache_dir = cache,
+    parse = FALSE
+  )
   expect_s3_class(data, "tbl_df")
   expect_equal(nrow(data), expected)
   expect_equal(names(data)[1:3], c("year", "month", "uf_source"))
@@ -205,8 +265,13 @@ test_that("sih_data reads one competence from R2 with provenance", {
   expect_true(!is.na(prov$source_hash_md5))
 
   # second call is served from the shared local cache, same rows
-  again <- sih_data(year = 2023, month = 1, uf = "RR", cache_dir = cache,
-                    parse = FALSE)
+  again <- sih_data(
+    year = 2023,
+    month = 1,
+    uf = "RR",
+    cache_dir = cache,
+    parse = FALSE
+  )
   expect_equal(nrow(again), expected)
 })
 
@@ -214,8 +279,13 @@ test_that("sih_data parses types from the mirror like it does from the FTP", {
   skip_if_no_integration()
   skip_if_not_installed("arrow")
   cache <- withr::local_tempdir()
-  data <- sih_data(year = 2023, month = 1, uf = "RR", cache_dir = cache,
-                   vars = c("DT_INTER", "VAL_TOT", "DIAS_PERM", "SEXO"))
+  data <- sih_data(
+    year = 2023,
+    month = 1,
+    uf = "RR",
+    cache_dir = cache,
+    vars = c("DT_INTER", "VAL_TOT", "DIAS_PERM", "SEXO")
+  )
   expect_s3_class(data$DT_INTER, "Date")
   expect_type(data$VAL_TOT, "double")
   expect_type(data$DIAS_PERM, "integer")
@@ -229,8 +299,14 @@ test_that("sih_data(lazy = TRUE) is a remote dataset over the mirror", {
   st <- sih_status(cache_dir = cache)
   expected <- st$records[st$year == 2023 & st$month == 1 & st$uf == "RR"]
 
-  ds <- sih_data(year = 2023, month = 1, uf = "RR", cache_dir = cache,
-                 lazy = TRUE, parse = FALSE)
+  ds <- sih_data(
+    year = 2023,
+    month = 1,
+    uf = "RR",
+    cache_dir = cache,
+    lazy = TRUE,
+    parse = FALSE
+  )
   expect_false(is.data.frame(ds))
   expect_equal(names(ds)[1:3], c("year", "month", "uf_source"))
   n <- ds |> dplyr::count() |> dplyr::collect()
@@ -243,8 +319,15 @@ test_that("sih_data(lazy = TRUE, backend = 'duckdb') works over the mirror", {
   skip_if_not_installed("duckdb")
   skip_if_not_installed("dbplyr")
   cache <- withr::local_tempdir()
-  ds <- sih_data(year = 2023, month = 1, uf = "RR", cache_dir = cache,
-                 lazy = TRUE, backend = "duckdb", parse = FALSE)
+  ds <- sih_data(
+    year = 2023,
+    month = 1,
+    uf = "RR",
+    cache_dir = cache,
+    lazy = TRUE,
+    backend = "duckdb",
+    parse = FALSE
+  )
   n <- ds |> dplyr::summarise(n = dplyr::n()) |> dplyr::collect()
   expect_gt(n$n, 0)
 })
@@ -257,18 +340,27 @@ test_that("sih_status lists the published competences", {
   expect_true(all(st$month %in% 1:12))
   expect_true(all(!is.na(st$source_hash_md5)))
   expect_true(all(!is.na(st$parquet_sha256)))
-  expect_true(all(grepl("^sih/rd/ano=\\d{4}/mes=\\d{2}/uf=[A-Z]{2}/", st$parquet_path)))
+  expect_true(all(grepl(
+    "^sih/rd/ano=\\d{4}/mes=\\d{2}/uf=[A-Z]{2}/",
+    st$parquet_path
+  )))
   expect_match(attr(st, "last_updated"), "^\\d{4}-\\d{2}-\\d{2}")
 })
 
 test_that(".r2_trim_to_wanted keeps only the wanted partitions", {
   cached <- tibble::tibble(
-    year = c(2023L, 2023L, 2024L, 2024L), month = c(1L, 2L, 1L, 2L),
-    uf_source = "RR", N_AIH = c("a", "b", "c", "d")
+    year = c(2023L, 2023L, 2024L, 2024L),
+    month = c(1L, 2L, 1L, 2L),
+    uf_source = "RR",
+    N_AIH = c("a", "b", "c", "d")
   )
   by <- c("year", "month", "uf_source")
   # the coarse %in% read brought two combinations that were not asked for
-  wanted <- tibble::tibble(year = c(2023L, 2024L), month = c(1L, 2L), uf_source = "RR")
+  wanted <- tibble::tibble(
+    year = c(2023L, 2024L),
+    month = c(1L, 2L),
+    uf_source = "RR"
+  )
   expect_identical(.r2_trim_to_wanted(cached, wanted, by)$N_AIH, c("a", "d"))
   # every row wanted: returned untouched
   expect_identical(.r2_trim_to_wanted(cached, cached[by], by), cached)
@@ -278,7 +370,13 @@ test_that(".sih_r2_lazy opens only the requested years and prunes inside each", 
   skip_if_not_installed("arrow")
   root <- withr::local_tempdir()
   part <- function(y, m, uf, n, morte) {
-    d <- file.path(root, "sih/rd", paste0("ano=", y), paste0("mes=", m), paste0("uf=", uf))
+    d <- file.path(
+      root,
+      "sih/rd",
+      paste0("ano=", y),
+      paste0("mes=", m),
+      paste0("uf=", uf)
+    )
     dir.create(d, recursive = TRUE)
     arrow::write_parquet(
       data.frame(N_AIH = paste0(y, m, uf, seq_len(n)), MORTE = morte),
@@ -291,25 +389,41 @@ test_that(".sih_r2_lazy opens only the requested years and prunes inside each", 
   part(2022, "01", "AC", 4, rep("1", 4))
   part(2023, "01", "RR", 2, c("0", "0"))
   opened <- character(0)
-  local_mocked_bindings(.r2_open_dataset = function(prefix, creds, partition_cols = NULL,
-                                                    unify_schemas = FALSE, schema = NULL) {
+  local_mocked_bindings(.r2_open_dataset = function(
+    prefix,
+    creds,
+    partition_cols = NULL,
+    unify_schemas = FALSE,
+    schema = NULL
+  ) {
     opened <<- c(opened, prefix)
     fields <- rep(list(arrow::utf8()), length(partition_cols))
     names(fields) <- partition_cols
-    arrow::open_dataset(file.path(root, prefix), format = "parquet",
-                        partitioning = do.call(arrow::hive_partition, fields),
-                        schema = schema)
+    arrow::open_dataset(
+      file.path(root, prefix),
+      format = "parquet",
+      partitioning = do.call(arrow::hive_partition, fields),
+      schema = schema
+    )
   })
 
-  res <- .sih_r2_lazy(c(2022, 2023), months = 1, ufs = "RR",
-                      backend = "arrow", creds = NULL) |>
+  res <- .sih_r2_lazy(
+    c(2022, 2023),
+    months = 1,
+    ufs = "RR",
+    backend = "arrow",
+    creds = NULL
+  ) |>
     dplyr::collect() |>
     dplyr::arrange(.data$year, .data$N_AIH)
 
   # 2021 is never listed; the newest year is listed once, for the schema
   expect_setequal(opened, c("sih/rd/ano=2022", "sih/rd/ano=2023"))
   expect_length(opened, 2)
-  expect_identical(names(res), c("year", "month", "uf_source", "N_AIH", "MORTE"))
+  expect_identical(
+    names(res),
+    c("year", "month", "uf_source", "N_AIH", "MORTE")
+  )
   expect_identical(res$year, c(2022L, 2022L, 2022L, 2023L, 2023L))
   expect_true(all(res$month == 1L & res$uf_source == "RR"))
   expect_identical(sum(res$MORTE == "1"), 2L)

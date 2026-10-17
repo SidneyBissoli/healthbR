@@ -50,7 +50,9 @@ test_that("sia_info returns expected structure", {
 test_that("sia_variables returns tibble with expected columns", {
   vars <- sia_variables()
   expect_s3_class(vars, "tbl_df")
-  expect_true(all(c("variable", "description", "type", "section") %in% names(vars)))
+  expect_true(all(
+    c("variable", "description", "type", "section") %in% names(vars)
+  ))
   expect_gt(nrow(vars), 0)
   expect_true("PA_PROC_ID" %in% vars$variable)
   expect_true("PA_SEXO" %in% vars$variable)
@@ -60,9 +62,18 @@ test_that("sia_variables returns tibble with expected columns", {
 
 test_that("sia_variables has key variables present", {
   vars <- sia_variables()
-  key_vars <- c("PA_CODUNI", "PA_PROC_ID", "PA_CIDPRI", "PA_SEXO",
-                "PA_IDADE", "PA_RACACOR", "PA_VALPRO", "PA_VALAPR",
-                "PA_UFMUN", "PA_MVM")
+  key_vars <- c(
+    "PA_CODUNI",
+    "PA_PROC_ID",
+    "PA_CIDPRI",
+    "PA_SEXO",
+    "PA_IDADE",
+    "PA_RACACOR",
+    "PA_VALPRO",
+    "PA_VALAPR",
+    "PA_UFMUN",
+    "PA_MVM"
+  )
   for (v in key_vars) {
     expect_true(v %in% vars$variable, info = paste(v, "missing"))
   }
@@ -110,7 +121,9 @@ test_that("sia_variables has expected sections", {
 test_that("sia_dictionary returns tibble with expected columns", {
   dict <- sia_dictionary()
   expect_s3_class(dict, "tbl_df")
-  expect_true(all(c("variable", "description", "code", "label") %in% names(dict)))
+  expect_true(all(
+    c("variable", "description", "code", "label") %in% names(dict)
+  ))
   expect_gt(nrow(dict), 0)
 })
 
@@ -234,8 +247,21 @@ test_that(".sia_validate_type errors on invalid type", {
 })
 
 test_that(".sia_validate_type accepts all 13 types", {
-  all_types <- c("PA", "BI", "AD", "AM", "AN", "AQ", "AR", "AB",
-                 "ACF", "ATD", "AMP", "SAD", "PS")
+  all_types <- c(
+    "PA",
+    "BI",
+    "AD",
+    "AM",
+    "AN",
+    "AQ",
+    "AR",
+    "AB",
+    "ACF",
+    "ATD",
+    "AMP",
+    "SAD",
+    "PS"
+  )
   for (t in all_types) {
     expect_equal(.sia_validate_type(t), t)
   }
@@ -336,8 +362,10 @@ test_that("sia_label_maps are consistent with dictionary", {
   for (var_name in names(sia_label_maps)) {
     dict_rows <- sia_dictionary(var_name)
     map_codes <- names(sia_label_maps[[var_name]])
-    expect_true(all(map_codes %in% dict_rows$code),
-                info = paste(var_name, "label_maps codes not in dictionary"))
+    expect_true(
+      all(map_codes %in% dict_rows$code),
+      info = paste(var_name, "label_maps codes not in dictionary")
+    )
   }
 })
 
@@ -405,8 +433,7 @@ test_that(".sia_cache_dir creates directory", {
 test_that("sia_data downloads PA single month single UF", {
   skip_if_no_integration()
 
-  data <- sia_data(year = 2022, month = 1, uf = "AC",
-                   cache_dir = tempdir())
+  data <- sia_data(year = 2022, month = 1, uf = "AC", cache_dir = tempdir())
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("PA_PROC_ID" %in% names(data))
@@ -424,9 +451,13 @@ test_that("sia_data downloads PA single month single UF", {
 test_that("sia_data filters by procedure", {
   skip_if_no_integration()
 
-  proc_data <- sia_data(year = 2022, month = 1, uf = "AC",
-                        procedure = "0301",
-                        cache_dir = tempdir())
+  proc_data <- sia_data(
+    year = 2022,
+    month = 1,
+    uf = "AC",
+    procedure = "0301",
+    cache_dir = tempdir()
+  )
   if (nrow(proc_data) > 0) {
     expect_true(all(grepl("^0301", proc_data$PA_PROC_ID)))
   }
@@ -435,9 +466,13 @@ test_that("sia_data filters by procedure", {
 test_that("sia_data filters by diagnosis", {
   skip_if_no_integration()
 
-  diag_data <- sia_data(year = 2022, month = 1, uf = "AC",
-                        diagnosis = "J",
-                        cache_dir = tempdir())
+  diag_data <- sia_data(
+    year = 2022,
+    month = 1,
+    uf = "AC",
+    diagnosis = "J",
+    cache_dir = tempdir()
+  )
   if (nrow(diag_data) > 0) {
     expect_true(all(grepl("^J", diag_data$PA_CIDPRI)))
   }
@@ -446,9 +481,13 @@ test_that("sia_data filters by diagnosis", {
 test_that("sia_data selects variables", {
   skip_if_no_integration()
 
-  data <- sia_data(year = 2022, month = 1, uf = "AC",
-                   vars = c("PA_PROC_ID", "PA_SEXO", "PA_VALAPR"),
-                   cache_dir = tempdir())
+  data <- sia_data(
+    year = 2022,
+    month = 1,
+    uf = "AC",
+    vars = c("PA_PROC_ID", "PA_SEXO", "PA_VALAPR"),
+    cache_dir = tempdir()
+  )
   expect_true("PA_PROC_ID" %in% names(data))
   expect_true("PA_SEXO" %in% names(data))
   expect_true("PA_VALAPR" %in% names(data))
@@ -464,18 +503,25 @@ test_that("sia_data cache works (second call faster)", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  t1 <- system.time(sia_data(year = 2022, month = 1, uf = "AC",
-                              cache_dir = cache_dir))
-  t2 <- system.time(sia_data(year = 2022, month = 1, uf = "AC",
-                              cache_dir = cache_dir))
+  t1 <- system.time(sia_data(
+    year = 2022,
+    month = 1,
+    uf = "AC",
+    cache_dir = cache_dir
+  ))
+  t2 <- system.time(sia_data(
+    year = 2022,
+    month = 1,
+    uf = "AC",
+    cache_dir = cache_dir
+  ))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
 
 test_that("sia_data handles multiple months", {
   skip_if_no_integration()
 
-  data <- sia_data(year = 2022, month = 1:2, uf = "AC",
-                   cache_dir = tempdir())
+  data <- sia_data(year = 2022, month = 1:2, uf = "AC", cache_dir = tempdir())
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true(all(c(1L, 2L) %in% data$month))
@@ -484,8 +530,13 @@ test_that("sia_data handles multiple months", {
 test_that("sia_data downloads different file type (BI)", {
   skip_if_no_integration()
 
-  data <- sia_data(year = 2022, month = 1, uf = "AC", type = "BI",
-                   cache_dir = tempdir())
+  data <- sia_data(
+    year = 2022,
+    month = 1,
+    uf = "AC",
+    type = "BI",
+    cache_dir = tempdir()
+  )
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("year" %in% names(data))
@@ -511,9 +562,13 @@ test_that("sia_variables type column has non-character types", {
 
 test_that("sia parse converts mock data correctly", {
   mock_data <- tibble::tibble(
-    year = 2022L, month = 1L, uf_source = "AC",
-    PA_MVM = "202201", PA_QTDPRO = "10",
-    PA_VALAPR = "150.75", PA_SEXO = "1"
+    year = 2022L,
+    month = 1L,
+    uf_source = "AC",
+    PA_MVM = "202201",
+    PA_QTDPRO = "10",
+    PA_VALAPR = "150.75",
+    PA_SEXO = "1"
   )
   spec <- .build_type_spec(sia_variables_metadata)
   parsed <- .parse_columns(mock_data, spec)
@@ -534,9 +589,15 @@ test_that("sia_data reports partial download failures", {
     .sia_validate_year = function(year, ...) as.integer(year),
     .sia_validate_uf = function(uf) toupper(uf),
     .sia_download_and_read = function(year, month, uf, ...) {
-      if (uf == "XX") stop("Not found")
-      tibble::tibble(year = as.integer(year), month = as.integer(month),
-                     uf_source = uf, PA_PROC_ID = "0301")
+      if (uf == "XX") {
+        stop("Not found")
+      }
+      tibble::tibble(
+        year = as.integer(year),
+        month = as.integer(month),
+        uf_source = uf,
+        PA_PROC_ID = "0301"
+      )
     }
   )
   result <- suppressWarnings(
@@ -572,15 +633,21 @@ test_that(".sia_download_loop binds results from multiple combos", {
   local_mocked_bindings(
     .sia_download_and_read = function(year, month, uf, type, ...) {
       tibble::tibble(
-        year = as.integer(year), month = as.integer(month),
-        uf_source = uf, PA_PROC_ID = "0301"
+        year = as.integer(year),
+        month = as.integer(month),
+        uf_source = uf,
+        PA_PROC_ID = "0301"
       )
     }
   )
 
   result <- .sia_download_loop(
-    year = 2022L, month = c(1L, 2L), target_ufs = c("AC", "RJ"),
-    type = "PA", cache = FALSE, cache_dir = NULL
+    year = 2022L,
+    month = c(1L, 2L),
+    target_ufs = c("AC", "RJ"),
+    type = "PA",
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_true(is.list(result))
@@ -594,17 +661,25 @@ test_that(".sia_download_loop binds results from multiple combos", {
 test_that(".sia_download_loop tracks failures", {
   local_mocked_bindings(
     .sia_download_and_read = function(year, month, uf, ...) {
-      if (uf == "ZZ") stop("FTP error")
+      if (uf == "ZZ") {
+        stop("FTP error")
+      }
       tibble::tibble(
-        year = as.integer(year), month = as.integer(month),
-        uf_source = uf, PA_PROC_ID = "0301"
+        year = as.integer(year),
+        month = as.integer(month),
+        uf_source = uf,
+        PA_PROC_ID = "0301"
       )
     }
   )
 
   result <- .sia_download_loop(
-    year = 2022L, month = 1L, target_ufs = c("AC", "ZZ"),
-    type = "PA", cache = FALSE, cache_dir = NULL
+    year = 2022L,
+    month = 1L,
+    target_ufs = c("AC", "ZZ"),
+    type = "PA",
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_equal(nrow(result$data), 1)
@@ -619,8 +694,12 @@ test_that(".sia_download_loop aborts when all downloads fail", {
 
   expect_error(
     .sia_download_loop(
-      year = 2022L, month = 1L, target_ufs = "AC",
-      type = "PA", cache = FALSE, cache_dir = NULL
+      year = 2022L,
+      month = 1L,
+      target_ufs = "AC",
+      type = "PA",
+      cache = FALSE,
+      cache_dir = NULL
     ),
     "No data could be downloaded"
   )
@@ -632,15 +711,21 @@ test_that(".sia_download_loop generates labels with type prefix", {
     .sia_download_and_read = function(year, month, uf, type, ...) {
       call_log <<- c(call_log, paste(type, uf, year, month))
       tibble::tibble(
-        year = as.integer(year), month = as.integer(month),
-        uf_source = uf, PA_PROC_ID = "0301"
+        year = as.integer(year),
+        month = as.integer(month),
+        uf_source = uf,
+        PA_PROC_ID = "0301"
       )
     }
   )
 
   result <- .sia_download_loop(
-    year = 2022L, month = 1L, target_ufs = "AC",
-    type = "BI", cache = FALSE, cache_dir = NULL
+    year = 2022L,
+    month = 1L,
+    target_ufs = "AC",
+    type = "BI",
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_equal(nrow(result$data), 1)
@@ -665,7 +750,11 @@ test_that(".sia_apply_filters filters by multiple procedure prefixes", {
     PA_CIDPRI = c("J180", "C509", "I219", "J181")
   )
 
-  result <- .sia_apply_filters(mock_data, procedure = c("0301", "0201"), diagnosis = NULL)
+  result <- .sia_apply_filters(
+    mock_data,
+    procedure = c("0301", "0201"),
+    diagnosis = NULL
+  )
   expect_equal(nrow(result), 3)
   expect_true(all(grepl("^(0301|0201)", result$PA_PROC_ID)))
 })
@@ -687,7 +776,11 @@ test_that(".sia_apply_filters filters by multiple diagnosis prefixes", {
     PA_CIDPRI = c("J180", "I219", "C509", "J181")
   )
 
-  result <- .sia_apply_filters(mock_data, procedure = NULL, diagnosis = c("J18", "C50"))
+  result <- .sia_apply_filters(
+    mock_data,
+    procedure = NULL,
+    diagnosis = c("J18", "C50")
+  )
   expect_equal(nrow(result), 3)
   expect_true(all(grepl("^(J18|C50)", result$PA_CIDPRI)))
 })
@@ -738,16 +831,24 @@ test_that("sia_data with vars selects columns", {
   local_mocked_bindings(
     .sia_download_and_read = function(year, month, uf, ...) {
       tibble::tibble(
-        year = as.integer(year), month = as.integer(month),
+        year = as.integer(year),
+        month = as.integer(month),
         uf_source = uf,
-        PA_PROC_ID = "0301010010", PA_SEXO = "1",
-        PA_CIDPRI = "J180", PA_VALAPR = "100.50"
+        PA_PROC_ID = "0301010010",
+        PA_SEXO = "1",
+        PA_CIDPRI = "J180",
+        PA_VALAPR = "100.50"
       )
     }
   )
 
-  result <- sia_data(2022, month = 1, uf = "AC",
-                     vars = c("PA_PROC_ID", "PA_SEXO"), parse = FALSE)
+  result <- sia_data(
+    2022,
+    month = 1,
+    uf = "AC",
+    vars = c("PA_PROC_ID", "PA_SEXO"),
+    parse = FALSE
+  )
 
   expect_true("PA_PROC_ID" %in% names(result))
   expect_true("PA_SEXO" %in% names(result))
@@ -761,7 +862,8 @@ test_that("sia_data applies procedure filter", {
   local_mocked_bindings(
     .sia_download_and_read = function(year, month, uf, ...) {
       tibble::tibble(
-        year = as.integer(year), month = as.integer(month),
+        year = as.integer(year),
+        month = as.integer(month),
         uf_source = uf,
         PA_PROC_ID = c("0301010010", "0404050032"),
         PA_SEXO = c("1", "2")
@@ -769,8 +871,13 @@ test_that("sia_data applies procedure filter", {
     }
   )
 
-  result <- sia_data(2022, month = 1, uf = "AC",
-                     procedure = "0301", parse = FALSE)
+  result <- sia_data(
+    2022,
+    month = 1,
+    uf = "AC",
+    procedure = "0301",
+    parse = FALSE
+  )
   expect_equal(nrow(result), 1)
   expect_true(grepl("^0301", result$PA_PROC_ID))
 })
@@ -779,7 +886,8 @@ test_that("sia_data applies diagnosis filter", {
   local_mocked_bindings(
     .sia_download_and_read = function(year, month, uf, ...) {
       tibble::tibble(
-        year = as.integer(year), month = as.integer(month),
+        year = as.integer(year),
+        month = as.integer(month),
         uf_source = uf,
         PA_PROC_ID = c("0301010010", "0404050032"),
         PA_CIDPRI = c("J180", "C509")
@@ -787,8 +895,7 @@ test_that("sia_data applies diagnosis filter", {
     }
   )
 
-  result <- sia_data(2022, month = 1, uf = "AC",
-                     diagnosis = "J", parse = FALSE)
+  result <- sia_data(2022, month = 1, uf = "AC", diagnosis = "J", parse = FALSE)
   expect_equal(nrow(result), 1)
   expect_true(grepl("^J", result$PA_CIDPRI))
 })

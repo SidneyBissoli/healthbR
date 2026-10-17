@@ -17,10 +17,20 @@ anvisa_base_url <- "https://dados.anvisa.gov.br/dados"
 #' @noRd
 anvisa_valid_types <- tibble::tibble(
   code = c(
-    "medicines", "medical_devices", "food", "cosmetics", "sanitizers",
-    "tobacco", "pesticides", "hemovigilance", "technovigilance",
-    "vigimed_notifications", "vigimed_medicines", "vigimed_reactions",
-    "sngpc", "sngpc_compounded"
+    "medicines",
+    "medical_devices",
+    "food",
+    "cosmetics",
+    "sanitizers",
+    "tobacco",
+    "pesticides",
+    "hemovigilance",
+    "technovigilance",
+    "vigimed_notifications",
+    "vigimed_medicines",
+    "vigimed_reactions",
+    "sngpc",
+    "sngpc_compounded"
   ),
   name = c(
     "Medicamentos",
@@ -65,9 +75,18 @@ anvisa_valid_types <- tibble::tibble(
 #' ANVISA snapshot types (no year/month parameter)
 #' @noRd
 anvisa_snapshot_types <- c(
-  "medicines", "medical_devices", "food", "cosmetics", "sanitizers",
-  "tobacco", "pesticides", "hemovigilance", "technovigilance",
-  "vigimed_notifications", "vigimed_medicines", "vigimed_reactions"
+  "medicines",
+  "medical_devices",
+  "food",
+  "cosmetics",
+  "sanitizers",
+  "tobacco",
+  "pesticides",
+  "hemovigilance",
+  "technovigilance",
+  "vigimed_notifications",
+  "vigimed_medicines",
+  "vigimed_reactions"
 )
 
 #' ANVISA time-series types (require year/month)
@@ -150,11 +169,17 @@ anvisa_sngpc_years <- 2014L:2026L
 #' @noRd
 anvisa_medicines_metadata <- tibble::tibble(
   variable = c(
-    "TIPO_PRODUTO", "NOME_PRODUTO", "DATA_FINALIZACAO_PROCESSO",
-    "CATEGORIA_REGULATORIA", "NUMERO_REGISTRO_PRODUTO",
-    "DATA_VENCIMENTO_REGISTRO", "NUMERO_PROCESSO",
-    "CLASSE_TERAPEUTICA", "EMPRESA_DETENTORA_REGISTRO",
-    "SITUACAO_REGISTRO", "PRINCIPIO_ATIVO"
+    "TIPO_PRODUTO",
+    "NOME_PRODUTO",
+    "DATA_FINALIZACAO_PROCESSO",
+    "CATEGORIA_REGULATORIA",
+    "NUMERO_REGISTRO_PRODUTO",
+    "DATA_VENCIMENTO_REGISTRO",
+    "NUMERO_PROCESSO",
+    "CLASSE_TERAPEUTICA",
+    "EMPRESA_DETENTORA_REGISTRO",
+    "SITUACAO_REGISTRO",
+    "PRINCIPIO_ATIVO"
   ),
   description = c(
     "Tipo de produto (Medicamento)",
@@ -175,11 +200,17 @@ anvisa_medicines_metadata <- tibble::tibble(
 #' @noRd
 anvisa_medical_devices_metadata <- tibble::tibble(
   variable = c(
-    "NUMERO_REGISTRO_CADASTRO", "NUMERO_PROCESSO", "NOME_TECNICO",
-    "CLASSE_RISCO", "NOME_COMERCIAL",
-    "CNPJ_DETENTOR_REGISTRO_CADASTRO", "DETENTOR_REGISTRO_CADASTRO",
-    "NOME_FABRICANTE", "NOME_PAIS_FABRIC",
-    "DT_PUB_REGISTRO_CADASTRO", "VALIDADE_REGISTRO_CADASTRO",
+    "NUMERO_REGISTRO_CADASTRO",
+    "NUMERO_PROCESSO",
+    "NOME_TECNICO",
+    "CLASSE_RISCO",
+    "NOME_COMERCIAL",
+    "CNPJ_DETENTOR_REGISTRO_CADASTRO",
+    "DETENTOR_REGISTRO_CADASTRO",
+    "NOME_FABRICANTE",
+    "NOME_PAIS_FABRIC",
+    "DT_PUB_REGISTRO_CADASTRO",
+    "VALIDADE_REGISTRO_CADASTRO",
     "DT_ATUALIZACAO_DADO"
   ),
   description = c(
@@ -202,10 +233,16 @@ anvisa_medical_devices_metadata <- tibble::tibble(
 #' @noRd
 anvisa_food_metadata <- tibble::tibble(
   variable = c(
-    "NU_CNPJ_EMPRESA", "NO_RAZAO_SOCIAL_EMPRESA", "NO_PRODUTO",
-    "NU_PROCESSO", "DS_TIPO_PRODUTO", "DS_CATEGORIA_PRODUTO",
-    "DT_FINALIZACAO_PROCESSO", "NU_REGISTRO_PRODUTO",
-    "DT_VENCIMENTO_REGISTRO", "ST_SITUACAO_REGISTRO"
+    "NU_CNPJ_EMPRESA",
+    "NO_RAZAO_SOCIAL_EMPRESA",
+    "NO_PRODUTO",
+    "NU_PROCESSO",
+    "DS_TIPO_PRODUTO",
+    "DS_CATEGORIA_PRODUTO",
+    "DT_FINALIZACAO_PROCESSO",
+    "NU_REGISTRO_PRODUTO",
+    "DT_VENCIMENTO_REGISTRO",
+    "ST_SITUACAO_REGISTRO"
   ),
   description = c(
     "CNPJ da empresa",
@@ -225,10 +262,16 @@ anvisa_food_metadata <- tibble::tibble(
 #' @noRd
 anvisa_cosmetics_metadata <- tibble::tibble(
   variable = c(
-    "NU_CNPJ_EMPRESA", "NO_RAZAO_SOCIAL_EMPRESA", "NO_PRODUTO",
-    "NU_PROCESSO", "DS_TIPO_PRODUTO", "DS_CATEGORIA_PRODUTO",
-    "DT_FINALIZACAO_PROCESSO", "NU_REGISTRO_PRODUTO",
-    "DT_VENCIMENTO_REGISTRO", "ST_SITUACAO_REGISTRO"
+    "NU_CNPJ_EMPRESA",
+    "NO_RAZAO_SOCIAL_EMPRESA",
+    "NO_PRODUTO",
+    "NU_PROCESSO",
+    "DS_TIPO_PRODUTO",
+    "DS_CATEGORIA_PRODUTO",
+    "DT_FINALIZACAO_PROCESSO",
+    "NU_REGISTRO_PRODUTO",
+    "DT_VENCIMENTO_REGISTRO",
+    "ST_SITUACAO_REGISTRO"
   ),
   description = c(
     "CNPJ da empresa",
@@ -248,8 +291,11 @@ anvisa_cosmetics_metadata <- tibble::tibble(
 #' @noRd
 anvisa_sanitizers_metadata <- tibble::tibble(
   variable = c(
-    "NOME_PRODUTO", "NUMERO_PROCESSO", "RAZAO_SOCIAL_EMPRESA",
-    "NUMERO_REGISTRO", "DATA_VENCIMENTO_REGISTRO",
+    "NOME_PRODUTO",
+    "NUMERO_PROCESSO",
+    "RAZAO_SOCIAL_EMPRESA",
+    "NUMERO_REGISTRO",
+    "DATA_VENCIMENTO_REGISTRO",
     "ST_SITUACAO_REGISTRO"
   ),
   description = c(
@@ -266,9 +312,14 @@ anvisa_sanitizers_metadata <- tibble::tibble(
 #' @noRd
 anvisa_tobacco_metadata <- tibble::tibble(
   variable = c(
-    "NU_CNPJ_EMPRESA", "NO_RAZAO_SOCIAL_EMPRESA", "NO_PRODUTO",
-    "NU_PROCESSO", "DS_TIPO_PRODUTO", "DS_CATEGORIA_PRODUTO",
-    "DT_FINALIZACAO_PROCESSO", "DT_VENCIMENTO_REGISTRO",
+    "NU_CNPJ_EMPRESA",
+    "NO_RAZAO_SOCIAL_EMPRESA",
+    "NO_PRODUTO",
+    "NU_PROCESSO",
+    "DS_TIPO_PRODUTO",
+    "DS_CATEGORIA_PRODUTO",
+    "DT_FINALIZACAO_PROCESSO",
+    "DT_VENCIMENTO_REGISTRO",
     "ST_SITUACAO_REGISTRO"
   ),
   description = c(
@@ -288,10 +339,20 @@ anvisa_tobacco_metadata <- tibble::tibble(
 #' @noRd
 anvisa_pesticides_metadata <- tibble::tibble(
   variable = c(
-    "NO_SUBSTANCIA", "TP_SUBSTANCIA", "NU_LMR", "CO_MONOGRAFIA",
-    "DS_INGREDIENTE_ATIVO", "NU_CAS", "ST_AUTORIZADO", "NO_CULTURA",
-    "TIPO_LIMITE", "NO_VALOR_REFERENCIA", "NO_UNIDADE_MEDIDA",
-    "DS_ATO_LEGAL", "DT_INICIO_VIGENCIA", "DT_FIM_VIGENCIA",
+    "NO_SUBSTANCIA",
+    "TP_SUBSTANCIA",
+    "NU_LMR",
+    "CO_MONOGRAFIA",
+    "DS_INGREDIENTE_ATIVO",
+    "NU_CAS",
+    "ST_AUTORIZADO",
+    "NO_CULTURA",
+    "TIPO_LIMITE",
+    "NO_VALOR_REFERENCIA",
+    "NO_UNIDADE_MEDIDA",
+    "DS_ATO_LEGAL",
+    "DT_INICIO_VIGENCIA",
+    "DT_FIM_VIGENCIA",
     "DT_ATUALIZACAO"
   ),
   description = c(
@@ -317,13 +378,21 @@ anvisa_pesticides_metadata <- tibble::tibble(
 #' @noRd
 anvisa_hemovigilance_metadata <- tibble::tibble(
   variable = c(
-    "NU_NOTIFICACAO", "DATA_OCORRENCIA_EVENTO",
-    "DATA_NOTIFICACAO_EVENTO", "STATUS_ANALISE",
-    "PRODUTO_MOTIVO", "TIPO_REACAO_TRANSFUSIONAL", "GRAU_RISCO",
-    "CATEGORIA_NOTIFICADOR", "TIPO_HEMOCOMPONENTE",
-    "FAIXA_ETARIA_PACIENTE", "CIDADE_NOTIFICACAO",
-    "UF_NOTIFICACAO", "DS_TEMPORALIDADE_REACAO",
-    "TIPO_EVENTO_ADVERSO", "ETAPA_CICLO_SANGUE",
+    "NU_NOTIFICACAO",
+    "DATA_OCORRENCIA_EVENTO",
+    "DATA_NOTIFICACAO_EVENTO",
+    "STATUS_ANALISE",
+    "PRODUTO_MOTIVO",
+    "TIPO_REACAO_TRANSFUSIONAL",
+    "GRAU_RISCO",
+    "CATEGORIA_NOTIFICADOR",
+    "TIPO_HEMOCOMPONENTE",
+    "FAIXA_ETARIA_PACIENTE",
+    "CIDADE_NOTIFICACAO",
+    "UF_NOTIFICACAO",
+    "DS_TEMPORALIDADE_REACAO",
+    "TIPO_EVENTO_ADVERSO",
+    "ETAPA_CICLO_SANGUE",
     "DS_ESPECIFICACAO_EVENTO"
   ),
   description = c(
@@ -350,14 +419,24 @@ anvisa_hemovigilance_metadata <- tibble::tibble(
 #' @noRd
 anvisa_technovigilance_metadata <- tibble::tibble(
   variable = c(
-    "ANO_NOTIFICACAO", "DATA_NOTIFICACAO", "NU_NOTIFICACAO",
-    "TIPO_NOTIFICACAO", "SUBTIPO_QUEIXA",
-    "CATEGORIA_DISPOSITIVO", "CODIFICACAO_EVENTO_ADVERSO",
-    "UF_EMPRESA_NOTIFICANTE", "MUNICIPIO_EMP_NOTIFICANTE",
-    "TIPO_NOTIFICANTE", "UF_OCORRENCIA", "MUNICIPIO_OCORRENCIA",
-    "CLASSE_RISCO", "NOME_TECNICO_PRODUTO",
-    "OCORRENCIA_NIVEL_1", "OCORRENCIA_NIVEL_2",
-    "UF_EMPRESA_REGISTRO", "MUNICIPIO_EMPRESA_REGISTRO"
+    "ANO_NOTIFICACAO",
+    "DATA_NOTIFICACAO",
+    "NU_NOTIFICACAO",
+    "TIPO_NOTIFICACAO",
+    "SUBTIPO_QUEIXA",
+    "CATEGORIA_DISPOSITIVO",
+    "CODIFICACAO_EVENTO_ADVERSO",
+    "UF_EMPRESA_NOTIFICANTE",
+    "MUNICIPIO_EMP_NOTIFICANTE",
+    "TIPO_NOTIFICANTE",
+    "UF_OCORRENCIA",
+    "MUNICIPIO_OCORRENCIA",
+    "CLASSE_RISCO",
+    "NOME_TECNICO_PRODUTO",
+    "OCORRENCIA_NIVEL_1",
+    "OCORRENCIA_NIVEL_2",
+    "UF_EMPRESA_REGISTRO",
+    "MUNICIPIO_EMPRESA_REGISTRO"
   ),
   description = c(
     "Ano da notifica\u00e7\u00e3o",
@@ -385,17 +464,35 @@ anvisa_technovigilance_metadata <- tibble::tibble(
 #' @noRd
 anvisa_vigimed_notifications_metadata <- tibble::tibble(
   variable = c(
-    "UF", "TIPO_ENTRADA_VIGIMED", "RECEBIDO_DE",
-    "IDENTIFICACAO_NOTIFICACAO", "DATA_INCLUSAO_SISTEMA",
-    "DATA_ULTIMA_ATUALIZACAO", "DATA_NOTIFICACAO",
-    "TIPO_NOTIFICACAO", "NOTIFICACAO_PARENT_CHILD",
-    "DATA_NASCIMENTO", "IDADE_MOMENTO_REACAO", "GRUPO_IDADE",
-    "IDADE_GESTACIONAL_MOMENTO_REACAO", "SEXO", "GESTANTE",
-    "LACTANTE", "PESO_KG", "ALTURA_CM",
-    "REACAO_EVENTO_ADVERSO_MEDDRA", "GRAVE", "GRAVIDADE",
-    "DESFECHO", "DATA_INICIO_HORA", "DATA_FINAL_HORA", "DURACAO",
-    "RELACAO_MEDICAMENTO_EVENTO", "NOME_MEDICAMENTO_WHODRUG",
-    "ACAO_ADOTADA", "NOTIFICADOR"
+    "UF",
+    "TIPO_ENTRADA_VIGIMED",
+    "RECEBIDO_DE",
+    "IDENTIFICACAO_NOTIFICACAO",
+    "DATA_INCLUSAO_SISTEMA",
+    "DATA_ULTIMA_ATUALIZACAO",
+    "DATA_NOTIFICACAO",
+    "TIPO_NOTIFICACAO",
+    "NOTIFICACAO_PARENT_CHILD",
+    "DATA_NASCIMENTO",
+    "IDADE_MOMENTO_REACAO",
+    "GRUPO_IDADE",
+    "IDADE_GESTACIONAL_MOMENTO_REACAO",
+    "SEXO",
+    "GESTANTE",
+    "LACTANTE",
+    "PESO_KG",
+    "ALTURA_CM",
+    "REACAO_EVENTO_ADVERSO_MEDDRA",
+    "GRAVE",
+    "GRAVIDADE",
+    "DESFECHO",
+    "DATA_INICIO_HORA",
+    "DATA_FINAL_HORA",
+    "DURACAO",
+    "RELACAO_MEDICAMENTO_EVENTO",
+    "NOME_MEDICAMENTO_WHODRUG",
+    "ACAO_ADOTADA",
+    "NOTIFICADOR"
   ),
   description = c(
     "UF",
@@ -434,16 +531,28 @@ anvisa_vigimed_notifications_metadata <- tibble::tibble(
 #' @noRd
 anvisa_vigimed_medicines_metadata <- tibble::tibble(
   variable = c(
-    "IDENTIFICACAO_NOTIFICACAO", "RELACAO_MEDICAMENTO_EVENTO",
-    "NOME_MEDICAMENTO_WHODRUG", "PRINCIPIOS_ATIVOS_WHODRUG",
-    "CODIGO_ATC", "DETENTOR_REGISTRO", "CONCENTRACAO",
-    "COMPONENTE_SUSPEITO", "ACAO_ADOTADA",
+    "IDENTIFICACAO_NOTIFICACAO",
+    "RELACAO_MEDICAMENTO_EVENTO",
+    "NOME_MEDICAMENTO_WHODRUG",
+    "PRINCIPIOS_ATIVOS_WHODRUG",
+    "CODIGO_ATC",
+    "DETENTOR_REGISTRO",
+    "CONCENTRACAO",
+    "COMPONENTE_SUSPEITO",
+    "ACAO_ADOTADA",
     "PROBLEMAS_ADICIONAIS_RELCIONADOS_MEDICAMENTO",
-    "INDICACAO_MEDDRA", "INDICACAO_RELATADA_NOTIFICADOR_INICIAL",
-    "DOSE", "FREQUENCIA_DOSE", "POSOLOGIA", "DURACAO",
-    "INICIO_ADMINISTRACAO", "FIM_ADMINISTRACAO",
-    "FORMA_FARMACEUTICA", "VIA_ADMINISTRACAO",
-    "VIA_ADMINISTRACAO_MAE_PAI", "NUMELO_LOTE"
+    "INDICACAO_MEDDRA",
+    "INDICACAO_RELATADA_NOTIFICADOR_INICIAL",
+    "DOSE",
+    "FREQUENCIA_DOSE",
+    "POSOLOGIA",
+    "DURACAO",
+    "INICIO_ADMINISTRACAO",
+    "FIM_ADMINISTRACAO",
+    "FORMA_FARMACEUTICA",
+    "VIA_ADMINISTRACAO",
+    "VIA_ADMINISTRACAO_MAE_PAI",
+    "NUMELO_LOTE"
   ),
   description = c(
     "Identifica\u00e7\u00e3o da notifica\u00e7\u00e3o (chave de liga\u00e7\u00e3o)",
@@ -475,10 +584,18 @@ anvisa_vigimed_medicines_metadata <- tibble::tibble(
 #' @noRd
 anvisa_vigimed_reactions_metadata <- tibble::tibble(
   variable = c(
-    "IDENTIFICACAO_NOTIFICACAO", "REACAO_EVTO_ADVERSO_MEDDRA_LLT",
-    "PT", "HLT", "HLGT", "SOC",
-    "DATA_INICIO_HORA", "DATA_FINAL_HORA", "DURACAO",
-    "GRAVE", "GRAVIDADE", "DESFECHO"
+    "IDENTIFICACAO_NOTIFICACAO",
+    "REACAO_EVTO_ADVERSO_MEDDRA_LLT",
+    "PT",
+    "HLT",
+    "HLGT",
+    "SOC",
+    "DATA_INICIO_HORA",
+    "DATA_FINAL_HORA",
+    "DURACAO",
+    "GRAVE",
+    "GRAVIDADE",
+    "DESFECHO"
   ),
   description = c(
     "Identifica\u00e7\u00e3o da notifica\u00e7\u00e3o (chave de liga\u00e7\u00e3o)",
@@ -500,11 +617,20 @@ anvisa_vigimed_reactions_metadata <- tibble::tibble(
 #' @noRd
 anvisa_sngpc_metadata <- tibble::tibble(
   variable = c(
-    "NU_ANO_VENDA", "NU_MES_VENDA", "SG_UF_VENDA",
-    "NO_MUNICIPIO_VENDA", "DS_PRINCIPIO_ATIVO",
-    "DS_DESCRICAO_APRESENTACAO", "QT_VENDIDA", "DS_UNIDADE_MEDIDA",
-    "NO_CONSELHO_PRESCRITOR", "SG_UF_CONSELHO_PRESCRITOR",
-    "TP_RECEITUARIO", "CO_CID10", "SG_SEXO", "NU_IDADE",
+    "NU_ANO_VENDA",
+    "NU_MES_VENDA",
+    "SG_UF_VENDA",
+    "NO_MUNICIPIO_VENDA",
+    "DS_PRINCIPIO_ATIVO",
+    "DS_DESCRICAO_APRESENTACAO",
+    "QT_VENDIDA",
+    "DS_UNIDADE_MEDIDA",
+    "NO_CONSELHO_PRESCRITOR",
+    "SG_UF_CONSELHO_PRESCRITOR",
+    "TP_RECEITUARIO",
+    "CO_CID10",
+    "SG_SEXO",
+    "NU_IDADE",
     "NU_UNIDADE_IDADE"
   ),
   description = c(
@@ -530,13 +656,22 @@ anvisa_sngpc_metadata <- tibble::tibble(
 #' @noRd
 anvisa_sngpc_compounded_metadata <- tibble::tibble(
   variable = c(
-    "NU_ANO_VENDA", "NU_MES_VENDA", "SG_UF_VENDA",
-    "NO_MUNICIPIO_VENDA", "DS_DCB", "NO_PRINCIPIO_ATIVO",
+    "NU_ANO_VENDA",
+    "NU_MES_VENDA",
+    "SG_UF_VENDA",
+    "NO_MUNICIPIO_VENDA",
+    "DS_DCB",
+    "NO_PRINCIPIO_ATIVO",
     "QT_ATIVO_POR_UNID_FARMACOTEC",
     "DS_UNIDADE_MEDIDA_PRINCIPIO_ATIVO",
-    "QT_UNIDADE_FARMACOTECNICA", "DS_TIPO_UNIDADE_FARMACOTECNICA",
-    "NO_CONSELHO_PRESCRITOR", "SG_UF_CONSELHO_PRESCRITOR",
-    "TP_RECEITUARIO", "CO_CID10", "SG_SEXO", "NU_IDADE",
+    "QT_UNIDADE_FARMACOTECNICA",
+    "DS_TIPO_UNIDADE_FARMACOTECNICA",
+    "NO_CONSELHO_PRESCRITOR",
+    "SG_UF_CONSELHO_PRESCRITOR",
+    "TP_RECEITUARIO",
+    "CO_CID10",
+    "SG_SEXO",
+    "NU_IDADE",
     "NU_UNIDADE_IDADE"
   ),
   description = c(
@@ -569,7 +704,8 @@ anvisa_sngpc_compounded_metadata <- tibble::tibble(
 #' @return A tibble with variable metadata.
 #' @noRd
 .anvisa_get_metadata <- function(type) {
-  switch(type,
+  switch(
+    type,
     medicines = anvisa_medicines_metadata,
     medical_devices = anvisa_medical_devices_metadata,
     food = anvisa_food_metadata,

@@ -50,34 +50,88 @@ sidra_theme_labels <- c(
 pns_sidra_catalog_internal <- tibble::tibble(
   table_code = c(
     # health perception
-    "4751", "7666", "7667",
+    "4751",
+    "7666",
+    "7667",
     # chronic diseases
-    "4416", "4418", "4420", "4487", "4489", "4491",
-    "4450", "4452", "4454", "4432", "4434", "4436",
+    "4416",
+    "4418",
+    "4420",
+    "4487",
+    "4489",
+    "4491",
+    "4450",
+    "4452",
+    "4454",
+    "4432",
+    "4434",
+    "4436",
     # mental health
-    "4667", "4669", "4671", "7891", "7893", "7895",
+    "4667",
+    "4669",
+    "4671",
+    "7891",
+    "7893",
+    "7895",
     # tobacco
-    "4162", "4164", "4173", "4175", "7765", "7767",
+    "4162",
+    "4164",
+    "4173",
+    "4175",
+    "7765",
+    "7767",
     # alcohol
-    "4352", "4354", "4356", "7720", "7722",
+    "4352",
+    "4354",
+    "4356",
+    "7720",
+    "7722",
     # physical activity
-    "4250", "4252", "4254", "7735", "7737",
+    "4250",
+    "4252",
+    "4254",
+    "7735",
+    "7737",
     # nutrition
-    "4304", "4306", "4308", "7668", "7670",
+    "4304",
+    "4306",
+    "4308",
+    "7668",
+    "7670",
     # health services
-    "5031", "5033", "5035", "7585", "7587",
+    "5031",
+    "5033",
+    "5035",
+    "7585",
+    "7587",
     # health insurance
-    "4938", "4940", "4942", "7565", "7567",
+    "4938",
+    "4940",
+    "4942",
+    "7565",
+    "7567",
     # womens health
-    "5471", "5473", "5475", "8252", "8254",
+    "5471",
+    "5473",
+    "5475",
+    "8252",
+    "8254",
     # oral health
-    "5141", "5143", "5145",
+    "5141",
+    "5143",
+    "5145",
     # accidents/violence
-    "5133", "5135", "5137",
+    "5133",
+    "5135",
+    "5137",
     # elderly
-    "5549", "5551", "5553",
+    "5549",
+    "5551",
+    "5553",
     # anthropometry
-    "8167", "8169", "8171"
+    "8167",
+    "8169",
+    "8171"
   ),
   table_name = c(
     # health perception
@@ -185,44 +239,88 @@ pns_sidra_catalog_internal <- tibble::tibble(
   ),
   years = c(
     # health perception
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
     # chronic diseases
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
     # mental health
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2019")), list(c("2019")), list(c("2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2019")),
+    list(c("2019")),
+    list(c("2019")),
     # tobacco
-    list(c("2013")), list(c("2013")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2019")), list(c("2019")),
+    list(c("2013")),
+    list(c("2013")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2019")),
+    list(c("2019")),
     # alcohol
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2019")), list(c("2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2019")),
+    list(c("2019")),
     # physical activity
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2019")), list(c("2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2019")),
+    list(c("2019")),
     # nutrition
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2019")), list(c("2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2019")),
+    list(c("2019")),
     # health services
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2019")), list(c("2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2019")),
+    list(c("2019")),
     # health insurance
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2019")), list(c("2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2019")),
+    list(c("2019")),
     # womens health
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
-    list(c("2019")), list(c("2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2019")),
+    list(c("2019")),
     # oral health
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
     # accidents/violence
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
     # elderly
-    list(c("2013", "2019")), list(c("2013", "2019")), list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
+    list(c("2013", "2019")),
     # anthropometry
-    list(c("2019")), list(c("2019")), list(c("2019"))
+    list(c("2019")),
+    list(c("2019")),
+    list(c("2019"))
   ),
   territorial_levels = c(
     rep(list(c("1", "2", "3")), 69)
@@ -230,7 +328,9 @@ pns_sidra_catalog_internal <- tibble::tibble(
 )
 
 # add theme labels
-pns_sidra_catalog_internal$theme_label <- sidra_theme_labels[pns_sidra_catalog_internal$theme]
+pns_sidra_catalog_internal$theme_label <- sidra_theme_labels[
+  pns_sidra_catalog_internal$theme
+]
 
 # ============================================================================
 # internal helper functions
@@ -296,7 +396,9 @@ pns_download_data <- function(year, cache_dir, refresh = FALSE) {
       cli::cli_alert_success("Download complete: {.file {zip_path}}")
     },
     error = function(e) {
-      if (file.exists(zip_path)) file.remove(zip_path)
+      if (file.exists(zip_path)) {
+        file.remove(zip_path)
+      }
       cli::cli_abort("Download failed: {e$message}")
     }
   )
@@ -323,12 +425,20 @@ pns_read_microdata <- function(zip_path, year) {
   extracted_files <- list.files(temp_dir, recursive = TRUE, full.names = TRUE)
 
   # look for txt data file
-  txt_files <- extracted_files[grepl("\\.txt$", extracted_files, ignore.case = TRUE)]
+  txt_files <- extracted_files[grepl(
+    "\\.txt$",
+    extracted_files,
+    ignore.case = TRUE
+  )]
   # exclude input files
   txt_files <- txt_files[!grepl("input", txt_files, ignore.case = TRUE)]
 
   # look for csv file
-  csv_files <- extracted_files[grepl("\\.csv$", extracted_files, ignore.case = TRUE)]
+  csv_files <- extracted_files[grepl(
+    "\\.csv$",
+    extracted_files,
+    ignore.case = TRUE
+  )]
 
   if (length(csv_files) > 0) {
     # read CSV format
@@ -337,7 +447,11 @@ pns_read_microdata <- function(zip_path, year) {
   } else if (length(txt_files) > 0) {
     # for fixed-width format, we need the input file
     # try to find input specification
-    input_files <- extracted_files[grepl("input", extracted_files, ignore.case = TRUE)]
+    input_files <- extracted_files[grepl(
+      "input",
+      extracted_files,
+      ignore.case = TRUE
+    )]
 
     if (length(input_files) > 0) {
       cli::cli_inform("Reading fixed-width format with input file...")
@@ -345,7 +459,11 @@ pns_read_microdata <- function(zip_path, year) {
     } else {
       # try reading as delimited
       cli::cli_inform("Attempting to read as delimited text...")
-      data <- readr::read_delim(txt_files[1], delim = ";", show_col_types = FALSE)
+      data <- readr::read_delim(
+        txt_files[1],
+        delim = ";",
+        show_col_types = FALSE
+      )
     }
   } else {
     # cleanup and abort
@@ -381,7 +499,9 @@ pns_read_fwf <- function(data_file, input_file) {
 
   if (length(spec_lines) == 0) {
     # alternative: try reading as SAS input format
-    cli::cli_warn("Could not parse input file format, attempting delimited read")
+    cli::cli_warn(
+      "Could not parse input file format, attempting delimited read"
+    )
     return(readr::read_delim(data_file, delim = ";", show_col_types = FALSE))
   }
 
@@ -402,7 +522,9 @@ pns_read_fwf <- function(data_file, input_file) {
   col_specs <- purrr::compact(col_specs)
 
   if (length(col_specs) == 0) {
-    cli::cli_warn("Could not parse column specifications, attempting delimited read")
+    cli::cli_warn(
+      "Could not parse column specifications, attempting delimited read"
+    )
     return(readr::read_delim(data_file, delim = ";", show_col_types = FALSE))
   }
 
@@ -449,7 +571,6 @@ pns_years <- function() {
 #' pns_info()
 #' pns_info(2019)
 pns_info <- function(year = NULL) {
-
   info <- list(
     name = "Pesquisa Nacional de Sa\u00fade (PNS)",
     name_en = "National Health Survey",
@@ -477,15 +598,57 @@ pns_info <- function(year = NULL) {
     "2013" = list(
       sample_size = "approximately 80,000 households",
       reference_period = "August 2013 - February 2014",
-      modules = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
-                  "L", "M", "N", "O", "P", "Q", "R", "S", "U", "W", "X"),
+      modules = c(
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "U",
+        "W",
+        "X"
+      ),
       notes = "First edition of PNS"
     ),
     "2019" = list(
       sample_size = "approximately 100,000 households",
       reference_period = "August 2019 - December 2019",
-      modules = c("A", "C", "E", "F", "G", "J", "K", "L", "M", "N", "O",
-                  "P", "Q", "R", "S", "U", "W", "X", "Y", "Z"),
+      modules = c(
+        "A",
+        "C",
+        "E",
+        "F",
+        "G",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "U",
+        "W",
+        "X",
+        "Y",
+        "Z"
+      ),
       notes = "Second edition with expanded sample"
     )
   )
@@ -497,7 +660,9 @@ pns_info <- function(year = NULL) {
   cli::cli_text("")
   cli::cli_alert_info("Institution: {info$institution}")
   cli::cli_alert_info("Partner: {info$partner}")
-  cli::cli_alert_info("Available years: {stringr::str_c(info$available_years, collapse = ', ')}")
+  cli::cli_alert_info(
+    "Available years: {stringr::str_c(info$available_years, collapse = ', ')}"
+  )
   cli::cli_alert_info("SIDRA tables: {info$sidra_tables}")
   cli::cli_text("")
   cli::cli_h2("Data access")
@@ -516,7 +681,9 @@ pns_info <- function(year = NULL) {
       cli::cli_h2("PNS {year}")
       cli::cli_alert_info("Sample size: {yi$sample_size}")
       cli::cli_alert_info("Reference period: {yi$reference_period}")
-      cli::cli_alert_info("Modules: {stringr::str_c(yi$modules, collapse = ', ')}")
+      cli::cli_alert_info(
+        "Modules: {stringr::str_c(yi$modules, collapse = ', ')}"
+      )
       if (!is.null(yi$notes)) {
         cli::cli_alert_info("Notes: {yi$notes}")
       }
@@ -542,11 +709,33 @@ pns_info <- function(year = NULL) {
 #' pns_modules()
 #' pns_modules(year = 2019)
 pns_modules <- function(year = NULL) {
-
   # module definitions
   modules <- tibble::tibble(
-    module = c("A", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-               "N", "O", "P", "Q", "R", "S", "U", "W", "X", "Y", "Z"),
+    module = c(
+      "A",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "U",
+      "W",
+      "X",
+      "Y",
+      "Z"
+    ),
     name = c(
       "Informa\u00e7\u00f5es do domic\u00edlio",
       "Caracter\u00edsticas gerais dos moradores",
@@ -597,10 +786,56 @@ pns_modules <- function(year = NULL) {
       "Physical activity of children",
       "Food consumption of children"
     ),
-    year_2013 = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE,
-                  TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
-    year_2019 = c(TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE,
-                  TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+    year_2013 = c(
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      FALSE,
+      FALSE
+    ),
+    year_2019 = c(
+      TRUE,
+      TRUE,
+      FALSE,
+      TRUE,
+      TRUE,
+      TRUE,
+      FALSE,
+      FALSE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE
+    )
   )
 
   # filter by year if specified
@@ -650,7 +885,9 @@ pns_modules <- function(year = NULL) {
         cli::cli_alert_success("Download complete: {.file {zip_path}}")
       },
       error = function(e) {
-        if (file.exists(zip_path)) file.remove(zip_path)
+        if (file.exists(zip_path)) {
+          file.remove(zip_path)
+        }
         cli::cli_abort("Download failed: {e$message}")
       }
     )
@@ -659,7 +896,9 @@ pns_modules <- function(year = NULL) {
   # extract
   cli::cli_inform("Extracting dictionary...")
   temp_dir <- file.path(tempdir(), paste0("pns_dict_", year))
-  if (dir.exists(temp_dir)) unlink(temp_dir, recursive = TRUE)
+  if (dir.exists(temp_dir)) {
+    unlink(temp_dir, recursive = TRUE)
+  }
   dir.create(temp_dir)
   utils::unzip(zip_path, exdir = temp_dir)
 
@@ -673,14 +912,24 @@ pns_modules <- function(year = NULL) {
 #' @return A tibble or NULL if parsing fails.
 #' @noRd
 .pns_parse_dictionary <- function(extracted_files, year) {
-  xlsx_files <- extracted_files[grepl("\\.xlsx?$", extracted_files, ignore.case = TRUE)]
-  txt_files <- extracted_files[grepl("dicionario.*\\.txt$|dicion.*\\.txt$",
-                                      extracted_files, ignore.case = TRUE)]
+  xlsx_files <- extracted_files[grepl(
+    "\\.xlsx?$",
+    extracted_files,
+    ignore.case = TRUE
+  )]
+  txt_files <- extracted_files[grepl(
+    "dicionario.*\\.txt$|dicion.*\\.txt$",
+    extracted_files,
+    ignore.case = TRUE
+  )]
 
   dict_df <- NULL
 
   if (length(xlsx_files) > 0) {
-    rlang::check_installed("readxl", reason = "to read PNS dictionary Excel files")
+    rlang::check_installed(
+      "readxl",
+      reason = "to read PNS dictionary Excel files"
+    )
     cli::cli_inform("Reading Excel dictionary...")
     dict_df <- tryCatch(
       readxl::read_excel(xlsx_files[1]),
@@ -737,22 +986,24 @@ pns_modules <- function(year = NULL) {
 #'
 #' # get dictionary for 2013
 #' dict_2013 <- pns_dictionary(year = 2013, cache_dir = tempdir())
-pns_dictionary <- function(year = 2019,
-                           cache_dir = NULL,
-                           refresh = FALSE) {
-
+pns_dictionary <- function(year = 2019, cache_dir = NULL, refresh = FALSE) {
   # validate year
   year <- validate_pns_year(year)
   if (length(year) > 1) {
     year <- year[1]
-    cli::cli_inform("Using year {year} for dictionary (only one year at a time).")
+    cli::cli_inform(
+      "Using year {year} for dictionary (only one year at a time)."
+    )
   }
 
   # set cache directory
   cache_dir <- pns_cache_dir(cache_dir)
 
   # check RDS cache
-  dict_cache_file <- file.path(cache_dir, paste0("pns_dictionary_", year, ".rds"))
+  dict_cache_file <- file.path(
+    cache_dir,
+    paste0("pns_dictionary_", year, ".rds")
+  )
   if (file.exists(dict_cache_file) && !refresh) {
     cli::cli_inform("Loading PNS {year} dictionary from cache...")
     return(readRDS(dict_cache_file))
@@ -810,11 +1061,12 @@ pns_dictionary <- function(year = 2019,
 #'
 #' # list variables for a specific module
 #' pns_variables(year = 2019, module = "J", cache_dir = tempdir())
-pns_variables <- function(year = 2019,
-                          module = NULL,
-                          cache_dir = NULL,
-                          refresh = FALSE) {
-
+pns_variables <- function(
+  year = 2019,
+  module = NULL,
+  cache_dir = NULL,
+  refresh = FALSE
+) {
   # get dictionary
   dict <- pns_dictionary(
     year = year,
@@ -824,8 +1076,21 @@ pns_variables <- function(year = 2019,
 
   # try to identify variable and label columns
   # common patterns in IBGE dictionaries
-  possible_var_cols <- c("variavel", "variable", "var", "codigo", "code", "nome")
-  possible_label_cols <- c("descricao", "description", "label", "rotulo", "desc")
+  possible_var_cols <- c(
+    "variavel",
+    "variable",
+    "var",
+    "codigo",
+    "code",
+    "nome"
+  )
+  possible_label_cols <- c(
+    "descricao",
+    "description",
+    "label",
+    "rotulo",
+    "desc"
+  )
 
   var_col <- NULL
   label_col <- NULL
@@ -846,13 +1111,19 @@ pns_variables <- function(year = 2019,
 
   if (is.null(var_col)) {
     # return first two columns as fallback
-    cli::cli_inform("Dictionary structure not recognized, returning raw structure.")
+    cli::cli_inform(
+      "Dictionary structure not recognized, returning raw structure."
+    )
     return(dict)
   }
 
   # extract unique variables
   result <- dict |>
-    dplyr::select(dplyr::all_of(c("year", var_col, if (!is.null(label_col)) label_col))) |>
+    dplyr::select(dplyr::all_of(c(
+      "year",
+      var_col,
+      if (!is.null(label_col)) label_col
+    ))) |>
     dplyr::distinct()
 
   # rename columns for consistency
@@ -886,13 +1157,19 @@ pns_variables <- function(year = 2019,
 #' @return Lazy query object or NULL.
 #' @noRd
 .pns_try_lazy <- function(year, vars, lazy, backend, cache_dir) {
-  if (!isTRUE(lazy)) return(NULL)
+  if (!isTRUE(lazy)) {
+    return(NULL)
+  }
   cache_dir_resolved <- .module_cache_dir("pns", cache_dir)
   year_filter <- if (!is.null(year)) as.integer(year) else NULL
   select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
-  .lazy_return(cache_dir_resolved, "pns_data", backend,
-               filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
-               select_cols = select_cols)
+  .lazy_return(
+    cache_dir_resolved,
+    "pns_data",
+    backend,
+    filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
+    select_cols = select_cols
+  )
 }
 
 #' Download/cache loop for PNS microdata years
@@ -907,8 +1184,11 @@ pns_variables <- function(year = 2019,
     target_year <- as.integer(y)
 
     # check partitioned cache first
-    if (!refresh && .has_arrow() &&
-        .has_partitioned_cache(cache_dir, dataset_name)) {
+    if (
+      !refresh &&
+        .has_arrow() &&
+        .has_partitioned_cache(cache_dir, dataset_name)
+    ) {
       ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
       cached <- ds |>
         dplyr::filter(.data$year == target_year) |>
@@ -936,7 +1216,9 @@ pns_variables <- function(year = 2019,
 #' @return Filtered tibble.
 #' @noRd
 .pns_select_vars <- function(combined_data, vars) {
-  if (is.null(vars)) return(combined_data)
+  if (is.null(vars)) {
+    return(combined_data)
+  }
 
   vars <- toupper(vars)
   vars_to_select <- unique(c("year", vars))
@@ -1016,12 +1298,14 @@ pns_variables <- function(year = 2019,
 #'   vars = c("V0001", "C006", "C008", "V0028"),
 #'   cache_dir = tempdir()
 #' )
-pns_data <- function(year = NULL,
-                     vars = NULL,
-                     cache_dir = NULL,
-                     refresh = FALSE,
-                     lazy = FALSE, backend = c("arrow", "duckdb")) {
-
+pns_data <- function(
+  year = NULL,
+  vars = NULL,
+  cache_dir = NULL,
+  refresh = FALSE,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   # validate inputs
   year <- validate_pns_year(year)
   cache_dir <- pns_cache_dir(cache_dir)
@@ -1029,7 +1313,9 @@ pns_data <- function(year = NULL,
 
   # lazy evaluation: return from partitioned cache if available
   ds <- .pns_try_lazy(year, vars, lazy, backend, cache_dir)
-  if (!is.null(ds)) return(ds)
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # download and load data for each year
   dataset_name <- "pns_data"
@@ -1038,7 +1324,9 @@ pns_data <- function(year = NULL,
 
   # if lazy was requested, return from cache after download
   ds <- .pns_try_lazy(year, vars, lazy, backend, cache_dir)
-  if (!is.null(ds)) return(ds)
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # select variables if specified
   combined_data <- .pns_select_vars(combined_data, vars)
@@ -1085,7 +1373,6 @@ pns_data <- function(year = NULL,
 #' # tables with 2013 data
 #' pns_sidra_tables(year = 2013)
 pns_sidra_tables <- function(theme = NULL, year = NULL) {
-
   catalog <- pns_sidra_catalog_internal
 
   # validate and filter by theme
@@ -1112,7 +1399,12 @@ pns_sidra_tables <- function(theme = NULL, year = NULL) {
 
   catalog |>
     dplyr::select(
-      "table_code", "table_name", "theme", "theme_label", "years", "territorial_levels"
+      "table_code",
+      "table_name",
+      "theme",
+      "theme_label",
+      "years",
+      "territorial_levels"
     ) |>
     dplyr::arrange(.data$theme, .data$table_code)
 }
@@ -1135,7 +1427,6 @@ pns_sidra_tables <- function(theme = NULL, year = NULL) {
 #' pns_sidra_search("hipertensao")
 #' pns_sidra_search("fumante")
 pns_sidra_search <- function(keyword, year = NULL) {
-
   # validate keyword
   if (missing(keyword) || is.null(keyword) || nchar(keyword) < 2) {
     cli::cli_abort("Please provide a keyword with at least 2 characters.")
@@ -1166,7 +1457,12 @@ pns_sidra_search <- function(keyword, year = NULL) {
 
   catalog |>
     dplyr::select(
-      "table_code", "table_name", "theme", "theme_label", "years", "territorial_levels"
+      "table_code",
+      "table_name",
+      "theme",
+      "theme_label",
+      "years",
+      "territorial_levels"
     ) |>
     dplyr::arrange(.data$table_code)
 }
@@ -1180,8 +1476,14 @@ pns_sidra_search <- function(keyword, year = NULL) {
 #' @param classifications Named list or NULL. Classification filters.
 #' @return Character URL string.
 #' @noRd
-.pns_sidra_build_url <- function(table, territorial_level, geo_code,
-                                 variable, year, classifications) {
+.pns_sidra_build_url <- function(
+  table,
+  territorial_level,
+  geo_code,
+  variable,
+  year,
+  classifications
+) {
   # validate territorial level
   if (!territorial_level %in% names(sidra_level_map)) {
     cli::cli_abort(c(
@@ -1211,7 +1513,10 @@ pns_sidra_search <- function(keyword, year = NULL) {
     for (class_id in names(classifications)) {
       class_values <- classifications[[class_id]]
       url <- stringr::str_c(
-        url, "/c", class_id, "/",
+        url,
+        "/c",
+        class_id,
+        "/",
         stringr::str_c(class_values, collapse = ",")
       )
     }
@@ -1266,14 +1571,15 @@ pns_sidra_search <- function(keyword, year = NULL) {
 #'   table = 4416,
 #'   territorial_level = "brazil"
 #' )
-pns_sidra_data <- function(table,
-                           territorial_level = "brazil",
-                           geo_code = "all",
-                           year = NULL,
-                           variable = NULL,
-                           classifications = NULL,
-                           raw = FALSE) {
-
+pns_sidra_data <- function(
+  table,
+  territorial_level = "brazil",
+  geo_code = "all",
+  year = NULL,
+  variable = NULL,
+  classifications = NULL,
+  raw = FALSE
+) {
   # validate table
   table <- as.character(table)
 
@@ -1285,8 +1591,14 @@ pns_sidra_data <- function(table,
   }
 
   # build SIDRA API URL
-  url <- .pns_sidra_build_url(table, territorial_level, geo_code,
-                              variable, year, classifications)
+  url <- .pns_sidra_build_url(
+    table,
+    territorial_level,
+    geo_code,
+    variable,
+    year,
+    classifications
+  )
 
   # make API request
   cli::cli_alert_info("Querying SIDRA API for table {.val {table}}...")
@@ -1331,7 +1643,9 @@ pns_sidra_data <- function(table,
   # clean and format
   result <- clean_sidra_response(data_raw, table)
 
-  cli::cli_alert_success("Retrieved {.val {nrow(result)}} rows from SIDRA table {.val {table}}")
+  cli::cli_alert_success(
+    "Retrieved {.val {nrow(result)}} rows from SIDRA table {.val {table}}"
+  )
 
   result
 }

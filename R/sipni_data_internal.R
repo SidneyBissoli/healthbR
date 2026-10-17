@@ -37,14 +37,27 @@ sipni_csv_base_url <- "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/
 #' schema uses `sigla_uf_estabelecimento`; `uf_estabelecimento` is kept for
 #' older files. The chunked reader picks the first one present.
 #' @noRd
-sipni_csv_uf_columns <- c("sg_uf_estabelecimento", "sigla_uf_estabelecimento",
-                          "uf_estabelecimento")
+sipni_csv_uf_columns <- c(
+  "sg_uf_estabelecimento",
+  "sigla_uf_estabelecimento",
+  "uf_estabelecimento"
+)
 
 #' SI-PNI month names in Portuguese (for CSV ZIP filenames)
 #' @noRd
 sipni_month_names <- c(
-  "jan", "fev", "mar", "abr", "mai", "jun",
-  "jul", "ago", "set", "out", "nov", "dez"
+  "jan",
+  "fev",
+  "mar",
+  "abr",
+  "mai",
+  "jun",
+  "jul",
+  "ago",
+  "set",
+  "out",
+  "nov",
+  "dez"
 )
 
 # ============================================================================
@@ -54,9 +67,33 @@ sipni_month_names <- c(
 #' Brazilian state (UF) abbreviations
 #' @noRd
 sipni_uf_list <- c(
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
-  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
-  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO"
 )
 
 # ============================================================================
@@ -84,13 +121,21 @@ sipni_valid_types <- tibble::tibble(
 sipni_variables_dpni <- tibble::tibble(
   variable = c(
     # temporal
-    "ANO", "ANOMES", "MES",
+    "ANO",
+    "ANOMES",
+    "MES",
     # localizacao
-    "UF", "MUNIC",
+    "UF",
+    "MUNIC",
     # paciente
     "FX_ETARIA",
     # vacinacao
-    "IMUNO", "DOSE", "QT_DOSE", "DOSE1", "DOSEN", "DIFER"
+    "IMUNO",
+    "DOSE",
+    "QT_DOSE",
+    "DOSE1",
+    "DOSEN",
+    "DIFER"
   ),
   description = c(
     # temporal
@@ -112,13 +157,21 @@ sipni_variables_dpni <- tibble::tibble(
   ),
   type = c(
     # temporal
-    "character", "character", "character",
+    "character",
+    "character",
+    "character",
     # localizacao
-    "character", "character",
+    "character",
+    "character",
     # paciente
     "character",
     # vacinacao
-    "character", "character", "integer", "character", "character", "character"
+    "character",
+    "character",
+    "integer",
+    "character",
+    "character",
+    "character"
   ),
   section = c(
     # temporal
@@ -143,9 +196,13 @@ sipni_variables_cpni <- tibble::tibble(
     # temporal
     "ANO",
     # localizacao
-    "UF", "MUNIC",
+    "UF",
+    "MUNIC",
     # vacinacao
-    "IMUNO", "QT_DOSE", "POP", "COBERT"
+    "IMUNO",
+    "QT_DOSE",
+    "POP",
+    "COBERT"
   ),
   description = c(
     # temporal
@@ -163,9 +220,13 @@ sipni_variables_cpni <- tibble::tibble(
     # temporal
     "character",
     # localizacao
-    "character", "character",
+    "character",
+    "character",
     # vacinacao
-    "character", "integer", "integer", "double"
+    "character",
+    "integer",
+    "integer",
+    "double"
   ),
   section = c(
     "temporal",
@@ -184,34 +245,58 @@ sipni_variables_cpni <- tibble::tibble(
 sipni_variables_api <- tibble::tibble(
   variable = c(
     # establishment
-    "sigla_uf_estabelecimento", "nome_uf_estabelecimento",
-    "codigo_municipio_estabelecimento", "nome_municipio_estabelecimento",
-    "codigo_cnes_estabelecimento", "nome_razao_social_estabelecimento",
-    "nome_fantasia_estalecimento", "codigo_tipo_estabelecimento",
-    "descricao_tipo_estabelecimento", "codigo_natureza_estabelecimento",
+    "sigla_uf_estabelecimento",
+    "nome_uf_estabelecimento",
+    "codigo_municipio_estabelecimento",
+    "nome_municipio_estabelecimento",
+    "codigo_cnes_estabelecimento",
+    "nome_razao_social_estabelecimento",
+    "nome_fantasia_estalecimento",
+    "codigo_tipo_estabelecimento",
+    "descricao_tipo_estabelecimento",
+    "codigo_natureza_estabelecimento",
     "descricao_natureza_estabelecimento",
     # patient
-    "codigo_paciente", "tipo_sexo_paciente", "numero_idade_paciente",
-    "codigo_raca_cor_paciente", "nome_raca_cor_paciente",
-    "sigla_uf_paciente", "nome_uf_paciente",
-    "codigo_municipio_paciente", "nome_municipio_paciente",
-    "numero_cep_paciente", "codigo_etnia_indigena_paciente",
-    "nome_etnia_indigena_paciente", "codigo_pais_paciente",
-    "nome_pais_paciente", "descricao_nacionalidade_paciente",
+    "codigo_paciente",
+    "tipo_sexo_paciente",
+    "numero_idade_paciente",
+    "codigo_raca_cor_paciente",
+    "nome_raca_cor_paciente",
+    "sigla_uf_paciente",
+    "nome_uf_paciente",
+    "codigo_municipio_paciente",
+    "nome_municipio_paciente",
+    "numero_cep_paciente",
+    "codigo_etnia_indigena_paciente",
+    "nome_etnia_indigena_paciente",
+    "codigo_pais_paciente",
+    "nome_pais_paciente",
+    "descricao_nacionalidade_paciente",
     # vaccine
-    "codigo_vacina", "sigla_vacina", "descricao_vacina",
-    "codigo_dose_vacina", "descricao_dose_vacina",
-    "codigo_lote_vacina", "codigo_vacina_fabricante",
-    "descricao_vacina_fabricante", "data_vacina",
+    "codigo_vacina",
+    "sigla_vacina",
+    "descricao_vacina",
+    "codigo_dose_vacina",
+    "descricao_dose_vacina",
+    "codigo_lote_vacina",
+    "codigo_vacina_fabricante",
+    "descricao_vacina_fabricante",
+    "data_vacina",
     # administration
-    "codigo_via_administracao", "descricao_via_administracao",
-    "codigo_local_aplicacao", "descricao_local_aplicacao",
+    "codigo_via_administracao",
+    "descricao_via_administracao",
+    "codigo_local_aplicacao",
+    "descricao_local_aplicacao",
     # strategy
-    "codigo_estrategia_vacinacao", "descricao_estrategia_vacinacao",
-    "codigo_vacina_grupo_atendimento", "descricao_vacina_grupo_atendimento",
-    "codigo_vacina_categoria_atendimento", "descricao_vacina_categoria_atendimento",
+    "codigo_estrategia_vacinacao",
+    "descricao_estrategia_vacinacao",
+    "codigo_vacina_grupo_atendimento",
+    "descricao_vacina_grupo_atendimento",
+    "codigo_vacina_categoria_atendimento",
+    "descricao_vacina_categoria_atendimento",
     # maternal
-    "codigo_condicao_maternal", "descricao_condicao_maternal"
+    "codigo_condicao_maternal",
+    "descricao_condicao_maternal"
   ),
   description = c(
     # establishment
@@ -270,23 +355,58 @@ sipni_variables_api <- tibble::tibble(
   ),
   type = c(
     # establishment (11)
-    "character", "character", "character", "character", "character",
-    "character", "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     "character",
     # patient (15)
-    "character", "character", "integer", "character", "character",
-    "character", "character", "character", "character", "character",
-    "character", "character", "character", "character", "character",
+    "character",
+    "character",
+    "integer",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # vaccine (9)
-    "character", "character", "character", "character", "character",
-    "character", "character", "character", "date",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "date",
     # administration (4)
-    "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # strategy (6)
-    "character", "character", "character", "character",
-    "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # maternal (2)
-    "character", "character"
+    "character",
+    "character"
   ),
   section = c(
     rep("estabelecimento", 11),
@@ -310,63 +430,61 @@ sipni_variables_api <- tibble::tibble(
 #' Dicionario_tb_ria_rotina.pdf.
 #' @noRd
 sipni_variables_microdados <- tibble::tribble(
-  ~variable, ~description, ~type, ~section,
-  "co_documento", "C\u00f3digo \u00fanico do registro de vacina\u00e7\u00e3o (RNDS)", "character", "registro",
-  "co_paciente", "C\u00f3digo anonimizado do paciente", "character", "paciente",
-  "tp_sexo_paciente", "Sexo do paciente (M/F)", "character", "paciente",
-  "co_raca_cor_paciente", "C\u00f3digo ra\u00e7a/cor do paciente", "character", "paciente",
-  "no_raca_cor_paciente", "Nome ra\u00e7a/cor do paciente", "character", "paciente",
-  "co_municipio_paciente", "C\u00f3digo munic\u00edpio de resid\u00eancia do paciente (IBGE)", "character", "paciente",
-  "co_pais_paciente", "C\u00f3digo pa\u00eds de resid\u00eancia do paciente", "character", "paciente",
-  "no_municipio_paciente", "Nome munic\u00edpio de resid\u00eancia do paciente", "character", "paciente",
-  "no_pais_paciente", "Nome pa\u00eds de resid\u00eancia do paciente", "character", "paciente",
-  "sg_uf_paciente", "Sigla UF de resid\u00eancia do paciente", "character", "paciente",
-  "nu_cep_paciente", "CEP do paciente", "character", "paciente",
-  "ds_nacionalidade_paciente", "Nacionalidade do paciente", "character", "paciente",
-  "no_etnia_indigena_paciente", "Nome etnia ind\u00edgena do paciente", "character", "paciente",
-  "co_etnia_indigena_paciente", "C\u00f3digo etnia ind\u00edgena do paciente", "character", "paciente",
-  "co_cnes_estabelecimento", "C\u00f3digo CNES do estabelecimento", "character", "estabelecimento",
-  "no_razao_social_estabelecimento", "Raz\u00e3o social do estabelecimento", "character", "estabelecimento",
-  "no_fantasia_estalecimento", "Nome fantasia do estabelecimento (grafia da fonte)", "character", "estabelecimento",
-  "co_municipio_estabelecimento", "C\u00f3digo munic\u00edpio do estabelecimento (IBGE)", "character", "estabelecimento",
-  "no_municipio_estabelecimento", "Nome munic\u00edpio do estabelecimento", "character", "estabelecimento",
-  "sg_uf_estabelecimento", "Sigla UF do estabelecimento", "character", "estabelecimento",
-  "co_troca_documento", "C\u00f3digo de troca do documento", "character", "registro",
-  "co_vacina", "C\u00f3digo da vacina", "character", "vacina",
-  "sg_vacina", "Sigla da vacina", "character", "vacina",
-  "dt_vacina", "Data da vacina\u00e7\u00e3o (AAAA-MM-DD)", "date", "vacina",
-  "co_dose_vacina", "C\u00f3digo da dose", "character", "vacina",
-  "ds_dose_vacina", "Descri\u00e7\u00e3o da dose", "character", "vacina",
-  "co_local_aplicacao", "C\u00f3digo local de aplica\u00e7\u00e3o", "character", "administracao",
-  "ds_local_aplicacao", "Descri\u00e7\u00e3o local de aplica\u00e7\u00e3o", "character", "administracao",
-  "co_via_administracao", "C\u00f3digo via de administra\u00e7\u00e3o", "character", "administracao",
-  "ds_via_administracao", "Descri\u00e7\u00e3o via de administra\u00e7\u00e3o", "character", "administracao",
-  "co_lote_vacina", "C\u00f3digo do lote da vacina", "character", "vacina",
-  "ds_vacina_fabricante", "Nome do fabricante da vacina", "character", "vacina",
-  "dt_entrada_rnds", "Data/hora de entrada do registro na RNDS", "character", "registro",
-  "co_sistema_origem", "C\u00f3digo do sistema de origem", "character", "registro",
-  "ds_sistema_origem", "Descri\u00e7\u00e3o do sistema de origem", "character", "registro",
-  "st_documento", "Situa\u00e7\u00e3o do documento", "character", "registro",
-  "co_estrategia_vacinacao", "C\u00f3digo estrat\u00e9gia de vacina\u00e7\u00e3o", "character", "estrategia",
-  "ds_estrategia_vacinacao", "Descri\u00e7\u00e3o estrat\u00e9gia de vacina\u00e7\u00e3o", "character", "estrategia",
-  "co_origem_registro", "C\u00f3digo origem do registro", "character", "registro",
-  "ds_origem_registro", "Descri\u00e7\u00e3o origem do registro", "character", "registro",
-  "co_vacina_grupo_atendimento", "C\u00f3digo grupo de atendimento", "character", "estrategia",
-  "ds_vacina_grupo_atendimento", "Descri\u00e7\u00e3o grupo de atendimento", "character", "estrategia",
-  "co_vacina_categoria_atendimento", "C\u00f3digo categoria de atendimento", "character", "estrategia",
-  "ds_vacina_categoria_atendimento", "Descri\u00e7\u00e3o categoria de atendimento", "character", "estrategia",
-  "co_vacina_fabricante", "C\u00f3digo do fabricante da vacina", "character", "vacina",
-  "ds_vacina", "Descri\u00e7\u00e3o da vacina", "character", "vacina",
-  "ds_condicao_maternal", "Descri\u00e7\u00e3o condi\u00e7\u00e3o maternal", "character", "maternal",
-  "co_tipo_estabelecimento", "C\u00f3digo tipo do estabelecimento", "character", "estabelecimento",
-  "ds_tipo_estabelecimento", "Descri\u00e7\u00e3o tipo do estabelecimento", "character", "estabelecimento",
-  "co_natureza_estabelecimento", "C\u00f3digo natureza jur\u00eddica do estabelecimento", "character", "estabelecimento",
-  "ds_natureza_estabelecimento", "Descri\u00e7\u00e3o natureza jur\u00eddica do estabelecimento", "character", "estabelecimento",
-  "nu_idade_paciente", "Idade do paciente", "integer", "paciente",
-  "co_condicao_maternal", "C\u00f3digo condi\u00e7\u00e3o maternal", "character", "maternal",
-  "no_uf_paciente", "Nome UF de resid\u00eancia do paciente", "character", "paciente",
-  "no_uf_estabelecimento", "Nome UF do estabelecimento", "character", "estabelecimento",
-  "dt_deletado_rnds", "Data/hora de exclus\u00e3o do registro na RNDS", "character", "registro"
+  ~variable                         , ~description                                                       , ~type       , ~section          ,
+  "co_documento"                    , "C\u00f3digo \u00fanico do registro de vacina\u00e7\u00e3o (RNDS)" , "character" , "registro"        ,
+  "co_paciente"                     , "C\u00f3digo anonimizado do paciente"                              , "character" , "paciente"        ,
+  "tp_sexo_paciente"                , "Sexo do paciente (M/F)"                                           , "character" , "paciente"        ,
+  "co_raca_cor_paciente"            , "C\u00f3digo ra\u00e7a/cor do paciente"                            , "character" , "paciente"        ,
+  "no_raca_cor_paciente"            , "Nome ra\u00e7a/cor do paciente"                                   , "character" , "paciente"        ,
+  "co_municipio_paciente"           , "C\u00f3digo munic\u00edpio de resid\u00eancia do paciente (IBGE)" , "character" , "paciente"        ,
+  "co_pais_paciente"                , "C\u00f3digo pa\u00eds de resid\u00eancia do paciente"             , "character" , "paciente"        ,
+  "no_municipio_paciente"           , "Nome munic\u00edpio de resid\u00eancia do paciente"               , "character" , "paciente"        ,
+  "no_pais_paciente"                , "Nome pa\u00eds de resid\u00eancia do paciente"                    , "character" , "paciente"        ,
+  "sg_uf_paciente"                  , "Sigla UF de resid\u00eancia do paciente"                          , "character" , "paciente"        ,
+  "nu_cep_paciente"                 , "CEP do paciente"                                                  , "character" , "paciente"        ,
+  "ds_nacionalidade_paciente"       , "Nacionalidade do paciente"                                        , "character" , "paciente"        ,
+  "no_etnia_indigena_paciente"      , "Nome etnia ind\u00edgena do paciente"                             , "character" , "paciente"        ,
+  "co_etnia_indigena_paciente"      , "C\u00f3digo etnia ind\u00edgena do paciente"                      , "character" , "paciente"        ,
+  "co_cnes_estabelecimento"         , "C\u00f3digo CNES do estabelecimento"                              , "character" , "estabelecimento" ,
+  "no_razao_social_estabelecimento" , "Raz\u00e3o social do estabelecimento"                             , "character" , "estabelecimento" ,
+  "no_fantasia_estalecimento"       , "Nome fantasia do estabelecimento (grafia da fonte)"               , "character" , "estabelecimento" ,
+  "co_municipio_estabelecimento"    , "C\u00f3digo munic\u00edpio do estabelecimento (IBGE)"             , "character" , "estabelecimento" ,
+  "no_municipio_estabelecimento"    , "Nome munic\u00edpio do estabelecimento"                           , "character" , "estabelecimento" ,
+  "sg_uf_estabelecimento"           , "Sigla UF do estabelecimento"                                      , "character" , "estabelecimento" ,
+  "co_troca_documento"              , "C\u00f3digo de troca do documento"                                , "character" , "registro"        ,
+  "co_vacina"                       , "C\u00f3digo da vacina"                                            , "character" , "vacina"          ,
+  "sg_vacina"                       , "Sigla da vacina"                                                  , "character" , "vacina"          ,
+  "dt_vacina"                       , "Data da vacina\u00e7\u00e3o (AAAA-MM-DD)"                         , "date"      , "vacina"          ,
+  "co_dose_vacina"                  , "C\u00f3digo da dose"                                              , "character" , "vacina"          ,
+  "ds_dose_vacina"                  , "Descri\u00e7\u00e3o da dose"                                      , "character" , "vacina"          ,
+  "co_local_aplicacao"              , "C\u00f3digo local de aplica\u00e7\u00e3o"                         , "character" , "administracao"   ,
+  "ds_local_aplicacao"              , "Descri\u00e7\u00e3o local de aplica\u00e7\u00e3o"                 , "character" , "administracao"   ,
+  "co_via_administracao"            , "C\u00f3digo via de administra\u00e7\u00e3o"                       , "character" , "administracao"   ,
+  "ds_via_administracao"            , "Descri\u00e7\u00e3o via de administra\u00e7\u00e3o"               , "character" , "administracao"   ,
+  "co_lote_vacina"                  , "C\u00f3digo do lote da vacina"                                    , "character" , "vacina"          ,
+  "ds_vacina_fabricante"            , "Nome do fabricante da vacina"                                     , "character" , "vacina"          ,
+  "dt_entrada_rnds"                 , "Data/hora de entrada do registro na RNDS"                         , "character" , "registro"        ,
+  "co_sistema_origem"               , "C\u00f3digo do sistema de origem"                                 , "character" , "registro"        ,
+  "ds_sistema_origem"               , "Descri\u00e7\u00e3o do sistema de origem"                         , "character" , "registro"        ,
+  "st_documento"                    , "Situa\u00e7\u00e3o do documento"                                  , "character" , "registro"        ,
+  "co_estrategia_vacinacao"         , "C\u00f3digo estrat\u00e9gia de vacina\u00e7\u00e3o"               , "character" , "estrategia"      ,
+  "ds_estrategia_vacinacao"         , "Descri\u00e7\u00e3o estrat\u00e9gia de vacina\u00e7\u00e3o"       , "character" , "estrategia"      ,
+  "co_origem_registro"              , "C\u00f3digo origem do registro"                                   , "character" , "registro"        ,
+  "ds_origem_registro"              , "Descri\u00e7\u00e3o origem do registro"                           , "character" , "registro"        ,
+  "co_vacina_grupo_atendimento"     , "C\u00f3digo grupo de atendimento"                                 , "character" , "estrategia"      ,
+  "ds_vacina_grupo_atendimento"     , "Descri\u00e7\u00e3o grupo de atendimento"                         , "character" , "estrategia"      ,
+  "co_vacina_categoria_atendimento" , "C\u00f3digo categoria de atendimento"                             , "character" , "estrategia"      ,
+  "ds_vacina_categoria_atendimento" , "Descri\u00e7\u00e3o categoria de atendimento"                     , "character" , "estrategia"      ,
+  "co_vacina_fabricante"            , "C\u00f3digo do fabricante da vacina"                              , "character" , "vacina"          ,
+  "ds_vacina"                       , "Descri\u00e7\u00e3o da vacina"                                    , "character" , "vacina"          ,
+  "ds_condicao_maternal"            , "Descri\u00e7\u00e3o condi\u00e7\u00e3o maternal"                  , "character" , "maternal"        ,
+  "co_tipo_estabelecimento"         , "C\u00f3digo tipo do estabelecimento"                              , "character" , "estabelecimento" ,
+  "ds_tipo_estabelecimento"         , "Descri\u00e7\u00e3o tipo do estabelecimento"                      , "character" , "estabelecimento" ,
+  "co_natureza_estabelecimento"     , "C\u00f3digo natureza jur\u00eddica do estabelecimento"            , "character" , "estabelecimento" ,
+  "ds_natureza_estabelecimento"     , "Descri\u00e7\u00e3o natureza jur\u00eddica do estabelecimento"    , "character" , "estabelecimento" ,
+  "nu_idade_paciente"               , "Idade do paciente"                                                , "integer"   , "paciente"        ,
+  "co_condicao_maternal"            , "C\u00f3digo condi\u00e7\u00e3o maternal"                          , "character" , "maternal"        ,
+  "no_uf_paciente"                  , "Nome UF de resid\u00eancia do paciente"                           , "character" , "paciente"        ,
+  "no_uf_estabelecimento"           , "Nome UF do estabelecimento"                                       , "character" , "estabelecimento" ,
+  "dt_deletado_rnds"                , "Data/hora de exclus\u00e3o do registro na RNDS"                   , "character" , "registro"
 )
-
-

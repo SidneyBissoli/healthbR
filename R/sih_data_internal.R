@@ -22,9 +22,33 @@ sih_available_years <- list(
 #' Brazilian state (UF) abbreviations
 #' @noRd
 sih_uf_list <- c(
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
-  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
-  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO"
 )
 
 # ============================================================================
@@ -36,26 +60,55 @@ sih_uf_list <- c(
 sih_variables_metadata <- tibble::tibble(
   variable = c(
     # identificacao
-    "N_AIH", "IDENT", "CEP", "MUNIC_RES", "MUNIC_MOV",
+    "N_AIH",
+    "IDENT",
+    "CEP",
+    "MUNIC_RES",
+    "MUNIC_MOV",
     # paciente
-    "NASC", "SEXO", "IDADE", "COD_IDADE", "RACA_COR",
-    "NACIONAL", "INSTRU",
+    "NASC",
+    "SEXO",
+    "IDADE",
+    "COD_IDADE",
+    "RACA_COR",
+    "NACIONAL",
+    "INSTRU",
     # clinica
-    "DIAG_PRINC", "DIAG_SECUN", "DIAGSEC1", "CID_ASSO",
+    "DIAG_PRINC",
+    "DIAG_SECUN",
+    "DIAGSEC1",
+    "CID_ASSO",
     "CID_MORTE",
     # procedimento
-    "PROC_REA", "PROC_SOLIC", "QT_DIARIAS",
+    "PROC_REA",
+    "PROC_SOLIC",
+    "QT_DIARIAS",
     # internacao
-    "DT_INTER", "DT_SAIDA", "CAR_INT", "COMPLEX", "ESPEC",
+    "DT_INTER",
+    "DT_SAIDA",
+    "CAR_INT",
+    "COMPLEX",
+    "ESPEC",
     "DIAS_PERM",
     # hospital
-    "CNES", "CNPJ_MANT", "NATUREZA", "GESTAO",
+    "CNES",
+    "CNPJ_MANT",
+    "NATUREZA",
+    "GESTAO",
     # desfecho
-    "MORTE", "COBRANCA", "CBOR",
+    "MORTE",
+    "COBRANCA",
+    "CBOR",
     # financeiro
-    "VAL_SH", "VAL_SP", "VAL_TOT", "VAL_UTI", "US_TOT",
+    "VAL_SH",
+    "VAL_SP",
+    "VAL_TOT",
+    "VAL_UTI",
+    "US_TOT",
     # uti
-    "UTI_MES_TO", "MARCA_UTI", "UTI_INT_TO"
+    "UTI_MES_TO",
+    "MARCA_UTI",
+    "UTI_INT_TO"
   ),
   description = c(
     # identificacao
@@ -111,26 +164,55 @@ sih_variables_metadata <- tibble::tibble(
   ),
   type = c(
     # identificacao
-    "character", "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # paciente
-    "date_ymd", "character", "integer", "character", "character",
-    "character", "character",
+    "date_ymd",
+    "character",
+    "integer",
+    "character",
+    "character",
+    "character",
+    "character",
     # clinica
-    "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
     "character",
     # procedimento
-    "character", "character", "integer",
+    "character",
+    "character",
+    "integer",
     # internacao
-    "date_ymd", "date_ymd", "character", "character", "character",
+    "date_ymd",
+    "date_ymd",
+    "character",
+    "character",
+    "character",
     "integer",
     # hospital
-    "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # desfecho
-    "character", "character", "character",
+    "character",
+    "character",
+    "character",
     # financeiro
-    "double", "double", "double", "double", "double",
+    "double",
+    "double",
+    "double",
+    "double",
+    "double",
     # uti
-    "integer", "character", "integer"
+    "integer",
+    "character",
+    "integer"
   ),
   section = c(
     # identificacao
@@ -194,48 +276,105 @@ sih_dictionary_data <- tibble::tibble(
   ),
   code = c(
     # SEXO
-    "0", "1", "3",
+    "0",
+    "1",
+    "3",
     # RACA_COR
-    "01", "02", "03", "04", "05", "99",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "99",
     # COD_IDADE
-    "2", "3", "4",
+    "2",
+    "3",
+    "4",
     # IDENT
-    "1", "5",
+    "1",
+    "5",
     # CAR_INT
-    "1", "2", "3", "4", "5", "6",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
     # COMPLEX
-    "01", "02", "03",
+    "01",
+    "02",
+    "03",
     # ESPEC
-    "01", "02", "03", "04", "05", "06", "07", "08", "09", "10",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
     # MORTE
-    "0", "1",
+    "0",
+    "1",
     # INSTRU
-    "0", "1", "2", "3", "4"
+    "0",
+    "1",
+    "2",
+    "3",
+    "4"
   ),
   label = c(
     # SEXO
-    "Ignorado", "Masculino", "Feminino",
+    "Ignorado",
+    "Masculino",
+    "Feminino",
     # RACA_COR
-    "Branca", "Preta", "Parda", "Amarela", "Ind\u00edgena", "Sem informa\u00e7\u00e3o",
+    "Branca",
+    "Preta",
+    "Parda",
+    "Amarela",
+    "Ind\u00edgena",
+    "Sem informa\u00e7\u00e3o",
     # COD_IDADE
-    "Dias", "Meses", "Anos",
+    "Dias",
+    "Meses",
+    "Anos",
     # IDENT
-    "Normal", "Longa perman\u00eancia",
+    "Normal",
+    "Longa perman\u00eancia",
     # CAR_INT
-    "Eletiva", "Urg\u00eancia", "Acidente no local de trabalho",
-    "Acidente no trajeto", "Outros acidentes de tr\u00e2nsito",
+    "Eletiva",
+    "Urg\u00eancia",
+    "Acidente no local de trabalho",
+    "Acidente no trajeto",
+    "Outros acidentes de tr\u00e2nsito",
     "Outros tipos de les\u00f5es",
     # COMPLEX
-    "Aten\u00e7\u00e3o B\u00e1sica", "M\u00e9dia complexidade", "Alta complexidade",
+    "Aten\u00e7\u00e3o B\u00e1sica",
+    "M\u00e9dia complexidade",
+    "Alta complexidade",
     # ESPEC
-    "Cirurgia", "Obstetr\u00edcia", "Cl\u00ednica m\u00e9dica", "Cuidados prolongados",
-    "Psiquiatria", "Tisiologia", "Pediatria", "Reabilita\u00e7\u00e3o",
-    "Cl\u00ednica cir\u00fargica", "Hospital-dia",
+    "Cirurgia",
+    "Obstetr\u00edcia",
+    "Cl\u00ednica m\u00e9dica",
+    "Cuidados prolongados",
+    "Psiquiatria",
+    "Tisiologia",
+    "Pediatria",
+    "Reabilita\u00e7\u00e3o",
+    "Cl\u00ednica cir\u00fargica",
+    "Hospital-dia",
     # MORTE
-    "N\u00e3o", "Sim",
+    "N\u00e3o",
+    "Sim",
     # INSTRU
-    "Sem instru\u00e7\u00e3o/analfabeto", "1\u00ba grau", "2\u00ba grau",
-    "3\u00ba grau", "N\u00e3o informado"
+    "Sem instru\u00e7\u00e3o/analfabeto",
+    "1\u00ba grau",
+    "2\u00ba grau",
+    "3\u00ba grau",
+    "N\u00e3o informado"
   )
 )
 
@@ -248,13 +387,18 @@ sih_dictionary_data <- tibble::tibble(
 sih_label_maps <- list(
   SEXO = c("0" = "Ignorado", "1" = "Masculino", "3" = "Feminino"),
   RACA_COR = c(
-    "01" = "Branca", "02" = "Preta", "03" = "Parda",
-    "04" = "Amarela", "05" = "Ind\u00edgena", "99" = "Sem informa\u00e7\u00e3o"
+    "01" = "Branca",
+    "02" = "Preta",
+    "03" = "Parda",
+    "04" = "Amarela",
+    "05" = "Ind\u00edgena",
+    "99" = "Sem informa\u00e7\u00e3o"
   ),
   COD_IDADE = c("2" = "Dias", "3" = "Meses", "4" = "Anos"),
   IDENT = c("1" = "Normal", "5" = "Longa perman\u00eancia"),
   CAR_INT = c(
-    "1" = "Eletiva", "2" = "Urg\u00eancia",
+    "1" = "Eletiva",
+    "2" = "Urg\u00eancia",
     "3" = "Acidente no local de trabalho",
     "4" = "Acidente no trajeto",
     "5" = "Outros acidentes de tr\u00e2nsito",
@@ -267,7 +411,10 @@ sih_label_maps <- list(
   ),
   MORTE = c("0" = "N\u00e3o", "1" = "Sim"),
   INSTRU = c(
-    "0" = "Sem instru\u00e7\u00e3o/analfabeto", "1" = "1\u00ba grau",
-    "2" = "2\u00ba grau", "3" = "3\u00ba grau", "4" = "N\u00e3o informado"
+    "0" = "Sem instru\u00e7\u00e3o/analfabeto",
+    "1" = "1\u00ba grau",
+    "2" = "2\u00ba grau",
+    "3" = "3\u00ba grau",
+    "4" = "N\u00e3o informado"
   )
 )

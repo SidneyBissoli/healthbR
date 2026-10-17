@@ -79,7 +79,9 @@ test_that("sinan_diseases search returns empty tibble for no match", {
 test_that("sinan_variables returns tibble with expected columns", {
   vars <- sinan_variables()
   expect_s3_class(vars, "tbl_df")
-  expect_true(all(c("variable", "description", "type", "section") %in% names(vars)))
+  expect_true(all(
+    c("variable", "description", "type", "section") %in% names(vars)
+  ))
   expect_gt(nrow(vars), 0)
   expect_true("CS_SEXO" %in% vars$variable)
   expect_true("DT_NOTIFIC" %in% vars$variable)
@@ -88,8 +90,16 @@ test_that("sinan_variables returns tibble with expected columns", {
 
 test_that("sinan_variables has expected key variables", {
   vars <- sinan_variables()
-  key_vars <- c("DT_NOTIFIC", "ID_AGRAVO", "CS_SEXO", "CS_RACA",
-                "NU_IDADE_N", "ID_MUNICIP", "CLASSI_FIN", "EVOLUCAO")
+  key_vars <- c(
+    "DT_NOTIFIC",
+    "ID_AGRAVO",
+    "CS_SEXO",
+    "CS_RACA",
+    "NU_IDADE_N",
+    "ID_MUNICIP",
+    "CLASSI_FIN",
+    "EVOLUCAO"
+  )
   expect_true(all(key_vars %in% vars$variable))
 })
 
@@ -112,8 +122,13 @@ test_that("sinan_variables search returns empty tibble for no match", {
 
 test_that("sinan_variables has expected sections", {
   vars <- sinan_variables()
-  expected_sections <- c("notificacao", "paciente", "residencia",
-                         "investigacao", "temporal")
+  expected_sections <- c(
+    "notificacao",
+    "paciente",
+    "residencia",
+    "investigacao",
+    "temporal"
+  )
   expect_true(all(expected_sections %in% vars$section))
 })
 
@@ -124,7 +139,9 @@ test_that("sinan_variables has expected sections", {
 test_that("sinan_dictionary returns tibble with expected columns", {
   dict <- sinan_dictionary()
   expect_s3_class(dict, "tbl_df")
-  expect_true(all(c("variable", "description", "code", "label") %in% names(dict)))
+  expect_true(all(
+    c("variable", "description", "code", "label") %in% names(dict)
+  ))
   expect_gt(nrow(dict), 0)
 })
 
@@ -266,7 +283,9 @@ test_that(".sinan_validate_vars warns on unknown vars", {
 
 test_that("sinan_valid_diseases has expected structure", {
   expect_s3_class(sinan_valid_diseases, "tbl_df")
-  expect_true(all(c("code", "name", "description") %in% names(sinan_valid_diseases)))
+  expect_true(all(
+    c("code", "name", "description") %in% names(sinan_valid_diseases)
+  ))
   expect_gt(nrow(sinan_valid_diseases), 20)
   expect_true("DENG" %in% sinan_valid_diseases$code)
   expect_true("TUBE" %in% sinan_valid_diseases$code)
@@ -357,8 +376,7 @@ test_that(".sinan_cache_dir creates directory if needed", {
 test_that("sinan_data downloads and reads data from FTP", {
   skip_if_no_integration()
 
-  data <- sinan_data(year = 2022, disease = "DENG",
-                     cache_dir = tempdir())
+  data <- sinan_data(year = 2022, disease = "DENG", cache_dir = tempdir())
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("DT_NOTIFIC" %in% names(data))
@@ -372,9 +390,12 @@ test_that("sinan_data downloads and reads data from FTP", {
 test_that("sinan_data selects variables", {
   skip_if_no_integration()
 
-  data <- sinan_data(year = 2022, disease = "DENG",
-                     vars = c("DT_NOTIFIC", "CS_SEXO", "ID_MUNICIP"),
-                     cache_dir = tempdir())
+  data <- sinan_data(
+    year = 2022,
+    disease = "DENG",
+    vars = c("DT_NOTIFIC", "CS_SEXO", "ID_MUNICIP"),
+    cache_dir = tempdir()
+  )
   # should have year, disease, requested vars
   expect_true("DT_NOTIFIC" %in% names(data))
   expect_true("CS_SEXO" %in% names(data))
@@ -404,10 +425,16 @@ test_that("sinan_data cache works (second call faster)", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  t1 <- system.time(sinan_data(year = 2022, disease = "DENG",
-                                cache_dir = cache_dir))
-  t2 <- system.time(sinan_data(year = 2022, disease = "DENG",
-                                cache_dir = cache_dir))
+  t1 <- system.time(sinan_data(
+    year = 2022,
+    disease = "DENG",
+    cache_dir = cache_dir
+  ))
+  t2 <- system.time(sinan_data(
+    year = 2022,
+    disease = "DENG",
+    cache_dir = cache_dir
+  ))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
 
@@ -427,9 +454,12 @@ test_that("sinan_variables type column has non-character types", {
 
 test_that("sinan parse converts mock data correctly", {
   mock_data <- tibble::tibble(
-    year = 2022L, disease = "DENG",
-    DT_NOTIFIC = "15012022", NU_ANO = "2022",
-    CS_SEXO = "M", NU_IDADE_N = "4025"
+    year = 2022L,
+    disease = "DENG",
+    DT_NOTIFIC = "15012022",
+    NU_ANO = "2022",
+    CS_SEXO = "M",
+    NU_IDADE_N = "4025"
   )
   spec <- .build_type_spec(sinan_variables_metadata)
   parsed <- .parse_columns(mock_data, spec)
@@ -449,9 +479,14 @@ test_that("sinan_data reports partial download failures", {
   local_mocked_bindings(
     .sinan_validate_year = function(year, ...) as.integer(year),
     .sinan_download_and_read = function(year, disease, ...) {
-      if (year == 9999L) stop("Not found")
-      tibble::tibble(year = as.integer(year), disease = disease,
-                     DT_NOTIFIC = "01012022")
+      if (year == 9999L) {
+        stop("Not found")
+      }
+      tibble::tibble(
+        year = as.integer(year),
+        disease = disease,
+        DT_NOTIFIC = "01012022"
+      )
     }
   )
   result <- suppressWarnings(

@@ -7,7 +7,7 @@ test_that("vigitel_years returns expected years", {
   expect_type(years, "integer")
   expect_equal(min(years), 2006L)
   expect_equal(max(years), 2024L)
-  expect_equal(length(years), 19L)  # 2006 to 2024 inclusive
+  expect_equal(length(years), 19L) # 2006 to 2024 inclusive
   expect_true(2006L %in% years)
   expect_true(2024L %in% years)
 })
@@ -250,9 +250,18 @@ test_that("vigitel_info returns a list visibly", {
 test_that("vigitel_info list has all expected fields", {
   info <- vigitel_info()
   expected_fields <- c(
-    "name", "full_name", "institution", "description",
-    "years_available", "url", "download_url", "weight_variable",
-    "geographic_coverage", "sample_size", "data_format", "topics"
+    "name",
+    "full_name",
+    "institution",
+    "description",
+    "years_available",
+    "url",
+    "download_url",
+    "weight_variable",
+    "geographic_coverage",
+    "sample_size",
+    "data_format",
+    "topics"
   )
   for (f in expected_fields) {
     expect_true(f %in% names(info), info = paste("Missing field:", f))
@@ -349,23 +358,31 @@ test_that("vigitel_identify_year_column returns first match", {
   # if both "ano" and "year" exist, returns the first in the priority list
   df <- tibble::tibble(year = 2020, ano = 2020, sexo = "M")
   result <- vigitel_identify_year_column(df)
-  expect_equal(result, "ano")  # "ano" comes first in possible_names
+  expect_equal(result, "ano") # "ano" comes first in possible_names
 })
 
 # --- .vigitel_try_lazy ---
 
 test_that(".vigitel_try_lazy returns NULL when lazy=FALSE", {
   result <- healthbR:::.vigitel_try_lazy(
-    lazy = FALSE, force = FALSE, backend = "arrow",
-    cache_dir = tempdir(), year = 2020, vars = NULL
+    lazy = FALSE,
+    force = FALSE,
+    backend = "arrow",
+    cache_dir = tempdir(),
+    year = 2020,
+    vars = NULL
   )
   expect_null(result)
 })
 
 test_that(".vigitel_try_lazy returns NULL when force=TRUE", {
   result <- healthbR:::.vigitel_try_lazy(
-    lazy = TRUE, force = TRUE, backend = "arrow",
-    cache_dir = tempdir(), year = 2020, vars = NULL
+    lazy = TRUE,
+    force = TRUE,
+    backend = "arrow",
+    cache_dir = tempdir(),
+    year = 2020,
+    vars = NULL
   )
   expect_null(result)
 })
@@ -373,8 +390,12 @@ test_that(".vigitel_try_lazy returns NULL when force=TRUE", {
 test_that(".vigitel_try_lazy returns NULL when no cache", {
   temp_dir <- withr::local_tempdir()
   result <- healthbR:::.vigitel_try_lazy(
-    lazy = TRUE, force = FALSE, backend = "arrow",
-    cache_dir = temp_dir, year = 2020, vars = NULL
+    lazy = TRUE,
+    force = FALSE,
+    backend = "arrow",
+    cache_dir = temp_dir,
+    year = 2020,
+    vars = NULL
   )
   expect_null(result)
 })
@@ -411,7 +432,9 @@ test_that(".vigitel_filter_and_select filters by multiple years", {
   )
 
   result <- healthbR:::.vigitel_filter_and_select(
-    df, year = c(2020, 2022), vars = NULL
+    df,
+    year = c(2020, 2022),
+    vars = NULL
   )
   expect_equal(nrow(result), 2)
   expect_equal(sort(result$ano), c(2020L, 2022L))
@@ -425,7 +448,11 @@ test_that(".vigitel_filter_and_select selects variables", {
     cidade = c("SP", "RJ")
   )
 
-  result <- healthbR:::.vigitel_filter_and_select(df, year = NULL, vars = "sexo")
+  result <- healthbR:::.vigitel_filter_and_select(
+    df,
+    year = NULL,
+    vars = "sexo"
+  )
   expect_equal(names(result), c("ano", "sexo"))
 })
 
@@ -438,7 +465,9 @@ test_that(".vigitel_filter_and_select selects multiple variables", {
   )
 
   result <- healthbR:::.vigitel_filter_and_select(
-    df, year = NULL, vars = c("sexo", "idade")
+    df,
+    year = NULL,
+    vars = c("sexo", "idade")
   )
   expect_true(all(c("ano", "sexo", "idade") %in% names(result)))
   expect_false("cidade" %in% names(result))
@@ -452,7 +481,9 @@ test_that(".vigitel_filter_and_select warns on missing variables", {
 
   expect_warning(
     healthbR:::.vigitel_filter_and_select(
-      df, year = NULL, vars = c("sexo", "nonexistent")
+      df,
+      year = NULL,
+      vars = c("sexo", "nonexistent")
     ),
     "not found"
   )
@@ -479,7 +510,9 @@ test_that(".vigitel_filter_and_select combines year filter and var select", {
   )
 
   result <- healthbR:::.vigitel_filter_and_select(
-    df, year = 2020, vars = "sexo"
+    df,
+    year = 2020,
+    vars = "sexo"
   )
   expect_equal(nrow(result), 2)
   expect_equal(names(result), c("ano", "sexo"))
@@ -515,7 +548,11 @@ test_that(".vigitel_download_and_cache calls download for new data", {
     .has_arrow = function() FALSE
   )
 
-  result <- healthbR:::.vigitel_download_and_cache("dta", temp_dir, force = FALSE)
+  result <- healthbR:::.vigitel_download_and_cache(
+    "dta",
+    temp_dir,
+    force = FALSE
+  )
 
   expect_true(download_called)
   expect_true(extract_called)
@@ -544,7 +581,11 @@ test_that(".vigitel_download_and_cache skips download when data file exists", {
     .has_arrow = function() FALSE
   )
 
-  result <- healthbR:::.vigitel_download_and_cache("dta", temp_dir, force = FALSE)
+  result <- healthbR:::.vigitel_download_and_cache(
+    "dta",
+    temp_dir,
+    force = FALSE
+  )
 
   expect_false(download_called)
   expect_s3_class(result, "tbl_df")
@@ -576,7 +617,11 @@ test_that(".vigitel_download_and_cache force re-downloads", {
     .has_arrow = function() FALSE
   )
 
-  result <- healthbR:::.vigitel_download_and_cache("csv", temp_dir, force = TRUE)
+  result <- healthbR:::.vigitel_download_and_cache(
+    "csv",
+    temp_dir,
+    force = TRUE
+  )
   expect_true(download_called)
 })
 
@@ -589,7 +634,9 @@ test_that("vigitel_cache_status with custom empty temp dir", {
 
   expect_s3_class(status, "tbl_df")
   expect_equal(nrow(status), 6)
-  expect_true(all(c("file_type", "exists", "size_mb", "details") %in% names(status)))
+  expect_true(all(
+    c("file_type", "exists", "size_mb", "details") %in% names(status)
+  ))
   # nothing should exist
 
   expect_true(all(!status$exists))
@@ -650,8 +697,14 @@ test_that("vigitel_clear_cache keep_parquet removes only source files", {
   vigitel_clear_cache(keep_parquet = TRUE, cache_dir = temp_dir)
 
   # source files should be removed
-  expect_false(file.exists(file.path(cache_dir, "vigitel-2006-2024-peso-rake.dta")))
-  expect_false(file.exists(file.path(cache_dir, "vigitel-2006-2024-peso-rake-dta.zip")))
+  expect_false(file.exists(file.path(
+    cache_dir,
+    "vigitel-2006-2024-peso-rake.dta"
+  )))
+  expect_false(file.exists(file.path(
+    cache_dir,
+    "vigitel-2006-2024-peso-rake-dta.zip"
+  )))
   # parquet should still exist
   expect_true(dir.exists(file.path(cache_dir, "vigitel_data")))
 })

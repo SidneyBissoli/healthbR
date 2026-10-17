@@ -15,7 +15,9 @@
   }
 
   year <- as.integer(year)
-  invalid <- year[is.na(year) | year < 2007L | year > as.integer(format(Sys.Date(), "%Y"))]
+  invalid <- year[
+    is.na(year) | year < 2007L | year > as.integer(format(Sys.Date(), "%Y"))
+  ]
 
   if (length(invalid) > 0) {
     cli::cli_abort(c(
@@ -91,9 +93,10 @@
 #' Get variables metadata for a given type
 #' @noRd
 .sisab_get_variables_meta <- function(type) {
-  switch(type,
+  switch(
+    type,
     "aps" = sisab_variables_aps,
-    "sb"  = sisab_variables_sb,
+    "sb" = sisab_variables_sb,
     "acs" = sisab_variables_acs,
     "pns" = sisab_variables_pns,
     sisab_variables_aps
@@ -137,9 +140,13 @@
 
   # build URL with parameters
   query_str <- paste(
-    vapply(names(params), function(k) {
-      stringr::str_c(k, "=", params[[k]])
-    }, character(1)),
+    vapply(
+      names(params),
+      function(k) {
+        stringr::str_c(k, "=", params[[k]])
+      },
+      character(1)
+    ),
     collapse = "&"
   )
   full_url <- stringr::str_c(url, "?", query_str)
@@ -148,23 +155,26 @@
   temp_file <- tempfile(fileext = ".json")
   on.exit(if (file.exists(temp_file)) file.remove(temp_file), add = TRUE)
 
-  tryCatch({
-    curl::curl_download(
-      full_url,
-      temp_file,
-      handle = curl::new_handle(
-        ssl_verifypeer = FALSE,
-        followlocation = TRUE,
-        timeout = 120
+  tryCatch(
+    {
+      curl::curl_download(
+        full_url,
+        temp_file,
+        handle = curl::new_handle(
+          ssl_verifypeer = FALSE,
+          followlocation = TRUE,
+          timeout = 120
+        )
       )
-    )
-  }, error = function(e) {
-    cli::cli_abort(c(
-      "Failed to connect to SISAB API.",
-      "x" = "{e$message}",
-      "i" = "Check your internet connection and try again."
-    ))
-  })
+    },
+    error = function(e) {
+      cli::cli_abort(c(
+        "Failed to connect to SISAB API.",
+        "x" = "{e$message}",
+        "i" = "Check your internet connection and try again."
+      ))
+    }
+  )
 
   # read and parse JSON
   raw <- readLines(temp_file, warn = FALSE, encoding = "UTF-8")
@@ -205,8 +215,15 @@
 
 #' Download and read SISAB data for one year (all requested months)
 #' @noRd
-.sisab_download_and_read <- function(year, months, type, level, uf = NULL,
-                                     cache = TRUE, cache_dir = NULL) {
+.sisab_download_and_read <- function(
+  year,
+  months,
+  type,
+  level,
+  uf = NULL,
+  cache = TRUE,
+  cache_dir = NULL
+) {
   cache_dir <- .sisab_cache_dir(cache_dir)
 
   # build cache key
@@ -217,7 +234,16 @@
     paste(sprintf("%02d", months), collapse = "-")
   }
   cache_base <- stringr::str_c(
-    "sisab_", type, "_", level, "_", uf_part, "_", year, "_", month_part
+    "sisab_",
+    type,
+    "_",
+    level,
+    "_",
+    uf_part,
+    "_",
+    year,
+    "_",
+    month_part
   )
 
   # check cache
@@ -380,12 +406,16 @@ sisab_variables <- function(type = "aps", search = NULL) {
 #' Validate and resolve all sisab_data parameters
 #' @noRd
 .sisab_resolve_params <- function(year, type, level, month, uf, vars) {
-  year  <- .sisab_validate_year(year)
-  type  <- .sisab_validate_type(type)
+  year <- .sisab_validate_year(year)
+  type <- .sisab_validate_type(type)
   level <- .sisab_validate_level(level)
   month <- .validate_month(month)
-  if (!is.null(uf))   uf <- .sisab_validate_uf(uf)
-  if (!is.null(vars))  .sisab_validate_vars(vars, type = type)
+  if (!is.null(uf)) {
+    uf <- .sisab_validate_uf(uf)
+  }
+  if (!is.null(vars)) {
+    .sisab_validate_vars(vars, type = type)
+  }
 
   if (level == "municipality" && is.null(uf) && length(month) > 3) {
     cli::cli_warn(c(
@@ -400,16 +430,30 @@ sisab_variables <- function(type = "aps", search = NULL) {
     target_ufs <- list(NULL)
   }
 
-  list(year = year, type = type, level = level,
-       month = month, uf = uf, target_ufs = target_ufs)
+  list(
+    year = year,
+    type = type,
+    level = level,
+    month = month,
+    uf = uf,
+    target_ufs = target_ufs
+  )
 }
 
 #' Download loop for sisab_data: expand grid, download, bind
 #' @noRd
-.sisab_download_loop <- function(year, type, level, month,
-                                 target_ufs, cache, cache_dir) {
+.sisab_download_loop <- function(
+  year,
+  type,
+  level,
+  month,
+  target_ufs,
+  cache,
+  cache_dir
+) {
   combinations <- expand.grid(
-    year = year, uf_idx = seq_along(target_ufs),
+    year = year,
+    uf_idx = seq_along(target_ufs),
     stringsAsFactors = FALSE
   )
 
@@ -420,33 +464,51 @@ sisab_variables <- function(type = "aps", search = NULL) {
     ))
   }
 
-  labels <- vapply(seq_len(n_combos), function(i) {
-    uf_val  <- target_ufs[[combinations$uf_idx[i]]]
-    uf_part <- if (!is.null(uf_val)) uf_val else "ALL"
-    paste(type, level, uf_part, combinations$year[i])
-  }, character(1))
+  labels <- vapply(
+    seq_len(n_combos),
+    function(i) {
+      uf_val <- target_ufs[[combinations$uf_idx[i]]]
+      uf_part <- if (!is.null(uf_val)) uf_val else "ALL"
+      paste(type, level, uf_part, combinations$year[i])
+    },
+    character(1)
+  )
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    yr     <- combinations$year[i]
-    uf_val <- target_ufs[[combinations$uf_idx[i]]]
-    tryCatch({
-      data <- .sisab_download_and_read(
-        yr, month, type, level, uf = uf_val,
-        cache = cache, cache_dir = cache_dir
+  results <- .map_parallel(
+    seq_len(n_combos),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      yr <- combinations$year[i]
+      uf_val <- target_ufs[[combinations$uf_idx[i]]]
+      tryCatch(
+        {
+          data <- .sisab_download_and_read(
+            yr,
+            month,
+            type,
+            level,
+            uf = uf_val,
+            cache = cache,
+            cache_dir = cache_dir
+          )
+          if (is.null(data) || nrow(data) == 0) {
+            return(NULL)
+          }
+          data$year <- as.integer(yr)
+          data$type <- type
+          cols <- names(data)
+          data <- data[, c("year", "type", setdiff(cols, c("year", "type")))]
+          data
+        },
+        error = function(e) NULL
       )
-      if (is.null(data) || nrow(data) == 0) return(NULL)
-      data$year <- as.integer(yr)
-      data$type <- type
-      cols <- names(data)
-      data <- data[, c("year", "type", setdiff(cols, c("year", "type")))]
-      data
-    }, error = function(e) NULL)
-  })
+    }
+  )
 
-  succeeded     <- !vapply(results, is.null, logical(1))
+  succeeded <- !vapply(results, is.null, logical(1))
   failed_labels <- labels[!succeeded]
-  results       <- results[succeeded]
+  results <- results[succeeded]
 
   if (length(results) == 0) {
     cli::cli_abort(
@@ -534,26 +596,36 @@ sisab_variables <- function(type = "aps", search = NULL) {
 #'
 #' # Municipality level for Sao Paulo
 #' sisab_data(year = 2024, level = "municipality", uf = "SP", month = 1)
-sisab_data <- function(year, type = "aps", level = "uf", month = NULL,
-                       uf = NULL, vars = NULL,
-                       cache = TRUE, cache_dir = NULL) {
-
+sisab_data <- function(
+  year,
+  type = "aps",
+  level = "uf",
+  month = NULL,
+  uf = NULL,
+  vars = NULL,
+  cache = TRUE,
+  cache_dir = NULL
+) {
   params <- .sisab_resolve_params(year, type, level, month, uf, vars)
 
   dl <- .sisab_download_loop(
-    year       = params$year,
-    type       = params$type,
-    level      = params$level,
-    month      = params$month,
+    year = params$year,
+    type = params$type,
+    level = params$level,
+    month = params$month,
     target_ufs = params$target_ufs,
-    cache      = cache,
-    cache_dir  = cache_dir
+    cache = cache,
+    cache_dir = cache_dir
   )
 
   lazy_select <- if (!is.null(vars)) unique(c("year", "type", vars)) else NULL
 
-  .data_return(dl$data, select_cols = lazy_select,
-               failed_labels = dl$failed_labels, module_name = "SISAB")
+  .data_return(
+    dl$data,
+    select_cols = lazy_select,
+    failed_labels = dl$failed_labels,
+    module_name = "SISAB"
+  )
 }
 
 

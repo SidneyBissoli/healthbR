@@ -168,8 +168,11 @@ test_that(".parse_columns ignores columns not in spec", {
 })
 
 test_that(".parse_columns handles empty data frame", {
-  data <- data.frame(A = character(0), B = character(0),
-                     stringsAsFactors = FALSE)
+  data <- data.frame(
+    A = character(0),
+    B = character(0),
+    stringsAsFactors = FALSE
+  )
   spec <- c(A = "integer", B = "double")
   result <- .parse_columns(data, spec)
   expect_equal(nrow(result), 0)
@@ -217,13 +220,20 @@ test_that(".convert_column gives the same result through the distinct-value path
   x <- c("20230101", NA, "", "  ", "20230101", "x", "20221231", NA, "20230101")
   plain <- function(v, type) {
     v[!is.na(v) & trimws(v) == ""] <- NA_character_
-    switch(type, integer = suppressWarnings(as.integer(v)),
-      double = suppressWarnings(as.double(v)), date_ymd = .parse_date_ymd(v))
+    switch(
+      type,
+      integer = suppressWarnings(as.integer(v)),
+      double = suppressWarnings(as.double(v)),
+      date_ymd = .parse_date_ymd(v)
+    )
   }
   for (type in c("integer", "double", "date_ymd")) {
     expect_identical(.convert_column(x, type), plain(x, type))
   }
   # all-distinct input takes the direct path
   expect_identical(.convert_column(c("1", "2", ""), "integer"), c(1L, 2L, NA))
-  expect_identical(.convert_column(character(0), "date_ymd"), as.Date(character(0)))
+  expect_identical(
+    .convert_column(character(0), "date_ymd"),
+    as.Date(character(0))
+  )
 })
