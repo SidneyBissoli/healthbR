@@ -5,7 +5,9 @@
 # ============================================================================
 
 skip_if_no_integration <- function() {
-  if (identical(Sys.getenv("HEALTHBR_INTEGRATION"), "true")) return(invisible())
+  if (identical(Sys.getenv("HEALTHBR_INTEGRATION"), "true")) {
+    return(invisible())
+  }
   skip("Integration tests skipped. Set HEALTHBR_INTEGRATION=true to run.")
 }
 
@@ -19,16 +21,28 @@ test_that("anvisa_base_url is correct", {
 
 test_that("anvisa_valid_types has 14 types", {
   expect_equal(nrow(anvisa_valid_types), 14)
-  expect_true(all(c("code", "name", "description", "category") %in%
-                    names(anvisa_valid_types)))
+  expect_true(all(
+    c("code", "name", "description", "category") %in%
+      names(anvisa_valid_types)
+  ))
 })
 
 test_that("anvisa_valid_types contains all expected codes", {
   expected <- c(
-    "medicines", "medical_devices", "food", "cosmetics", "sanitizers",
-    "tobacco", "pesticides", "hemovigilance", "technovigilance",
-    "vigimed_notifications", "vigimed_medicines", "vigimed_reactions",
-    "sngpc", "sngpc_compounded"
+    "medicines",
+    "medical_devices",
+    "food",
+    "cosmetics",
+    "sanitizers",
+    "tobacco",
+    "pesticides",
+    "hemovigilance",
+    "technovigilance",
+    "vigimed_notifications",
+    "vigimed_medicines",
+    "vigimed_reactions",
+    "sngpc",
+    "sngpc_compounded"
   )
   expect_equal(anvisa_valid_types$code, expected)
 })
@@ -54,17 +68,44 @@ test_that("anvisa_type_files maps all snapshot types", {
 })
 
 test_that("anvisa_type_files has correct filenames", {
-  expect_equal(anvisa_type_files[["medicines"]], "DADOS_ABERTOS_MEDICAMENTOS.csv")
-  expect_equal(anvisa_type_files[["medical_devices"]], "TA_PRODUTO_SAUDE_SITE.csv")
+  expect_equal(
+    anvisa_type_files[["medicines"]],
+    "DADOS_ABERTOS_MEDICAMENTOS.csv"
+  )
+  expect_equal(
+    anvisa_type_files[["medical_devices"]],
+    "TA_PRODUTO_SAUDE_SITE.csv"
+  )
   expect_equal(anvisa_type_files[["food"]], "DADOS_ABERTOS_ALIMENTO.csv")
   expect_equal(anvisa_type_files[["cosmetics"]], "DADOS_ABERTOS_COSMETICO.csv")
-  expect_equal(anvisa_type_files[["sanitizers"]], "DADOS_ABERTOS_REGISTROS_SANEANTES.CSV")
-  expect_equal(anvisa_type_files[["tobacco"]], "DADOS_ABERTOS_PRODUTO_FUMIGENO.csv")
-  expect_equal(anvisa_type_files[["pesticides"]], "TA_MONOGRAFIA_AGROTOXICO.csv")
-  expect_equal(anvisa_type_files[["hemovigilance"]], "DADOS_ABERTOS_HEMOVIGILANCIA.csv")
-  expect_equal(anvisa_type_files[["technovigilance"]], "DADOS_ABERTOS_TECNOVIGILANCIA.csv")
-  expect_equal(anvisa_type_files[["vigimed_notifications"]], "VigiMed_Notificacoes.csv")
-  expect_equal(anvisa_type_files[["vigimed_medicines"]], "VigiMed_Medicamentos.csv")
+  expect_equal(
+    anvisa_type_files[["sanitizers"]],
+    "DADOS_ABERTOS_REGISTROS_SANEANTES.CSV"
+  )
+  expect_equal(
+    anvisa_type_files[["tobacco"]],
+    "DADOS_ABERTOS_PRODUTO_FUMIGENO.csv"
+  )
+  expect_equal(
+    anvisa_type_files[["pesticides"]],
+    "TA_MONOGRAFIA_AGROTOXICO.csv"
+  )
+  expect_equal(
+    anvisa_type_files[["hemovigilance"]],
+    "DADOS_ABERTOS_HEMOVIGILANCIA.csv"
+  )
+  expect_equal(
+    anvisa_type_files[["technovigilance"]],
+    "DADOS_ABERTOS_TECNOVIGILANCIA.csv"
+  )
+  expect_equal(
+    anvisa_type_files[["vigimed_notifications"]],
+    "VigiMed_Notificacoes.csv"
+  )
+  expect_equal(
+    anvisa_type_files[["vigimed_medicines"]],
+    "VigiMed_Medicamentos.csv"
+  )
   expect_equal(anvisa_type_files[["vigimed_reactions"]], "VigiMed_Reacoes.csv")
 })
 
@@ -112,7 +153,9 @@ test_that("anvisa_medicines_metadata has 11 variables", {
 
 test_that("anvisa_medical_devices_metadata has 12 variables", {
   expect_equal(nrow(anvisa_medical_devices_metadata), 12)
-  expect_true("NUMERO_REGISTRO_CADASTRO" %in% anvisa_medical_devices_metadata$variable)
+  expect_true(
+    "NUMERO_REGISTRO_CADASTRO" %in% anvisa_medical_devices_metadata$variable
+  )
   expect_true("CLASSE_RISCO" %in% anvisa_medical_devices_metadata$variable)
 })
 
@@ -145,7 +188,9 @@ test_that("anvisa_pesticides_metadata has 15 variables", {
 test_that("anvisa_hemovigilance_metadata has 16 variables", {
   expect_equal(nrow(anvisa_hemovigilance_metadata), 16)
   expect_true("NU_NOTIFICACAO" %in% anvisa_hemovigilance_metadata$variable)
-  expect_true("TIPO_REACAO_TRANSFUSIONAL" %in% anvisa_hemovigilance_metadata$variable)
+  expect_true(
+    "TIPO_REACAO_TRANSFUSIONAL" %in% anvisa_hemovigilance_metadata$variable
+  )
 })
 
 test_that("anvisa_technovigilance_metadata has 18 variables", {
@@ -156,19 +201,26 @@ test_that("anvisa_technovigilance_metadata has 18 variables", {
 
 test_that("anvisa_vigimed_notifications_metadata has 29 variables", {
   expect_equal(nrow(anvisa_vigimed_notifications_metadata), 29)
-  expect_true("IDENTIFICACAO_NOTIFICACAO" %in% anvisa_vigimed_notifications_metadata$variable)
+  expect_true(
+    "IDENTIFICACAO_NOTIFICACAO" %in%
+      anvisa_vigimed_notifications_metadata$variable
+  )
   expect_true("SEXO" %in% anvisa_vigimed_notifications_metadata$variable)
 })
 
 test_that("anvisa_vigimed_medicines_metadata has 22 variables", {
   expect_equal(nrow(anvisa_vigimed_medicines_metadata), 22)
-  expect_true("IDENTIFICACAO_NOTIFICACAO" %in% anvisa_vigimed_medicines_metadata$variable)
+  expect_true(
+    "IDENTIFICACAO_NOTIFICACAO" %in% anvisa_vigimed_medicines_metadata$variable
+  )
   expect_true("CODIGO_ATC" %in% anvisa_vigimed_medicines_metadata$variable)
 })
 
 test_that("anvisa_vigimed_reactions_metadata has 12 variables", {
   expect_equal(nrow(anvisa_vigimed_reactions_metadata), 12)
-  expect_true("IDENTIFICACAO_NOTIFICACAO" %in% anvisa_vigimed_reactions_metadata$variable)
+  expect_true(
+    "IDENTIFICACAO_NOTIFICACAO" %in% anvisa_vigimed_reactions_metadata$variable
+  )
   expect_true("SOC" %in% anvisa_vigimed_reactions_metadata$variable)
 })
 
@@ -181,15 +233,17 @@ test_that("anvisa_sngpc_metadata has 15 variables", {
 test_that("anvisa_sngpc_compounded_metadata has 17 variables", {
   expect_equal(nrow(anvisa_sngpc_compounded_metadata), 17)
   expect_true("DS_DCB" %in% anvisa_sngpc_compounded_metadata$variable)
-  expect_true("QT_ATIVO_POR_UNID_FARMACOTEC" %in% anvisa_sngpc_compounded_metadata$variable)
+  expect_true(
+    "QT_ATIVO_POR_UNID_FARMACOTEC" %in%
+      anvisa_sngpc_compounded_metadata$variable
+  )
 })
 
 test_that("all metadata tibbles have required columns", {
   all_types <- anvisa_valid_types$code
   for (type in all_types) {
     meta <- .anvisa_get_metadata(type)
-    expect_true(all(c("variable", "description") %in% names(meta)),
-                info = type)
+    expect_true(all(c("variable", "description") %in% names(meta)), info = type)
     expect_true(nrow(meta) > 0, info = type)
   }
 })
@@ -197,8 +251,10 @@ test_that("all metadata tibbles have required columns", {
 test_that(".anvisa_get_metadata returns correct metadata for each type", {
   expect_identical(.anvisa_get_metadata("medicines"), anvisa_medicines_metadata)
   expect_identical(.anvisa_get_metadata("sngpc"), anvisa_sngpc_metadata)
-  expect_identical(.anvisa_get_metadata("vigimed_reactions"),
-                   anvisa_vigimed_reactions_metadata)
+  expect_identical(
+    .anvisa_get_metadata("vigimed_reactions"),
+    anvisa_vigimed_reactions_metadata
+  )
 })
 
 
@@ -333,8 +389,10 @@ test_that("anvisa_types() returns valid types tibble", {
   result <- anvisa_types()
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 14)
-  expect_true(all(c("code", "name", "description", "category") %in%
-                    names(result)))
+  expect_true(all(
+    c("code", "name", "description", "category") %in%
+      names(result)
+  ))
 })
 
 
@@ -495,8 +553,11 @@ test_that(".anvisa_download_snapshot reads CSV correctly", {
     }
   )
 
-  result <- .anvisa_download_snapshot("medicines", cache = FALSE,
-                                     cache_dir = temp_dir)
+  result <- .anvisa_download_snapshot(
+    "medicines",
+    cache = FALSE,
+    cache_dir = temp_dir
+  )
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 2)
   expect_equal(ncol(result), 3)
@@ -520,8 +581,11 @@ test_that(".anvisa_download_snapshot handles comma delimiter for sanitizers", {
     }
   )
 
-  result <- .anvisa_download_snapshot("sanitizers", cache = FALSE,
-                                     cache_dir = temp_dir)
+  result <- .anvisa_download_snapshot(
+    "sanitizers",
+    cache = FALSE,
+    cache_dir = temp_dir
+  )
   expect_equal(nrow(result), 1)
   expect_equal(ncol(result), 3)
 })
@@ -545,14 +609,20 @@ test_that(".anvisa_download_snapshot caches and retrieves data", {
   )
 
   # first call: downloads
-  result1 <- .anvisa_download_snapshot("medicines", cache = TRUE,
-                                      cache_dir = temp_dir)
+  result1 <- .anvisa_download_snapshot(
+    "medicines",
+    cache = TRUE,
+    cache_dir = temp_dir
+  )
   expect_equal(download_count, 1L)
 
   # second call: from cache
-  result2 <- .anvisa_download_snapshot("medicines", cache = TRUE,
-                                      cache_dir = temp_dir)
-  expect_equal(download_count, 1L)  # no new download
+  result2 <- .anvisa_download_snapshot(
+    "medicines",
+    cache = TRUE,
+    cache_dir = temp_dir
+  )
+  expect_equal(download_count, 1L) # no new download
   expect_equal(nrow(result2), nrow(result1))
 })
 
@@ -580,8 +650,13 @@ test_that(".anvisa_download_sngpc reads CSV and adds partition columns", {
     }
   )
 
-  result <- .anvisa_download_sngpc("sngpc", 2020, 1,
-                                   cache = FALSE, cache_dir = temp_dir)
+  result <- .anvisa_download_sngpc(
+    "sngpc",
+    2020,
+    1,
+    cache = FALSE,
+    cache_dir = temp_dir
+  )
   expect_s3_class(result, "tbl_df")
   expect_true("year" %in% names(result))
   expect_true("month" %in% names(result))
@@ -607,8 +682,7 @@ test_that(".anvisa_download_sngpc URL includes ssl_verifypeer=FALSE", {
     }
   )
 
-  .anvisa_download_sngpc("sngpc", 2020, 1, cache = FALSE,
-                         cache_dir = temp_dir)
+  .anvisa_download_sngpc("sngpc", 2020, 1, cache = FALSE, cache_dir = temp_dir)
   expect_false(captured_ssl)
 })
 
@@ -633,8 +707,7 @@ test_that("anvisa_data routes snapshot types to .anvisa_data_snapshot", {
     }
   )
 
-  result <- anvisa_data(type = "medicines", cache = FALSE,
-                        cache_dir = temp_dir)
+  result <- anvisa_data(type = "medicines", cache = FALSE, cache_dir = temp_dir)
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 1)
 })
@@ -655,8 +728,13 @@ test_that("anvisa_data routes SNGPC types to .anvisa_data_sngpc", {
     }
   )
 
-  result <- anvisa_data(type = "sngpc", year = 2020, month = 1,
-                        cache = FALSE, cache_dir = temp_dir)
+  result <- anvisa_data(
+    type = "sngpc",
+    year = 2020,
+    month = 1,
+    cache = FALSE,
+    cache_dir = temp_dir
+  )
   expect_s3_class(result, "tbl_df")
   expect_true("year" %in% names(result))
   expect_true("month" %in% names(result))
@@ -678,9 +756,12 @@ test_that("anvisa_data snapshot with vars selects columns", {
     }
   )
 
-  result <- anvisa_data(type = "medicines",
-                        vars = c("TIPO_PRODUTO", "PRINCIPIO_ATIVO"),
-                        cache = FALSE, cache_dir = temp_dir)
+  result <- anvisa_data(
+    type = "medicines",
+    vars = c("TIPO_PRODUTO", "PRINCIPIO_ATIVO"),
+    cache = FALSE,
+    cache_dir = temp_dir
+  )
   expect_equal(ncol(result), 2)
   expect_equal(names(result), c("TIPO_PRODUTO", "PRINCIPIO_ATIVO"))
 })
@@ -698,7 +779,9 @@ test_that("anvisa_data SNGPC handles download failure gracefully", {
   local_mocked_bindings(
     .http_download = function(url, destfile, ...) {
       call_count <<- call_count + 1L
-      if (call_count == 1L) stop("Network error")
+      if (call_count == 1L) {
+        stop("Network error")
+      }
       file.copy(mock_csv, destfile, overwrite = TRUE)
       invisible(destfile)
     }
@@ -707,10 +790,17 @@ test_that("anvisa_data SNGPC handles download failure gracefully", {
   # month 1 fails, month 2 succeeds => partial result with warning
   warned <- FALSE
   result <- withCallingHandlers(
-    anvisa_data(type = "sngpc", year = 2020, month = 1:2,
-                cache = FALSE, cache_dir = temp_dir),
+    anvisa_data(
+      type = "sngpc",
+      year = 2020,
+      month = 1:2,
+      cache = FALSE,
+      cache_dir = temp_dir
+    ),
     warning = function(w) {
-      if (grepl("failed", conditionMessage(w))) warned <<- TRUE
+      if (grepl("failed", conditionMessage(w))) {
+        warned <<- TRUE
+      }
       invokeRestart("muffleWarning")
     },
     message = function(m) invokeRestart("muffleMessage")
@@ -733,8 +823,13 @@ test_that("anvisa_data SNGPC errors when all downloads fail", {
   )
 
   expect_error(
-    anvisa_data(type = "sngpc", year = 2020, month = 1,
-                cache = FALSE, cache_dir = temp_dir),
+    anvisa_data(
+      type = "sngpc",
+      year = 2020,
+      month = 1,
+      cache = FALSE,
+      cache_dir = temp_dir
+    ),
     "No data could be downloaded"
   )
 })
@@ -781,8 +876,7 @@ test_that("anvisa_data medicines downloads real data", {
   dir.create(temp_dir)
   on.exit(unlink(temp_dir, recursive = TRUE))
 
-  result <- anvisa_data(type = "medicines", cache = TRUE,
-                        cache_dir = temp_dir)
+  result <- anvisa_data(type = "medicines", cache = TRUE, cache_dir = temp_dir)
   expect_s3_class(result, "tbl_df")
   expect_true(nrow(result) > 1000)
   expect_true("PRINCIPIO_ATIVO" %in% names(result))
@@ -796,8 +890,11 @@ test_that("anvisa_data hemovigilance downloads real data", {
   dir.create(temp_dir)
   on.exit(unlink(temp_dir, recursive = TRUE))
 
-  result <- anvisa_data(type = "hemovigilance", cache = TRUE,
-                        cache_dir = temp_dir)
+  result <- anvisa_data(
+    type = "hemovigilance",
+    cache = TRUE,
+    cache_dir = temp_dir
+  )
   expect_s3_class(result, "tbl_df")
   expect_true(nrow(result) > 100)
   expect_true("NU_NOTIFICACAO" %in% names(result))
@@ -810,8 +907,7 @@ test_that("anvisa_data pesticides downloads real data", {
   dir.create(temp_dir)
   on.exit(unlink(temp_dir, recursive = TRUE))
 
-  result <- anvisa_data(type = "pesticides", cache = TRUE,
-                        cache_dir = temp_dir)
+  result <- anvisa_data(type = "pesticides", cache = TRUE, cache_dir = temp_dir)
   expect_s3_class(result, "tbl_df")
   expect_true(nrow(result) > 100)
   expect_true("NO_SUBSTANCIA" %in% names(result))
@@ -824,8 +920,13 @@ test_that("anvisa_data sngpc downloads real data", {
   dir.create(temp_dir)
   on.exit(unlink(temp_dir, recursive = TRUE))
 
-  result <- anvisa_data(type = "sngpc", year = 2020, month = 1,
-                        cache = TRUE, cache_dir = temp_dir)
+  result <- anvisa_data(
+    type = "sngpc",
+    year = 2020,
+    month = 1,
+    cache = TRUE,
+    cache_dir = temp_dir
+  )
   expect_s3_class(result, "tbl_df")
   expect_true(nrow(result) > 100)
   expect_true("year" %in% names(result))
@@ -841,8 +942,11 @@ test_that("anvisa_data vigimed_notifications downloads real data", {
   dir.create(temp_dir)
   on.exit(unlink(temp_dir, recursive = TRUE))
 
-  result <- anvisa_data(type = "vigimed_notifications", cache = TRUE,
-                        cache_dir = temp_dir)
+  result <- anvisa_data(
+    type = "vigimed_notifications",
+    cache = TRUE,
+    cache_dir = temp_dir
+  )
   expect_s3_class(result, "tbl_df")
   expect_true(nrow(result) > 100)
   expect_true("IDENTIFICACAO_NOTIFICACAO" %in% names(result))

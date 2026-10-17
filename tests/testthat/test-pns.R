@@ -391,7 +391,7 @@ test_that("pns_data handles variable selection", {
   expect_true("year" %in% names(df))
   expect_true(all(toupper(vars_to_select) %in% names(df)))
   # should have year + selected vars = 6 columns (or fewer if data has < 6 vars)
-  expect_equal(ncol(df), length(vars_to_select) + 1)  # +1 for year column
+  expect_equal(ncol(df), length(vars_to_select) + 1) # +1 for year column
 })
 
 test_that("pns_data uses cache on second call", {
@@ -406,8 +406,11 @@ test_that("pns_data uses cache on second call", {
   df1 <- pns_data(year = 2019, cache_dir = test_cache)
 
   # verify partitioned cache exists
-  cache_files <- list.files(file.path(test_cache, "pns_data"),
-                            recursive = TRUE, pattern = "\\.parquet$")
+  cache_files <- list.files(
+    file.path(test_cache, "pns_data"),
+    recursive = TRUE,
+    pattern = "\\.parquet$"
+  )
   expect_true(length(cache_files) > 0)
 
   # second call should use cache
@@ -460,7 +463,10 @@ test_that("pns_info invisible return contains expected fields", {
 
   expect_equal(info$name, "Pesquisa Nacional de Sa\u00fade (PNS)")
   expect_equal(info$name_en, "National Health Survey")
-  expect_equal(info$institution, "IBGE - Instituto Brasileiro de Geografia e Estat\u00edstica")
+  expect_equal(
+    info$institution,
+    "IBGE - Instituto Brasileiro de Geografia e Estat\u00edstica"
+  )
   expect_equal(info$partner, "Minist\u00e9rio da Sa\u00fade")
   expect_equal(info$sidra_tables, 2222)
   expect_type(info$description, "character")
@@ -589,8 +595,17 @@ test_that("sidra_theme_labels has expected themes", {
 test_that("pns_sidra_catalog_internal has expected structure", {
   catalog <- healthbR:::pns_sidra_catalog_internal
   expect_s3_class(catalog, "tbl_df")
-  expect_true(all(c("table_code", "table_name", "theme", "theme_label",
-                     "years", "territorial_levels") %in% names(catalog)))
+  expect_true(all(
+    c(
+      "table_code",
+      "table_name",
+      "theme",
+      "theme_label",
+      "years",
+      "territorial_levels"
+    ) %in%
+      names(catalog)
+  ))
   expect_true(nrow(catalog) == 69)
 })
 
@@ -671,8 +686,17 @@ test_that("pns_clear_cache removes files and recreates directory", {
 
 test_that("pns_sidra_tables returns expected columns", {
   result <- pns_sidra_tables()
-  expect_true(all(c("table_code", "table_name", "theme", "theme_label",
-                     "years", "territorial_levels") %in% names(result)))
+  expect_true(all(
+    c(
+      "table_code",
+      "table_name",
+      "theme",
+      "theme_label",
+      "years",
+      "territorial_levels"
+    ) %in%
+      names(result)
+  ))
 })
 
 test_that("pns_sidra_tables with multiple themes", {
@@ -904,8 +928,11 @@ test_that("pns_sidra_data warns for unknown table code", {
 
 test_that(".pns_try_lazy returns NULL when lazy is FALSE", {
   result <- healthbR:::.pns_try_lazy(
-    year = 2019, vars = NULL, lazy = FALSE,
-    backend = "arrow", cache_dir = tempdir()
+    year = 2019,
+    vars = NULL,
+    lazy = FALSE,
+    backend = "arrow",
+    cache_dir = tempdir()
   )
   expect_null(result)
 })
@@ -913,8 +940,11 @@ test_that(".pns_try_lazy returns NULL when lazy is FALSE", {
 test_that(".pns_try_lazy returns NULL when cache does not exist", {
   temp <- withr::local_tempdir()
   result <- healthbR:::.pns_try_lazy(
-    year = 2019, vars = NULL, lazy = TRUE,
-    backend = "arrow", cache_dir = temp
+    year = 2019,
+    vars = NULL,
+    lazy = TRUE,
+    backend = "arrow",
+    cache_dir = temp
   )
   expect_null(result)
 })
@@ -923,8 +953,11 @@ test_that(".pns_try_lazy with vars passes select_cols", {
   temp <- withr::local_tempdir()
   # no cache, so returns NULL regardless, but exercises the code path
   result <- healthbR:::.pns_try_lazy(
-    year = 2019, vars = c("V0001", "C006"), lazy = TRUE,
-    backend = "arrow", cache_dir = temp
+    year = 2019,
+    vars = c("V0001", "C006"),
+    lazy = TRUE,
+    backend = "arrow",
+    cache_dir = temp
   )
   expect_null(result)
 })
@@ -932,8 +965,11 @@ test_that(".pns_try_lazy with vars passes select_cols", {
 test_that(".pns_try_lazy with NULL year passes NULL filter", {
   temp <- withr::local_tempdir()
   result <- healthbR:::.pns_try_lazy(
-    year = NULL, vars = NULL, lazy = TRUE,
-    backend = "arrow", cache_dir = temp
+    year = NULL,
+    vars = NULL,
+    lazy = TRUE,
+    backend = "arrow",
+    cache_dir = temp
   )
   expect_null(result)
 })
@@ -943,14 +979,24 @@ test_that(".pns_try_lazy with NULL year passes NULL filter", {
 # ----------------------------------------------------------------------------
 
 test_that(".pns_select_vars returns all columns when vars is NULL", {
-  mock_data <- tibble::tibble(year = 2019L, V0001 = "11", C006 = "1", X001 = "2")
+  mock_data <- tibble::tibble(
+    year = 2019L,
+    V0001 = "11",
+    C006 = "1",
+    X001 = "2"
+  )
   result <- healthbR:::.pns_select_vars(mock_data, NULL)
   expect_equal(ncol(result), 4)
   expect_equal(names(result), c("year", "V0001", "C006", "X001"))
 })
 
 test_that(".pns_select_vars selects specified variables", {
-  mock_data <- tibble::tibble(year = 2019L, V0001 = "11", C006 = "1", X001 = "2")
+  mock_data <- tibble::tibble(
+    year = 2019L,
+    V0001 = "11",
+    C006 = "1",
+    X001 = "2"
+  )
   result <- healthbR:::.pns_select_vars(mock_data, c("V0001", "C006"))
   expect_equal(ncol(result), 3)
   expect_true(all(c("year", "V0001", "C006") %in% names(result)))
@@ -1018,14 +1064,21 @@ test_that(".pns_download_loop handles multiple years", {
 
   local_mocked_bindings(
     .has_arrow = function() FALSE,
-    pns_download_data = function(y, cache_dir, refresh) paste0("fake_", y, ".zip"),
+    pns_download_data = function(y, cache_dir, refresh) {
+      paste0("fake_", y, ".zip")
+    },
     pns_read_microdata = function(zip_path, year) {
       if (year == 2013L || year == "2013") mock_2013 else mock_2019
     },
     .cache_append_partitioned = function(...) invisible(NULL)
   )
 
-  result <- healthbR:::.pns_download_loop(c(2013L, 2019L), cache, FALSE, "pns_data")
+  result <- healthbR:::.pns_download_loop(
+    c(2013L, 2019L),
+    cache,
+    FALSE,
+    "pns_data"
+  )
   expect_length(result, 2)
   expect_equal(result[[1]]$year, 2013L)
   expect_equal(result[[2]]$year, 2019L)
@@ -1106,7 +1159,10 @@ test_that(".pns_parse_dictionary returns NULL for no matching files", {
   temp <- withr::local_tempdir()
   # create a non-dictionary file
   writeLines("hello", file.path(temp, "readme.txt"))
-  result <- healthbR:::.pns_parse_dictionary(file.path(temp, "readme.txt"), 2019)
+  result <- healthbR:::.pns_parse_dictionary(
+    file.path(temp, "readme.txt"),
+    2019
+  )
   expect_null(result)
 })
 
@@ -1145,8 +1201,14 @@ test_that(".pns_parse_dictionary prefers xlsx over txt", {
 # ----------------------------------------------------------------------------
 
 test_that("pns_dictionary validates year parameter", {
-  expect_error(pns_dictionary(year = 1999, cache_dir = tempdir()), "Invalid year")
-  expect_error(pns_dictionary(year = 2020, cache_dir = tempdir()), "Invalid year")
+  expect_error(
+    pns_dictionary(year = 1999, cache_dir = tempdir()),
+    "Invalid year"
+  )
+  expect_error(
+    pns_dictionary(year = 2020, cache_dir = tempdir()),
+    "Invalid year"
+  )
 })
 
 test_that("pns_dictionary uses first year when multiple are given", {
@@ -1351,7 +1413,12 @@ test_that("pns_data with lazy=TRUE returns NULL when no cache", {
 
 test_that("pns_data with vars selects columns", {
   temp <- withr::local_tempdir()
-  mock_data <- tibble::tibble(year = 2019L, V0001 = "SP", C006 = "1", X001 = "A")
+  mock_data <- tibble::tibble(
+    year = 2019L,
+    V0001 = "SP",
+    C006 = "1",
+    X001 = "A"
+  )
 
   local_mocked_bindings(
     .pns_try_lazy = function(...) NULL,
@@ -1496,7 +1563,11 @@ test_that("pns_sidra_data handles empty response", {
     .package = "curl"
   )
 
-  result <- pns_sidra_data(table = 4751, territorial_level = "brazil", year = 2019)
+  result <- pns_sidra_data(
+    table = 4751,
+    territorial_level = "brazil",
+    year = 2019
+  )
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 0)
 })
@@ -1543,7 +1614,9 @@ test_that("pns_sidra_data raw parameter returns unprocessed data", {
   )
 
   result <- pns_sidra_data(
-    table = 4751, territorial_level = "brazil", raw = TRUE
+    table = 4751,
+    territorial_level = "brazil",
+    raw = TRUE
   )
   expect_s3_class(result, "tbl_df")
   # raw should include the header row
@@ -1584,7 +1657,10 @@ test_that("pns_read_microdata reads fwf when input file present", {
   writeLines(data_content, file.path(zip_dir, "PNS_2019_dados.txt"))
 
   zip_path <- file.path(temp, "PNS_fwf.zip")
-  withr::with_dir(zip_dir, utils::zip(zip_path, files = c("input_PNS2019.txt", "PNS_2019_dados.txt")))
+  withr::with_dir(
+    zip_dir,
+    utils::zip(zip_path, files = c("input_PNS2019.txt", "PNS_2019_dados.txt"))
+  )
 
   result <- healthbR:::pns_read_microdata(zip_path, 2019)
   expect_s3_class(result, "tbl_df")

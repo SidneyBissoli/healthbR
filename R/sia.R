@@ -9,8 +9,11 @@
 #' Validate SIA year parameter
 #' @noRd
 .sia_validate_year <- function(year, status = "all") {
-  .validate_year(year, sia_years(status = status),
-                 years_fn_hint = "sia_years(status = 'all')")
+  .validate_year(
+    year,
+    sia_years(status = status),
+    years_fn_hint = "sia_years(status = 'all')"
+  )
 }
 
 #' Validate SIA UF parameter
@@ -72,7 +75,11 @@
 
   stringr::str_c(
     "ftp://ftp.datasus.gov.br/dissemin/publicos/SIASUS/200801_/Dados/",
-    type, uf, yy, mm, ".dbc"
+    type,
+    uf,
+    yy,
+    mm,
+    ".dbc"
   )
 }
 
@@ -91,8 +98,14 @@
 #' flat cache as migration fallback.
 #'
 #' @noRd
-.sia_download_and_read <- function(year, month, uf, type = "PA",
-                                   cache = TRUE, cache_dir = NULL) {
+.sia_download_and_read <- function(
+  year,
+  month,
+  uf,
+  type = "PA",
+  cache = TRUE,
+  cache_dir = NULL
+) {
   cache_dir <- .sia_cache_dir(cache_dir)
   dataset_name <- "sia_data"
   target_year <- as.integer(year)
@@ -100,13 +113,18 @@
   target_uf <- uf
 
   # 1. check partitioned cache first (preferred path)
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
-      dplyr::filter(.data$uf_source == target_uf,
-                     .data$year == target_year,
-                     .data$month == target_month) |>
+      dplyr::filter(
+        .data$uf_source == target_uf,
+        .data$year == target_year,
+        .data$month == target_month
+      ) |>
       dplyr::collect()
     if (nrow(cached) > 0) return(cached)
   }
@@ -139,13 +157,21 @@
   data$month <- target_month
   data$uf_source <- target_uf
   cols <- names(data)
-  data <- data[, c("year", "month", "uf_source",
-                    setdiff(cols, c("year", "month", "uf_source")))]
+  data <- data[, c(
+    "year",
+    "month",
+    "uf_source",
+    setdiff(cols, c("year", "month", "uf_source"))
+  )]
 
   # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    .cache_append_partitioned(data, cache_dir, dataset_name,
-                              c("uf_source", "year", "month"))
+    .cache_append_partitioned(
+      data,
+      cache_dir,
+      dataset_name,
+      c("uf_source", "year", "month")
+    )
   }
 
   data
@@ -179,7 +205,8 @@
 sia_years <- function(status = "final") {
   status <- match.arg(status, c("final", "preliminary", "all"))
 
-  switch(status,
+  switch(
+    status,
     "final" = sia_available_years$final,
     "preliminary" = sia_available_years$preliminary,
     "all" = sort(c(sia_available_years$final, sia_available_years$preliminary))
@@ -208,7 +235,9 @@ sia_info <- function() {
   cli::cli_text("")
   cli::cli_text("Fonte:          Minist\u00e9rio da Sa\u00fade / DATASUS")
   cli::cli_text("Acesso:         FTP DATASUS")
-  cli::cli_text("Documento base: Boletim de Produ\u00e7\u00e3o Ambulatorial (BPA) / APAC")
+  cli::cli_text(
+    "Documento base: Boletim de Produ\u00e7\u00e3o Ambulatorial (BPA) / APAC"
+  )
   cli::cli_text("Granularidade:  Mensal (um arquivo por tipo/UF/m\u00eas)")
 
   cli::cli_h2("Dados dispon\u00edveis")
@@ -319,9 +348,18 @@ sia_dictionary <- function(variable = NULL) {
 
 
 #' @noRd
-.sia_download_loop <- function(year, month, target_ufs, type, cache, cache_dir) {
+.sia_download_loop <- function(
+  year,
+  month,
+  target_ufs,
+  type,
+  cache,
+  cache_dir
+) {
   combinations <- expand.grid(
-    year = year, month = month, uf = target_ufs,
+    year = year,
+    month = month,
+    uf = target_ufs,
     stringsAsFactors = FALSE
   )
 
@@ -332,22 +370,38 @@ sia_dictionary <- function(variable = NULL) {
     ))
   }
 
-  labels <- paste(type, combinations$uf,
-                  paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
+  labels <- paste(
+    type,
+    combinations$uf,
+    paste0(combinations$year, "/", sprintf("%02d", combinations$month))
+  )
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    yr <- combinations$year[i]
-    mo <- combinations$month[i]
-    st <- combinations$uf[i]
+  results <- .map_parallel(
+    seq_len(n_combos),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      yr <- combinations$year[i]
+      mo <- combinations$month[i]
+      st <- combinations$uf[i]
 
-    tryCatch({
-      .sia_download_and_read(yr, mo, st, type = type,
-                             cache = cache, cache_dir = cache_dir)
-    }, error = function(e) {
-      NULL
-    })
-  })
+      tryCatch(
+        {
+          .sia_download_and_read(
+            yr,
+            mo,
+            st,
+            type = type,
+            cache = cache,
+            cache_dir = cache_dir
+          )
+        },
+        error = function(e) {
+          NULL
+        }
+      )
+    }
+  )
 
   succeeded <- !vapply(results, is.null, logical(1))
   failed_labels <- labels[!succeeded]
@@ -368,7 +422,9 @@ sia_dictionary <- function(variable = NULL) {
 .sia_apply_filters <- function(results, procedure, diagnosis) {
   if (!is.null(procedure)) {
     proc_pattern <- stringr::str_c(
-      "^(", stringr::str_c(procedure, collapse = "|"), ")"
+      "^(",
+      stringr::str_c(procedure, collapse = "|"),
+      ")"
     )
     if ("PA_PROC_ID" %in% names(results)) {
       results <- results[grepl(proc_pattern, results$PA_PROC_ID), ]
@@ -381,7 +437,9 @@ sia_dictionary <- function(variable = NULL) {
 
   if (!is.null(diagnosis)) {
     diag_pattern <- stringr::str_c(
-      "^(", stringr::str_c(diagnosis, collapse = "|"), ")"
+      "^(",
+      stringr::str_c(diagnosis, collapse = "|"),
+      ")"
     )
     if ("PA_CIDPRI" %in% names(results)) {
       results <- results[grepl(diag_pattern, results$PA_CIDPRI), ]
@@ -491,18 +549,31 @@ sia_dictionary <- function(variable = NULL) {
 #'
 #' # different file type (APAC Medicamentos)
 #' med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
-sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
-                     procedure = NULL, diagnosis = NULL,
-                     parse = TRUE, col_types = NULL,
-                     cache = TRUE, cache_dir = NULL,
-                     lazy = FALSE, backend = c("arrow", "duckdb")) {
-
+sia_data <- function(
+  year,
+  type = "PA",
+  month = NULL,
+  vars = NULL,
+  uf = NULL,
+  procedure = NULL,
+  diagnosis = NULL,
+  parse = TRUE,
+  col_types = NULL,
+  cache = TRUE,
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   # validate inputs
   year <- .sia_validate_year(year)
   type <- .sia_validate_type(type)
   month <- .validate_month(month)
-  if (!is.null(uf)) uf <- .sia_validate_uf(uf)
-  if (!is.null(vars)) .sia_validate_vars(vars)
+  if (!is.null(uf)) {
+    uf <- .sia_validate_uf(uf)
+  }
+  if (!is.null(vars)) {
+    .sia_validate_vars(vars)
+  }
 
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sia_uf_list
@@ -510,13 +581,28 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
   # compute lazy args once
   cache_dir_resolved <- .sia_cache_dir(cache_dir)
   lazy_filters <- list(year = year, uf_source = target_ufs)
-  if (!is.null(month)) lazy_filters$month <- as.integer(month)
-  lazy_select <- if (!is.null(vars)) unique(c("year", "month", "uf_source", vars)) else NULL
+  if (!is.null(month)) {
+    lazy_filters$month <- as.integer(month)
+  }
+  lazy_select <- if (!is.null(vars)) {
+    unique(c("year", "month", "uf_source", vars))
+  } else {
+    NULL
+  }
 
   # pre-download lazy check
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved, "sia_data",
-                        lazy_filters, lazy_select, parse = parse)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sia_data",
+    lazy_filters,
+    lazy_select,
+    parse = parse
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # download, bind, and collect failures
   dl <- .sia_download_loop(year, month, target_ufs, type, cache, cache_dir)
@@ -532,8 +618,17 @@ sia_data <- function(year, type = "PA", month = NULL, vars = NULL, uf = NULL,
   # apply procedure/diagnosis filters
   results <- .sia_apply_filters(results, procedure, diagnosis)
 
-  .data_return(results, lazy, backend, cache_dir_resolved, "sia_data",
-               lazy_filters, lazy_select, failed_labels, "SIA")
+  .data_return(
+    results,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sia_data",
+    lazy_filters,
+    lazy_select,
+    failed_labels,
+    "SIA"
+  )
 }
 
 

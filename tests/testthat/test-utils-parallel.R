@@ -113,22 +113,31 @@ test_that(".map_parallel with .progress = TRUE returns correct results", {
 })
 
 test_that(".map_parallel with .progress string returns correct results", {
-  result <- healthbR:::.map_parallel(1:5, function(x) x * 2,
-                                      .progress = "Downloading")
+  result <- healthbR:::.map_parallel(
+    1:5,
+    function(x) x * 2,
+    .progress = "Downloading"
+  )
   expect_equal(result, list(2, 4, 6, 8, 10))
 })
 
 test_that(".map_parallel with .progress and .delay returns correct results", {
-  result <- healthbR:::.map_parallel(1:3, function(x) x + 10,
-                                      .delay = 0.01,
-                                      .progress = "Downloading")
+  result <- healthbR:::.map_parallel(
+    1:3,
+    function(x) x + 10,
+    .delay = 0.01,
+    .progress = "Downloading"
+  )
   expect_equal(result, list(11, 12, 13))
 })
 
 test_that(".map_parallel with .progress skips bar for single element", {
   # should not error even with .progress = TRUE and n = 1
-  result <- healthbR:::.map_parallel(list(42), function(x) x + 1,
-                                      .progress = "Downloading")
+  result <- healthbR:::.map_parallel(
+    list(42),
+    function(x) x + 1,
+    .progress = "Downloading"
+  )
   expect_equal(result, list(43))
 })
 
@@ -139,15 +148,18 @@ test_that(".map_parallel with .progress skips bar for empty input", {
 
 test_that(".map_parallel with .progress passes extra arguments", {
   add_n <- function(x, n) x + n
-  result <- healthbR:::.map_parallel(1:3, add_n, n = 100,
-                                      .progress = "Processing")
+  result <- healthbR:::.map_parallel(
+    1:3,
+    add_n,
+    n = 100,
+    .progress = "Processing"
+  )
   expect_equal(result, list(101, 102, 103))
 })
 
 test_that(".map_parallel with .progress preserves names", {
   input <- list(a = 1, b = 2, c = 3)
-  result <- healthbR:::.map_parallel(input, function(x) x * 2,
-                                      .progress = TRUE)
+  result <- healthbR:::.map_parallel(input, function(x) x * 2, .progress = TRUE)
   expect_named(result, c("a", "b", "c"))
   expect_equal(result, list(a = 2, b = 4, c = 6))
 })

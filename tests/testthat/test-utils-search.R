@@ -38,7 +38,10 @@ test_that(".strip_accents handles full Portuguese words", {
 
 test_that(".strip_accents handles empty and vector input", {
   expect_equal(.strip_accents(""), "")
-  expect_equal(.strip_accents(c("caf\u00e9", "ma\u00e7\u00e3")), c("cafe", "maca"))
+  expect_equal(
+    .strip_accents(c("caf\u00e9", "ma\u00e7\u00e3")),
+    c("cafe", "maca")
+  )
 })
 
 
@@ -47,33 +50,42 @@ test_that(".strip_accents handles empty and vector input", {
 # ============================================================================
 
 test_that(".search_metadata returns data unchanged when search is NULL", {
-  df <- data.frame(variable = c("A", "B"), description = c("x", "y"),
-                   stringsAsFactors = FALSE)
+  df <- data.frame(
+    variable = c("A", "B"),
+    description = c("x", "y"),
+    stringsAsFactors = FALSE
+  )
   expect_identical(.search_metadata(df, NULL, c("variable", "description")), df)
 })
 
 test_that(".search_metadata filters by exact match", {
-  df <- data.frame(variable = c("IDADE", "SEXO", "RACA"),
-                   description = c("Idade", "Sexo", "Raca"),
-                   stringsAsFactors = FALSE)
+  df <- data.frame(
+    variable = c("IDADE", "SEXO", "RACA"),
+    description = c("Idade", "Sexo", "Raca"),
+    stringsAsFactors = FALSE
+  )
   result <- .search_metadata(df, "sexo", c("variable", "description"))
   expect_equal(nrow(result), 1)
   expect_equal(result$variable, "SEXO")
 })
 
 test_that(".search_metadata is case-insensitive", {
-  df <- data.frame(variable = c("IDADE", "SEXO"),
-                   description = c("Idade do paciente", "Sexo do paciente"),
-                   stringsAsFactors = FALSE)
+  df <- data.frame(
+    variable = c("IDADE", "SEXO"),
+    description = c("Idade do paciente", "Sexo do paciente"),
+    stringsAsFactors = FALSE
+  )
   result <- .search_metadata(df, "IDADE", c("variable", "description"))
   expect_equal(nrow(result), 1)
   expect_equal(result$variable, "IDADE")
 })
 
 test_that(".search_metadata is accent-insensitive", {
-  df <- data.frame(variable = c("IDADE", "NOME_MAE"),
-                   description = c("Idade", "Nome da m\u00e3e"),
-                   stringsAsFactors = FALSE)
+  df <- data.frame(
+    variable = c("IDADE", "NOME_MAE"),
+    description = c("Idade", "Nome da m\u00e3e"),
+    stringsAsFactors = FALSE
+  )
   # search "mae" should match "mãe" in description
 
   result <- .search_metadata(df, "mae", c("variable", "description"))
@@ -82,9 +94,11 @@ test_that(".search_metadata is accent-insensitive", {
 })
 
 test_that(".search_metadata matches accented search against ASCII data", {
-  df <- data.frame(variable = c("SAUDE", "OUTRO"),
-                   description = c("Saude publica", "Outro campo"),
-                   stringsAsFactors = FALSE)
+  df <- data.frame(
+    variable = c("SAUDE", "OUTRO"),
+    description = c("Saude publica", "Outro campo"),
+    stringsAsFactors = FALSE
+  )
   # search with accent should match ASCII description
   result <- .search_metadata(df, "sa\u00fade", c("variable", "description"))
   expect_equal(nrow(result), 1)
@@ -104,7 +118,11 @@ test_that(".search_metadata searches multiple columns", {
   expect_equal(result$code, "DENG")
 
   # match in name column
-  result2 <- .search_metadata(df, "tuberculose", c("code", "name", "description"))
+  result2 <- .search_metadata(
+    df,
+    "tuberculose",
+    c("code", "name", "description")
+  )
   expect_equal(nrow(result2), 1)
   expect_equal(result2$code, "TUBE")
 
@@ -115,25 +133,35 @@ test_that(".search_metadata searches multiple columns", {
 })
 
 test_that(".search_metadata returns empty data.frame when no match", {
-  df <- data.frame(variable = c("A", "B"),
-                   description = c("x", "y"),
-                   stringsAsFactors = FALSE)
+  df <- data.frame(
+    variable = c("A", "B"),
+    description = c("x", "y"),
+    stringsAsFactors = FALSE
+  )
   result <- .search_metadata(df, "zzz", c("variable", "description"))
   expect_equal(nrow(result), 0)
 })
 
 test_that(".search_metadata handles partial matches", {
-  df <- data.frame(variable = c("CAUSABAS", "CAUSA_EXTERNA", "SEXO"),
-                   description = c("Causa basica", "Causa externa", "Sexo"),
-                   stringsAsFactors = FALSE)
+  df <- data.frame(
+    variable = c("CAUSABAS", "CAUSA_EXTERNA", "SEXO"),
+    description = c("Causa basica", "Causa externa", "Sexo"),
+    stringsAsFactors = FALSE
+  )
   result <- .search_metadata(df, "causa", c("variable", "description"))
   expect_equal(nrow(result), 2)
 })
 
 test_that(".search_metadata handles accented data with accent search", {
-  df <- data.frame(variable = c("POP"),
-                   description = c("Popula\u00e7\u00e3o residente"),
-                   stringsAsFactors = FALSE)
-  result <- .search_metadata(df, "popula\u00e7\u00e3o", c("variable", "description"))
+  df <- data.frame(
+    variable = c("POP"),
+    description = c("Popula\u00e7\u00e3o residente"),
+    stringsAsFactors = FALSE
+  )
+  result <- .search_metadata(
+    df,
+    "popula\u00e7\u00e3o",
+    c("variable", "description")
+  )
   expect_equal(nrow(result), 1)
 })

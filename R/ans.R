@@ -27,8 +27,11 @@
 #' @noRd
 .ans_validate_year <- function(year, type) {
   available <- ans_available_years[[type]]
-  .validate_year(year, available,
-                 years_fn_hint = paste0("ans_years(type = '", type, "')"))
+  .validate_year(
+    year,
+    available,
+    years_fn_hint = paste0("ans_years(type = '", type, "')")
+  )
 }
 
 #' Validate ANS UF parameter (beneficiaries only, includes XX)
@@ -75,7 +78,8 @@
 #' Get variable metadata for a type
 #' @noRd
 .ans_get_variables_meta <- function(type) {
-  switch(type,
+  switch(
+    type,
     "beneficiaries" = ans_beneficiaries_metadata,
     "complaints" = ans_complaints_metadata,
     "financial" = ans_financial_metadata,
@@ -95,7 +99,15 @@
   stringr::str_c(
     ans_base_url,
     "/informacoes_consolidadas_de_beneficiarios-024/",
-    year, mm, "/pda-024-icb-", uf, "-", year, "_", mm, ".zip"
+    year,
+    mm,
+    "/pda-024-icb-",
+    uf,
+    "-",
+    year,
+    "_",
+    mm,
+    ".zip"
   )
 }
 
@@ -105,7 +117,8 @@
   stringr::str_c(
     ans_base_url,
     "/demandas_dos_consumidores_nip/pda-013-demandas_dos_consumidores_nip-",
-    year, ".csv"
+    year,
+    ".csv"
   )
 }
 
@@ -114,14 +127,21 @@
 .ans_financial_url <- function(year, quarter) {
   stringr::str_c(
     ans_base_url,
-    "/demonstracoes_contabeis/", year, "/", quarter, "T", year, ".zip"
+    "/demonstracoes_contabeis/",
+    year,
+    "/",
+    quarter,
+    "T",
+    year,
+    ".zip"
   )
 }
 
 #' Build URL for operators CSV
 #' @noRd
 .ans_operators_url <- function(status) {
-  switch(status,
+  switch(
+    status,
     "active" = stringr::str_c(
       ans_base_url,
       "/operadoras_de_plano_de_saude_ativas/Relatorio_cadop.csv"
@@ -147,8 +167,13 @@
 
 #' Download and read a beneficiaries ZIP for one UF/year/month
 #' @noRd
-.ans_download_beneficiaries <- function(year, month, uf,
-                                        cache = TRUE, cache_dir = NULL) {
+.ans_download_beneficiaries <- function(
+  year,
+  month,
+  uf,
+  cache = TRUE,
+  cache_dir = NULL
+) {
   cache_dir <- .ans_cache_dir(cache_dir)
   dataset_name <- "ans_beneficiaries_data"
   target_year <- as.integer(year)
@@ -156,13 +181,18 @@
   target_uf <- uf
 
   # 1. check partitioned cache
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
-      dplyr::filter(.data$uf_source == target_uf,
-                     .data$year == target_year,
-                     .data$month == target_month) |>
+      dplyr::filter(
+        .data$uf_source == target_uf,
+        .data$year == target_year,
+        .data$month == target_month
+      ) |>
       dplyr::collect()
     if (nrow(cached) > 0) return(cached)
   }
@@ -184,15 +214,23 @@
   on.exit(unlink(temp_dir, recursive = TRUE), add = TRUE)
 
   utils::unzip(temp_zip, exdir = temp_dir)
-  csvs <- list.files(temp_dir, pattern = "csv$", full.names = TRUE,
-                     recursive = TRUE)
+  csvs <- list.files(
+    temp_dir,
+    pattern = "csv$",
+    full.names = TRUE,
+    recursive = TRUE
+  )
 
   if (length(csvs) == 0) {
-    cli::cli_abort("No CSV file found in downloaded ZIP for {uf} {year}/{sprintf('%02d', month)}.")
+    cli::cli_abort(
+      "No CSV file found in downloaded ZIP for {uf} {year}/{sprintf('%02d', month)}."
+    )
   }
 
   data <- readr::read_delim(
-    csvs[1], delim = ";", show_col_types = FALSE,
+    csvs[1],
+    delim = ";",
+    show_col_types = FALSE,
     locale = readr::locale(encoding = "UTF-8"),
     col_types = readr::cols(.default = "c")
   )
@@ -202,13 +240,21 @@
   data$month <- target_month
   data$uf_source <- target_uf
   cols <- names(data)
-  data <- data[, c("year", "month", "uf_source",
-                    setdiff(cols, c("year", "month", "uf_source")))]
+  data <- data[, c(
+    "year",
+    "month",
+    "uf_source",
+    setdiff(cols, c("year", "month", "uf_source"))
+  )]
 
   # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    .cache_append_partitioned(data, cache_dir, dataset_name,
-                              c("uf_source", "year", "month"))
+    .cache_append_partitioned(
+      data,
+      cache_dir,
+      dataset_name,
+      c("uf_source", "year", "month")
+    )
   }
 
   data
@@ -223,8 +269,11 @@
   target_year <- as.integer(year)
 
   # 1. check partitioned cache
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
       dplyr::filter(.data$year == target_year) |>
@@ -244,7 +293,9 @@
   .http_download(url, temp_csv)
 
   data <- readr::read_delim(
-    temp_csv, delim = ";", show_col_types = FALSE,
+    temp_csv,
+    delim = ";",
+    show_col_types = FALSE,
     locale = readr::locale(encoding = "UTF-8"),
     col_types = readr::cols(.default = "c")
   )
@@ -265,20 +316,29 @@
 
 #' Download and read a financial ZIP for one year/quarter
 #' @noRd
-.ans_download_financial <- function(year, quarter,
-                                    cache = TRUE, cache_dir = NULL) {
+.ans_download_financial <- function(
+  year,
+  quarter,
+  cache = TRUE,
+  cache_dir = NULL
+) {
   cache_dir <- .ans_cache_dir(cache_dir)
   dataset_name <- "ans_financial_data"
   target_year <- as.integer(year)
   target_quarter <- as.integer(quarter)
 
   # 1. check partitioned cache
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
-      dplyr::filter(.data$year == target_year,
-                     .data$quarter == target_quarter) |>
+      dplyr::filter(
+        .data$year == target_year,
+        .data$quarter == target_quarter
+      ) |>
       dplyr::collect()
     if (nrow(cached) > 0) return(cached)
   }
@@ -300,15 +360,21 @@
   on.exit(unlink(temp_dir, recursive = TRUE), add = TRUE)
 
   utils::unzip(temp_zip, exdir = temp_dir)
-  csvs <- list.files(temp_dir, pattern = "csv$", full.names = TRUE,
-                     recursive = TRUE)
+  csvs <- list.files(
+    temp_dir,
+    pattern = "csv$",
+    full.names = TRUE,
+    recursive = TRUE
+  )
 
   if (length(csvs) == 0) {
     cli::cli_abort("No CSV file found in downloaded ZIP for {year} Q{quarter}.")
   }
 
   data <- readr::read_delim(
-    csvs[1], delim = ";", show_col_types = FALSE,
+    csvs[1],
+    delim = ";",
+    show_col_types = FALSE,
     locale = readr::locale(encoding = "UTF-8"),
     col_types = readr::cols(.default = "c")
   )
@@ -321,8 +387,12 @@
 
   # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    .cache_append_partitioned(data, cache_dir, dataset_name,
-                              c("year", "quarter"))
+    .cache_append_partitioned(
+      data,
+      cache_dir,
+      dataset_name,
+      c("year", "quarter")
+    )
   }
 
   data
@@ -352,7 +422,9 @@
   .http_download(url, temp_csv)
 
   data <- readr::read_delim(
-    temp_csv, delim = ";", show_col_types = FALSE,
+    temp_csv,
+    delim = ";",
+    show_col_types = FALSE,
     locale = readr::locale(encoding = "UTF-8"),
     col_types = readr::cols(.default = "c")
   )
@@ -372,20 +444,33 @@
 
 #' Dispatch beneficiaries data download
 #' @noRd
-.ans_data_beneficiaries <- function(year, uf, month, vars,
-                                    cache, cache_dir,
-                                    lazy, backend) {
+.ans_data_beneficiaries <- function(
+  year,
+  uf,
+  month,
+  vars,
+  cache,
+  cache_dir,
+  lazy,
+  backend
+) {
   year <- .ans_validate_year(year, "beneficiaries")
   month <- .ans_validate_month_beneficiaries(month, year)
   if (!is.null(uf)) {
     uf <- .ans_validate_uf(uf)
   }
-  if (!is.null(vars)) .ans_validate_vars(vars, "beneficiaries")
+  if (!is.null(vars)) {
+    .ans_validate_vars(vars, "beneficiaries")
+  }
 
   target_ufs <- if (!is.null(uf)) toupper(uf) else ans_uf_list
 
   cache_dir_resolved <- .ans_cache_dir(cache_dir)
-  lazy_filters <- list(year = year, uf_source = target_ufs, month = as.integer(month))
+  lazy_filters <- list(
+    year = year,
+    uf_source = target_ufs,
+    month = as.integer(month)
+  )
   lazy_select <- if (!is.null(vars)) {
     unique(c("year", "month", "uf_source", vars))
   } else {
@@ -393,19 +478,29 @@
   }
 
   # pre-download lazy check
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved,
-                        "ans_beneficiaries_data",
-                        lazy_filters, lazy_select)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "ans_beneficiaries_data",
+    lazy_filters,
+    lazy_select
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # build combinations, filtering out Jan-Mar 2019
   combinations <- expand.grid(
-    year = year, month = month, uf = target_ufs,
+    year = year,
+    month = month,
+    uf = target_ufs,
     stringsAsFactors = FALSE
   )
   # remove invalid 2019 months (1-3)
   combinations <- combinations[
-    !(combinations$year == 2019L & combinations$month < 4L), ]
+    !(combinations$year == 2019L & combinations$month < 4L),
+  ]
 
   if (nrow(combinations) == 0) {
     cli::cli_abort("No valid year/month/UF combinations to download.")
@@ -418,19 +513,30 @@
     ))
   }
 
-  labels <- paste(combinations$uf,
-                  paste0(combinations$year, "/",
-                         sprintf("%02d", combinations$month)))
+  labels <- paste(
+    combinations$uf,
+    paste0(combinations$year, "/", sprintf("%02d", combinations$month))
+  )
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    tryCatch({
-      .ans_download_beneficiaries(
-        combinations$year[i], combinations$month[i], combinations$uf[i],
-        cache = cache, cache_dir = cache_dir
+  results <- .map_parallel(
+    seq_len(n_combos),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      tryCatch(
+        {
+          .ans_download_beneficiaries(
+            combinations$year[i],
+            combinations$month[i],
+            combinations$uf[i],
+            cache = cache,
+            cache_dir = cache_dir
+          )
+        },
+        error = function(e) NULL
       )
-    }, error = function(e) NULL)
-  })
+    }
+  )
 
   succeeded <- !vapply(results, is.null, logical(1))
   failed_labels <- labels[!succeeded]
@@ -442,28 +548,44 @@
 
   data <- dplyr::bind_rows(results)
 
-  .data_return(data, lazy, backend, cache_dir_resolved,
-               "ans_beneficiaries_data",
-               lazy_filters, lazy_select, failed_labels, "ANS beneficiaries")
+  .data_return(
+    data,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "ans_beneficiaries_data",
+    lazy_filters,
+    lazy_select,
+    failed_labels,
+    "ANS beneficiaries"
+  )
 }
 
 
 #' Dispatch complaints data download
 #' @noRd
-.ans_data_complaints <- function(year, vars, cache, cache_dir,
-                                 lazy, backend) {
+.ans_data_complaints <- function(year, vars, cache, cache_dir, lazy, backend) {
   year <- .ans_validate_year(year, "complaints")
-  if (!is.null(vars)) .ans_validate_vars(vars, "complaints")
+  if (!is.null(vars)) {
+    .ans_validate_vars(vars, "complaints")
+  }
 
   cache_dir_resolved <- .ans_cache_dir(cache_dir)
   lazy_filters <- list(year = year)
   lazy_select <- if (!is.null(vars)) unique(c("year", vars)) else NULL
 
   # pre-download lazy check
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved,
-                        "ans_complaints_data",
-                        lazy_filters, lazy_select)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "ans_complaints_data",
+    lazy_filters,
+    lazy_select
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   n_years <- length(year)
   if (n_years > 1) {
@@ -472,12 +594,23 @@
 
   labels <- as.character(year)
 
-  results <- .map_parallel(seq_along(year), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    tryCatch({
-      .ans_download_complaints(year[i], cache = cache, cache_dir = cache_dir)
-    }, error = function(e) NULL)
-  })
+  results <- .map_parallel(
+    seq_along(year),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      tryCatch(
+        {
+          .ans_download_complaints(
+            year[i],
+            cache = cache,
+            cache_dir = cache_dir
+          )
+        },
+        error = function(e) NULL
+      )
+    }
+  )
 
   succeeded <- !vapply(results, is.null, logical(1))
   failed_labels <- labels[!succeeded]
@@ -489,20 +622,36 @@
 
   data <- dplyr::bind_rows(results)
 
-  .data_return(data, lazy, backend, cache_dir_resolved,
-               "ans_complaints_data",
-               lazy_filters, lazy_select, failed_labels, "ANS complaints")
+  .data_return(
+    data,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "ans_complaints_data",
+    lazy_filters,
+    lazy_select,
+    failed_labels,
+    "ANS complaints"
+  )
 }
 
 
 #' Dispatch financial data download
 #' @noRd
-.ans_data_financial <- function(year, quarter, vars,
-                                cache, cache_dir,
-                                lazy, backend) {
+.ans_data_financial <- function(
+  year,
+  quarter,
+  vars,
+  cache,
+  cache_dir,
+  lazy,
+  backend
+) {
   year <- .ans_validate_year(year, "financial")
   quarter <- .validate_quarter(quarter)
-  if (!is.null(vars)) .ans_validate_vars(vars, "financial")
+  if (!is.null(vars)) {
+    .ans_validate_vars(vars, "financial")
+  }
 
   cache_dir_resolved <- .ans_cache_dir(cache_dir)
   lazy_filters <- list(year = year, quarter = as.integer(quarter))
@@ -513,13 +662,21 @@
   }
 
   # pre-download lazy check
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved,
-                        "ans_financial_data",
-                        lazy_filters, lazy_select)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "ans_financial_data",
+    lazy_filters,
+    lazy_select
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   combinations <- expand.grid(
-    year = year, quarter = quarter,
+    year = year,
+    quarter = quarter,
     stringsAsFactors = FALSE
   )
 
@@ -530,15 +687,24 @@
 
   labels <- paste0(combinations$year, " Q", combinations$quarter)
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    tryCatch({
-      .ans_download_financial(
-        combinations$year[i], combinations$quarter[i],
-        cache = cache, cache_dir = cache_dir
+  results <- .map_parallel(
+    seq_len(n_combos),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      tryCatch(
+        {
+          .ans_download_financial(
+            combinations$year[i],
+            combinations$quarter[i],
+            cache = cache,
+            cache_dir = cache_dir
+          )
+        },
+        error = function(e) NULL
       )
-    }, error = function(e) NULL)
-  })
+    }
+  )
 
   succeeded <- !vapply(results, is.null, logical(1))
   failed_labels <- labels[!succeeded]
@@ -550,9 +716,17 @@
 
   data <- dplyr::bind_rows(results)
 
-  .data_return(data, lazy, backend, cache_dir_resolved,
-               "ans_financial_data",
-               lazy_filters, lazy_select, failed_labels, "ANS financial")
+  .data_return(
+    data,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "ans_financial_data",
+    lazy_filters,
+    lazy_select,
+    failed_labels,
+    "ANS financial"
+  )
 }
 
 
@@ -602,9 +776,13 @@ ans_info <- function() {
   cli::cli_h1("ANS \u2014 Ag\u00eancia Nacional de Sa\u00fade Suplementar")
 
   cli::cli_text("")
-  cli::cli_text("Fonte:    Ag\u00eancia Nacional de Sa\u00fade Suplementar (ANS)")
+  cli::cli_text(
+    "Fonte:    Ag\u00eancia Nacional de Sa\u00fade Suplementar (ANS)"
+  )
   cli::cli_text("Acesso:   Dados Abertos ANS (HTTP)")
-  cli::cli_text("Conte\u00fado: Dados do setor de sa\u00fade suplementar (planos de sa\u00fade)")
+  cli::cli_text(
+    "Conte\u00fado: Dados do setor de sa\u00fade suplementar (planos de sa\u00fade)"
+  )
 
   cli::cli_h2("Dados dispon\u00edveis")
   cli::cli_bullets(c(
@@ -626,7 +804,9 @@ ans_info <- function() {
   cli::cli_text("  financial:      year, quarter")
 
   cli::cli_h2("Per\u00edodos dispon\u00edveis")
-  cli::cli_text("  Benefici\u00e1rios:      Abr/2019\u20132025 (mensal, por UF)")
+  cli::cli_text(
+    "  Benefici\u00e1rios:      Abr/2019\u20132025 (mensal, por UF)"
+  )
   cli::cli_text("  Demandas NIP:       2011\u20132026 (anual, nacional)")
   cli::cli_text("  Demonstra\u00e7\u00f5es:    2007\u20132025 (trimestral)")
   cli::cli_text("  Operadoras:         Instantaneo (cadastro atual)")
@@ -667,7 +847,8 @@ ans_info <- function() {
 #' ans_variables(search = "operadora")
 ans_variables <- function(type = "beneficiaries", search = NULL) {
   type <- tolower(type)
-  result <- switch(type,
+  result <- switch(
+    type,
     "beneficiaries" = ans_beneficiaries_metadata,
     "complaints" = ans_complaints_metadata,
     "financial" = ans_financial_metadata,
@@ -761,12 +942,18 @@ ans_variables <- function(type = "beneficiaries", search = NULL) {
 #'
 #' # financial statements Q1 2023
 #' fin <- ans_data(year = 2023, type = "financial", quarter = 1)
-ans_data <- function(year, type = "beneficiaries",
-                     uf = NULL, month = NULL, quarter = NULL,
-                     vars = NULL,
-                     cache = TRUE, cache_dir = NULL,
-                     lazy = FALSE, backend = c("arrow", "duckdb")) {
-
+ans_data <- function(
+  year,
+  type = "beneficiaries",
+  uf = NULL,
+  month = NULL,
+  quarter = NULL,
+  vars = NULL,
+  cache = TRUE,
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   type <- .ans_validate_type(type)
 
   # warn about unused parameters
@@ -775,10 +962,14 @@ ans_data <- function(year, type = "beneficiaries",
   }
   if (type == "complaints") {
     if (!is.null(uf)) {
-      cli::cli_warn("{.arg uf} is ignored for {.val complaints} type (national data).")
+      cli::cli_warn(
+        "{.arg uf} is ignored for {.val complaints} type (national data)."
+      )
     }
     if (!is.null(month)) {
-      cli::cli_warn("{.arg month} is ignored for {.val complaints} type (annual data).")
+      cli::cli_warn(
+        "{.arg month} is ignored for {.val complaints} type (annual data)."
+      )
     }
     if (!is.null(quarter)) {
       cli::cli_warn("{.arg quarter} is ignored for {.val complaints} type.")
@@ -794,15 +985,34 @@ ans_data <- function(year, type = "beneficiaries",
   }
 
   # dispatch to type-specific handler
-  switch(type,
+  switch(
+    type,
     "beneficiaries" = .ans_data_beneficiaries(
-      year, uf, month, vars, cache, cache_dir, lazy, backend
+      year,
+      uf,
+      month,
+      vars,
+      cache,
+      cache_dir,
+      lazy,
+      backend
     ),
     "complaints" = .ans_data_complaints(
-      year, vars, cache, cache_dir, lazy, backend
+      year,
+      vars,
+      cache,
+      cache_dir,
+      lazy,
+      backend
     ),
     "financial" = .ans_data_financial(
-      year, quarter, vars, cache, cache_dir, lazy, backend
+      year,
+      quarter,
+      vars,
+      cache,
+      cache_dir,
+      lazy,
+      backend
     )
   )
 }
@@ -838,22 +1048,34 @@ ans_data <- function(year, type = "beneficiaries",
 #'
 #' # all operators (active + cancelled)
 #' all_ops <- ans_operators(status = "all")
-ans_operators <- function(status = "active",
-                          vars = NULL,
-                          cache = TRUE, cache_dir = NULL) {
+ans_operators <- function(
+  status = "active",
+  vars = NULL,
+  cache = TRUE,
+  cache_dir = NULL
+) {
   status <- match.arg(status, c("active", "cancelled", "all"))
 
   if (status == "all") {
-    active <- .ans_download_operators("active", cache = cache,
-                                     cache_dir = cache_dir)
+    active <- .ans_download_operators(
+      "active",
+      cache = cache,
+      cache_dir = cache_dir
+    )
     active$status <- "active"
-    cancelled <- .ans_download_operators("cancelled", cache = cache,
-                                        cache_dir = cache_dir)
+    cancelled <- .ans_download_operators(
+      "cancelled",
+      cache = cache,
+      cache_dir = cache_dir
+    )
     cancelled$status <- "cancelled"
     data <- dplyr::bind_rows(active, cancelled)
   } else {
-    data <- .ans_download_operators(status, cache = cache,
-                                   cache_dir = cache_dir)
+    data <- .ans_download_operators(
+      status,
+      cache = cache,
+      cache_dir = cache_dir
+    )
   }
 
   # column selection

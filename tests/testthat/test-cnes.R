@@ -55,7 +55,9 @@ test_that("cnes_info returns expected structure", {
 test_that("cnes_variables returns tibble with expected columns", {
   vars <- cnes_variables()
   expect_s3_class(vars, "tbl_df")
-  expect_true(all(c("variable", "description", "type", "section") %in% names(vars)))
+  expect_true(all(
+    c("variable", "description", "type", "section") %in% names(vars)
+  ))
   expect_gt(nrow(vars), 0)
   expect_true("CNES" %in% vars$variable)
   expect_true("TP_UNID" %in% vars$variable)
@@ -65,8 +67,16 @@ test_that("cnes_variables returns tibble with expected columns", {
 
 test_that("cnes_variables has key variables present", {
   vars <- cnes_variables()
-  key_vars <- c("CNES", "CODUFMUN", "TP_UNID", "VINC_SUS", "TP_GESTAO",
-                "ESFERA_A", "PF_PJ", "COMPETEN")
+  key_vars <- c(
+    "CNES",
+    "CODUFMUN",
+    "TP_UNID",
+    "VINC_SUS",
+    "TP_GESTAO",
+    "ESFERA_A",
+    "PF_PJ",
+    "COMPETEN"
+  )
   for (v in key_vars) {
     expect_true(v %in% vars$variable, info = paste(v, "missing"))
   }
@@ -112,7 +122,9 @@ test_that("cnes_variables has expected sections", {
 test_that("cnes_dictionary returns tibble with expected columns", {
   dict <- cnes_dictionary()
   expect_s3_class(dict, "tbl_df")
-  expect_true(all(c("variable", "description", "code", "label") %in% names(dict)))
+  expect_true(all(
+    c("variable", "description", "code", "label") %in% names(dict)
+  ))
   expect_gt(nrow(dict), 0)
 })
 
@@ -224,8 +236,21 @@ test_that(".cnes_validate_type errors on invalid type", {
 })
 
 test_that(".cnes_validate_type accepts all 13 types", {
-  all_types <- c("ST", "LT", "PF", "DC", "EQ", "SR", "HB", "EP",
-                 "RC", "IN", "EE", "EF", "GM")
+  all_types <- c(
+    "ST",
+    "LT",
+    "PF",
+    "DC",
+    "EQ",
+    "SR",
+    "HB",
+    "EP",
+    "RC",
+    "IN",
+    "EE",
+    "EF",
+    "GM"
+  )
   for (t in all_types) {
     expect_equal(.cnes_validate_type(t), t)
   }
@@ -313,7 +338,9 @@ test_that(".cnes_validate_vars silent on known variables", {
 
 test_that("cnes_valid_types has 13 types with correct structure", {
   expect_equal(nrow(cnes_valid_types), 13)
-  expect_true(all(c("code", "name", "description") %in% names(cnes_valid_types)))
+  expect_true(all(
+    c("code", "name", "description") %in% names(cnes_valid_types)
+  ))
   expect_true("ST" %in% cnes_valid_types$code)
   expect_true("GM" %in% cnes_valid_types$code)
 })
@@ -326,8 +353,10 @@ test_that("cnes_label_maps are consistent with dictionary", {
   for (var_name in names(cnes_label_maps)) {
     dict_rows <- cnes_dictionary(var_name)
     map_codes <- names(cnes_label_maps[[var_name]])
-    expect_true(all(map_codes %in% dict_rows$code),
-                info = paste(var_name, "label_maps codes not in dictionary"))
+    expect_true(
+      all(map_codes %in% dict_rows$code),
+      info = paste(var_name, "label_maps codes not in dictionary")
+    )
   }
 })
 
@@ -395,8 +424,7 @@ test_that(".cnes_cache_dir creates directory", {
 test_that("cnes_data downloads ST single month single UF", {
   skip_if_no_integration()
 
-  data <- cnes_data(year = 2023, month = 1, uf = "AC",
-                    cache_dir = tempdir())
+  data <- cnes_data(year = 2023, month = 1, uf = "AC", cache_dir = tempdir())
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("CNES" %in% names(data))
@@ -413,9 +441,13 @@ test_that("cnes_data downloads ST single month single UF", {
 test_that("cnes_data selects variables", {
   skip_if_no_integration()
 
-  data <- cnes_data(year = 2023, month = 1, uf = "AC",
-                    vars = c("CNES", "TP_UNID", "VINC_SUS"),
-                    cache_dir = tempdir())
+  data <- cnes_data(
+    year = 2023,
+    month = 1,
+    uf = "AC",
+    vars = c("CNES", "TP_UNID", "VINC_SUS"),
+    cache_dir = tempdir()
+  )
   expect_true("CNES" %in% names(data))
   expect_true("TP_UNID" %in% names(data))
   expect_true("VINC_SUS" %in% names(data))
@@ -427,8 +459,7 @@ test_that("cnes_data selects variables", {
 test_that("cnes_data handles multiple months", {
   skip_if_no_integration()
 
-  data <- cnes_data(year = 2023, month = 1:2, uf = "AC",
-                    cache_dir = tempdir())
+  data <- cnes_data(year = 2023, month = 1:2, uf = "AC", cache_dir = tempdir())
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true(all(c(1L, 2L) %in% data$month))
@@ -437,8 +468,13 @@ test_that("cnes_data handles multiple months", {
 test_that("cnes_data downloads different file type (LT)", {
   skip_if_no_integration()
 
-  data <- cnes_data(year = 2023, month = 1, uf = "AC", type = "LT",
-                    cache_dir = tempdir())
+  data <- cnes_data(
+    year = 2023,
+    month = 1,
+    uf = "AC",
+    type = "LT",
+    cache_dir = tempdir()
+  )
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("year" %in% names(data))
@@ -453,10 +489,18 @@ test_that("cnes_data cache works (second call faster)", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  t1 <- system.time(cnes_data(year = 2023, month = 1, uf = "AC",
-                               cache_dir = cache_dir))
-  t2 <- system.time(cnes_data(year = 2023, month = 1, uf = "AC",
-                               cache_dir = cache_dir))
+  t1 <- system.time(cnes_data(
+    year = 2023,
+    month = 1,
+    uf = "AC",
+    cache_dir = cache_dir
+  ))
+  t2 <- system.time(cnes_data(
+    year = 2023,
+    month = 1,
+    uf = "AC",
+    cache_dir = cache_dir
+  ))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
 
@@ -473,8 +517,12 @@ test_that("cnes_variables type column has date_ym for COMPETEN", {
 
 test_that("cnes parse converts mock data correctly", {
   mock_data <- tibble::tibble(
-    year = 2023L, month = 1L, uf_source = "AC",
-    COMPETEN = "202301", CNES = "1234567", TP_UNID = "05"
+    year = 2023L,
+    month = 1L,
+    uf_source = "AC",
+    COMPETEN = "202301",
+    CNES = "1234567",
+    TP_UNID = "05"
   )
   spec <- .build_type_spec(cnes_variables_metadata)
   parsed <- .parse_columns(mock_data, spec)
@@ -494,9 +542,15 @@ test_that("cnes_data reports partial download failures", {
     .cnes_validate_year = function(year, ...) as.integer(year),
     .cnes_validate_uf = function(uf) toupper(uf),
     .cnes_download_and_read = function(year, month, uf, ...) {
-      if (uf == "XX") stop("Not found")
-      tibble::tibble(year = as.integer(year), month = as.integer(month),
-                     uf_source = uf, CNES = "1234567")
+      if (uf == "XX") {
+        stop("Not found")
+      }
+      tibble::tibble(
+        year = as.integer(year),
+        month = as.integer(month),
+        uf_source = uf,
+        CNES = "1234567"
+      )
     }
   )
   result <- suppressWarnings(

@@ -130,10 +130,15 @@
 #'   (backend="duckdb"), or NULL if lazy=FALSE or no cache.
 #'
 #' @noRd
-.cache_open_lazy <- function(cache_dir, dataset_name,
-                             lazy = FALSE,
-                             backend = c("arrow", "duckdb")) {
-  if (!isTRUE(lazy)) return(NULL)
+.cache_open_lazy <- function(
+  cache_dir,
+  dataset_name,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
+  if (!isTRUE(lazy)) {
+    return(NULL)
+  }
 
   backend <- match.arg(backend)
 
@@ -148,8 +153,10 @@
       return(NULL)
     }
     # unify_schemas: cached years may carry different column sets
-    return(arrow::open_dataset(file.path(cache_dir, dataset_name),
-                               unify_schemas = TRUE))
+    return(arrow::open_dataset(
+      file.path(cache_dir, dataset_name),
+      unify_schemas = TRUE
+    ))
   }
 
   if (backend == "duckdb") {
@@ -169,8 +176,10 @@
       return(NULL)
     }
 
-    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
-                              unify_schemas = TRUE)
+    ds <- arrow::open_dataset(
+      file.path(cache_dir, dataset_name),
+      unify_schemas = TRUE
+    )
     return(arrow::to_duckdb(ds))
   }
 
@@ -198,10 +207,22 @@
 #'   if no partitioned cache exists.
 #'
 #' @noRd
-.lazy_return <- function(cache_dir, dataset_name, backend,
-                         filters = list(), select_cols = NULL) {
-  ds <- .cache_open_lazy(cache_dir, dataset_name, lazy = TRUE, backend = backend)
-  if (is.null(ds)) return(NULL)
+.lazy_return <- function(
+  cache_dir,
+  dataset_name,
+  backend,
+  filters = list(),
+  select_cols = NULL
+) {
+  ds <- .cache_open_lazy(
+    cache_dir,
+    dataset_name,
+    lazy = TRUE,
+    backend = backend
+  )
+  if (is.null(ds)) {
+    return(NULL)
+  }
 
   for (col_name in names(filters)) {
     values <- filters[[col_name]]
@@ -243,15 +264,29 @@
 #' @return A lazy query object, or NULL.
 #'
 #' @noRd
-.try_lazy_cache <- function(lazy, backend, cache_dir, dataset_name,
-                            filters, select_cols, parse = FALSE) {
-  if (!isTRUE(lazy)) return(NULL)
+.try_lazy_cache <- function(
+  lazy,
+  backend,
+  cache_dir,
+  dataset_name,
+  filters,
+  select_cols,
+  parse = FALSE
+) {
+  if (!isTRUE(lazy)) {
+    return(NULL)
+  }
   if (isTRUE(parse)) {
     cli::cli_inform("{.arg parse} is ignored when {.arg lazy} is TRUE.")
   }
   backend <- match.arg(backend, c("arrow", "duckdb"))
-  .lazy_return(cache_dir, dataset_name, backend,
-               filters = filters, select_cols = select_cols)
+  .lazy_return(
+    cache_dir,
+    dataset_name,
+    backend,
+    filters = filters,
+    select_cols = select_cols
+  )
 }
 
 
@@ -276,15 +311,27 @@
 #' @return A tibble (eager) or lazy query object.
 #'
 #' @noRd
-.data_return <- function(data, lazy = FALSE, backend = "arrow",
-                         cache_dir = NULL, dataset_name = NULL,
-                         filters = list(), select_cols = NULL,
-                         failed_labels = character(0), module_name = "") {
+.data_return <- function(
+  data,
+  lazy = FALSE,
+  backend = "arrow",
+  cache_dir = NULL,
+  dataset_name = NULL,
+  filters = list(),
+  select_cols = NULL,
+  failed_labels = character(0),
+  module_name = ""
+) {
   # post-download lazy return
   if (isTRUE(lazy) && !is.null(cache_dir) && !is.null(dataset_name)) {
     backend <- match.arg(backend, c("arrow", "duckdb"))
-    ds <- .lazy_return(cache_dir, dataset_name, backend,
-                       filters = filters, select_cols = select_cols)
+    ds <- .lazy_return(
+      cache_dir,
+      dataset_name,
+      backend,
+      filters = filters,
+      select_cols = select_cols
+    )
     if (!is.null(ds)) return(ds)
   }
 
@@ -320,8 +367,12 @@
 #'   if arrow is not available and RDS fallback was used.
 #'
 #' @noRd
-.cache_write_partitioned <- function(data, cache_dir, dataset_name,
-                                     partitioning) {
+.cache_write_partitioned <- function(
+  data,
+  cache_dir,
+  dataset_name,
+  partitioning
+) {
   dataset_dir <- file.path(cache_dir, dataset_name)
 
   if (!.has_arrow()) {
@@ -336,20 +387,23 @@
     unlink(dataset_dir, recursive = TRUE)
   }
 
-  tryCatch({
-    arrow::write_dataset(
-      data,
-      path = dataset_dir,
-      format = "parquet",
-      partitioning = partitioning
-    )
-    invisible(dataset_dir)
-  }, error = function(e) {
-    cli::cli_warn("Failed to write partitioned cache: {e$message}")
-    rds_path <- file.path(cache_dir, paste0(dataset_name, ".rds"))
-    saveRDS(data, rds_path)
-    invisible(NULL)
-  })
+  tryCatch(
+    {
+      arrow::write_dataset(
+        data,
+        path = dataset_dir,
+        format = "parquet",
+        partitioning = partitioning
+      )
+      invisible(dataset_dir)
+    },
+    error = function(e) {
+      cli::cli_warn("Failed to write partitioned cache: {e$message}")
+      rds_path <- file.path(cache_dir, paste0(dataset_name, ".rds"))
+      saveRDS(data, rds_path)
+      invisible(NULL)
+    }
+  )
 }
 
 
@@ -411,8 +465,12 @@
 #' @return Invisible path to the dataset directory, or NULL.
 #'
 #' @noRd
-.cache_append_partitioned <- function(data, cache_dir, dataset_name,
-                                      partitioning) {
+.cache_append_partitioned <- function(
+  data,
+  cache_dir,
+  dataset_name,
+  partitioning
+) {
   dataset_dir <- file.path(cache_dir, dataset_name)
 
   if (!.has_arrow()) {
@@ -432,19 +490,22 @@
   # "overwrite" replaces files with the SAME name inside a partition (arrow
   # names them part-{i}.parquet) and keeps the others: a partition written
   # twice by this function ends up with the second write only
-  tryCatch({
-    arrow::write_dataset(
-      data,
-      path = dataset_dir,
-      format = "parquet",
-      partitioning = partitioning,
-      existing_data_behavior = "overwrite"
-    )
-    invisible(dataset_dir)
-  }, error = function(e) {
-    cli::cli_warn("Failed to append partitioned cache: {e$message}")
-    invisible(NULL)
-  })
+  tryCatch(
+    {
+      arrow::write_dataset(
+        data,
+        path = dataset_dir,
+        format = "parquet",
+        partitioning = partitioning,
+        existing_data_behavior = "overwrite"
+      )
+      invisible(dataset_dir)
+    },
+    error = function(e) {
+      cli::cli_warn("Failed to append partitioned cache: {e$message}")
+      invisible(NULL)
+    }
+  )
 }
 
 
@@ -459,9 +520,11 @@
 #' @return Invisible tibble with file, size_mb, modified columns.
 #' @noRd
 .cache_status <- function(module_name, module_label, cache_dir) {
-  files <- list.files(cache_dir,
-                      pattern = paste0("^", module_name, "_.*\\.(parquet|rds)$"),
-                      full.names = TRUE)
+  files <- list.files(
+    cache_dir,
+    pattern = paste0("^", module_name, "_.*\\.(parquet|rds)$"),
+    full.names = TRUE
+  )
 
   # hive-partitioned dataset directories (e.g. sim_data/, sipni_r2_data/)
   dirs <- list.dirs(cache_dir, recursive = FALSE)
@@ -470,7 +533,9 @@
   if (length(files) == 0 && length(dirs) == 0) {
     cli::cli_inform("No cached {module_label} files found.")
     return(invisible(tibble::tibble(
-      file = character(), size_mb = numeric(), modified = as.POSIXct(character())
+      file = character(),
+      size_mb = numeric(),
+      modified = as.POSIXct(character())
     )))
   }
 
@@ -508,9 +573,11 @@
 #' @return Invisible NULL.
 #' @noRd
 .clear_cache <- function(module_name, module_label, cache_dir) {
-  files <- list.files(cache_dir,
-                      pattern = paste0("^", module_name, "_.*\\.(parquet|rds)$"),
-                      full.names = TRUE)
+  files <- list.files(
+    cache_dir,
+    pattern = paste0("^", module_name, "_.*\\.(parquet|rds)$"),
+    full.names = TRUE
+  )
 
   # hive-partitioned dataset directories (e.g. sih_data/, sipni_r2_data/) --
   # the same set .cache_status() reports. They were left behind until
@@ -528,16 +595,23 @@
   n_removed <- if (length(files) > 0) sum(file.remove(files)) else 0L
   n_partitions <- 0L
   if (length(dirs) > 0) {
-    n_partitions <- sum(vapply(dirs, function(d) {
-      length(list.files(d, recursive = TRUE))
-    }, integer(1)))
+    n_partitions <- sum(vapply(
+      dirs,
+      function(d) {
+        length(list.files(d, recursive = TRUE))
+      },
+      integer(1)
+    ))
     unlink(dirs, recursive = TRUE)
   }
 
   msg <- "Removed {n_removed} cached {module_label} file(s)"
   if (n_partitions > 0) {
-    msg <- paste0(msg, " and {n_partitions} partition file(s) in ",
-                  "{length(dirs)} dataset director{?y/ies}")
+    msg <- paste0(
+      msg,
+      " and {n_partitions} partition file(s) in ",
+      "{length(dirs)} dataset director{?y/ies}"
+    )
   }
   cli::cli_inform(c("v" = paste0(msg, ".")))
 

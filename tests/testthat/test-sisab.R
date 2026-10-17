@@ -39,7 +39,9 @@ test_that("sisab_info returns expected structure", {
 test_that("sisab_variables returns tibble with expected columns", {
   vars <- sisab_variables()
   expect_s3_class(vars, "tbl_df")
-  expect_true(all(c("variable", "description", "type", "section") %in% names(vars)))
+  expect_true(all(
+    c("variable", "description", "type", "section") %in% names(vars)
+  ))
   expect_gt(nrow(vars), 0)
 })
 
@@ -80,7 +82,9 @@ test_that("sisab_variables search returns empty tibble for no match", {
 
 test_that("sisab_valid_types has expected structure", {
   expect_s3_class(sisab_valid_types, "tbl_df")
-  expect_true(all(c("code", "name", "endpoint", "description") %in% names(sisab_valid_types)))
+  expect_true(all(
+    c("code", "name", "endpoint", "description") %in% names(sisab_valid_types)
+  ))
   expect_equal(nrow(sisab_valid_types), 4)
   expect_true("aps" %in% sisab_valid_types$code)
   expect_true("sb" %in% sisab_valid_types$code)
@@ -249,7 +253,10 @@ test_that("sisab_cache_status detects cached files", {
   dir.create(temp_dir, recursive = TRUE)
   on.exit(unlink(temp_dir, recursive = TRUE))
 
-  saveRDS(data.frame(x = 1), file.path(temp_dir, "sisab_aps_uf_ALL_2024_full.rds"))
+  saveRDS(
+    data.frame(x = 1),
+    file.path(temp_dir, "sisab_aps_uf_ALL_2024_full.rds")
+  )
 
   result <- sisab_cache_status(cache_dir = temp_dir)
   expect_equal(nrow(result), 1)
@@ -262,7 +269,10 @@ test_that("sisab_clear_cache removes cached files", {
   dir.create(temp_dir, recursive = TRUE)
   on.exit(unlink(temp_dir, recursive = TRUE))
 
-  saveRDS(data.frame(x = 1), file.path(temp_dir, "sisab_aps_uf_ALL_2024_full.rds"))
+  saveRDS(
+    data.frame(x = 1),
+    file.path(temp_dir, "sisab_aps_uf_ALL_2024_full.rds")
+  )
   sisab_clear_cache(cache_dir = temp_dir)
 
   files <- list.files(temp_dir, pattern = "^sisab_")
@@ -312,8 +322,13 @@ test_that(".sisab_get_variables_meta returns correct metadata for each type", {
 test_that("sisab_data downloads APS coverage data for UF level", {
   skip_if_no_integration()
 
-  data <- sisab_data(year = 2024, type = "aps", level = "uf",
-                     month = 1, cache_dir = tempdir())
+  data <- sisab_data(
+    year = 2024,
+    type = "aps",
+    level = "uf",
+    month = 1,
+    cache_dir = tempdir()
+  )
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_true("year" %in% names(data))
@@ -328,8 +343,13 @@ test_that("sisab_data downloads APS coverage data for UF level", {
 test_that("sisab_data downloads APS coverage data for BRASIL level", {
   skip_if_no_integration()
 
-  data <- sisab_data(year = 2024, type = "aps", level = "brazil",
-                     month = 1, cache_dir = tempdir())
+  data <- sisab_data(
+    year = 2024,
+    type = "aps",
+    level = "brazil",
+    month = 1,
+    cache_dir = tempdir()
+  )
   expect_s3_class(data, "tbl_df")
   expect_equal(nrow(data), 1)
   expect_true("qtCobertura" %in% names(data))
@@ -338,9 +358,14 @@ test_that("sisab_data downloads APS coverage data for BRASIL level", {
 test_that("sisab_data variable selection works", {
   skip_if_no_integration()
 
-  data <- sisab_data(year = 2024, type = "aps", level = "brazil",
-                     month = 1, vars = c("qtPopulacao", "qtCobertura"),
-                     cache_dir = tempdir())
+  data <- sisab_data(
+    year = 2024,
+    type = "aps",
+    level = "brazil",
+    month = 1,
+    vars = c("qtPopulacao", "qtCobertura"),
+    cache_dir = tempdir()
+  )
   expect_true("qtPopulacao" %in% names(data))
   expect_true("qtCobertura" %in% names(data))
   expect_true("year" %in% names(data))
@@ -354,10 +379,20 @@ test_that("sisab_data cache works (second call faster)", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  t1 <- system.time(sisab_data(year = 2024, type = "aps", level = "brazil",
-                                month = 1, cache_dir = cache_dir))
-  t2 <- system.time(sisab_data(year = 2024, type = "aps", level = "brazil",
-                                month = 1, cache_dir = cache_dir))
+  t1 <- system.time(sisab_data(
+    year = 2024,
+    type = "aps",
+    level = "brazil",
+    month = 1,
+    cache_dir = cache_dir
+  ))
+  t2 <- system.time(sisab_data(
+    year = 2024,
+    type = "aps",
+    level = "brazil",
+    month = 1,
+    cache_dir = cache_dir
+  ))
   expect_lt(t2["elapsed"], t1["elapsed"])
 })
 
@@ -370,7 +405,9 @@ test_that("sisab_data reports partial download failures", {
   local_mocked_bindings(
     .sisab_validate_year = function(year) as.integer(year),
     .sisab_download_and_read = function(year, ...) {
-      if (year == 9999L) return(NULL)
+      if (year == 9999L) {
+        return(NULL)
+      }
       tibble::tibble(cobertura = 0.5)
     }
   )
@@ -491,8 +528,13 @@ test_that(".sisab_download_loop binds results from multiple years", {
   )
 
   result <- .sisab_download_loop(
-    year = c(2023L, 2024L), type = "aps", level = "uf",
-    month = 1L, target_ufs = list(NULL), cache = FALSE, cache_dir = NULL
+    year = c(2023L, 2024L),
+    type = "aps",
+    level = "uf",
+    month = 1L,
+    target_ufs = list(NULL),
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_true(is.list(result))
@@ -507,14 +549,21 @@ test_that(".sisab_download_loop binds results from multiple years", {
 test_that(".sisab_download_loop tracks failures", {
   local_mocked_bindings(
     .sisab_download_and_read = function(year, months, type, level, uf, ...) {
-      if (year == 9999L) stop("API error")
+      if (year == 9999L) {
+        stop("API error")
+      }
       tibble::tibble(qtCobertura = 0.5)
     }
   )
 
   result <- .sisab_download_loop(
-    year = c(2024L, 9999L), type = "aps", level = "uf",
-    month = 1L, target_ufs = list(NULL), cache = FALSE, cache_dir = NULL
+    year = c(2024L, 9999L),
+    type = "aps",
+    level = "uf",
+    month = 1L,
+    target_ufs = list(NULL),
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_equal(nrow(result$data), 1)
@@ -529,8 +578,13 @@ test_that(".sisab_download_loop aborts when all downloads fail", {
 
   expect_error(
     .sisab_download_loop(
-      year = 2024L, type = "aps", level = "uf",
-      month = 1L, target_ufs = list(NULL), cache = FALSE, cache_dir = NULL
+      year = 2024L,
+      type = "aps",
+      level = "uf",
+      month = 1L,
+      target_ufs = list(NULL),
+      cache = FALSE,
+      cache_dir = NULL
     ),
     "No data could be downloaded"
   )
@@ -539,14 +593,21 @@ test_that(".sisab_download_loop aborts when all downloads fail", {
 test_that(".sisab_download_loop with multiple UFs", {
   local_mocked_bindings(
     .sisab_download_and_read = function(year, months, type, level, uf, ...) {
-      tibble::tibble(qtCobertura = runif(1), sgUf = ifelse(is.null(uf), "ALL", uf))
+      tibble::tibble(
+        qtCobertura = runif(1),
+        sgUf = ifelse(is.null(uf), "ALL", uf)
+      )
     }
   )
 
   result <- .sisab_download_loop(
-    year = 2024L, type = "aps", level = "uf",
-    month = 1L, target_ufs = list("SP", "RJ"),
-    cache = FALSE, cache_dir = NULL
+    year = 2024L,
+    type = "aps",
+    level = "uf",
+    month = 1L,
+    target_ufs = list("SP", "RJ"),
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_equal(nrow(result$data), 2)
@@ -556,15 +617,21 @@ test_that(".sisab_download_loop with multiple UFs", {
 test_that(".sisab_download_loop skips NULL results", {
   local_mocked_bindings(
     .sisab_download_and_read = function(year, months, type, level, uf, ...) {
-      if (!is.null(uf) && uf == "RJ") return(NULL)
+      if (!is.null(uf) && uf == "RJ") {
+        return(NULL)
+      }
       tibble::tibble(qtCobertura = 0.5)
     }
   )
 
   result <- .sisab_download_loop(
-    year = 2024L, type = "aps", level = "uf",
-    month = 1L, target_ufs = list("SP", "RJ"),
-    cache = FALSE, cache_dir = NULL
+    year = 2024L,
+    type = "aps",
+    level = "uf",
+    month = 1L,
+    target_ufs = list("SP", "RJ"),
+    cache = FALSE,
+    cache_dir = NULL
   )
 
   expect_equal(nrow(result$data), 1)

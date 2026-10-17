@@ -32,8 +32,10 @@ test_that(".r2_credentials defaults to the public healthbr-data token", {
 
 test_that(".r2_credentials accepts custom credentials", {
   creds <- .r2_credentials(list(
-    access_key_id = "AK", secret_access_key = "SK",
-    endpoint = "https://example.com", bucket = "meu-bucket"
+    access_key_id = "AK",
+    secret_access_key = "SK",
+    endpoint = "https://example.com",
+    bucket = "meu-bucket"
   ))
   expect_equal(creds$access_key_id, "AK")
   expect_equal(creds$secret_access_key, "SK")
@@ -42,15 +44,13 @@ test_that(".r2_credentials accepts custom credentials", {
 })
 
 test_that(".r2_credentials fills endpoint/bucket defaults", {
-  creds <- .r2_credentials(list(access_key_id = "AK",
-                                secret_access_key = "SK"))
+  creds <- .r2_credentials(list(access_key_id = "AK", secret_access_key = "SK"))
   expect_equal(creds$bucket, "healthbr-data")
   expect_match(creds$endpoint, "cloudflarestorage")
 })
 
 test_that(".r2_credentials rejects incomplete credentials", {
-  expect_error(.r2_credentials(list(access_key_id = "AK")),
-               "r2_credentials")
+  expect_error(.r2_credentials(list(access_key_id = "AK")), "r2_credentials")
   expect_error(.r2_credentials(list()), "r2_credentials")
 })
 
@@ -71,15 +71,26 @@ test_that("sipni_data rejects invalid source", {
 test_that("sipni_variables_microdados has 56 unique variables", {
   expect_equal(nrow(sipni_variables_microdados), 56)
   expect_equal(anyDuplicated(sipni_variables_microdados$variable), 0)
-  expect_true(all(c("variable", "description", "type", "section") %in%
-                    names(sipni_variables_microdados)))
+  expect_true(all(
+    c("variable", "description", "type", "section") %in%
+      names(sipni_variables_microdados)
+  ))
 })
 
 test_that("sipni_variables_microdados has expected key variables and types", {
   v <- sipni_variables_microdados
-  expect_true(all(c("dt_vacina", "ds_vacina", "co_vacina", "sg_uf_paciente",
-                    "tp_sexo_paciente", "nu_idade_paciente",
-                    "co_municipio_estabelecimento") %in% v$variable))
+  expect_true(all(
+    c(
+      "dt_vacina",
+      "ds_vacina",
+      "co_vacina",
+      "sg_uf_paciente",
+      "tp_sexo_paciente",
+      "nu_idade_paciente",
+      "co_municipio_estabelecimento"
+    ) %in%
+      v$variable
+  ))
   expect_equal(v$type[v$variable == "dt_vacina"], "date")
   expect_equal(v$type[v$variable == "nu_idade_paciente"], "integer")
   expect_equal(v$type[v$variable == "ds_vacina"], "character")
@@ -122,8 +133,11 @@ test_that(".sipni_r2_shape_microdados maps partition columns", {
 
 test_that(".sipni_r2_cached_combos returns typed empty tibble without cache", {
   tmp <- withr::local_tempdir()
-  out <- .sipni_r2_cached_combos(tmp, "sipni_r2_data",
-                                 c("year", "month", "uf_source"))
+  out <- .sipni_r2_cached_combos(
+    tmp,
+    "sipni_r2_data",
+    c("year", "month", "uf_source")
+  )
   expect_equal(nrow(out), 0)
   expect_type(out$year, "integer")
   expect_type(out$month, "integer")
@@ -140,15 +154,20 @@ test_that(".r2_manifest uses the cached copy when offline", {
   manifest_path <- "sipni/manifest.json"
   slug <- gsub("[^a-z0-9]+", "_", tolower(manifest_path))
   json_path <- file.path(tmp, paste0("r2_", slug))
-  writeLines('{"dataset": "sipni-microdados", "partitions": {
+  writeLines(
+    '{"dataset": "sipni-microdados", "partitions": {
     "2024-01": {"processing_timestamp": "2026-01-01 00:00:00",
                  "source_url": "https://example.com/x.zip",
-                 "total_records": 10}}}', json_path)
+                 "total_records": 10}}}',
+    json_path
+  )
 
   local_mocked_bindings(.r2_head_etag = function(url) NULL)
   # clear any session memo from other tests
-  rm(list = ls(envir = .r2_env)[grepl("^manifest:", ls(envir = .r2_env))],
-     envir = .r2_env)
+  rm(
+    list = ls(envir = .r2_env)[grepl("^manifest:", ls(envir = .r2_env))],
+    envir = .r2_env
+  )
 
   m <- .r2_manifest(manifest_path, tmp)
   expect_type(m, "list")
@@ -170,18 +189,22 @@ test_that(".r2_manifest returns NULL offline with no cached copy", {
 test_that(".sipni_r2_manifest_summary parses microdados partition keys", {
   tmp <- withr::local_tempdir()
   slug <- gsub("[^a-z0-9]+", "_", "sipni/manifest.json")
-  writeLines('{"partitions": {
+  writeLines(
+    '{"partitions": {
     "2020-01": {"processing_timestamp": "2026-02-23 09:45:30",
                  "source_url": "https://example.com/jan.zip",
                  "total_records": 100},
     "2024-12": {"processing_timestamp": "2026-03-01 10:00:00",
                  "source_url": "https://example.com/dez.zip",
                  "total_records": 200}}}',
-    file.path(tmp, paste0("r2_", slug)))
+    file.path(tmp, paste0("r2_", slug))
+  )
 
   local_mocked_bindings(.r2_head_etag = function(url) NULL)
-  rm(list = ls(envir = .r2_env)[grepl("^manifest:", ls(envir = .r2_env))],
-     envir = .r2_env)
+  rm(
+    list = ls(envir = .r2_env)[grepl("^manifest:", ls(envir = .r2_env))],
+    envir = .r2_env
+  )
 
   s <- .sipni_r2_manifest_summary("microdados", tmp)
   expect_s3_class(s, "tbl_df")
@@ -199,15 +222,19 @@ test_that(".sipni_r2_manifest_summary parses microdados partition keys", {
 test_that(".sipni_r2_manifest_summary parses aggregate partition keys", {
   tmp <- withr::local_tempdir()
   slug <- gsub("[^a-z0-9]+", "_", "sipni/agregados/doses/manifest.json")
-  writeLines('{"partitions": {
+  writeLines(
+    '{"partitions": {
     "1994-AC": {"processing_timestamp": "2026-02-26 21:22:33",
                  "source_url": "ftp://ftp.datasus.gov.br/DPNIAC94.DBF",
                  "total_records": 1639}}}',
-    file.path(tmp, paste0("r2_", slug)))
+    file.path(tmp, paste0("r2_", slug))
+  )
 
   local_mocked_bindings(.r2_head_etag = function(url) NULL)
-  rm(list = ls(envir = .r2_env)[grepl("^manifest:", ls(envir = .r2_env))],
-     envir = .r2_env)
+  rm(
+    list = ls(envir = .r2_env)[grepl("^manifest:", ls(envir = .r2_env))],
+    envir = .r2_env
+  )
 
   s <- .sipni_r2_manifest_summary("doses", tmp)
   expect_equal(s$year, 1994L)
@@ -266,31 +293,50 @@ test_that("local partitioned cache reads unify schemas across years", {
   # 1994 = 7 cols vs 2019 = 12 cols); without unify_schemas the read
   # projected everything to the first file's schema, dropping columns
   tmp <- withr::local_tempdir()
-  old <- tibble::tibble(year = 1994L, uf_source = "AC",
-                        ANO = "1994", QT_DOSE = "1")
-  new <- tibble::tibble(year = 2019L, uf_source = "AC",
-                        ANO = "2019", QT_DOSE = "2", ANOMES = "201901")
-  .cache_append_partitioned(old, tmp, "sipni_dpni_data",
-                            c("uf_source", "year"))
-  .cache_append_partitioned(new, tmp, "sipni_dpni_data",
-                            c("uf_source", "year"))
+  old <- tibble::tibble(
+    year = 1994L,
+    uf_source = "AC",
+    ANO = "1994",
+    QT_DOSE = "1"
+  )
+  new <- tibble::tibble(
+    year = 2019L,
+    uf_source = "AC",
+    ANO = "2019",
+    QT_DOSE = "2",
+    ANOMES = "201901"
+  )
+  .cache_append_partitioned(old, tmp, "sipni_dpni_data", c("uf_source", "year"))
+  .cache_append_partitioned(new, tmp, "sipni_dpni_data", c("uf_source", "year"))
 
-  got <- .sipni_ftp_check_cache("AC", 2019, "DPNI", cache = TRUE,
-                                cache_dir = tmp)
+  got <- .sipni_ftp_check_cache(
+    "AC",
+    2019,
+    "DPNI",
+    cache = TRUE,
+    cache_dir = tmp
+  )
   expect_true("ANOMES" %in% names(got))
   expect_equal(got$ANOMES, "201901")
 
-  res <- .sipni_r2_fetch_agregados("DPNI", years = c(1994L, 2019L),
-                                   ufs = "AC", cache = TRUE,
-                                   cache_dir = tmp, creds = NULL)
+  res <- .sipni_r2_fetch_agregados(
+    "DPNI",
+    years = c(1994L, 2019L),
+    ufs = "AC",
+    cache = TRUE,
+    cache_dir = tmp,
+    creds = NULL
+  )
   combined <- dplyr::bind_rows(res$results)
   expect_equal(nrow(combined), 2)
   expect_true("ANOMES" %in% names(combined))
 })
 
 test_that("sipni_dictionary(lookup = TRUE) is a no-op on the built-in dict", {
-  expect_identical(sipni_dictionary(source = "datasus"),
-                   sipni_dictionary(source = "datasus", lookup = TRUE))
+  expect_identical(
+    sipni_dictionary(source = "datasus"),
+    sipni_dictionary(source = "datasus", lookup = TRUE)
+  )
 })
 
 test_that("built-in dictionary follows the official .cnv data codes", {
@@ -300,10 +346,14 @@ test_that("built-in dictionary follows the official .cnv data codes", {
   expect_match(d$label[d$variable == "IMUNO" & d$code == "02"][1], "BCG")
   expect_match(d$label[d$variable == "IMUNO" & d$code == "09"][1], "Hib")
   # range-encoded DOSE codes (11-31 = Tratamento) are expanded
-  expect_equal(unique(d$label[d$variable == "DOSE" & d$code == "11"]),
-               "Tratamento")
-  expect_true(all(c("IMUNO", "DOSE", "FX_ETARIA", "ANO", "MES") %in%
-                    d$variable))
+  expect_equal(
+    unique(d$label[d$variable == "DOSE" & d$code == "11"]),
+    "Tratamento"
+  )
+  expect_true(all(
+    c("IMUNO", "DOSE", "FX_ETARIA", "ANO", "MES") %in%
+      d$variable
+  ))
 })
 
 
@@ -314,10 +364,17 @@ test_that("built-in dictionary follows the official .cnv data codes", {
 test_that("sipni_dictionary lookup decodes real aggregate data codes", {
   skip_if_no_integration()
 
-  lk <- sipni_dictionary("IMUNO", lookup = TRUE,
-                         cache_dir = tempfile("sipni_lk_test"))
-  agg <- sipni_data(year = 2019, uf = "AC", parse = FALSE,
-                    cache_dir = tempfile("sipni_lk_data"))
+  lk <- sipni_dictionary(
+    "IMUNO",
+    lookup = TRUE,
+    cache_dir = tempfile("sipni_lk_test")
+  )
+  agg <- sipni_data(
+    year = 2019,
+    uf = "AC",
+    parse = FALSE,
+    cache_dir = tempfile("sipni_lk_data")
+  )
   expect_true(all(unique(agg$IMUNO) %in% lk$code))
 })
 
@@ -339,8 +396,13 @@ test_that("sipni_data reads microdata from R2 (default source)", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  data <- sipni_data(year = 2024, uf = "AC", month = 1,
-                     cache_dir = cache_dir, parse = FALSE)
+  data <- sipni_data(
+    year = 2024,
+    uf = "AC",
+    month = 1,
+    cache_dir = cache_dir,
+    parse = FALSE
+  )
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
   expect_equal(names(data)[1:3], c("year", "month", "uf_source"))
@@ -358,16 +420,27 @@ test_that("sipni_data reads aggregates from R2 (default source)", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  data <- sipni_data(year = 2019, uf = "AC", cache_dir = cache_dir,
-                     parse = FALSE)
+  data <- sipni_data(
+    year = 2019,
+    uf = "AC",
+    cache_dir = cache_dir,
+    parse = FALSE
+  )
   expect_gt(nrow(data), 0)
-  expect_true(all(c("year", "uf_source", "IMUNO", "QT_DOSE") %in%
-                    names(data)))
+  expect_true(all(
+    c("year", "uf_source", "IMUNO", "QT_DOSE") %in%
+      names(data)
+  ))
   expect_equal(unname(attr(data, "healthbr_source")["aggregated"]), "r2")
 
   # CPNI with the decimal comma fix
-  cob <- sipni_data(year = 2019, type = "CPNI", uf = "AC",
-                    cache_dir = cache_dir, parse = TRUE)
+  cob <- sipni_data(
+    year = 2019,
+    type = "CPNI",
+    uf = "AC",
+    cache_dir = cache_dir,
+    parse = TRUE
+  )
   expect_true("COBERT" %in% names(cob))
   expect_type(cob$COBERT, "double")
 })
@@ -379,10 +452,8 @@ test_that("sipni_data R2 local cache serves the second call", {
   dir.create(cache_dir, recursive = TRUE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  d1 <- sipni_data(year = 2019, uf = "AC", cache_dir = cache_dir,
-                   parse = FALSE)
-  d2 <- sipni_data(year = 2019, uf = "AC", cache_dir = cache_dir,
-                   parse = FALSE)
+  d1 <- sipni_data(year = 2019, uf = "AC", cache_dir = cache_dir, parse = FALSE)
+  d2 <- sipni_data(year = 2019, uf = "AC", cache_dir = cache_dir, parse = FALSE)
   expect_equal(nrow(d1), nrow(d2))
 })
 
@@ -402,9 +473,13 @@ test_that("sipni_dictionary reads the R2 dictionaries", {
 
   dict <- sipni_dictionary(cache_dir = tempfile("sipni_dict_test"))
   expect_s3_class(dict, "tbl_df")
-  expect_true(all(c("variable", "description", "code", "label",
-                    "source_codes") %in% names(dict)))
-  expect_true(all(c("IMUNO", "DOSE", "FX_ETARIA", "ANO", "MES") %in%
-                    dict$variable))
+  expect_true(all(
+    c("variable", "description", "code", "label", "source_codes") %in%
+      names(dict)
+  ))
+  expect_true(all(
+    c("IMUNO", "DOSE", "FX_ETARIA", "ANO", "MES") %in%
+      dict$variable
+  ))
   expect_gt(nrow(dict), 200)
 })

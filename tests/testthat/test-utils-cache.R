@@ -90,7 +90,10 @@ test_that(".cache_write_partitioned creates Hive-style directories", {
   )
 
   result <- healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", c("uf", "year")
+    test_data,
+    cache_dir,
+    "test_ds",
+    c("uf", "year")
   )
 
   expect_true(healthbR:::.has_partitioned_cache(cache_dir, "test_ds"))
@@ -115,7 +118,10 @@ test_that(".cache_open_dataset returns Arrow Dataset", {
   )
 
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", c("year")
+    test_data,
+    cache_dir,
+    "test_ds",
+    c("year")
   )
 
   ds <- healthbR:::.cache_open_dataset(cache_dir, "test_ds")
@@ -147,13 +153,19 @@ test_that(".cache_append_partitioned adds new partitions", {
   # write first partition
   data1 <- tibble::tibble(year = rep(2020L, 3), value = 1:3)
   healthbR:::.cache_append_partitioned(
-    data1, cache_dir, "test_ds", c("year")
+    data1,
+    cache_dir,
+    "test_ds",
+    c("year")
   )
 
   # write second partition
   data2 <- tibble::tibble(year = rep(2021L, 2), value = 4:5)
   healthbR:::.cache_append_partitioned(
-    data2, cache_dir, "test_ds", c("year")
+    data2,
+    cache_dir,
+    "test_ds",
+    c("year")
   )
 
   # both partitions should exist
@@ -173,13 +185,19 @@ test_that(".cache_append_partitioned overwrites existing partition", {
   # write initial data
   data1 <- tibble::tibble(year = rep(2020L, 3), value = 1:3)
   healthbR:::.cache_append_partitioned(
-    data1, cache_dir, "test_ds", c("year")
+    data1,
+    cache_dir,
+    "test_ds",
+    c("year")
   )
 
   # overwrite same partition with new data
   data2 <- tibble::tibble(year = rep(2020L, 5), value = 10:14)
   healthbR:::.cache_append_partitioned(
-    data2, cache_dir, "test_ds", c("year")
+    data2,
+    cache_dir,
+    "test_ds",
+    c("year")
   )
 
   # should have the new data, not the old
@@ -237,7 +255,10 @@ test_that("partitioned cache works with 3-column partitioning", {
   )
 
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", c("uf_source", "year", "month")
+    test_data,
+    cache_dir,
+    "test_ds",
+    c("uf_source", "year", "month")
   )
 
   # open and filter for just AC, month 1
@@ -278,8 +299,12 @@ test_that(".cache_open_lazy returns NULL when no cache exists", {
   dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
   on.exit(unlink(cache_dir, recursive = TRUE))
 
-  result <- healthbR:::.cache_open_lazy(cache_dir, "nonexistent",
-                                         lazy = TRUE, backend = "arrow")
+  result <- healthbR:::.cache_open_lazy(
+    cache_dir,
+    "nonexistent",
+    lazy = TRUE,
+    backend = "arrow"
+  )
   expect_null(result)
 })
 
@@ -293,8 +318,12 @@ test_that(".cache_open_lazy returns Arrow Dataset with arrow backend", {
   test_data <- tibble::tibble(year = c(2020L, 2021L), value = c(10, 20))
   healthbR:::.cache_write_partitioned(test_data, cache_dir, "test_ds", "year")
 
-  ds <- healthbR:::.cache_open_lazy(cache_dir, "test_ds",
-                                     lazy = TRUE, backend = "arrow")
+  ds <- healthbR:::.cache_open_lazy(
+    cache_dir,
+    "test_ds",
+    lazy = TRUE,
+    backend = "arrow"
+  )
   expect_true(inherits(ds, "Dataset") || inherits(ds, "FileSystemDataset"))
 
   collected <- ds |> dplyr::collect()
@@ -312,8 +341,12 @@ test_that(".cache_open_lazy returns DuckDB tbl with duckdb backend", {
   test_data <- tibble::tibble(year = c(2020L, 2021L), value = c(10, 20))
   healthbR:::.cache_write_partitioned(test_data, cache_dir, "test_ds", "year")
 
-  ds <- healthbR:::.cache_open_lazy(cache_dir, "test_ds",
-                                     lazy = TRUE, backend = "duckdb")
+  ds <- healthbR:::.cache_open_lazy(
+    cache_dir,
+    "test_ds",
+    lazy = TRUE,
+    backend = "duckdb"
+  )
   expect_true(inherits(ds, "tbl_lazy") || inherits(ds, "tbl_duckdb_connection"))
 
   collected <- ds |> dplyr::collect()
@@ -333,11 +366,18 @@ test_that(".cache_open_lazy arrow dataset supports lazy filter", {
     value = c(10, 20, 30, 40)
   )
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", c("uf_source", "year")
+    test_data,
+    cache_dir,
+    "test_ds",
+    c("uf_source", "year")
   )
 
-  ds <- healthbR:::.cache_open_lazy(cache_dir, "test_ds",
-                                     lazy = TRUE, backend = "arrow")
+  ds <- healthbR:::.cache_open_lazy(
+    cache_dir,
+    "test_ds",
+    lazy = TRUE,
+    backend = "arrow"
+  )
 
   # filter on partition column before collecting
   result <- ds |>
@@ -377,11 +417,16 @@ test_that(".lazy_return filters by partition columns", {
     value = c(10, 20, 30, 40)
   )
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", c("uf_source", "year")
+    test_data,
+    cache_dir,
+    "test_ds",
+    c("uf_source", "year")
   )
 
   ds <- healthbR:::.lazy_return(
-    cache_dir, "test_ds", "arrow",
+    cache_dir,
+    "test_ds",
+    "arrow",
     filters = list(uf_source = "AC", year = 2020L)
   )
 
@@ -408,11 +453,16 @@ test_that(".lazy_return selects columns", {
     col_c = c(TRUE, FALSE)
   )
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", c("uf_source", "year")
+    test_data,
+    cache_dir,
+    "test_ds",
+    c("uf_source", "year")
   )
 
   ds <- healthbR:::.lazy_return(
-    cache_dir, "test_ds", "arrow",
+    cache_dir,
+    "test_ds",
+    "arrow",
     select_cols = c("uf_source", "year", "col_a")
   )
 
@@ -435,11 +485,16 @@ test_that(".lazy_return with filters and select_cols combined", {
     deaths = c(1, 2, 0, 1)
   )
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", c("disease", "year")
+    test_data,
+    cache_dir,
+    "test_ds",
+    c("disease", "year")
   )
 
   ds <- healthbR:::.lazy_return(
-    cache_dir, "test_ds", "arrow",
+    cache_dir,
+    "test_ds",
+    "arrow",
     filters = list(disease = "DENG"),
     select_cols = c("disease", "year", "cases")
   )
@@ -463,11 +518,16 @@ test_that(".lazy_return works with duckdb backend", {
     value = c(10, 20, 30)
   )
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", "year"
+    test_data,
+    cache_dir,
+    "test_ds",
+    "year"
   )
 
   ds <- healthbR:::.lazy_return(
-    cache_dir, "test_ds", "duckdb",
+    cache_dir,
+    "test_ds",
+    "duckdb",
     filters = list(year = c(2020L, 2021L))
   )
 
@@ -489,7 +549,10 @@ test_that(".lazy_return with empty filters returns all data", {
     value = c(10, 20, 30)
   )
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", "year"
+    test_data,
+    cache_dir,
+    "test_ds",
+    "year"
   )
 
   ds <- healthbR:::.lazy_return(cache_dir, "test_ds", "arrow")
@@ -509,12 +572,17 @@ test_that(".lazy_return ignores non-existent columns in select_cols", {
     value = c(10, 20)
   )
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", "year"
+    test_data,
+    cache_dir,
+    "test_ds",
+    "year"
   )
 
   # request a column that doesn't exist — it should be ignored
   ds <- healthbR:::.lazy_return(
-    cache_dir, "test_ds", "arrow",
+    cache_dir,
+    "test_ds",
+    "arrow",
     select_cols = c("year", "value", "nonexistent_col")
   )
 
@@ -529,9 +597,12 @@ test_that(".lazy_return ignores non-existent columns in select_cols", {
 
 test_that(".try_lazy_cache returns NULL when lazy = FALSE", {
   result <- healthbR:::.try_lazy_cache(
-    lazy = FALSE, backend = "arrow",
-    cache_dir = tempdir(), dataset_name = "test",
-    filters = list(), select_cols = NULL
+    lazy = FALSE,
+    backend = "arrow",
+    cache_dir = tempdir(),
+    dataset_name = "test",
+    filters = list(),
+    select_cols = NULL
   )
   expect_null(result)
 })
@@ -539,9 +610,13 @@ test_that(".try_lazy_cache returns NULL when lazy = FALSE", {
 test_that(".try_lazy_cache emits parse message when parse = TRUE", {
   expect_message(
     healthbR:::.try_lazy_cache(
-      lazy = TRUE, backend = "arrow",
-      cache_dir = tempdir(), dataset_name = "nonexistent",
-      filters = list(), select_cols = NULL, parse = TRUE
+      lazy = TRUE,
+      backend = "arrow",
+      cache_dir = tempdir(),
+      dataset_name = "nonexistent",
+      filters = list(),
+      select_cols = NULL,
+      parse = TRUE
     ),
     "parse.*ignored"
   )
@@ -555,9 +630,12 @@ test_that(".try_lazy_cache returns NULL when no cache exists", {
   on.exit(unlink(cache_dir, recursive = TRUE))
 
   result <- healthbR:::.try_lazy_cache(
-    lazy = TRUE, backend = "arrow",
-    cache_dir = cache_dir, dataset_name = "nonexistent",
-    filters = list(), select_cols = NULL
+    lazy = TRUE,
+    backend = "arrow",
+    cache_dir = cache_dir,
+    dataset_name = "nonexistent",
+    filters = list(),
+    select_cols = NULL
   )
   expect_null(result)
 })
@@ -570,16 +648,24 @@ test_that(".try_lazy_cache returns lazy dataset when cache exists", {
   on.exit(unlink(cache_dir, recursive = TRUE))
 
   test_data <- tibble::tibble(
-    year = c(2020L, 2021L), uf_source = c("AC", "SP"), value = c(10, 20)
+    year = c(2020L, 2021L),
+    uf_source = c("AC", "SP"),
+    value = c(10, 20)
   )
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", c("uf_source", "year")
+    test_data,
+    cache_dir,
+    "test_ds",
+    c("uf_source", "year")
   )
 
   ds <- healthbR:::.try_lazy_cache(
-    lazy = TRUE, backend = "arrow",
-    cache_dir = cache_dir, dataset_name = "test_ds",
-    filters = list(year = 2020L), select_cols = c("year", "value")
+    lazy = TRUE,
+    backend = "arrow",
+    cache_dir = cache_dir,
+    dataset_name = "test_ds",
+    filters = list(year = 2020L),
+    select_cols = c("year", "value")
   )
 
   expect_false(is.null(ds))
@@ -595,7 +681,10 @@ test_that(".try_lazy_cache returns lazy dataset when cache exists", {
 
 test_that(".data_return selects columns and returns tibble", {
   data <- data.frame(
-    year = 2020L, uf_source = "AC", VAR1 = "a", VAR2 = "b",
+    year = 2020L,
+    uf_source = "AC",
+    VAR1 = "a",
+    VAR2 = "b",
     stringsAsFactors = FALSE
   )
 
@@ -611,14 +700,20 @@ test_that(".data_return selects columns and returns tibble", {
 
 test_that(".data_return returns all columns when select_cols is NULL", {
   data <- data.frame(
-    year = 2020L, uf_source = "AC", VAR1 = "a", VAR2 = "b",
+    year = 2020L,
+    uf_source = "AC",
+    VAR1 = "a",
+    VAR2 = "b",
     stringsAsFactors = FALSE
   )
 
   result <- healthbR:::.data_return(data, module_name = "TEST")
 
   expect_s3_class(result, "tbl_df")
-  expect_equal(sort(names(result)), sort(c("uf_source", "VAR1", "VAR2", "year")))
+  expect_equal(
+    sort(names(result)),
+    sort(c("uf_source", "VAR1", "VAR2", "year"))
+  )
 })
 
 test_that(".data_return reports download failures", {
@@ -657,16 +752,23 @@ test_that(".data_return attempts lazy return when lazy = TRUE", {
 
   test_data <- tibble::tibble(year = c(2020L, 2021L), value = c(10, 20))
   healthbR:::.cache_write_partitioned(
-    test_data, cache_dir, "test_ds", "year"
+    test_data,
+    cache_dir,
+    "test_ds",
+    "year"
   )
 
   # pass a dummy eager data frame — but lazy should take priority
   eager_data <- data.frame(year = 9999L, value = 0, stringsAsFactors = FALSE)
 
   result <- healthbR:::.data_return(
-    eager_data, lazy = TRUE, backend = "arrow",
-    cache_dir = cache_dir, dataset_name = "test_ds",
-    filters = list(year = 2020L), module_name = "TEST"
+    eager_data,
+    lazy = TRUE,
+    backend = "arrow",
+    cache_dir = cache_dir,
+    dataset_name = "test_ds",
+    filters = list(year = 2020L),
+    module_name = "TEST"
   )
 
   # should be a lazy object, not the dummy eager data
@@ -684,8 +786,11 @@ test_that(".data_return falls through to eager when lazy cache missing", {
   data <- data.frame(year = 2020L, value = 42, stringsAsFactors = FALSE)
 
   result <- healthbR:::.data_return(
-    data, lazy = TRUE, backend = "arrow",
-    cache_dir = cache_dir, dataset_name = "nonexistent",
+    data,
+    lazy = TRUE,
+    backend = "arrow",
+    cache_dir = cache_dir,
+    dataset_name = "nonexistent",
     module_name = "TEST"
   )
 

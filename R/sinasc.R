@@ -9,8 +9,11 @@
 #' Validate SINASC year parameter
 #' @noRd
 .sinasc_validate_year <- function(year, status = "all") {
-  .validate_year(year, sinasc_years(status = status),
-                 years_fn_hint = "sinasc_years(status = 'all')")
+  .validate_year(
+    year,
+    sinasc_years(status = status),
+    years_fn_hint = "sinasc_years(status = 'all')"
+  )
 }
 
 #' Validate SINASC UF parameter
@@ -47,7 +50,10 @@
     # DN{UF}{YYYY}.dbc
     stringr::str_c(
       "ftp://ftp.datasus.gov.br/dissemin/publicos/SINASC/1996_/Dados/DNRES/",
-      "DN", uf, year, ".dbc"
+      "DN",
+      uf,
+      year,
+      ".dbc"
     )
   } else {
     cli::cli_abort(
@@ -69,19 +75,26 @@
 #' Returns a tibble with `year` and `uf_source` columns already added.
 #' Uses partitioned cache when arrow is available.
 #' @noRd
-.sinasc_download_and_read <- function(year, uf, cache = TRUE, cache_dir = NULL) {
+.sinasc_download_and_read <- function(
+  year,
+  uf,
+  cache = TRUE,
+  cache_dir = NULL
+) {
   cache_dir <- .sinasc_cache_dir(cache_dir)
   dataset_name <- "sinasc_data"
   target_year <- as.integer(year)
   target_uf <- uf
 
   # 1. check partitioned cache
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
-      dplyr::filter(.data$uf_source == target_uf,
-                     .data$year == target_year) |>
+      dplyr::filter(.data$uf_source == target_uf, .data$year == target_year) |>
       dplyr::collect()
     if (nrow(cached) > 0) return(cached)
   }
@@ -115,8 +128,12 @@
 
   # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    .cache_append_partitioned(data, cache_dir, dataset_name,
-                              c("uf_source", "year"))
+    .cache_append_partitioned(
+      data,
+      cache_dir,
+      dataset_name,
+      c("uf_source", "year")
+    )
   }
 
   data
@@ -150,10 +167,14 @@
 sinasc_years <- function(status = "final") {
   status <- match.arg(status, c("final", "preliminary", "all"))
 
-  switch(status,
+  switch(
+    status,
     "final" = sinasc_available_years$final,
     "preliminary" = sinasc_available_years$preliminary,
-    "all" = sort(c(sinasc_available_years$final, sinasc_available_years$preliminary))
+    "all" = sort(c(
+      sinasc_available_years$final,
+      sinasc_available_years$preliminary
+    ))
   )
 }
 
@@ -174,7 +195,9 @@ sinasc_info <- function() {
   final_range <- range(sinasc_available_years$final)
   prelim_range <- range(sinasc_available_years$preliminary)
 
-  cli::cli_h1("SINASC \u2014 Sistema de Informa\u00e7\u00f5es sobre Nascidos Vivos")
+  cli::cli_h1(
+    "SINASC \u2014 Sistema de Informa\u00e7\u00f5es sobre Nascidos Vivos"
+  )
 
   cli::cli_text("")
   cli::cli_text("Fonte:          Minist\u00e9rio da Sa\u00fade / DATASUS")
@@ -192,7 +215,9 @@ sinasc_info <- function() {
 
   cli::cli_h2("Vari\u00e1veis-chave")
   cli::cli_text("  DTNASC      Data de nascimento")
-  cli::cli_text("  CODMUNRES   Munic\u00edpio de resid\u00eancia da m\u00e3e (IBGE)")
+  cli::cli_text(
+    "  CODMUNRES   Munic\u00edpio de resid\u00eancia da m\u00e3e (IBGE)"
+  )
   cli::cli_text("  SEXO        Sexo")
   cli::cli_text("  PESO        Peso ao nascer (gramas)")
   cli::cli_text("  IDADEMAE    Idade da m\u00e3e")
@@ -357,15 +382,26 @@ sinasc_dictionary <- function(variable = NULL) {
 #' sinasc_data(year = 2022, uf = "RJ",
 #'             vars = c("DTNASC", "SEXO", "PESO",
 #'                      "IDADEMAE", "PARTO", "CONSULTAS"))
-sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
-                        parse = TRUE, col_types = NULL,
-                        cache = TRUE, cache_dir = NULL,
-                        lazy = FALSE, backend = c("arrow", "duckdb")) {
-
+sinasc_data <- function(
+  year,
+  vars = NULL,
+  uf = NULL,
+  anomaly = NULL,
+  parse = TRUE,
+  col_types = NULL,
+  cache = TRUE,
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   # validate inputs
   year <- .sinasc_validate_year(year)
-  if (!is.null(uf)) uf <- .sinasc_validate_uf(uf)
-  if (!is.null(vars)) .sinasc_validate_vars(vars)
+  if (!is.null(uf)) {
+    uf <- .sinasc_validate_uf(uf)
+  }
+  if (!is.null(vars)) {
+    .sinasc_validate_vars(vars)
+  }
 
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sinasc_uf_list
@@ -373,16 +409,30 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
   # compute lazy args once
   cache_dir_resolved <- .sinasc_cache_dir(cache_dir)
   lazy_filters <- list(year = year, uf_source = target_ufs)
-  lazy_select <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
+  lazy_select <- if (!is.null(vars)) {
+    unique(c("year", "uf_source", vars))
+  } else {
+    NULL
+  }
 
   # pre-download lazy check
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved, "sinasc_data",
-                        lazy_filters, lazy_select, parse = parse)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sinasc_data",
+    lazy_filters,
+    lazy_select,
+    parse = parse
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # build all year x UF combinations
   combinations <- expand.grid(
-    year = year, uf = target_ufs,
+    year = year,
+    uf = target_ufs,
     stringsAsFactors = FALSE
   )
 
@@ -396,17 +446,29 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
   # download and read each combination
   labels <- paste(combinations$uf, combinations$year)
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    yr <- combinations$year[i]
-    st <- combinations$uf[i]
+  results <- .map_parallel(
+    seq_len(n_combos),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      yr <- combinations$year[i]
+      st <- combinations$uf[i]
 
-    tryCatch({
-      .sinasc_download_and_read(yr, st, cache = cache, cache_dir = cache_dir)
-    }, error = function(e) {
-      NULL
-    })
-  })
+      tryCatch(
+        {
+          .sinasc_download_and_read(
+            yr,
+            st,
+            cache = cache,
+            cache_dir = cache_dir
+          )
+        },
+        error = function(e) {
+          NULL
+        }
+      )
+    }
+  )
 
   # remove NULLs and bind
   succeeded <- !vapply(results, is.null, logical(1))
@@ -414,7 +476,9 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
   results <- results[succeeded]
 
   if (length(results) == 0) {
-    cli::cli_abort("No data could be downloaded for the requested year(s)/UF(s).")
+    cli::cli_abort(
+      "No data could be downloaded for the requested year(s)/UF(s)."
+    )
   }
 
   results <- dplyr::bind_rows(results)
@@ -427,16 +491,31 @@ sinasc_data <- function(year, vars = NULL, uf = NULL, anomaly = NULL,
 
   # filter by anomaly if requested
   if (!is.null(anomaly)) {
-    anomaly_pattern <- stringr::str_c("^(", stringr::str_c(anomaly, collapse = "|"), ")")
+    anomaly_pattern <- stringr::str_c(
+      "^(",
+      stringr::str_c(anomaly, collapse = "|"),
+      ")"
+    )
     if ("CODANOMAL" %in% names(results)) {
       results <- results[grepl(anomaly_pattern, results$CODANOMAL), ]
     } else {
-      cli::cli_warn("Column {.var CODANOMAL} not found in data. Cannot filter by anomaly.")
+      cli::cli_warn(
+        "Column {.var CODANOMAL} not found in data. Cannot filter by anomaly."
+      )
     }
   }
 
-  .data_return(results, lazy, backend, cache_dir_resolved, "sinasc_data",
-               lazy_filters, lazy_select, failed_labels, "SINASC")
+  .data_return(
+    results,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sinasc_data",
+    lazy_filters,
+    lazy_select,
+    failed_labels,
+    "SINASC"
+  )
 }
 
 

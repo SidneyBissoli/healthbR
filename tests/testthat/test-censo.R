@@ -386,7 +386,11 @@ test_that("censo_sidra_data warns for unknown table", {
 
   expect_message(
     tryCatch(
-      censo_sidra_data(table = 99999, territorial_level = "brazil", year = 2022),
+      censo_sidra_data(
+        table = 99999,
+        territorial_level = "brazil",
+        year = 2022
+      ),
       error = function(e) NULL
     ),
     "not found in internal catalog"
@@ -401,7 +405,6 @@ test_that("censo_sidra_data warns for unknown table", {
 # --- censo_info --- additional coverage ---
 
 test_that("censo_info returns invisible list", {
-
   result <- censo_info()
   expect_type(result, "list")
   expect_true("institution" %in% names(result))
@@ -425,8 +428,10 @@ test_that("censo_info with year 2010 returns year_details", {
 test_that("censo_info with each valid year returns year_details", {
   for (yr in c(1970, 1980, 1991, 2000, 2010, 2022)) {
     info <- censo_info(yr)
-    expect_true("year_details" %in% names(info),
-                info = paste("year_details missing for", yr))
+    expect_true(
+      "year_details" %in% names(info),
+      info = paste("year_details missing for", yr)
+    )
   }
 })
 
@@ -581,11 +586,16 @@ test_that("censo_sidra_search with missing keyword errors", {
 test_that("censo_populacao validates variables case-insensitively", {
   # Mock the SIDRA fetch to avoid real API calls
   local_mocked_bindings(
-    .censo_fetch_sidra = function(...) tibble::tibble(V = c("header", "100"), D1C = c("h", "1"))
+    .censo_fetch_sidra = function(...) {
+      tibble::tibble(V = c("header", "100"), D1C = c("h", "1"))
+    }
   )
   # "Total" should be lowered to "total" and accepted
-  result <- censo_populacao(year = 2022, variables = "Total",
-                            territorial_level = "brazil")
+  result <- censo_populacao(
+    year = 2022,
+    variables = "Total",
+    territorial_level = "brazil"
+  )
   expect_s3_class(result, "tbl_df")
 })
 
@@ -593,29 +603,48 @@ test_that("censo_populacao validates variables case-insensitively", {
 
 test_that("censo_sidra_data handles NULL year", {
   local_mocked_bindings(
-    .censo_fetch_sidra = function(table, territorial_level, geo_code,
-                                  variable, period, classifications) {
+    .censo_fetch_sidra = function(
+      table,
+      territorial_level,
+      geo_code,
+      variable,
+      period,
+      classifications
+    ) {
       # period should be NULL when year is NULL
       expect_null(period)
       tibble::tibble(V = c("header", "100"), D1C = c("h", "1"))
     }
   )
-  result <- censo_sidra_data(table = 9514, territorial_level = "brazil",
-                              year = NULL, variable = 93)
+  result <- censo_sidra_data(
+    table = 9514,
+    territorial_level = "brazil",
+    year = NULL,
+    variable = 93
+  )
   expect_s3_class(result, "tbl_df")
 })
 
 test_that("censo_sidra_data handles NULL variable", {
   local_mocked_bindings(
-    .censo_fetch_sidra = function(table, territorial_level, geo_code,
-                                  variable, period, classifications) {
+    .censo_fetch_sidra = function(
+      table,
+      territorial_level,
+      geo_code,
+      variable,
+      period,
+      classifications
+    ) {
       # variable should be NULL when not specified
       expect_null(variable)
       tibble::tibble(V = c("header", "100"), D1C = c("h", "1"))
     }
   )
-  result <- censo_sidra_data(table = 9514, territorial_level = "brazil",
-                              year = 2022)
+  result <- censo_sidra_data(
+    table = 9514,
+    territorial_level = "brazil",
+    year = 2022
+  )
   expect_s3_class(result, "tbl_df")
 })
 
@@ -624,8 +653,12 @@ test_that("censo_sidra_data raw=TRUE returns raw data", {
   local_mocked_bindings(
     .censo_fetch_sidra = function(...) mock_raw
   )
-  result <- censo_sidra_data(table = 9514, territorial_level = "brazil",
-                              year = 2022, raw = TRUE)
+  result <- censo_sidra_data(
+    table = 9514,
+    territorial_level = "brazil",
+    year = 2022,
+    raw = TRUE
+  )
   expect_equal(result, mock_raw)
 })
 
@@ -633,8 +666,11 @@ test_that("censo_sidra_data returns empty tibble for empty API response", {
   local_mocked_bindings(
     .censo_fetch_sidra = function(...) tibble::tibble()
   )
-  result <- censo_sidra_data(table = 9514, territorial_level = "brazil",
-                              year = 2022)
+  result <- censo_sidra_data(
+    table = 9514,
+    territorial_level = "brazil",
+    year = 2022
+  )
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 0)
 })
@@ -646,8 +682,12 @@ test_that("censo_populacao raw=TRUE returns raw data", {
   local_mocked_bindings(
     .censo_fetch_sidra = function(...) mock_raw
   )
-  result <- censo_populacao(year = 2022, variables = "total",
-                            territorial_level = "brazil", raw = TRUE)
+  result <- censo_populacao(
+    year = 2022,
+    variables = "total",
+    territorial_level = "brazil",
+    raw = TRUE
+  )
   expect_equal(result, mock_raw)
 })
 
@@ -655,8 +695,11 @@ test_that("censo_populacao returns empty tibble when API returns no data", {
   local_mocked_bindings(
     .censo_fetch_sidra = function(...) tibble::tibble()
   )
-  result <- censo_populacao(year = 2022, variables = "total",
-                            territorial_level = "brazil")
+  result <- censo_populacao(
+    year = 2022,
+    variables = "total",
+    territorial_level = "brazil"
+  )
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 0)
 })
@@ -668,8 +711,11 @@ test_that("censo_estimativa raw=TRUE returns raw data", {
   local_mocked_bindings(
     .censo_fetch_sidra = function(...) mock_raw
   )
-  result <- censo_estimativa(year = 2020, territorial_level = "brazil",
-                              raw = TRUE)
+  result <- censo_estimativa(
+    year = 2020,
+    territorial_level = "brazil",
+    raw = TRUE
+  )
   expect_equal(result, mock_raw)
 })
 

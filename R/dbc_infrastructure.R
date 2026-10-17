@@ -87,6 +87,5 @@
   tibble::as_tibble(df)
 }
 
-
 # NOTE: .datasus_download() has been moved to R/utils-download.R
 # It is still available to all package functions via the shared namespace.

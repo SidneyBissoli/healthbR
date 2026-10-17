@@ -5,7 +5,9 @@
 # ============================================================================
 
 skip_if_no_integration <- function() {
-  if (identical(Sys.getenv("HEALTHBR_INTEGRATION"), "true")) return(invisible())
+  if (identical(Sys.getenv("HEALTHBR_INTEGRATION"), "true")) {
+    return(invisible())
+  }
   skip("Integration tests skipped. Set HEALTHBR_INTEGRATION=true to run.")
 }
 
@@ -37,8 +39,10 @@ test_that("ans_available_years financial start at 2007", {
 
 test_that("ans_valid_types has 3 types", {
   expect_equal(nrow(ans_valid_types), 3)
-  expect_equal(ans_valid_types$code,
-               c("beneficiaries", "complaints", "financial"))
+  expect_equal(
+    ans_valid_types$code,
+    c("beneficiaries", "complaints", "financial")
+  )
 })
 
 test_that("ans_uf_list has 27 states", {
@@ -82,18 +86,35 @@ test_that("ans_operators_metadata has 20 variables", {
 })
 
 test_that("all metadata tibbles have required columns", {
-  for (meta in list(ans_beneficiaries_metadata, ans_complaints_metadata,
-                    ans_financial_metadata, ans_operators_metadata)) {
-    expect_true(all(c("variable", "description", "type", "section") %in%
-                      names(meta)))
+  for (meta in list(
+    ans_beneficiaries_metadata,
+    ans_complaints_metadata,
+    ans_financial_metadata,
+    ans_operators_metadata
+  )) {
+    expect_true(all(
+      c("variable", "description", "type", "section") %in%
+        names(meta)
+    ))
   }
 })
 
 test_that("all metadata types are valid", {
-  valid_types <- c("character", "integer", "double", "date_dmy",
-                   "date_ymd", "date_ym", "date")
-  for (meta in list(ans_beneficiaries_metadata, ans_complaints_metadata,
-                    ans_financial_metadata, ans_operators_metadata)) {
+  valid_types <- c(
+    "character",
+    "integer",
+    "double",
+    "date_dmy",
+    "date_ymd",
+    "date_ym",
+    "date"
+  )
+  for (meta in list(
+    ans_beneficiaries_metadata,
+    ans_complaints_metadata,
+    ans_financial_metadata,
+    ans_operators_metadata
+  )) {
     expect_true(all(meta$type %in% valid_types))
   }
 })
@@ -137,8 +158,10 @@ test_that(".ans_validate_year errors on invalid years per type", {
 })
 
 test_that(".ans_validate_year accepts multiple years", {
-  expect_equal(.ans_validate_year(c(2022, 2023), "beneficiaries"),
-               c(2022L, 2023L))
+  expect_equal(
+    .ans_validate_year(c(2022, 2023), "beneficiaries"),
+    c(2022L, 2023L)
+  )
 })
 
 
@@ -212,12 +235,15 @@ test_that(".ans_validate_vars silent on valid variables", {
 # ============================================================================
 
 test_that(".ans_get_variables_meta returns correct metadata", {
-  expect_identical(.ans_get_variables_meta("beneficiaries"),
-                   ans_beneficiaries_metadata)
-  expect_identical(.ans_get_variables_meta("complaints"),
-                   ans_complaints_metadata)
-  expect_identical(.ans_get_variables_meta("financial"),
-                   ans_financial_metadata)
+  expect_identical(
+    .ans_get_variables_meta("beneficiaries"),
+    ans_beneficiaries_metadata
+  )
+  expect_identical(
+    .ans_get_variables_meta("complaints"),
+    ans_complaints_metadata
+  )
+  expect_identical(.ans_get_variables_meta("financial"), ans_financial_metadata)
 })
 
 
@@ -373,8 +399,14 @@ test_that("ans_variables errors on invalid type", {
 test_that("ans_data warns about unused quarter for beneficiaries", {
   expect_warning(
     tryCatch(
-      ans_data(year = 2023, type = "beneficiaries", quarter = 1,
-               uf = "AC", month = 12, cache = FALSE),
+      ans_data(
+        year = 2023,
+        type = "beneficiaries",
+        quarter = 1,
+        uf = "AC",
+        month = 12,
+        cache = FALSE
+      ),
       error = function(e) NULL
     ),
     "quarter.*ignored"
@@ -384,8 +416,7 @@ test_that("ans_data warns about unused quarter for beneficiaries", {
 test_that("ans_data warns about unused uf for complaints", {
   expect_warning(
     tryCatch(
-      ans_data(year = 2022, type = "complaints", uf = "AC",
-               cache = FALSE),
+      ans_data(year = 2022, type = "complaints", uf = "AC", cache = FALSE),
       error = function(e) NULL
     ),
     "uf.*ignored"
@@ -395,8 +426,7 @@ test_that("ans_data warns about unused uf for complaints", {
 test_that("ans_data warns about unused month for complaints", {
   expect_warning(
     tryCatch(
-      ans_data(year = 2022, type = "complaints", month = 1,
-               cache = FALSE),
+      ans_data(year = 2022, type = "complaints", month = 1, cache = FALSE),
       error = function(e) NULL
     ),
     "month.*ignored"
@@ -406,8 +436,7 @@ test_that("ans_data warns about unused month for complaints", {
 test_that("ans_data warns about unused quarter for complaints", {
   expect_warning(
     tryCatch(
-      ans_data(year = 2022, type = "complaints", quarter = 1,
-               cache = FALSE),
+      ans_data(year = 2022, type = "complaints", quarter = 1, cache = FALSE),
       error = function(e) NULL
     ),
     "quarter.*ignored"
@@ -417,8 +446,7 @@ test_that("ans_data warns about unused quarter for complaints", {
 test_that("ans_data warns about unused uf for financial", {
   expect_warning(
     tryCatch(
-      ans_data(year = 2023, type = "financial", uf = "AC",
-               cache = FALSE),
+      ans_data(year = 2023, type = "financial", uf = "AC", cache = FALSE),
       error = function(e) NULL
     ),
     "uf.*ignored"
@@ -428,8 +456,7 @@ test_that("ans_data warns about unused uf for financial", {
 test_that("ans_data warns about unused month for financial", {
   expect_warning(
     tryCatch(
-      ans_data(year = 2023, type = "financial", month = 1,
-               cache = FALSE),
+      ans_data(year = 2023, type = "financial", month = 1, cache = FALSE),
       error = function(e) NULL
     ),
     "month.*ignored"
@@ -526,14 +553,26 @@ test_that(".ans_download_beneficiaries checks partitioned cache", {
 
   # create fake partitioned cache
   fake_data <- tibble::tibble(
-    year = 2023L, month = 12L, uf_source = "AC",
-    CD_OPERADORA = "123456", SG_UF = "AC"
+    year = 2023L,
+    month = 12L,
+    uf_source = "AC",
+    CD_OPERADORA = "123456",
+    SG_UF = "AC"
   )
-  .cache_append_partitioned(fake_data, d, "ans_beneficiaries_data",
-                            c("uf_source", "year", "month"))
+  .cache_append_partitioned(
+    fake_data,
+    d,
+    "ans_beneficiaries_data",
+    c("uf_source", "year", "month")
+  )
 
-  result <- .ans_download_beneficiaries(2023, 12, "AC", cache = TRUE,
-                                        cache_dir = d)
+  result <- .ans_download_beneficiaries(
+    2023,
+    12,
+    "AC",
+    cache = TRUE,
+    cache_dir = d
+  )
   expect_equal(nrow(result), 1)
   expect_equal(result$CD_OPERADORA, "123456")
 })
@@ -547,7 +586,8 @@ test_that(".ans_download_complaints checks partitioned cache", {
 
   fake_data <- tibble::tibble(
     year = 2022L,
-    NUMERO_DA_DEMANDA = "999999", REGISTRO_OPERADORA = "111111"
+    NUMERO_DA_DEMANDA = "999999",
+    REGISTRO_OPERADORA = "111111"
   )
   .cache_append_partitioned(fake_data, d, "ans_complaints_data", c("year"))
 
@@ -564,11 +604,17 @@ test_that(".ans_download_financial checks partitioned cache", {
   skip_if_not_installed("arrow")
 
   fake_data <- tibble::tibble(
-    year = 2023L, quarter = 1L,
-    REG_ANS = "123456", VL_SALDO_FINAL = "0"
+    year = 2023L,
+    quarter = 1L,
+    REG_ANS = "123456",
+    VL_SALDO_FINAL = "0"
   )
-  .cache_append_partitioned(fake_data, d, "ans_financial_data",
-                            c("year", "quarter"))
+  .cache_append_partitioned(
+    fake_data,
+    d,
+    "ans_financial_data",
+    c("year", "quarter")
+  )
 
   result <- .ans_download_financial(2023, 1, cache = TRUE, cache_dir = d)
   expect_equal(nrow(result), 1)
@@ -581,7 +627,8 @@ test_that(".ans_download_operators checks flat cache", {
   on.exit(unlink(d, recursive = TRUE))
 
   fake_data <- tibble::tibble(
-    REGISTRO_OPERADORA = "999999", CNPJ = "12345678901234"
+    REGISTRO_OPERADORA = "999999",
+    CNPJ = "12345678901234"
   )
   .cache_write(fake_data, d, "ans_operators_active")
 
@@ -603,14 +650,28 @@ test_that(".ans_data_beneficiaries returns cached data", {
   skip_if_not_installed("arrow")
 
   fake_data <- tibble::tibble(
-    year = 2023L, month = 12L, uf_source = "AC",
-    CD_OPERADORA = "123456", QT_BENEFICIARIO_ATIVO = "10"
+    year = 2023L,
+    month = 12L,
+    uf_source = "AC",
+    CD_OPERADORA = "123456",
+    QT_BENEFICIARIO_ATIVO = "10"
   )
-  .cache_append_partitioned(fake_data, d, "ans_beneficiaries_data",
-                            c("uf_source", "year", "month"))
+  .cache_append_partitioned(
+    fake_data,
+    d,
+    "ans_beneficiaries_data",
+    c("uf_source", "year", "month")
+  )
 
   result <- .ans_data_beneficiaries(
-    2023, "AC", 12, NULL, TRUE, d, FALSE, "arrow"
+    2023,
+    "AC",
+    12,
+    NULL,
+    TRUE,
+    d,
+    FALSE,
+    "arrow"
   )
   expect_s3_class(result, "tbl_df")
   expect_true("CD_OPERADORA" %in% names(result))
@@ -625,7 +686,8 @@ test_that(".ans_data_complaints returns cached data", {
 
   fake_data <- tibble::tibble(
     year = 2022L,
-    NUMERO_DA_DEMANDA = "999999", SEXO = "F"
+    NUMERO_DA_DEMANDA = "999999",
+    SEXO = "F"
   )
   .cache_append_partitioned(fake_data, d, "ans_complaints_data", c("year"))
 
@@ -642,11 +704,17 @@ test_that(".ans_data_financial returns cached data", {
   skip_if_not_installed("arrow")
 
   fake_data <- tibble::tibble(
-    year = 2023L, quarter = 1L,
-    REG_ANS = "123456", DESCRICAO = "Teste"
+    year = 2023L,
+    quarter = 1L,
+    REG_ANS = "123456",
+    DESCRICAO = "Teste"
   )
-  .cache_append_partitioned(fake_data, d, "ans_financial_data",
-                            c("year", "quarter"))
+  .cache_append_partitioned(
+    fake_data,
+    d,
+    "ans_financial_data",
+    c("year", "quarter")
+  )
 
   result <- .ans_data_financial(2023, 1, NULL, TRUE, d, FALSE, "arrow")
   expect_s3_class(result, "tbl_df")
@@ -666,14 +734,25 @@ test_that("ans_data routes to beneficiaries", {
   skip_if_not_installed("arrow")
 
   fake_data <- tibble::tibble(
-    year = 2023L, month = 12L, uf_source = "AC",
+    year = 2023L,
+    month = 12L,
+    uf_source = "AC",
     CD_OPERADORA = "123456"
   )
-  .cache_append_partitioned(fake_data, d, "ans_beneficiaries_data",
-                            c("uf_source", "year", "month"))
+  .cache_append_partitioned(
+    fake_data,
+    d,
+    "ans_beneficiaries_data",
+    c("uf_source", "year", "month")
+  )
 
-  result <- ans_data(year = 2023, type = "beneficiaries",
-                     uf = "AC", month = 12, cache_dir = d)
+  result <- ans_data(
+    year = 2023,
+    type = "beneficiaries",
+    uf = "AC",
+    month = 12,
+    cache_dir = d
+  )
   expect_s3_class(result, "tbl_df")
   expect_true("CD_OPERADORA" %in% names(result))
 })
@@ -704,14 +783,23 @@ test_that("ans_data routes to financial", {
   skip_if_not_installed("arrow")
 
   fake_data <- tibble::tibble(
-    year = 2023L, quarter = 1L,
+    year = 2023L,
+    quarter = 1L,
     REG_ANS = "123456"
   )
-  .cache_append_partitioned(fake_data, d, "ans_financial_data",
-                            c("year", "quarter"))
+  .cache_append_partitioned(
+    fake_data,
+    d,
+    "ans_financial_data",
+    c("year", "quarter")
+  )
 
-  result <- ans_data(year = 2023, type = "financial",
-                     quarter = 1, cache_dir = d)
+  result <- ans_data(
+    year = 2023,
+    type = "financial",
+    quarter = 1,
+    cache_dir = d
+  )
   expect_s3_class(result, "tbl_df")
   expect_true("REG_ANS" %in% names(result))
 })
@@ -729,14 +817,27 @@ test_that("ans_data vars selects columns for beneficiaries", {
   skip_if_not_installed("arrow")
 
   fake_data <- tibble::tibble(
-    year = 2023L, month = 12L, uf_source = "AC",
-    CD_OPERADORA = "123456", SG_UF = "AC", TP_SEXO = "M"
+    year = 2023L,
+    month = 12L,
+    uf_source = "AC",
+    CD_OPERADORA = "123456",
+    SG_UF = "AC",
+    TP_SEXO = "M"
   )
-  .cache_append_partitioned(fake_data, d, "ans_beneficiaries_data",
-                            c("uf_source", "year", "month"))
+  .cache_append_partitioned(
+    fake_data,
+    d,
+    "ans_beneficiaries_data",
+    c("uf_source", "year", "month")
+  )
 
-  result <- ans_data(year = 2023, uf = "AC", month = 12,
-                     vars = c("CD_OPERADORA", "TP_SEXO"), cache_dir = d)
+  result <- ans_data(
+    year = 2023,
+    uf = "AC",
+    month = 12,
+    vars = c("CD_OPERADORA", "TP_SEXO"),
+    cache_dir = d
+  )
   expect_true("CD_OPERADORA" %in% names(result))
   expect_true("TP_SEXO" %in% names(result))
   expect_true("year" %in% names(result))
@@ -787,7 +888,9 @@ test_that("ans_operators vars selects columns", {
   on.exit(unlink(d, recursive = TRUE))
 
   fake <- tibble::tibble(
-    REGISTRO_OPERADORA = "111", CNPJ = "aaa", UF = "SP"
+    REGISTRO_OPERADORA = "111",
+    CNPJ = "aaa",
+    UF = "SP"
   )
   .cache_write(fake, d, "ans_operators_active")
 
@@ -810,14 +913,25 @@ test_that("ans_data lazy=TRUE returns lazy object", {
   skip_if_not_installed("arrow")
 
   fake_data <- tibble::tibble(
-    year = 2023L, month = 12L, uf_source = "AC",
+    year = 2023L,
+    month = 12L,
+    uf_source = "AC",
     CD_OPERADORA = "123456"
   )
-  .cache_append_partitioned(fake_data, d, "ans_beneficiaries_data",
-                            c("uf_source", "year", "month"))
+  .cache_append_partitioned(
+    fake_data,
+    d,
+    "ans_beneficiaries_data",
+    c("uf_source", "year", "month")
+  )
 
-  result <- ans_data(year = 2023, uf = "AC", month = 12,
-                     lazy = TRUE, cache_dir = d)
+  result <- ans_data(
+    year = 2023,
+    uf = "AC",
+    month = 12,
+    lazy = TRUE,
+    cache_dir = d
+  )
   expect_false(inherits(result, "tbl_df"))
   collected <- dplyr::collect(result)
   expect_s3_class(collected, "tbl_df")
@@ -860,8 +974,12 @@ test_that("integration: financial 2023 Q1", {
   d <- tempfile()
   on.exit(unlink(d, recursive = TRUE))
 
-  result <- ans_data(year = 2023, type = "financial", quarter = 1,
-                     cache_dir = d)
+  result <- ans_data(
+    year = 2023,
+    type = "financial",
+    quarter = 1,
+    cache_dir = d
+  )
   expect_s3_class(result, "tbl_df")
   expect_true(nrow(result) > 0)
   expect_true("REG_ANS" %in% names(result))

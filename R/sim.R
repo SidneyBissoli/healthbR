@@ -9,8 +9,11 @@
 #' Validate SIM year parameter
 #' @noRd
 .sim_validate_year <- function(year, status = "all") {
-  .validate_year(year, sim_years(status = status),
-                 years_fn_hint = "sim_years(status = 'all')")
+  .validate_year(
+    year,
+    sim_years(status = status),
+    years_fn_hint = "sim_years(status = 'all')"
+  )
 }
 
 #' Validate SIM UF parameter
@@ -64,7 +67,10 @@
     # CID-10: DO{UF}{YYYY}.dbc
     stringr::str_c(
       "ftp://ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/DORES/",
-      "DO", uf, year, ".dbc"
+      "DO",
+      uf,
+      year,
+      ".dbc"
     )
   } else {
     cli::cli_abort(
@@ -102,12 +108,12 @@
 
   dplyr::case_when(
     is.na(unit) | is.na(value) ~ NA_real_,
-    unit == 0L ~ value / (365.25 * 24 * 60),   # minutes to years
-    unit == 1L ~ value / (365.25 * 24),         # hours to years
-    unit == 2L ~ value / 365.25,                # days to years
-    unit == 3L ~ value / 12,                    # months to years
-    unit == 4L ~ as.double(value),              # years (0-99)
-    unit == 5L ~ 100 + as.double(value),        # 100+ years
+    unit == 0L ~ value / (365.25 * 24 * 60), # minutes to years
+    unit == 1L ~ value / (365.25 * 24), # hours to years
+    unit == 2L ~ value / 365.25, # days to years
+    unit == 3L ~ value / 12, # months to years
+    unit == 4L ~ as.double(value), # years (0-99)
+    unit == 5L ~ 100 + as.double(value), # 100+ years
     TRUE ~ NA_real_
   )
 }
@@ -127,12 +133,14 @@
   target_uf <- uf
 
   # 1. check partitioned cache first (preferred path)
-  if (isTRUE(cache) && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
+  if (
+    isTRUE(cache) &&
+      .has_arrow() &&
+      .has_partitioned_cache(cache_dir, dataset_name)
+  ) {
     ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
     cached <- ds |>
-      dplyr::filter(.data$uf_source == target_uf,
-                     .data$year == target_year) |>
+      dplyr::filter(.data$uf_source == target_uf, .data$year == target_year) |>
       dplyr::collect()
     if (nrow(cached) > 0) return(cached)
   }
@@ -166,8 +174,12 @@
 
   # 4. write to partitioned cache
   if (isTRUE(cache)) {
-    .cache_append_partitioned(data, cache_dir, dataset_name,
-                              c("uf_source", "year"))
+    .cache_append_partitioned(
+      data,
+      cache_dir,
+      dataset_name,
+      c("uf_source", "year")
+    )
   }
 
   data
@@ -201,7 +213,8 @@
 sim_years <- function(status = "final") {
   status <- match.arg(status, c("final", "preliminary", "all"))
 
-  switch(status,
+  switch(
+    status,
     "final" = sim_available_years$final,
     "preliminary" = sim_available_years$preliminary,
     "all" = sort(c(sim_available_years$final, sim_available_years$preliminary))
@@ -336,7 +349,8 @@ sim_dictionary <- function(variable = NULL) {
 #' @noRd
 .sim_download_loop <- function(year, target_ufs, cache, cache_dir) {
   combinations <- expand.grid(
-    year = year, uf = target_ufs,
+    year = year,
+    uf = target_ufs,
     stringsAsFactors = FALSE
   )
 
@@ -349,22 +363,28 @@ sim_dictionary <- function(variable = NULL) {
 
   labels <- paste(combinations$uf, combinations$year)
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
-                            .progress = "Downloading", function(i) {
-    yr <- combinations$year[i]
-    st <- combinations$uf[i]
-    tryCatch(
-      .sim_download_and_read(yr, st, cache = cache, cache_dir = cache_dir),
-      error = function(e) NULL
-    )
-  })
+  results <- .map_parallel(
+    seq_len(n_combos),
+    .delay = 0.5,
+    .progress = "Downloading",
+    function(i) {
+      yr <- combinations$year[i]
+      st <- combinations$uf[i]
+      tryCatch(
+        .sim_download_and_read(yr, st, cache = cache, cache_dir = cache_dir),
+        error = function(e) NULL
+      )
+    }
+  )
 
   succeeded <- !vapply(results, is.null, logical(1))
   failed_labels <- labels[!succeeded]
   results <- results[succeeded]
 
   if (length(results) == 0) {
-    cli::cli_abort("No data could be downloaded for the requested year(s)/UF(s).")
+    cli::cli_abort(
+      "No data could be downloaded for the requested year(s)/UF(s)."
+    )
   }
 
   list(data = dplyr::bind_rows(results), failed_labels = failed_labels)
@@ -373,15 +393,29 @@ sim_dictionary <- function(variable = NULL) {
 #' Post-process SIM data (cause filter, parse, age decode)
 #' @return List with `data` (data.frame) and `lazy_select` (character or NULL).
 #' @noRd
-.sim_post_process <- function(data, cause, decode_age, parse, col_types,
-                              lazy, vars, lazy_select) {
+.sim_post_process <- function(
+  data,
+  cause,
+  decode_age,
+  parse,
+  col_types,
+  lazy,
+  vars,
+  lazy_select
+) {
   # filter by cause
   if (!is.null(cause)) {
-    cause_pattern <- stringr::str_c("^(", stringr::str_c(cause, collapse = "|"), ")")
+    cause_pattern <- stringr::str_c(
+      "^(",
+      stringr::str_c(cause, collapse = "|"),
+      ")"
+    )
     if ("CAUSABAS" %in% names(data)) {
       data <- data[grepl(cause_pattern, data$CAUSABAS), ]
     } else {
-      cli::cli_warn("Column {.var CAUSABAS} not found in data. Cannot filter by cause.")
+      cli::cli_warn(
+        "Column {.var CAUSABAS} not found in data. Cannot filter by cause."
+      )
     }
   }
 
@@ -490,16 +524,27 @@ sim_dictionary <- function(variable = NULL) {
 #' sim_data(year = 2022, uf = "RJ",
 #'          vars = c("DTOBITO", "SEXO", "IDADE",
 #'                   "RACACOR", "CODMUNRES", "CAUSABAS"))
-sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
-                     decode_age = TRUE,
-                     parse = TRUE, col_types = NULL,
-                     cache = TRUE, cache_dir = NULL,
-                     lazy = FALSE, backend = c("arrow", "duckdb")) {
-
+sim_data <- function(
+  year,
+  vars = NULL,
+  uf = NULL,
+  cause = NULL,
+  decode_age = TRUE,
+  parse = TRUE,
+  col_types = NULL,
+  cache = TRUE,
+  cache_dir = NULL,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   # validate inputs
   year <- .sim_validate_year(year)
-  if (!is.null(uf)) uf <- .sim_validate_uf(uf)
-  if (!is.null(vars)) .sim_validate_vars(vars)
+  if (!is.null(uf)) {
+    uf <- .sim_validate_uf(uf)
+  }
+  if (!is.null(vars)) {
+    .sim_validate_vars(vars)
+  }
 
   # determine UFs to download
   target_ufs <- if (!is.null(uf)) toupper(uf) else sim_uf_list
@@ -507,20 +552,50 @@ sim_data <- function(year, vars = NULL, uf = NULL, cause = NULL,
   # compute lazy args
   cache_dir_resolved <- .sim_cache_dir(cache_dir)
   lazy_filters <- list(year = year, uf_source = target_ufs)
-  lazy_select <- if (!is.null(vars)) unique(c("year", "uf_source", vars)) else NULL
+  lazy_select <- if (!is.null(vars)) {
+    unique(c("year", "uf_source", vars))
+  } else {
+    NULL
+  }
 
   # pre-download lazy check
-  ds <- .try_lazy_cache(lazy, backend, cache_dir_resolved, "sim_data",
-                        lazy_filters, lazy_select, parse = parse)
-  if (!is.null(ds)) return(ds)
+  ds <- .try_lazy_cache(
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sim_data",
+    lazy_filters,
+    lazy_select,
+    parse = parse
+  )
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # download, post-process, return
   dl <- .sim_download_loop(year, target_ufs, cache, cache_dir)
-  pp <- .sim_post_process(dl$data, cause, decode_age, parse, col_types,
-                          lazy, vars, lazy_select)
+  pp <- .sim_post_process(
+    dl$data,
+    cause,
+    decode_age,
+    parse,
+    col_types,
+    lazy,
+    vars,
+    lazy_select
+  )
 
-  .data_return(pp$data, lazy, backend, cache_dir_resolved, "sim_data",
-               lazy_filters, pp$lazy_select, dl$failed_labels, "SIM")
+  .data_return(
+    pp$data,
+    lazy,
+    backend,
+    cache_dir_resolved,
+    "sim_data",
+    lazy_filters,
+    pp$lazy_select,
+    dl$failed_labels,
+    "SIM"
+  )
 }
 
 

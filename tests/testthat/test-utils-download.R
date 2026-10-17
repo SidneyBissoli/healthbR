@@ -14,8 +14,12 @@ test_that(".http_download_resumable downloads a small file", {
 
   # use a small, stable URL
   url <- "https://httpbin.org/bytes/1024"
-  result <- healthbR:::.http_download_resumable(url, dest, retries = 2L,
-                                                timeout = 30L)
+  result <- healthbR:::.http_download_resumable(
+    url,
+    dest,
+    retries = 2L,
+    timeout = 30L
+  )
   expect_true(file.exists(dest))
   expect_gt(file.size(dest), 0)
 })
@@ -26,7 +30,10 @@ test_that(".http_download_resumable errors on invalid URL", {
 
   expect_error(
     healthbR:::.http_download_resumable(
-      "https://httpbin.org/status/404", dest, retries = 1L, timeout = 10L
+      "https://httpbin.org/status/404",
+      dest,
+      retries = 1L,
+      timeout = 10L
     ),
     "Failed to download"
   )
@@ -47,8 +54,12 @@ test_that(".http_download_resumable resumes partial file", {
   # download a file that's bigger than 100 bytes
 
   url <- "https://httpbin.org/bytes/2048"
-  result <- healthbR:::.http_download_resumable(url, dest, retries = 2L,
-                                                timeout = 30L)
+  result <- healthbR:::.http_download_resumable(
+    url,
+    dest,
+    retries = 2L,
+    timeout = 30L
+  )
   expect_true(file.exists(dest))
   # file should be larger than the initial partial
   expect_gt(file.size(dest), 100)
@@ -63,8 +74,10 @@ test_that(".multi_download returns empty data frame for empty input", {
   result <- healthbR:::.multi_download(character(0), character(0))
   expect_s3_class(result, "data.frame")
   expect_equal(nrow(result), 0)
-  expect_true(all(c("success", "url", "destfile", "status_code", "error") %in%
-                    names(result)))
+  expect_true(all(
+    c("success", "url", "destfile", "status_code", "error") %in%
+      names(result)
+  ))
 })
 
 test_that(".multi_download downloads multiple files", {
@@ -77,10 +90,18 @@ test_that(".multi_download downloads multiple files", {
     "https://httpbin.org/bytes/256"
   )
   dests <- c(tempfile(fileext = ".bin"), tempfile(fileext = ".bin"))
-  on.exit(for (d in dests) if (file.exists(d)) file.remove(d))
+  on.exit(
+    for (d in dests) {
+      if (file.exists(d)) file.remove(d)
+    }
+  )
 
-  result <- healthbR:::.multi_download(urls, dests, max_concurrent = 2L,
-                                        timeout = 30L)
+  result <- healthbR:::.multi_download(
+    urls,
+    dests,
+    max_concurrent = 2L,
+    timeout = 30L
+  )
   expect_s3_class(result, "data.frame")
   expect_equal(nrow(result), 2)
   expect_true(all(result$success))
@@ -97,10 +118,18 @@ test_that(".multi_download handles mixed success/failure", {
     "https://httpbin.org/status/404"
   )
   dests <- c(tempfile(fileext = ".bin"), tempfile(fileext = ".bin"))
-  on.exit(for (d in dests) if (file.exists(d)) file.remove(d))
+  on.exit(
+    for (d in dests) {
+      if (file.exists(d)) file.remove(d)
+    }
+  )
 
-  result <- healthbR:::.multi_download(urls, dests, max_concurrent = 2L,
-                                        timeout = 30L)
+  result <- healthbR:::.multi_download(
+    urls,
+    dests,
+    max_concurrent = 2L,
+    timeout = 30L
+  )
   expect_equal(nrow(result), 2)
   # first should succeed
   expect_true(result$success[1])
@@ -126,8 +155,10 @@ test_that(".datasus_download errors on invalid FTP URL", {
 
   expect_error(
     healthbR:::.datasus_download(
-      "ftp://ftp.datasus.gov.br/nonexistent/file.dbc", dest,
-      retries = 1L, timeout = 10L
+      "ftp://ftp.datasus.gov.br/nonexistent/file.dbc",
+      dest,
+      retries = 1L,
+      timeout = 10L
     ),
     "Failed to download"
   )
@@ -144,8 +175,10 @@ test_that(".http_download errors on invalid URL", {
 
   expect_error(
     healthbR:::.http_download(
-      "https://httpbin.org/status/404", dest,
-      retries = 1L, timeout = 10L
+      "https://httpbin.org/status/404",
+      dest,
+      retries = 1L,
+      timeout = 10L
     ),
     "Failed to download"
   )
@@ -160,8 +193,10 @@ test_that(".http_download downloads a small file", {
   on.exit(if (file.exists(dest)) file.remove(dest))
 
   result <- healthbR:::.http_download(
-    "https://httpbin.org/bytes/512", dest,
-    retries = 2L, timeout = 30L
+    "https://httpbin.org/bytes/512",
+    dest,
+    retries = 2L,
+    timeout = 30L
   )
   expect_true(file.exists(dest))
   expect_gt(file.size(dest), 0)
@@ -217,8 +252,10 @@ test_that(".datasus_download errors after all retries exhausted with mock", {
 
   expect_error(
     .datasus_download(
-      "ftp://fake.server/file.dbc", dest,
-      retries = 1L, timeout = 5L
+      "ftp://fake.server/file.dbc",
+      dest,
+      retries = 1L,
+      timeout = 5L
     ),
     "Failed to download"
   )
@@ -239,8 +276,10 @@ test_that(".datasus_download cleans up partial file on failure", {
 
   tryCatch(
     .datasus_download(
-      "ftp://fake.server/file.dbc", dest,
-      retries = 1L, timeout = 5L
+      "ftp://fake.server/file.dbc",
+      dest,
+      retries = 1L,
+      timeout = 5L
     ),
     error = function(e) NULL
   )
@@ -262,8 +301,10 @@ test_that(".http_download errors after all retries exhausted with mock", {
 
   expect_error(
     .http_download(
-      "https://fake.server/file.csv", dest,
-      retries = 1L, timeout = 5L
+      "https://fake.server/file.csv",
+      dest,
+      retries = 1L,
+      timeout = 5L
     ),
     "Failed to download"
   )
@@ -283,8 +324,10 @@ test_that(".http_download cleans up partial file on failure", {
 
   tryCatch(
     .http_download(
-      "https://fake.server/file.csv", dest,
-      retries = 1L, timeout = 5L
+      "https://fake.server/file.csv",
+      dest,
+      retries = 1L,
+      timeout = 5L
     ),
     error = function(e) NULL
   )
@@ -340,8 +383,12 @@ test_that(".datasus_download succeeds on first try with mock", {
     .package = "curl"
   )
 
-  result <- .datasus_download("ftp://fake.server/file.dbc", dest,
-                               retries = 3L, timeout = 5L)
+  result <- .datasus_download(
+    "ftp://fake.server/file.dbc",
+    dest,
+    retries = 3L,
+    timeout = 5L
+  )
   expect_true(file.exists(dest))
   expect_gt(file.size(dest), 0)
 })
@@ -354,15 +401,21 @@ test_that(".datasus_download succeeds after retry with mock", {
   local_mocked_bindings(
     curl_download = function(url, destfile, ...) {
       call_count <<- call_count + 1L
-      if (call_count < 2L) stop("Connection refused")
+      if (call_count < 2L) {
+        stop("Connection refused")
+      }
       writeBin(as.raw(1:200), destfile)
       invisible(destfile)
     },
     .package = "curl"
   )
 
-  result <- .datasus_download("ftp://fake.server/file.dbc", dest,
-                               retries = 3L, timeout = 5L)
+  result <- .datasus_download(
+    "ftp://fake.server/file.dbc",
+    dest,
+    retries = 3L,
+    timeout = 5L
+  )
   expect_true(file.exists(dest))
   expect_equal(call_count, 2L)
 })
@@ -380,7 +433,10 @@ test_that(".datasus_download returns invisible destfile on success", {
   )
 
   vis_result <- withVisible(.datasus_download(
-    "ftp://fake.server/file.dbc", dest, retries = 1L, timeout = 5L
+    "ftp://fake.server/file.dbc",
+    dest,
+    retries = 1L,
+    timeout = 5L
   ))
   expect_false(vis_result$visible)
   expect_equal(vis_result$value, dest)
@@ -402,8 +458,12 @@ test_that(".http_download succeeds on first try with mock", {
     .package = "curl"
   )
 
-  result <- .http_download("https://fake.server/file.csv", dest,
-                            retries = 1L, timeout = 5L)
+  result <- .http_download(
+    "https://fake.server/file.csv",
+    dest,
+    retries = 1L,
+    timeout = 5L
+  )
   expect_true(file.exists(dest))
   expect_gt(file.size(dest), 0)
 })
@@ -421,9 +481,13 @@ test_that(".http_download accepts ssl_verifypeer=FALSE without error", {
   )
 
   # just verify the function runs without error when ssl_verifypeer=FALSE
-  result <- .http_download("https://fake.server/file.csv", dest,
-                            retries = 1L, timeout = 5L,
-                            ssl_verifypeer = FALSE)
+  result <- .http_download(
+    "https://fake.server/file.csv",
+    dest,
+    retries = 1L,
+    timeout = 5L,
+    ssl_verifypeer = FALSE
+  )
   expect_true(file.exists(dest))
   expect_gt(file.size(dest), 0)
 })
@@ -436,15 +500,21 @@ test_that(".http_download succeeds after retry with mock", {
   local_mocked_bindings(
     curl_download = function(url, destfile, ...) {
       call_count <<- call_count + 1L
-      if (call_count < 2L) stop("Timeout")
+      if (call_count < 2L) {
+        stop("Timeout")
+      }
       writeBin(as.raw(1:200), destfile)
       invisible(destfile)
     },
     .package = "curl"
   )
 
-  result <- .http_download("https://fake.server/file.csv", dest,
-                            retries = 3L, timeout = 5L)
+  result <- .http_download(
+    "https://fake.server/file.csv",
+    dest,
+    retries = 3L,
+    timeout = 5L
+  )
   expect_true(file.exists(dest))
   expect_equal(call_count, 2L)
 })
@@ -462,7 +532,10 @@ test_that(".http_download returns invisible destfile on success", {
   )
 
   vis_result <- withVisible(.http_download(
-    "https://fake.server/file.csv", dest, retries = 1L, timeout = 5L
+    "https://fake.server/file.csv",
+    dest,
+    retries = 1L,
+    timeout = 5L
   ))
   expect_false(vis_result$visible)
   expect_equal(vis_result$value, dest)
@@ -485,8 +558,10 @@ test_that(".http_download_resumable fresh download with mock", {
   )
 
   result <- .http_download_resumable(
-    "https://fake.server/file.bin", dest,
-    retries = 1L, timeout = 5L
+    "https://fake.server/file.bin",
+    dest,
+    retries = 1L,
+    timeout = 5L
   )
   expect_true(file.exists(dest))
   expect_gt(file.size(dest), 0)
@@ -517,8 +592,10 @@ test_that(".http_download_resumable detects existing partial file size", {
   # Should clean up and error
   expect_error(
     .http_download_resumable(
-      "https://fake.server/file.bin", dest,
-      retries = 1L, timeout = 5L
+      "https://fake.server/file.bin",
+      dest,
+      retries = 1L,
+      timeout = 5L
     ),
     "Failed to download"
   )
@@ -532,7 +609,9 @@ test_that(".http_download_resumable succeeds after partial failure then retry", 
   local_mocked_bindings(
     curl_download = function(url, destfile, ...) {
       call_count <<- call_count + 1L
-      if (call_count < 2L) stop("Temporary failure")
+      if (call_count < 2L) {
+        stop("Temporary failure")
+      }
       writeBin(as.raw(1:200), destfile)
       invisible(destfile)
     },
@@ -540,8 +619,10 @@ test_that(".http_download_resumable succeeds after partial failure then retry", 
   )
 
   result <- .http_download_resumable(
-    "https://fake.server/file.bin", dest,
-    retries = 3L, timeout = 5L
+    "https://fake.server/file.bin",
+    dest,
+    retries = 3L,
+    timeout = 5L
   )
   expect_true(file.exists(dest))
   expect_gt(file.size(dest), 0)
@@ -561,7 +642,10 @@ test_that(".http_download_resumable returns invisible destfile", {
   )
 
   vis_result <- withVisible(.http_download_resumable(
-    "https://fake.server/file.bin", dest, retries = 1L, timeout = 5L
+    "https://fake.server/file.bin",
+    dest,
+    retries = 1L,
+    timeout = 5L
   ))
   expect_false(vis_result$visible)
   expect_equal(vis_result$value, dest)
@@ -580,8 +664,10 @@ test_that(".http_download_resumable errors after all retries", {
 
   expect_error(
     .http_download_resumable(
-      "https://fake.server/file.bin", dest,
-      retries = 1L, timeout = 5L
+      "https://fake.server/file.bin",
+      dest,
+      retries = 1L,
+      timeout = 5L
     ),
     "Failed to download"
   )
@@ -605,8 +691,10 @@ test_that(".http_download_resumable cleans up destfile on total failure", {
 
   tryCatch(
     .http_download_resumable(
-      "https://fake.server/file.bin", dest,
-      retries = 1L, timeout = 5L
+      "https://fake.server/file.bin",
+      dest,
+      retries = 1L,
+      timeout = 5L
     ),
     error = function(e) NULL
   )
@@ -626,10 +714,15 @@ test_that(".multi_download creates destination directories", {
   local_mocked_bindings(
     multi_download = function(urls, destfiles, ...) {
       # simulate curl::multi_download response
-      for (d in destfiles) writeBin(as.raw(1:100), d)
+      for (d in destfiles) {
+        writeBin(as.raw(1:100), d)
+      }
       data.frame(
-        success = TRUE, url = urls, destfile = destfiles,
-        status_code = 200L, error = NA_character_,
+        success = TRUE,
+        url = urls,
+        destfile = destfiles,
+        status_code = 200L,
+        error = NA_character_,
         stringsAsFactors = FALSE
       )
     },
@@ -649,7 +742,9 @@ test_that(".multi_download creates destination directories", {
 test_that(".multi_download returns correct structure with mocked results", {
   local_mocked_bindings(
     multi_download = function(urls, destfiles, ...) {
-      for (d in destfiles) writeBin(as.raw(1:100), d)
+      for (d in destfiles) {
+        writeBin(as.raw(1:100), d)
+      }
       data.frame(
         success = c(TRUE, FALSE),
         url = urls,
@@ -665,13 +760,17 @@ test_that(".multi_download returns correct structure with mocked results", {
   dest1 <- tempfile(fileext = ".bin")
   dest2 <- tempfile(fileext = ".bin")
   on.exit({
-    if (file.exists(dest1)) file.remove(dest1)
+    if (file.exists(dest1)) {
+      file.remove(dest1)
+    }
     if (file.exists(dest2)) file.remove(dest2)
   })
 
   result <- .multi_download(
     c("https://fake.server/a.bin", "https://fake.server/b.bin"),
-    c(dest1, dest2), max_concurrent = 2L, timeout = 5L
+    c(dest1, dest2),
+    max_concurrent = 2L,
+    timeout = 5L
   )
 
   expect_equal(nrow(result), 2)

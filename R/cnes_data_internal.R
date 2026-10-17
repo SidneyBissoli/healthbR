@@ -19,9 +19,33 @@ cnes_available_years <- list(
 #' Brazilian state (UF) abbreviations
 #' @noRd
 cnes_uf_list <- c(
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
-  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
-  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO"
 )
 
 # ============================================================================
@@ -32,8 +56,19 @@ cnes_uf_list <- c(
 #' @noRd
 cnes_valid_types <- tibble::tibble(
   code = c(
-    "ST", "LT", "PF", "DC", "EQ", "SR", "HB", "EP",
-    "RC", "IN", "EE", "EF", "GM"
+    "ST",
+    "LT",
+    "PF",
+    "DC",
+    "EQ",
+    "SR",
+    "HB",
+    "EP",
+    "RC",
+    "IN",
+    "EE",
+    "EF",
+    "GM"
   ),
   name = c(
     "Estabelecimentos",
@@ -76,18 +111,37 @@ cnes_valid_types <- tibble::tibble(
 cnes_variables_metadata <- tibble::tibble(
   variable = c(
     # identificacao
-    "CNES", "CODUFMUN", "COD_CEP", "CPF_CNPJ", "PF_PJ",
-    "NIV_DEP", "CNPJ_MAN", "COD_IR",
+    "CNES",
+    "CODUFMUN",
+    "COD_CEP",
+    "CPF_CNPJ",
+    "PF_PJ",
+    "NIV_DEP",
+    "CNPJ_MAN",
+    "COD_IR",
     # classificacao
-    "TP_UNID", "TURNO_AT", "NIV_HIER", "TP_PREST",
+    "TP_UNID",
+    "TURNO_AT",
+    "NIV_HIER",
+    "TP_PREST",
     # sus
-    "VINC_SUS", "TP_GESTAO", "ESFERA_A", "ATIVIDAD",
-    "RETESSION", "NAT_JUR",
+    "VINC_SUS",
+    "TP_GESTAO",
+    "ESFERA_A",
+    "ATIVIDAD",
+    "RETESSION",
+    "NAT_JUR",
     # atendimento
-    "ATV_AMBUL", "ATV_HOSP", "ATV_URG", "ATV_SUR",
-    "ATV_ENSN", "ATV_VIGIL",
+    "ATV_AMBUL",
+    "ATV_HOSP",
+    "ATV_URG",
+    "ATV_SUR",
+    "ATV_ENSN",
+    "ATV_VIGIL",
     # temporal
-    "COMPETEN", "DTCARGA", "DT_ATUAL"
+    "COMPETEN",
+    "DTCARGA",
+    "DT_ATUAL"
   ),
   description = c(
     # identificacao
@@ -125,18 +179,37 @@ cnes_variables_metadata <- tibble::tibble(
   ),
   type = c(
     # identificacao
-    "character", "character", "character", "character", "character",
-    "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # classificacao
-    "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # sus
-    "character", "character", "character", "character",
-    "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # atendimento
-    "character", "character", "character", "character",
-    "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # temporal
-    "date_ym", "character", "character"
+    "date_ym",
+    "character",
+    "character"
   ),
   section = c(
     # identificacao
@@ -180,17 +253,44 @@ cnes_dictionary_data <- tibble::tibble(
   ),
   code = c(
     # TP_UNID
-    "01", "02", "04", "05", "07", "09", "15", "20",
-    "21", "22", "32", "36", "39", "40", "42", "43",
-    "50", "60", "61", "62", "64", "70",
+    "01",
+    "02",
+    "04",
+    "05",
+    "07",
+    "09",
+    "15",
+    "20",
+    "21",
+    "22",
+    "32",
+    "36",
+    "39",
+    "40",
+    "42",
+    "43",
+    "50",
+    "60",
+    "61",
+    "62",
+    "64",
+    "70",
     # ESFERA_A
-    "1", "2", "3", "4",
+    "1",
+    "2",
+    "3",
+    "4",
     # VINC_SUS
-    "0", "1",
+    "0",
+    "1",
     # TP_GESTAO
-    "M", "E", "D", "S",
+    "M",
+    "E",
+    "D",
+    "S",
     # PF_PJ
-    "1", "3"
+    "1",
+    "3"
   ),
   label = c(
     # TP_UNID
@@ -267,11 +367,16 @@ cnes_label_maps <- list(
     "70" = "Centro de aten\u00e7\u00e3o hemoter\u00e1pica/hematol\u00f3gica"
   ),
   ESFERA_A = c(
-    "1" = "Federal", "2" = "Estadual", "3" = "Municipal", "4" = "Privada"
+    "1" = "Federal",
+    "2" = "Estadual",
+    "3" = "Municipal",
+    "4" = "Privada"
   ),
   VINC_SUS = c("0" = "N\u00e3o", "1" = "Sim"),
   TP_GESTAO = c(
-    "M" = "Municipal", "E" = "Estadual", "D" = "Dupla",
+    "M" = "Municipal",
+    "E" = "Estadual",
+    "D" = "Dupla",
     "S" = "Sem gest\u00e3o"
   ),
   PF_PJ = c("1" = "Pessoa F\u00edsica", "3" = "Pessoa Jur\u00eddica")

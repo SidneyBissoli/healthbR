@@ -22,19 +22,42 @@ devtools::load_all(".", quiet = TRUE)
 dict <- sipni_dictionary(source = "r2", cache = FALSE)
 lookup <- healthbR:::.sipni_expand_dict_lookup(dict)
 
-message("Lookup rows: ", nrow(lookup),
-        " (overlaps resolved by specificity: explicit codes beat ranges)")
+message(
+  "Lookup rows: ",
+  nrow(lookup),
+  " (overlaps resolved by specificity: explicit codes beat ranges)"
+)
 
 esc <- function(x) {
-  vapply(x, function(s) {
-    ints <- utf8ToInt(s)
-    paste(ifelse(ints > 127L, sprintf("\\u%04x", ints),
-                 vapply(ints, function(i) {
-                   ch <- intToUtf8(i)
-                   if (ch == "\\") "\\\\" else if (ch == "\"") "\\\"" else ch
-                 }, character(1))),
-          collapse = "")
-  }, character(1), USE.NAMES = FALSE)
+  vapply(
+    x,
+    function(s) {
+      ints <- utf8ToInt(s)
+      paste(
+        ifelse(
+          ints > 127L,
+          sprintf("\\u%04x", ints),
+          vapply(
+            ints,
+            function(i) {
+              ch <- intToUtf8(i)
+              if (ch == "\\") {
+                "\\\\"
+              } else if (ch == "\"") {
+                "\\\""
+              } else {
+                ch
+              }
+            },
+            character(1)
+          )
+        ),
+        collapse = ""
+      )
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
 }
 
 vec_lines <- function(x, indent = "    ") {
@@ -42,8 +65,15 @@ vec_lines <- function(x, indent = "    ") {
 }
 
 named_vec_lines <- function(codes, labels, indent = "    ") {
-  paste0(indent, "\"", esc(codes), "\" = \"", esc(labels), "\"",
-         c(rep(",", length(codes) - 1), ""))
+  paste0(
+    indent,
+    "\"",
+    esc(codes),
+    "\" = \"",
+    esc(labels),
+    "\"",
+    c(rep(",", length(codes) - 1), "")
+  )
 }
 
 out <- c(
@@ -80,21 +110,28 @@ out <- c(
 )
 
 map_specs <- list(
-  IMUNO = lookup[lookup$variable == "IMUNO" &
-                   grepl("doses", lookup$description), ],
+  IMUNO = lookup[
+    lookup$variable == "IMUNO" &
+      grepl("doses", lookup$description),
+  ],
   DOSE = lookup[lookup$variable == "DOSE", ],
   FX_ETARIA = lookup[lookup$variable == "FX_ETARIA", ]
 )
 for (i in seq_along(map_specs)) {
   m <- map_specs[[i]]
-  out <- c(out,
-           paste0("  ", names(map_specs)[i], " = c("),
-           named_vec_lines(m$code, m$label),
-           paste0("  )", if (i < length(map_specs)) ","))
+  out <- c(
+    out,
+    paste0("  ", names(map_specs)[i], " = c("),
+    named_vec_lines(m$code, m$label),
+    paste0("  )", if (i < length(map_specs)) ",")
+  )
 }
 out <- c(out, ")")
 
 writeLines(out, "R/sipni_dictionary_data.R")
-message("Wrote R/sipni_dictionary_data.R: ", nrow(lookup),
-        " dictionary rows; label maps: ",
-        paste(vapply(map_specs, nrow, integer(1)), collapse = "/"))
+message(
+  "Wrote R/sipni_dictionary_data.R: ",
+  nrow(lookup),
+  " dictionary rows; label maps: ",
+  paste(vapply(map_specs, nrow, integer(1)), collapse = "/")
+)

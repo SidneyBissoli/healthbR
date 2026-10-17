@@ -74,11 +74,22 @@ pnadc_base_url <- function() {
 pnadc_required_vars <- function() {
   c(
     # identification
-    "Ano", "Trimestre", "UF", "Capital", "RM_RIDE", "V1008", "V1014",
+    "Ano",
+    "Trimestre",
+    "UF",
+    "Capital",
+    "RM_RIDE",
+    "V1008",
+    "V1014",
     # demographics
-    "V2007", "V2009", "V2010",
+    "V2007",
+    "V2009",
+    "V2010",
     # survey design
-    "UPA", "Estrato", "V1028", "V1027"
+    "UPA",
+    "Estrato",
+    "V1028",
+    "V1027"
   )
 }
 
@@ -208,11 +219,15 @@ pnadc_find_data_url <- function(module, year) {
     quarter <- module_info$quarter
     data_dir_url <- stringr::str_c(
       base,
-      "Anual/Microdados/Trimestre/Trimestre_", quarter, "/Dados/"
+      "Anual/Microdados/Trimestre/Trimestre_",
+      quarter,
+      "/Dados/"
     )
     doc_dir_url <- stringr::str_c(
       base,
-      "Anual/Microdados/Trimestre/Trimestre_", quarter, "/Documentacao/"
+      "Anual/Microdados/Trimestre/Trimestre_",
+      quarter,
+      "/Documentacao/"
     )
     data_pattern <- stringr::str_c("PNADC_", year, "_trimestre", quarter)
     input_pattern <- stringr::str_c("input_PNADC_trimestre", quarter)
@@ -286,7 +301,9 @@ pnadc_download_file <- function(url, destfile, refresh = FALSE) {
       cli::cli_alert_success("Download complete: {.file {basename(destfile)}}")
     },
     error = function(e) {
-      if (file.exists(destfile)) file.remove(destfile)
+      if (file.exists(destfile)) {
+        file.remove(destfile)
+      }
       cli::cli_abort(c(
         "Download failed: {e$message}",
         "i" = "URL: {.url {url}}",
@@ -399,9 +416,15 @@ pnadc_read_zip <- function(zip_path, input_path, module, year) {
   extracted_files <- list.files(temp_dir, recursive = TRUE, full.names = TRUE)
 
   # look for data file (TXT)
-  txt_files <- extracted_files[grepl("\\.txt$", extracted_files, ignore.case = TRUE)]
+  txt_files <- extracted_files[grepl(
+    "\\.txt$",
+    extracted_files,
+    ignore.case = TRUE
+  )]
   # exclude input/documentation files
-  data_files <- txt_files[!grepl("input|dicionario|leitura", txt_files, ignore.case = TRUE)]
+  data_files <- txt_files[
+    !grepl("input|dicionario|leitura", txt_files, ignore.case = TRUE)
+  ]
 
   if (length(data_files) == 0) {
     # cleanup and abort
@@ -443,7 +466,9 @@ pnadc_apply_survey_design <- function(data) {
     ))
   }
 
-  cli::cli_inform("Applying survey design (PSU: UPA, Strata: Estrato, Weight: V1028)...")
+  cli::cli_inform(
+    "Applying survey design (PSU: UPA, Strata: Estrato, Weight: V1028)..."
+  )
 
   # create survey design using srvyr
   svy <- srvyr::as_survey_design(
@@ -605,17 +630,21 @@ pnadc_info <- function() {
 #' @examplesIf interactive()
 #' # get dictionary for deficiencia module
 #' dict <- pnadc_dictionaries(module = "deficiencia", cache_dir = tempdir())
-pnadc_dictionaries <- function(module,
-                                year = NULL,
-                                cache_dir = NULL,
-                                refresh = FALSE) {
+pnadc_dictionaries <- function(
+  module,
+  year = NULL,
+  cache_dir = NULL,
+  refresh = FALSE
+) {
   # validate parameters
   module <- validate_pnadc_module(module)
   years <- validate_pnadc_year(year, module)
 
   if (length(years) > 1) {
     year <- max(years)
-    cli::cli_inform("Using year {year} for dictionary (only one year at a time).")
+    cli::cli_inform(
+      "Using year {year} for dictionary (only one year at a time)."
+    )
   } else {
     year <- years[1]
   }
@@ -624,7 +653,10 @@ pnadc_dictionaries <- function(module,
   cache_dir <- pnadc_cache_dir(cache_dir)
 
   # check for cached dictionary
-  dict_cache_file <- file.path(cache_dir, paste0("pnadc_dict_", module, "_", year, ".rds"))
+  dict_cache_file <- file.path(
+    cache_dir,
+    paste0("pnadc_dict_", module, "_", year, ".rds")
+  )
 
   if (file.exists(dict_cache_file) && !refresh) {
     cli::cli_inform("Loading PNADC {module} {year} dictionary from cache...")
@@ -658,7 +690,9 @@ pnadc_dictionaries <- function(module,
 
   # save to cache
   saveRDS(dict_df, dict_cache_file)
-  cli::cli_alert_success("Dictionary cached: {.file {basename(dict_cache_file)}}")
+  cli::cli_alert_success(
+    "Dictionary cached: {.file {basename(dict_cache_file)}}"
+  )
 
   dict_df
 }
@@ -682,10 +716,12 @@ pnadc_dictionaries <- function(module,
 #' @examplesIf interactive()
 #' # list variables for deficiencia module
 #' pnadc_variables(module = "deficiencia", cache_dir = tempdir())
-pnadc_variables <- function(module,
-                             year = NULL,
-                             cache_dir = NULL,
-                             refresh = FALSE) {
+pnadc_variables <- function(
+  module,
+  year = NULL,
+  cache_dir = NULL,
+  refresh = FALSE
+) {
   dict <- pnadc_dictionaries(
     module = module,
     year = year,
@@ -703,7 +739,9 @@ pnadc_variables <- function(module,
 #' Try lazy return from partitioned cache
 #' @noRd
 .pnadc_try_lazy <- function(module, year, vars, lazy, backend, cache_dir) {
-  if (!isTRUE(lazy)) return(NULL)
+  if (!isTRUE(lazy)) {
+    return(NULL)
+  }
   cache_dir_resolved <- .module_cache_dir("pnadc", cache_dir)
   ds_name <- paste0("pnadc_", module, "_data")
   year_filter <- if (!is.null(year)) as.integer(year) else NULL
@@ -713,7 +751,9 @@ pnadc_variables <- function(module,
     NULL
   }
   .lazy_return(
-    cache_dir_resolved, ds_name, backend,
+    cache_dir_resolved,
+    ds_name,
+    backend,
     filters = if (!is.null(year_filter)) list(year = year_filter) else list(),
     select_cols = select_cols
   )
@@ -721,14 +761,22 @@ pnadc_variables <- function(module,
 
 #' Download and cache loop for each year
 #' @noRd
-.pnadc_download_loop <- function(module, years, cache_dir, refresh,
-                                 dataset_name) {
+.pnadc_download_loop <- function(
+  module,
+  years,
+  cache_dir,
+  refresh,
+  dataset_name
+) {
   .map_parallel(years, .progress = "Downloading", function(y) {
     target_year <- as.integer(y)
 
     # 1. check partitioned cache first (preferred path)
-    if (!refresh && .has_arrow() &&
-        .has_partitioned_cache(cache_dir, dataset_name)) {
+    if (
+      !refresh &&
+        .has_arrow() &&
+        .has_partitioned_cache(cache_dir, dataset_name)
+    ) {
       ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
       cached <- ds |>
         dplyr::filter(.data$year == target_year) |>
@@ -773,7 +821,9 @@ pnadc_variables <- function(module,
 #' Select variables with required vars always included
 #' @noRd
 .pnadc_select_vars <- function(combined_data, vars) {
-  if (is.null(vars)) return(combined_data)
+  if (is.null(vars)) {
+    return(combined_data)
+  }
 
   vars <- toupper(vars)
   # always include required variables
@@ -888,13 +938,16 @@ pnadc_variables <- function(module,
 #'   vars = c("S11001", "S11002"),
 #'   cache_dir = tempdir()
 #' )
-pnadc_data <- function(module,
-                       year = NULL,
-                       vars = NULL,
-                       as_survey = FALSE,
-                       cache_dir = NULL,
-                       refresh = FALSE,
-                       lazy = FALSE, backend = c("arrow", "duckdb")) {
+pnadc_data <- function(
+  module,
+  year = NULL,
+  vars = NULL,
+  as_survey = FALSE,
+  cache_dir = NULL,
+  refresh = FALSE,
+  lazy = FALSE,
+  backend = c("arrow", "duckdb")
+) {
   # validate parameters
   module <- validate_pnadc_module(module)
   years <- validate_pnadc_year(year, module)
@@ -903,12 +956,19 @@ pnadc_data <- function(module,
 
   # try lazy return from existing cache
   ds <- .pnadc_try_lazy(module, year, vars, lazy, backend, cache_dir)
-  if (!is.null(ds)) return(ds)
+  if (!is.null(ds)) {
+    return(ds)
+  }
 
   # download and load data for each year
   dataset_name <- paste0("pnadc_", module, "_data")
-  data_list <- .pnadc_download_loop(module, years, cache_dir, refresh,
-                                    dataset_name)
+  data_list <- .pnadc_download_loop(
+    module,
+    years,
+    cache_dir,
+    refresh,
+    dataset_name
+  )
   combined_data <- dplyr::bind_rows(data_list)
 
   # try lazy return after download

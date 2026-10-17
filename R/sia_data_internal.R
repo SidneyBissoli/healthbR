@@ -19,9 +19,33 @@ sia_available_years <- list(
 #' Brazilian state (UF) abbreviations
 #' @noRd
 sia_uf_list <- c(
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
-  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
-  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO"
 )
 
 # ============================================================================
@@ -32,8 +56,19 @@ sia_uf_list <- c(
 #' @noRd
 sia_valid_types <- tibble::tibble(
   code = c(
-    "PA", "BI", "AD", "AM", "AN", "AQ", "AR", "AB",
-    "ACF", "ATD", "AMP", "SAD", "PS"
+    "PA",
+    "BI",
+    "AD",
+    "AM",
+    "AN",
+    "AQ",
+    "AR",
+    "AB",
+    "ACF",
+    "ATD",
+    "AMP",
+    "SAD",
+    "PS"
   ),
   name = c(
     "Produ\u00e7\u00e3o Ambulatorial",
@@ -76,20 +111,40 @@ sia_valid_types <- tibble::tibble(
 sia_variables_metadata <- tibble::tibble(
   variable = c(
     # gestao
-    "PA_CODUNI", "PA_GESTAO", "PA_CONDIC",
+    "PA_CODUNI",
+    "PA_GESTAO",
+    "PA_CONDIC",
     # procedimento
-    "PA_PROC_ID", "PA_TPFIN", "PA_SUBFIN", "PA_CODOCO",
-    "PA_DOCORIG", "PA_CODESP", "PA_TIPATE", "PA_TIPPRO",
+    "PA_PROC_ID",
+    "PA_TPFIN",
+    "PA_SUBFIN",
+    "PA_CODOCO",
+    "PA_DOCORIG",
+    "PA_CODESP",
+    "PA_TIPATE",
+    "PA_TIPPRO",
     # paciente
-    "PA_SEXO", "PA_IDADE", "PA_RACACOR", "PA_ETNIA",
+    "PA_SEXO",
+    "PA_IDADE",
+    "PA_RACACOR",
+    "PA_ETNIA",
     # diagnostico
-    "PA_CIDPRI", "PA_CIDSEC", "PA_CATEND",
+    "PA_CIDPRI",
+    "PA_CIDSEC",
+    "PA_CATEND",
     # financeiro
-    "PA_QTDPRO", "PA_QTDAPR", "PA_VALPRO", "PA_VALAPR",
+    "PA_QTDPRO",
+    "PA_QTDAPR",
+    "PA_VALPRO",
+    "PA_VALAPR",
     # localizacao
-    "PA_UFMUN", "PA_MUNRES", "PA_MUNPCN", "PA_REGCT",
+    "PA_UFMUN",
+    "PA_MUNRES",
+    "PA_MUNPCN",
+    "PA_REGCT",
     # temporal
-    "PA_MVM", "PA_CMP"
+    "PA_MVM",
+    "PA_CMP"
   ),
   description = c(
     # gestao
@@ -130,20 +185,40 @@ sia_variables_metadata <- tibble::tibble(
   ),
   type = c(
     # gestao
-    "character", "character", "character",
+    "character",
+    "character",
+    "character",
     # procedimento
-    "character", "character", "character", "character",
-    "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # paciente
-    "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # diagnostico
-    "character", "character", "character",
+    "character",
+    "character",
+    "character",
     # financeiro
-    "integer", "integer", "double", "double",
+    "integer",
+    "integer",
+    "double",
+    "double",
     # localizacao
-    "character", "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # temporal
-    "date_ym", "date_ym"
+    "date_ym",
+    "date_ym"
   ),
   section = c(
     # gestao
@@ -194,34 +269,63 @@ sia_dictionary_data <- tibble::tibble(
   ),
   code = c(
     # PA_SEXO
-    "1", "2",
+    "1",
+    "2",
     # PA_RACACOR
-    "01", "02", "03", "04", "05",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
     # PA_CONDIC
-    "EP", "EC", "MP", "MC",
+    "EP",
+    "EC",
+    "MP",
+    "MC",
     # PA_TIPATE
-    "01", "02", "03", "04",
+    "01",
+    "02",
+    "03",
+    "04",
     # PA_TPFIN
-    "01", "04", "05", "06", "07",
+    "01",
+    "04",
+    "05",
+    "06",
+    "07",
     # PA_CATEND
-    "01", "02"
+    "01",
+    "02"
   ),
   label = c(
     # PA_SEXO
-    "Masculino", "Feminino",
+    "Masculino",
+    "Feminino",
     # PA_RACACOR
-    "Branca", "Preta", "Amarela", "Parda", "Ind\u00edgena",
+    "Branca",
+    "Preta",
+    "Amarela",
+    "Parda",
+    "Ind\u00edgena",
     # PA_CONDIC
-    "Estado plena", "Estado convencional",
-    "Municipal plena", "Municipal convencional",
+    "Estado plena",
+    "Estado convencional",
+    "Municipal plena",
+    "Municipal convencional",
     # PA_TIPATE
-    "Eletivo", "Urg\u00eancia",
-    "Acidente de trabalho", "Outros",
+    "Eletivo",
+    "Urg\u00eancia",
+    "Acidente de trabalho",
+    "Outros",
     # PA_TPFIN
-    "Fundo de A\u00e7\u00f5es Estrat\u00e9gicas", "FAEC",
-    "Incentivo MAC", "MAC", "Incentivo FAEC",
+    "Fundo de A\u00e7\u00f5es Estrat\u00e9gicas",
+    "FAEC",
+    "Incentivo MAC",
+    "MAC",
+    "Incentivo FAEC",
     # PA_CATEND
-    "Eletivo", "Urg\u00eancia"
+    "Eletivo",
+    "Urg\u00eancia"
   )
 )
 
@@ -234,20 +338,30 @@ sia_dictionary_data <- tibble::tibble(
 sia_label_maps <- list(
   PA_SEXO = c("1" = "Masculino", "2" = "Feminino"),
   PA_RACACOR = c(
-    "01" = "Branca", "02" = "Preta", "03" = "Amarela",
-    "04" = "Parda", "05" = "Ind\u00edgena"
+    "01" = "Branca",
+    "02" = "Preta",
+    "03" = "Amarela",
+    "04" = "Parda",
+    "05" = "Ind\u00edgena"
   ),
   PA_CONDIC = c(
-    "EP" = "Estado plena", "EC" = "Estado convencional",
-    "MP" = "Municipal plena", "MC" = "Municipal convencional"
+    "EP" = "Estado plena",
+    "EC" = "Estado convencional",
+    "MP" = "Municipal plena",
+    "MC" = "Municipal convencional"
   ),
   PA_TIPATE = c(
-    "01" = "Eletivo", "02" = "Urg\u00eancia",
-    "03" = "Acidente de trabalho", "04" = "Outros"
+    "01" = "Eletivo",
+    "02" = "Urg\u00eancia",
+    "03" = "Acidente de trabalho",
+    "04" = "Outros"
   ),
   PA_TPFIN = c(
-    "01" = "Fundo de A\u00e7\u00f5es Estrat\u00e9gicas", "04" = "FAEC",
-    "05" = "Incentivo MAC", "06" = "MAC", "07" = "Incentivo FAEC"
+    "01" = "Fundo de A\u00e7\u00f5es Estrat\u00e9gicas",
+    "04" = "FAEC",
+    "05" = "Incentivo MAC",
+    "06" = "MAC",
+    "07" = "Incentivo FAEC"
   ),
   PA_CATEND = c("01" = "Eletivo", "02" = "Urg\u00eancia")
 )

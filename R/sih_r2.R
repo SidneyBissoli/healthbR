@@ -32,10 +32,20 @@ sih_r2_manifest_path <- "sih/rd/manifest.json"
 #' Column names of the SIH-RD manifest summary (and of sih_status())
 #' @noRd
 sih_r2_status_cols <- c(
-  "dataset", "year", "month", "uf", "records", "processing_timestamp",
-  "source_url", "source_hash_md5", "source_size_bytes",
-  "parquet_path", "parquet_sha256", "parquet_size_bytes",
-  "pipeline_version", "git_commit"
+  "dataset",
+  "year",
+  "month",
+  "uf",
+  "records",
+  "processing_timestamp",
+  "source_url",
+  "source_hash_md5",
+  "source_size_bytes",
+  "parquet_path",
+  "parquet_sha256",
+  "parquet_size_bytes",
+  "pipeline_version",
+  "git_commit"
 )
 
 #' Summarise the SIH-RD manifest as one row per partition
@@ -54,7 +64,9 @@ sih_r2_status_cols <- c(
 #' @noRd
 .sih_r2_manifest_summary <- function(cache_dir) {
   manifest <- .r2_manifest(sih_r2_manifest_path, cache_dir)
-  if (is.null(manifest) || is.null(manifest$partitions)) return(NULL)
+  if (is.null(manifest) || is.null(manifest$partitions)) {
+    return(NULL)
+  }
 
   # Session memo keyed on the manifest's own identity: building the summary
   # walks 11k+ partitions and cost ~4.6 s per call (measured 2026-09-05 with
@@ -64,7 +76,9 @@ sih_r2_status_cols <- c(
   stamp <- rlang::hash(manifest)
   memo_key <- paste0("summary:", sih_r2_manifest_path)
   memo <- .r2_env[[memo_key]]
-  if (!is.null(memo) && identical(memo$stamp, stamp)) return(memo$summary)
+  if (!is.null(memo) && identical(memo$stamp, stamp)) {
+    return(memo$summary)
+  }
 
   parts <- manifest$partitions
   keys <- names(parts)
@@ -76,19 +90,29 @@ sih_r2_status_cols <- c(
     if (is.null(v) || length(v) == 0) NA_real_ else as.numeric(v[[1]])
   }
   get_chr <- function(field) {
-    vapply(parts, function(p) scalar_chr(p[[field]]), character(1),
-           USE.NAMES = FALSE)
+    vapply(
+      parts,
+      function(p) scalar_chr(p[[field]]),
+      character(1),
+      USE.NAMES = FALSE
+    )
   }
   get_num <- function(field) {
-    vapply(parts, function(p) scalar_num(p[[field]]), numeric(1),
-           USE.NAMES = FALSE)
+    vapply(
+      parts,
+      function(p) scalar_num(p[[field]]),
+      numeric(1),
+      USE.NAMES = FALSE
+    )
   }
   # first output file of a partition, whatever shape the parser gave it --
   # computed ONCE per partition (as.list() on a one-row data frame is what
   # made the three per-field passes slow)
   first_output <- function(p) {
     of <- p[["output_files"]]
-    if (is.null(of) || length(of) == 0) return(NULL)
+    if (is.null(of) || length(of) == 0) {
+      return(NULL)
+    }
     if (is.data.frame(of)) {
       if (nrow(of) == 0) NULL else as.list(of[1, , drop = FALSE])
     } else {
@@ -97,12 +121,20 @@ sih_r2_status_cols <- c(
   }
   outputs <- lapply(parts, first_output)
   get_output_chr <- function(field) {
-    vapply(outputs, function(o) scalar_chr(o[[field]]),
-           character(1), USE.NAMES = FALSE)
+    vapply(
+      outputs,
+      function(o) scalar_chr(o[[field]]),
+      character(1),
+      USE.NAMES = FALSE
+    )
   }
   get_output_num <- function(field) {
-    vapply(outputs, function(o) scalar_num(o[[field]]),
-           numeric(1), USE.NAMES = FALSE)
+    vapply(
+      outputs,
+      function(o) scalar_num(o[[field]]),
+      numeric(1),
+      USE.NAMES = FALSE
+    )
   }
 
   summ <- tibble::tibble(
@@ -133,13 +165,22 @@ sih_r2_status_cols <- c(
 #' @return A tibble or NULL (never errors).
 #' @noRd
 .sih_r2_provenance <- function(years, months, ufs, cache_dir) {
-  tryCatch({
-    s <- .sih_r2_manifest_summary(cache_dir)
-    if (is.null(s)) return(NULL)
-    out <- s[s$year %in% as.integer(years) & s$month %in% as.integer(months) &
-               s$uf %in% ufs, ]
-    if (nrow(out) == 0) NULL else out
-  }, error = function(e) NULL)
+  tryCatch(
+    {
+      s <- .sih_r2_manifest_summary(cache_dir)
+      if (is.null(s)) {
+        return(NULL)
+      }
+      out <- s[
+        s$year %in%
+          as.integer(years) &
+          s$month %in% as.integer(months) &
+          s$uf %in% ufs,
+      ]
+      if (nrow(out) == 0) NULL else out
+    },
+    error = function(e) NULL
+  )
 }
 
 
@@ -176,26 +217,46 @@ sih_r2_status_cols <- c(
   failed <- character(0)
 
   # 1. serve cached combos locally
-  wanted <- expand.grid(year = as.integer(years), month = as.integer(months),
-                        uf_source = ufs, stringsAsFactors = FALSE)
-  have <- tibble::tibble(year = integer(0), month = integer(0),
-                         uf_source = character(0))
+  wanted <- expand.grid(
+    year = as.integer(years),
+    month = as.integer(months),
+    uf_source = ufs,
+    stringsAsFactors = FALSE
+  )
+  have <- tibble::tibble(
+    year = integer(0),
+    month = integer(0),
+    uf_source = character(0)
+  )
   if (isTRUE(cache)) {
-    combos <- .sipni_r2_cached_combos(cache_dir, dataset_name,
-                                      c("year", "month", "uf_source"))
+    combos <- .sipni_r2_cached_combos(
+      cache_dir,
+      dataset_name,
+      c("year", "month", "uf_source")
+    )
     if (nrow(combos) > 0) {
-      have <- dplyr::inner_join(wanted, combos,
-                                by = c("year", "month", "uf_source"))
+      have <- dplyr::inner_join(
+        wanted,
+        combos,
+        by = c("year", "month", "uf_source")
+      )
       if (nrow(have) > 0) {
-        ds <- arrow::open_dataset(file.path(cache_dir, dataset_name),
-                                  unify_schemas = TRUE)
+        ds <- arrow::open_dataset(
+          file.path(cache_dir, dataset_name),
+          unify_schemas = TRUE
+        )
         cached <- ds |>
-          dplyr::filter(.data$year %in% !!unique(have$year),
-                        .data$month %in% !!unique(have$month),
-                        .data$uf_source %in% !!unique(have$uf_source)) |>
+          dplyr::filter(
+            .data$year %in% !!unique(have$year),
+            .data$month %in% !!unique(have$month),
+            .data$uf_source %in% !!unique(have$uf_source)
+          ) |>
           dplyr::collect()
-        cached <- .r2_trim_to_wanted(cached, wanted,
-                                     c("year", "month", "uf_source"))
+        cached <- .r2_trim_to_wanted(
+          cached,
+          wanted,
+          c("year", "month", "uf_source")
+        )
         cached <- .sipni_front_cols(cached, c("year", "month", "uf_source"))
         if (nrow(cached) > 0) results <- c(results, list(cached))
       }
@@ -213,8 +274,11 @@ sih_r2_status_cols <- c(
   for (y in sort(unique(todo$year))) {
     todo_y <- todo[todo$year == y, ]
     ds <- tryCatch(
-      .r2_open_dataset(paste0(sih_r2_prefix, "/ano=", y), creds,
-                       partition_cols = c("mes", "uf")),
+      .r2_open_dataset(
+        paste0(sih_r2_prefix, "/ano=", y),
+        creds,
+        partition_cols = c("mes", "uf")
+      ),
       error = function(e) NULL
     )
     if (is.null(ds)) {
@@ -228,24 +292,36 @@ sih_r2_status_cols <- c(
       cli::cli_inform(c(
         "i" = "Reading SIH data from R2: {y}/{mes_chr} ({length(need_ufs)} UF(s))..."
       ))
-      df <- tryCatch({
-        ds |>
-          dplyr::filter(.data$mes == !!mes_chr,
-                        .data$uf %in% !!need_ufs) |>
-          dplyr::collect()
-      }, error = function(e) NULL)
+      df <- tryCatch(
+        {
+          ds |>
+            dplyr::filter(.data$mes == !!mes_chr, .data$uf %in% !!need_ufs) |>
+            dplyr::collect()
+        },
+        error = function(e) NULL
+      )
 
-      got_ufs <- if (is.null(df) || nrow(df) == 0) character(0) else unique(df$uf)
+      got_ufs <- if (is.null(df) || nrow(df) == 0) {
+        character(0)
+      } else {
+        unique(df$uf)
+      }
       missing_ufs <- setdiff(need_ufs, got_ufs)
       if (length(missing_ufs) > 0) {
         failed <- c(failed, label(missing_ufs, y, m))
       }
-      if (length(got_ufs) == 0) next
+      if (length(got_ufs) == 0) {
+        next
+      }
 
       df <- .sih_r2_shape(df, y, m)
       if (isTRUE(cache)) {
-        .cache_append_partitioned(df, cache_dir, dataset_name,
-                                  c("uf_source", "year", "month"))
+        .cache_append_partitioned(
+          df,
+          cache_dir,
+          dataset_name,
+          c("uf_source", "year", "month")
+        )
       }
       results <- c(results, list(df))
     }
@@ -275,8 +351,11 @@ sih_r2_status_cols <- c(
 #' @noRd
 .sih_r2_lazy <- function(years, months, ufs, backend, creds) {
   years <- sort(as.integer(years))
-  newest <- .r2_open_dataset(paste0(sih_r2_prefix, "/ano=", max(years)), creds,
-                             partition_cols = c("mes", "uf"))
+  newest <- .r2_open_dataset(
+    paste0(sih_r2_prefix, "/ano=", max(years)),
+    creds,
+    partition_cols = c("mes", "uf")
+  )
   sch <- newest$schema
 
   # partitions are pruned inside each year: a filter written after the
@@ -284,9 +363,16 @@ sih_r2_status_cols <- c(
   # both years, 92 s)
   per_year <- lapply(years, function(y) {
     # the newest year was already listed to take the schema
-    yd <- if (y == max(years)) newest else
-      .r2_open_dataset(paste0(sih_r2_prefix, "/ano=", y), creds,
-                       partition_cols = c("mes", "uf"), schema = sch)
+    yd <- if (y == max(years)) {
+      newest
+    } else {
+      .r2_open_dataset(
+        paste0(sih_r2_prefix, "/ano=", y),
+        creds,
+        partition_cols = c("mes", "uf"),
+        schema = sch
+      )
+    }
     yd <- yd |> dplyr::filter(.data$uf %in% !!ufs)
     if (length(months) < 12) {
       yd <- yd |> dplyr::filter(.data$mes %in% !!sprintf("%02d", months))
@@ -296,9 +382,11 @@ sih_r2_status_cols <- c(
   ds <- Reduce(dplyr::union_all, per_year)
   raw_cols <- setdiff(names(newest$schema), c("mes", "uf"))
   ds <- ds |>
-    dplyr::mutate(year = as.integer(.data$ano),
-                  month = as.integer(.data$mes),
-                  uf_source = .data$uf) |>
+    dplyr::mutate(
+      year = as.integer(.data$ano),
+      month = as.integer(.data$mes),
+      uf_source = .data$uf
+    ) |>
     dplyr::select(dplyr::all_of(c("year", "month", "uf_source", raw_cols)))
 
   if (backend == "duckdb") {
@@ -360,12 +448,19 @@ sih_status <- function(cache_dir = NULL) {
       "i" = "The R2 mirror may be unreachable and no local copy was cached."
     ))
     return(tibble::tibble(
-      dataset = character(0), year = integer(0), month = integer(0),
-      uf = character(0), records = numeric(0),
-      processing_timestamp = character(0), source_url = character(0),
-      source_hash_md5 = character(0), source_size_bytes = numeric(0),
-      parquet_path = character(0), parquet_sha256 = character(0),
-      parquet_size_bytes = numeric(0), pipeline_version = character(0),
+      dataset = character(0),
+      year = integer(0),
+      month = integer(0),
+      uf = character(0),
+      records = numeric(0),
+      processing_timestamp = character(0),
+      source_url = character(0),
+      source_hash_md5 = character(0),
+      source_size_bytes = numeric(0),
+      parquet_path = character(0),
+      parquet_sha256 = character(0),
+      parquet_size_bytes = numeric(0),
+      pipeline_version = character(0),
       git_commit = character(0)
     ))
   }

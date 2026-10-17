@@ -19,21 +19,65 @@ sim_available_years <- list(
 #' Brazilian state (UF) abbreviations
 #' @noRd
 sim_uf_list <- c(
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
-  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
-  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO"
 )
 
 #' UF abbreviation to IBGE code mapping
 #' @noRd
 sim_uf_codes <- c(
-  "AC" = "12", "AL" = "27", "AP" = "16", "AM" = "13",
-  "BA" = "29", "CE" = "23", "DF" = "53", "ES" = "32",
-  "GO" = "52", "MA" = "21", "MT" = "51", "MS" = "50",
-  "MG" = "31", "PA" = "15", "PB" = "25", "PR" = "41",
-  "PE" = "26", "PI" = "22", "RJ" = "33", "RN" = "24",
-  "RS" = "43", "RO" = "11", "RR" = "14", "SC" = "42",
-  "SP" = "35", "SE" = "28", "TO" = "17"
+  "AC" = "12",
+  "AL" = "27",
+  "AP" = "16",
+  "AM" = "13",
+  "BA" = "29",
+  "CE" = "23",
+  "DF" = "53",
+  "ES" = "32",
+  "GO" = "52",
+  "MA" = "21",
+  "MT" = "51",
+  "MS" = "50",
+  "MG" = "31",
+  "PA" = "15",
+  "PB" = "25",
+  "PR" = "41",
+  "PE" = "26",
+  "PI" = "22",
+  "RJ" = "33",
+  "RN" = "24",
+  "RS" = "43",
+  "RO" = "11",
+  "RR" = "14",
+  "SC" = "42",
+  "SP" = "35",
+  "SE" = "28",
+  "TO" = "17"
 )
 
 # ============================================================================
@@ -45,20 +89,50 @@ sim_uf_codes <- c(
 sim_variables_metadata <- tibble::tibble(
   variable = c(
     # identification
-    "TIPOBITO", "DTOBITO", "HORAOBITO", "NATURAL", "DTNASC",
+    "TIPOBITO",
+    "DTOBITO",
+    "HORAOBITO",
+    "NATURAL",
+    "DTNASC",
     # location
-    "CODMUNRES", "CODMUNOCOR", "LOCOCOR",
+    "CODMUNRES",
+    "CODMUNOCOR",
+    "LOCOCOR",
     # demographics
-    "SEXO", "IDADE", "RACACOR", "ESTCIV", "ESC", "ESC2010", "OCUP",
+    "SEXO",
+    "IDADE",
+    "RACACOR",
+    "ESTCIV",
+    "ESC",
+    "ESC2010",
+    "OCUP",
     # cause of death
-    "CAUSABAS", "CAUSABAS_O", "LINHAA", "LINHAB", "LINHAC", "LINHAD",
-    "LINHAII", "CIRCOBITO",
+    "CAUSABAS",
+    "CAUSABAS_O",
+    "LINHAA",
+    "LINHAB",
+    "LINHAC",
+    "LINHAD",
+    "LINHAII",
+    "CIRCOBITO",
     # maternal/perinatal
-    "IDADEMAE", "ESCMAE", "GESTACAO", "GRAVIDEZ", "PARTO",
-    "OBITOGRAV", "OBITOPUERP", "PESO",
+    "IDADEMAE",
+    "ESCMAE",
+    "GESTACAO",
+    "GRAVIDEZ",
+    "PARTO",
+    "OBITOGRAV",
+    "OBITOPUERP",
+    "PESO",
     # investigation
-    "ASSISTMED", "EXAME", "CIRURGIA", "NECROPSIA",
-    "ACIDTRAB", "FONTE", "FONTEINV", "TPPOS"
+    "ASSISTMED",
+    "EXAME",
+    "CIRURGIA",
+    "NECROPSIA",
+    "ACIDTRAB",
+    "FONTE",
+    "FONTEINV",
+    "TPPOS"
   ),
   description = c(
     # identification
@@ -109,21 +183,50 @@ sim_variables_metadata <- tibble::tibble(
   ),
   type = c(
     # identification
-    "character", "date_dmy", "character", "character", "date_dmy",
+    "character",
+    "date_dmy",
+    "character",
+    "character",
+    "date_dmy",
     # location
-    "character", "character", "character",
+    "character",
+    "character",
+    "character",
     # demographics
-    "character", "character", "character", "character", "character",
-    "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # cause of death
-    "character", "character", "character", "character", "character",
-    "character", "character", "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
     # maternal/perinatal
-    "integer", "character", "character", "character", "character",
-    "character", "character", "integer",
+    "integer",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "integer",
     # investigation
-    "character", "character", "character", "character",
-    "character", "character", "character", "character"
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character",
+    "character"
   ),
   section = c(
     # identification
@@ -193,62 +296,145 @@ sim_dictionary_data <- tibble::tibble(
   ),
   code = c(
     # TIPOBITO
-    "1", "2",
+    "1",
+    "2",
     # SEXO
-    "M", "F", "I",
+    "M",
+    "F",
+    "I",
     # RACACOR
-    "1", "2", "3", "4", "5",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
     # ESTCIV
-    "1", "2", "3", "4", "5", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "9",
     # ESC
-    "1", "2", "3", "4", "5", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "9",
     # LOCOCOR
-    "1", "2", "3", "4", "5", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "9",
     # CIRCOBITO
-    "1", "2", "3", "4", "9",
+    "1",
+    "2",
+    "3",
+    "4",
+    "9",
     # ASSISTMED
-    "1", "2", "9",
+    "1",
+    "2",
+    "9",
     # GRAVIDEZ
-    "1", "2", "3", "9",
+    "1",
+    "2",
+    "3",
+    "9",
     # PARTO
-    "1", "2", "9",
+    "1",
+    "2",
+    "9",
     # OBITOGRAV
-    "1", "2", "9",
+    "1",
+    "2",
+    "9",
     # OBITOPUERP
-    "1", "2", "3", "9",
+    "1",
+    "2",
+    "3",
+    "9",
     # IDADE
-    "0", "1", "2", "3", "4", "5"
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
   ),
   label = c(
     # TIPOBITO
-    "Fetal", "N\u00e3o fetal",
+    "Fetal",
+    "N\u00e3o fetal",
     # SEXO
-    "Masculino", "Feminino", "Ignorado",
+    "Masculino",
+    "Feminino",
+    "Ignorado",
     # RACACOR
-    "Branca", "Preta", "Amarela", "Parda", "Ind\u00edgena",
+    "Branca",
+    "Preta",
+    "Amarela",
+    "Parda",
+    "Ind\u00edgena",
     # ESTCIV
-    "Solteiro", "Casado", "Vi\u00favo",
-    "Separado judicialmente", "Uni\u00e3o est\u00e1vel", "Ignorado",
+    "Solteiro",
+    "Casado",
+    "Vi\u00favo",
+    "Separado judicialmente",
+    "Uni\u00e3o est\u00e1vel",
+    "Ignorado",
     # ESC
-    "Nenhuma", "1 a 3 anos", "4 a 7 anos",
-    "8 a 11 anos", "12 e mais", "Ignorado",
+    "Nenhuma",
+    "1 a 3 anos",
+    "4 a 7 anos",
+    "8 a 11 anos",
+    "12 e mais",
+    "Ignorado",
     # LOCOCOR
-    "Hospital", "Outro estab. sa\u00fade", "Domic\u00edlio",
-    "Via p\u00fablica", "Outros", "Ignorado",
+    "Hospital",
+    "Outro estab. sa\u00fade",
+    "Domic\u00edlio",
+    "Via p\u00fablica",
+    "Outros",
+    "Ignorado",
     # CIRCOBITO
-    "Acidente", "Suic\u00eddio", "Homic\u00eddio", "Outros", "Ignorado",
+    "Acidente",
+    "Suic\u00eddio",
+    "Homic\u00eddio",
+    "Outros",
+    "Ignorado",
     # ASSISTMED
-    "Sim", "N\u00e3o", "Ignorado",
+    "Sim",
+    "N\u00e3o",
+    "Ignorado",
     # GRAVIDEZ
-    "\u00danica", "Dupla", "Tripla e mais", "Ignorada",
+    "\u00danica",
+    "Dupla",
+    "Tripla e mais",
+    "Ignorada",
     # PARTO
-    "Vaginal", "Ces\u00e1reo", "Ignorado",
+    "Vaginal",
+    "Ces\u00e1reo",
+    "Ignorado",
     # OBITOGRAV
-    "Sim", "N\u00e3o", "Ignorado",
+    "Sim",
+    "N\u00e3o",
+    "Ignorado",
     # OBITOPUERP
-    "De 0 a 42 dias", "De 43 dias a 1 ano", "N\u00e3o", "Ignorado",
+    "De 0 a 42 dias",
+    "De 43 dias a 1 ano",
+    "N\u00e3o",
+    "Ignorado",
     # IDADE
-    "Minutos (< 1 hora)", "Horas", "Dias", "Meses", "Anos (0-99)", "Anos (100+)"
+    "Minutos (< 1 hora)",
+    "Horas",
+    "Dias",
+    "Meses",
+    "Anos (0-99)",
+    "Anos (100+)"
   )
 )
 
@@ -261,27 +447,43 @@ sim_dictionary_data <- tibble::tibble(
 sim_label_maps <- list(
   SEXO = c("M" = "Masculino", "F" = "Feminino", "I" = "Ignorado"),
   RACACOR = c(
-    "1" = "Branca", "2" = "Preta", "3" = "Amarela",
-    "4" = "Parda", "5" = "Ind\u00edgena"
+    "1" = "Branca",
+    "2" = "Preta",
+    "3" = "Amarela",
+    "4" = "Parda",
+    "5" = "Ind\u00edgena"
   ),
   ESTCIV = c(
-    "1" = "Solteiro", "2" = "Casado", "3" = "Vi\u00favo",
-    "4" = "Separado judicialmente", "5" = "Uni\u00e3o est\u00e1vel",
+    "1" = "Solteiro",
+    "2" = "Casado",
+    "3" = "Vi\u00favo",
+    "4" = "Separado judicialmente",
+    "5" = "Uni\u00e3o est\u00e1vel",
     "9" = "Ignorado"
   ),
   LOCOCOR = c(
-    "1" = "Hospital", "2" = "Outro estab. sa\u00fade",
-    "3" = "Domic\u00edlio", "4" = "Via p\u00fablica",
-    "5" = "Outros", "9" = "Ignorado"
+    "1" = "Hospital",
+    "2" = "Outro estab. sa\u00fade",
+    "3" = "Domic\u00edlio",
+    "4" = "Via p\u00fablica",
+    "5" = "Outros",
+    "9" = "Ignorado"
   ),
   TIPOBITO = c("1" = "Fetal", "2" = "N\u00e3o fetal"),
   ESC = c(
-    "1" = "Nenhuma", "2" = "1 a 3 anos", "3" = "4 a 7 anos",
-    "4" = "8 a 11 anos", "5" = "12 e mais", "9" = "Ignorado"
+    "1" = "Nenhuma",
+    "2" = "1 a 3 anos",
+    "3" = "4 a 7 anos",
+    "4" = "8 a 11 anos",
+    "5" = "12 e mais",
+    "9" = "Ignorado"
   ),
   CIRCOBITO = c(
-    "1" = "Acidente", "2" = "Suic\u00eddio",
-    "3" = "Homic\u00eddio", "4" = "Outros", "9" = "Ignorado"
+    "1" = "Acidente",
+    "2" = "Suic\u00eddio",
+    "3" = "Homic\u00eddio",
+    "4" = "Outros",
+    "9" = "Ignorado"
   ),
   ASSISTMED = c("1" = "Sim", "2" = "N\u00e3o", "9" = "Ignorado")
 )

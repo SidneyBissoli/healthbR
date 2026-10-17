@@ -45,7 +45,10 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
 #' Public URLs of one object, in the order to try them
 #' @noRd
 .r2_pub_urls <- function(object_path) {
-  bases <- unique(c(getOption("healthbR.r2_pub_base", healthbr_r2_pub_domain), healthbr_r2_pub_base))
+  bases <- unique(c(
+    getOption("healthbR.r2_pub_base", healthbr_r2_pub_domain),
+    healthbr_r2_pub_base
+  ))
   stringr::str_c(bases, "/", object_path)
 }
 
@@ -64,7 +67,9 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
 #' @noRd
 .r2_trim_to_wanted <- function(cached, wanted, by) {
   extra <- dplyr::anti_join(dplyr::distinct(cached[by]), wanted, by = by)
-  if (nrow(extra) == 0) return(cached)
+  if (nrow(extra) == 0) {
+    return(cached)
+  }
   dplyr::semi_join(cached, wanted, by = by)
 }
 
@@ -162,7 +167,9 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
   creds <- creds %||% .r2_credentials()
 
   key <- paste0("fs:", creds$endpoint, ":", creds$access_key_id)
-  if (!is.null(.r2_env[[key]])) return(.r2_env[[key]])
+  if (!is.null(.r2_env[[key]])) {
+    return(.r2_env[[key]])
+  }
 
   fs <- arrow::S3FileSystem$create(
     endpoint_override = creds$endpoint,
@@ -194,8 +201,13 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
 #'   (default) uses the first file's schema.
 #' @return An arrow Dataset.
 #' @noRd
-.r2_open_dataset <- function(prefix, creds = NULL, partition_cols = NULL,
-                             unify_schemas = FALSE, schema = NULL) {
+.r2_open_dataset <- function(
+  prefix,
+  creds = NULL,
+  partition_cols = NULL,
+  unify_schemas = FALSE,
+  schema = NULL
+) {
   creds <- creds %||% .r2_credentials()
   fs <- .r2_filesystem(creds)
 
@@ -214,11 +226,17 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
       selector_ignore_prefixes = c(".", "_", "README", "manifest")
     )
   )
-  if (!is.null(partitioning)) args$partitioning <- partitioning
-  if (isTRUE(unify_schemas)) args$unify_schemas <- TRUE
+  if (!is.null(partitioning)) {
+    args$partitioning <- partitioning
+  }
+  if (isTRUE(unify_schemas)) {
+    args$unify_schemas <- TRUE
+  }
   # an explicit schema (partition fields included) lets a prefix with several
   # historical schemas be opened without reading every footer
-  if (!is.null(schema)) args$schema <- schema
+  if (!is.null(schema)) {
+    args$schema <- schema
+  }
   do.call(arrow::open_dataset, args)
 }
 
@@ -249,7 +267,11 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
   json_path <- file.path(cache_dir, paste0("r2_", slug))
   etag_path <- paste0(json_path, ".etag")
 
-  local_etag <- if (file.exists(etag_path)) readLines(etag_path, warn = FALSE)[1] else NA_character_
+  local_etag <- if (file.exists(etag_path)) {
+    readLines(etag_path, warn = FALSE)[1]
+  } else {
+    NA_character_
+  }
   remote_etag <- NULL
   for (candidate in urls) {
     remote_etag <- .r2_head_etag(candidate)
@@ -262,30 +284,40 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
   # session memo: same manifest + same etag -> reuse parsed object
   memo_key <- paste0("manifest:", manifest_path)
   memo <- .r2_env[[memo_key]]
-  if (!is.null(memo) && !is.null(remote_etag) &&
-      identical(memo$etag, remote_etag)) {
+  if (
+    !is.null(memo) && !is.null(remote_etag) && identical(memo$etag, remote_etag)
+  ) {
     return(memo$parsed)
   }
 
-  fresh_local <- file.exists(json_path) && !is.na(local_etag) &&
-    !is.null(remote_etag) && identical(local_etag, remote_etag)
+  fresh_local <- file.exists(json_path) &&
+    !is.na(local_etag) &&
+    !is.null(remote_etag) &&
+    identical(local_etag, remote_etag)
 
   if (!fresh_local && !is.null(remote_etag)) {
-    ok <- tryCatch({
-      curl::curl_download(url, json_path, quiet = TRUE)
-      writeLines(remote_etag, etag_path)
-      TRUE
-    }, error = function(e) FALSE)
+    ok <- tryCatch(
+      {
+        curl::curl_download(url, json_path, quiet = TRUE)
+        writeLines(remote_etag, etag_path)
+        TRUE
+      },
+      error = function(e) FALSE
+    )
     if (!ok && !file.exists(json_path)) return(NULL)
   }
 
-  if (!file.exists(json_path)) return(NULL)
+  if (!file.exists(json_path)) {
+    return(NULL)
+  }
 
   parsed <- tryCatch(
     jsonlite::fromJSON(json_path, simplifyVector = TRUE),
     error = function(e) NULL
   )
-  if (is.null(parsed)) return(NULL)
+  if (is.null(parsed)) {
+    return(NULL)
+  }
 
   .r2_env[[memo_key]] <- list(
     etag = remote_etag %||% local_etag,
@@ -298,14 +330,19 @@ healthbr_r2_pub_base <- "https://pub-99d9e1a3f5c542178d04efbddf1bba97.r2.dev"
 #' HEAD an URL and return its ETag (NULL if unreachable)
 #' @noRd
 .r2_head_etag <- function(url) {
-  tryCatch({
-    h <- curl::new_handle(nobody = TRUE, timeout = 30, followlocation = TRUE)
-    r <- curl::curl_fetch_memory(url, handle = h)
-    if (r$status_code != 200) return(NULL)
-    headers <- curl::parse_headers_list(r$headers)
-    etag <- headers[["etag"]]
-    if (is.null(etag)) NULL else etag
-  }, error = function(e) NULL)
+  tryCatch(
+    {
+      h <- curl::new_handle(nobody = TRUE, timeout = 30, followlocation = TRUE)
+      r <- curl::curl_fetch_memory(url, handle = h)
+      if (r$status_code != 200) {
+        return(NULL)
+      }
+      headers <- curl::parse_headers_list(r$headers)
+      etag <- headers[["etag"]]
+      if (is.null(etag)) NULL else etag
+    },
+    error = function(e) NULL
+  )
 }
 
 
