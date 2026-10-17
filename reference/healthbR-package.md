@@ -22,7 +22,7 @@ Ministry of Health's informatics department: compressed '.dbc' microdata
 read natively, or the healthbr-data 'Parquet' mirror with per-file
 provenance) and from 'IBGE' repositories, and is returned in tidy format
 following tidyverse conventions. A vignette compares the package with
-'microdatasus' on the 'DATASUS' systems both read.
+'microdatasus' and 'read.dbc' on the 'DATASUS' files they read.
 
 ## See also
 
