@@ -17,69 +17,55 @@ characteristics.
 
 ## Getting started
 
-``` r
-
-library(healthbR)
-library(dplyr)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`
 
 ### Check available years
 
-``` r
-
-sinasc_years()
-
-# include preliminary data
-sinasc_years(status = "all")
-```
+\
+[`sinasc_years`](https://sidneybissoli.github.io/healthbR/reference/sinasc_years.md)`(``)`\
+\
+`# include preliminary data`\
+[`sinasc_years`](https://sidneybissoli.github.io/healthbR/reference/sinasc_years.md)`(``status ``=`` ``"all"``)`
 
 ### Module information
 
-``` r
-
-sinasc_info()
-```
+\
+[`sinasc_info`](https://sidneybissoli.github.io/healthbR/reference/sinasc_info.md)`(``)`
 
 ## Downloading data
 
 ### Basic download
 
-``` r
-
-births <- sinasc_data(year = 2022, uf = "AC")
-```
+\
+`births`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`
 
 ### Multiple states and years
 
-``` r
-
-births <- sinasc_data(year = 2020:2022, uf = c("SP", "RJ"))
-```
+\
+`births`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2020``:``2022``, uf ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"SP"``, ``"RJ"``)``)`
 
 ### Filter by congenital anomaly
 
 Use CID-10 code prefixes to filter births with congenital anomalies:
 
-``` r
-
-# Down syndrome (Q90)
-down <- sinasc_data(year = 2022, uf = "SP", anomaly = "Q90")
-
-# All congenital anomalies (Chapter XVII)
-anomalies <- sinasc_data(year = 2022, uf = "SP", anomaly = "Q")
-```
+\
+`# Down syndrome (Q90)`\
+`down`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, anomaly ``=`` ``"Q90"``)`\
+\
+`# All congenital anomalies (Chapter XVII)`\
+`anomalies`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, anomaly ``=`` ``"Q"``)`
 
 ### Select variables
 
-``` r
-
-births <- sinasc_data(
-  year = 2022,
-  uf = "SP",
-  vars = c("DTNASC", "SEXO", "PESO", "IDADEMAE", "GESTACAO",
-           "PARTO", "CONSULTAS", "CODMUNRES")
-)
-```
+\
+`births`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(`\
+`  year ``=`` ``2022``,`\
+`  uf ``=`` ``"SP"``,`\
+`  vars ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"DTNASC"``, ``"SEXO"``, ``"PESO"``, ``"IDADEMAE"``, ``"GESTACAO"``,`\
+`           ``"PARTO"``, ``"CONSULTAS"``, ``"CODMUNRES"``)`\
+`)`
 
 ## Key variables
 
@@ -100,104 +86,90 @@ births <- sinasc_data(
 
 ### Data dictionary
 
-``` r
-
-sinasc_dictionary()
-sinasc_dictionary("PARTO")
-sinasc_dictionary("GESTACAO")
-```
+\
+[`sinasc_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sinasc_dictionary.md)`(``)`\
+[`sinasc_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sinasc_dictionary.md)`(``"PARTO"``)`\
+[`sinasc_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sinasc_dictionary.md)`(``"GESTACAO"``)`
 
 ### Explore variables
 
-``` r
-
-sinasc_variables()
-sinasc_variables(search = "mae")
-sinasc_variables(search = "peso")
-```
+\
+[`sinasc_variables`](https://sidneybissoli.github.io/healthbR/reference/sinasc_variables.md)`(``)`\
+[`sinasc_variables`](https://sidneybissoli.github.io/healthbR/reference/sinasc_variables.md)`(``search ``=`` ``"mae"``)`\
+[`sinasc_variables`](https://sidneybissoli.github.io/healthbR/reference/sinasc_variables.md)`(``search ``=`` ``"peso"``)`
 
 ## Example: Low birth weight by state
 
-``` r
-
-births <- sinasc_data(year = 2022, uf = c("SP", "RJ", "MG", "BA", "RS"))
-
-lbw <- births |>
-  filter(!is.na(PESO), PESO != "0") |>
-  mutate(
-    weight = as.numeric(PESO),
-    low_weight = weight < 2500
-  ) |>
-  group_by(uf_source) |>
-  summarise(
-    total = n(),
-    low_weight_n = sum(low_weight),
-    low_weight_pct = low_weight_n / total * 100
-  )
-```
+\
+`births`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"SP"``, ``"RJ"``, ``"MG"``, ``"BA"``, ``"RS"``)``)`\
+\
+`lbw`` ``<-`` ``births`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``!`[`is.na`](https://rdrr.io/r/base/NA.html)`(``PESO``)``, ``PESO`` ``!=`` ``"0"``)`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(`\
+`    weight ``=`` `[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``PESO``)``,`\
+`    low_weight ``=`` ``weight`` ``<`` ``2500`\
+`  ``)`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``uf_source``)`` ``|>`\
+`  `[`summarise`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    total ``=`` `[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``,`\
+`    low_weight_n ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``low_weight``)``,`\
+`    low_weight_pct ``=`` ``low_weight_n`` ``/`` ``total`` ``*`` ``100`\
+`  ``)`
 
 ## Example: Cesarean rates over time
 
-``` r
-
-births <- sinasc_data(year = 2018:2022, uf = "SP",
-                      vars = c("PARTO", "CODMUNRES"))
-
-cesarean <- births |>
-  filter(PARTO %in% c("1", "2")) |>
-  group_by(year) |>
-  summarise(
-    vaginal = sum(PARTO == "1"),
-    cesarean = sum(PARTO == "2"),
-    cesarean_rate = cesarean / (vaginal + cesarean) * 100
-  )
-```
+\
+`births`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2018``:``2022``, uf ``=`` ``"SP"``,`\
+`                      vars ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"PARTO"``, ``"CODMUNRES"``)``)`\
+\
+`cesarean`` ``<-`` ``births`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``PARTO`` `[`%in%`](https://rdrr.io/r/base/match.html)` `[`c`](https://rdrr.io/r/base/c.html)`(``"1"``, ``"2"``)``)`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``year``)`` ``|>`\
+`  `[`summarise`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    vaginal ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``PARTO`` ``==`` ``"1"``)``,`\
+`    cesarean ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``PARTO`` ``==`` ``"2"``)``,`\
+`    cesarean_rate ``=`` ``cesarean`` ``/`` ``(``vaginal`` ``+`` ``cesarean``)`` ``*`` ``100`\
+`  ``)`
 
 ## Example: Teen pregnancy
 
-``` r
-
-births <- sinasc_data(year = 2022, uf = "SP")
-
-teen <- births |>
-  filter(!is.na(IDADEMAE)) |>
-  mutate(
-    mother_age = as.integer(IDADEMAE),
-    teen_mother = mother_age < 20
-  ) |>
-  summarise(
-    total = n(),
-    teen_n = sum(teen_mother, na.rm = TRUE),
-    teen_pct = teen_n / total * 100
-  )
-```
+\
+`births`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``)`\
+\
+`teen`` ``<-`` ``births`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``!`[`is.na`](https://rdrr.io/r/base/NA.html)`(``IDADEMAE``)``)`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(`\
+`    mother_age ``=`` `[`as.integer`](https://rdrr.io/r/base/integer.html)`(``IDADEMAE``)``,`\
+`    teen_mother ``=`` ``mother_age`` ``<`` ``20`\
+`  ``)`` ``|>`\
+`  `[`summarise`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    total ``=`` `[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``,`\
+`    teen_n ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``teen_mother``, na.rm ``=`` ``TRUE``)``,`\
+`    teen_pct ``=`` ``teen_n`` ``/`` ``total`` ``*`` ``100`\
+`  ``)`
 
 ## Smart type parsing
 
-``` r
-
-# parsed types (default)
-births <- sinasc_data(year = 2022, uf = "AC")
-class(births$DTNASC)  # Date
-class(births$PESO)    # integer
-
-# all character
-births_raw <- sinasc_data(year = 2022, uf = "AC", parse = FALSE)
-```
+\
+`# parsed types (default)`\
+`births`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+[`class`](https://rdrr.io/r/base/class.html)`(``births``$``DTNASC``)``  ``# Date`\
+[`class`](https://rdrr.io/r/base/class.html)`(``births``$``PESO``)``    ``# integer`\
+\
+`# all character`\
+`births_raw`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``, parse ``=`` ``FALSE``)`
 
 ## Cache and lazy evaluation
 
-``` r
-
-sinasc_cache_status()
-sinasc_clear_cache()
-
-# lazy query
-lazy <- sinasc_data(year = 2022, uf = "SP", lazy = TRUE)
-lazy |>
-  filter(PARTO == "2") |>
-  collect()
-```
+\
+[`sinasc_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sinasc_cache_status.md)`(``)`\
+[`sinasc_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/sinasc_clear_cache.md)`(``)`\
+\
+`# lazy query`\
+`lazy`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, lazy ``=`` ``TRUE``)`\
+`lazy`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``PARTO`` ``==`` ``"2"``)`` ``|>`\
+`  `[`collect`](https://dplyr.tidyverse.org/reference/compute.html)`(``)`
 
 ## Further reading
 

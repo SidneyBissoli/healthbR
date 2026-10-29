@@ -28,17 +28,15 @@ file. If the mirror is unreachable,
 [`sipni_data()`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)
 falls back automatically to the official DATASUS/OpenDataSUS sources.
 
-``` r
-
-# default: R2 mirror with automatic DATASUS fallback
-sipni_data(year = 2024, uf = "AC", month = 1)
-
-# pin a single source (no fallback)
-sipni_data(year = 2019, uf = "AC", source = "datasus")
-
-# invert the priority (DATASUS first, R2 as fallback)
-sipni_data(year = 2019, uf = "AC", source = c("datasus", "r2"))
-```
+\
+`# default: R2 mirror with automatic DATASUS fallback`\
+[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"AC"``, month ``=`` ``1``)`\
+\
+`# pin a single source (no fallback)`\
+[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``, source ``=`` ``"datasus"``)`\
+\
+`# invert the priority (DATASUS first, R2 as fallback)`\
+[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``, source ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"datasus"``, ``"r2"``)``)`
 
 Why the mirror is the default:
 
@@ -52,15 +50,13 @@ Why the mirror is the default:
 
 The result records where the data actually came from:
 
-``` r
-
-data <- sipni_data(year = 2024, uf = "AC", month = 1)
-attr(data, "healthbr_source")
-#>  microdata
-#>       "r2"
-attr(data, "healthbr_provenance")
-#> # A tibble: 1 x 7  (partition, processing timestamp, Ministry source URL...)
-```
+\
+`data`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"AC"``, month ``=`` ``1``)`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``data``, ``"healthbr_source"``)`\
+`#>  microdata`\
+`#>       "r2"`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``data``, ``"healthbr_provenance"``)`\
+`#> # A tibble: 1 x 7  (partition, processing timestamp, Ministry source URL...)`
 
 ### Checking availability with sipni_status()
 
@@ -70,41 +66,33 @@ and record counts.
 [`sipni_status()`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md)
 reads it:
 
-``` r
-
-# everything the mirror holds
-sipni_status()
-
-# which 2026 microdata months are published so far?
-sipni_status("microdados") |>
-  filter(year == 2026)
-```
+\
+`# everything the mirror holds`\
+[`sipni_status`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md)`(``)`\
+\
+`# which 2026 microdata months are published so far?`\
+[`sipni_status`](https://sidneybissoli.github.io/healthbR/reference/sipni_status.md)`(``"microdados"``)`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``year`` ``==`` ``2026``)`
 
 ### Check available years
 
-``` r
-
-sipni_years()
-#> [1] 1994 1995 ... 2025 2026
-```
+\
+[`sipni_years`](https://sidneybissoli.github.io/healthbR/reference/sipni_years.md)`(``)`\
+`#> [1] 1994 1995 ... 2025 2026`
 
 ### Module information
 
-``` r
-
-sipni_info()
-```
+\
+[`sipni_info`](https://sidneybissoli.github.io/healthbR/reference/sipni_info.md)`(``)`
 
 ## Aggregated data: doses applied (DPNI)
 
 The default type returns aggregated dose counts (1994–2019):
 
-``` r
-
-# doses applied in Acre, 2019
-ac_doses <- sipni_data(year = 2019, uf = "AC")
-ac_doses
-```
+\
+`# doses applied in Acre, 2019`\
+`ac_doses`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``)`\
+`ac_doses`
 
 ### Key variables (DPNI)
 
@@ -131,21 +119,19 @@ label, reflecting code changes over the years — e.g. data codes `08`
 produces wrong labels. `lookup = TRUE` expands the dictionary into one
 row per **data code**, ready to join:
 
-``` r
-
-# published form (code = .cnv category, source_codes = data codes)
-sipni_dictionary("IMUNO")
-
-# join-ready lookup: one row per data code
-sipni_dictionary("IMUNO", lookup = TRUE)
-
-# dose types and age groups
-sipni_dictionary("DOSE", lookup = TRUE)
-sipni_dictionary("FX_ETARIA", lookup = TRUE)
-
-# the built-in offline copy (already in data-code form)
-sipni_dictionary("IMUNO", source = "datasus")
-```
+\
+`# published form (code = .cnv category, source_codes = data codes)`\
+[`sipni_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md)`(``"IMUNO"``)`\
+\
+`# join-ready lookup: one row per data code`\
+[`sipni_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md)`(``"IMUNO"``, lookup ``=`` ``TRUE``)`\
+\
+`# dose types and age groups`\
+[`sipni_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md)`(``"DOSE"``, lookup ``=`` ``TRUE``)`\
+[`sipni_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md)`(``"FX_ETARIA"``, lookup ``=`` ``TRUE``)`\
+\
+`# the built-in offline copy (already in data-code form)`\
+[`sipni_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md)`(``"IMUNO"``, source ``=`` ``"datasus"``)`
 
 When more than one .cnv category claims the same data code, the more
 specific claim wins: explicitly listed codes take precedence over codes
@@ -157,12 +143,10 @@ only labels codes that no specific age group claimed explicitly.
 
 The CPNI type provides coverage rates per municipality:
 
-``` r
-
-# vaccination coverage in Acre, 2019
-ac_coverage <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
-ac_coverage
-```
+\
+`# vaccination coverage in Acre, 2019`\
+`ac_coverage`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, type ``=`` ``"CPNI"``, uf ``=`` ``"AC"``)`\
+`ac_coverage`
 
 ### Key variables (CPNI)
 
@@ -182,12 +166,10 @@ For years 2020 and later, SI-PNI provides individual-level microdata
 (one row per vaccination dose). The `type` parameter is ignored for
 these years:
 
-``` r
-
-# microdata for Acre, January 2024
-ac_micro <- sipni_data(year = 2024, uf = "AC", month = 1)
-ac_micro
-```
+\
+`# microdata for Acre, January 2024`\
+`ac_micro`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"AC"``, month ``=`` ``1``)`\
+`ac_micro`
 
 **Column names differ by source.** The mirror publishes the Ministry’s
 JSON exports (56 fields, no CSV serialization artifacts); the
@@ -218,63 +200,57 @@ them:
 
 ### Exploring variables
 
-``` r
-
-# DPNI variables
-sipni_variables()
-
-# CPNI variables
-sipni_variables(type = "CPNI")
-
-# microdata variables, R2 mirror (default; 56 fields)
-sipni_variables(type = "API")
-
-# microdata variables, OpenDataSUS CSV (~47 fields)
-sipni_variables(type = "API", source = "datasus")
-
-# search
-sipni_variables(search = "dose")
-```
+\
+`# DPNI variables`\
+[`sipni_variables`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md)`(``)`\
+\
+`# CPNI variables`\
+[`sipni_variables`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md)`(``type ``=`` ``"CPNI"``)`\
+\
+`# microdata variables, R2 mirror (default; 56 fields)`\
+[`sipni_variables`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md)`(``type ``=`` ``"API"``)`\
+\
+`# microdata variables, OpenDataSUS CSV (~47 fields)`\
+[`sipni_variables`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md)`(``type ``=`` ``"API"``, source ``=`` ``"datasus"``)`\
+\
+`# search`\
+[`sipni_variables`](https://sidneybissoli.github.io/healthbR/reference/sipni_variables.md)`(``search ``=`` ``"dose"``)`
 
 ## Month parameter for microdata
 
 Each month is a separate partition. Use `month` to select specific
 months:
 
-``` r
-
-# single month
-jan <- sipni_data(year = 2024, uf = "AC", month = 1)
-
-# first quarter
-q1 <- sipni_data(year = 2024, uf = "AC", month = 1:3)
-
-# all 12 months (default)
-full_year <- sipni_data(year = 2024, uf = "AC")
-```
+\
+`# single month`\
+`jan`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"AC"``, month ``=`` ``1``)`\
+\
+`# first quarter`\
+`q1`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"AC"``, month ``=`` ``1``:``3``)`\
+\
+`# all 12 months (default)`\
+`full_year`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"AC"``)`
 
 For aggregated data (1994–2019), the `month` parameter is ignored
 because the files are annual.
 
 ## Example: vaccine doses by immunobiological
 
-``` r
-
-ac_2019 <- sipni_data(year = 2019, uf = "AC")
-
-# decode immunobiological names: lookup = TRUE gives data-code rows
-imuno_labels <- sipni_dictionary("IMUNO", lookup = TRUE) |>
-  select(code, label)
-
-doses_by_vaccine <- ac_2019 |>
-  group_by(IMUNO) |>
-  summarize(total_doses = sum(as.integer(QT_DOSE), na.rm = TRUE),
-            .groups = "drop") |>
-  left_join(imuno_labels, by = c("IMUNO" = "code")) |>
-  arrange(desc(total_doses))
-
-doses_by_vaccine
-```
+\
+`ac_2019`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``)`\
+\
+`# decode immunobiological names: lookup = TRUE gives data-code rows`\
+`imuno_labels`` ``<-`` `[`sipni_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md)`(``"IMUNO"``, lookup ``=`` ``TRUE``)`` ``|>`\
+`  `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``code``, ``label``)`\
+\
+`doses_by_vaccine`` ``<-`` ``ac_2019`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``IMUNO``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(``total_doses ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(`[`as.integer`](https://rdrr.io/r/base/integer.html)`(``QT_DOSE``)``, na.rm ``=`` ``TRUE``)``,`\
+`            .groups ``=`` ``"drop"``)`` ``|>`\
+`  `[`left_join`](https://dplyr.tidyverse.org/reference/mutate-joins.html)`(``imuno_labels``, by ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"IMUNO"`` ``=`` ``"code"``)``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``total_doses``)``)`\
+\
+`doses_by_vaccine`
 
 Note: the 2019 aggregated data are drastically incomplete *at the
 source* (the Ministry was migrating to the new SI-PNI that year); totals
@@ -282,48 +258,44 @@ are a fraction of 2018’s. This is faithful to what DATASUS publishes.
 
 ## Example: coverage trends over time
 
-``` r
-
-# coverage data for Sao Paulo, 2015-2019
-sp_cov <- sipni_data(
-  year = 2015:2019,
-  type = "CPNI",
-  uf = "SP"
-)
-
-# average coverage by year
-sp_cov |>
-  group_by(year) |>
-  summarize(
-    mean_coverage = mean(as.numeric(COBERT), na.rm = TRUE),
-    .groups = "drop"
-  )
-```
+\
+`# coverage data for Sao Paulo, 2015-2019`\
+`sp_cov`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(`\
+`  year ``=`` ``2015``:``2019``,`\
+`  type ``=`` ``"CPNI"``,`\
+`  uf ``=`` ``"SP"`\
+`)`\
+\
+`# average coverage by year`\
+`sp_cov`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``year``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    mean_coverage ``=`` `[`mean`](https://rdrr.io/r/base/mean.html)`(`[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``COBERT``)``, na.rm ``=`` ``TRUE``)``,`\
+`    .groups ``=`` ``"drop"`\
+`  ``)`
 
 ## Example: individual-level analysis (2020+)
 
-``` r
-
-# vaccinations in Acre, January 2024
-ac_jan <- sipni_data(year = 2024, uf = "AC", month = 1)
-
-# vaccines administered
-ac_jan |>
-  count(ds_vacina, sort = TRUE)
-
-# doses by sex
-ac_jan |>
-  count(tp_sexo_paciente)
-
-# age distribution
-ac_jan |>
-  mutate(age = as.integer(nu_idade_paciente)) |>
-  filter(!is.na(age)) |>
-  mutate(age_group = cut(age,
-                         breaks = c(0, 5, 12, 18, 30, 60, Inf),
-                         right = FALSE)) |>
-  count(age_group)
-```
+\
+`# vaccinations in Acre, January 2024`\
+`ac_jan`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"AC"``, month ``=`` ``1``)`\
+\
+`# vaccines administered`\
+`ac_jan`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``ds_vacina``, sort ``=`` ``TRUE``)`\
+\
+`# doses by sex`\
+`ac_jan`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``tp_sexo_paciente``)`\
+\
+`# age distribution`\
+`ac_jan`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``age ``=`` `[`as.integer`](https://rdrr.io/r/base/integer.html)`(``nu_idade_paciente``)``)`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``!`[`is.na`](https://rdrr.io/r/base/NA.html)`(``age``)``)`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``age_group ``=`` `[`cut`](https://rdrr.io/r/base/cut.html)`(``age``,`\
+`                         breaks ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``0``, ``5``, ``12``, ``18``, ``30``, ``60``, ``Inf``)``,`\
+`                         right ``=`` ``FALSE``)``)`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``age_group``)`
 
 ## Mixed year requests
 
@@ -332,15 +304,13 @@ When requesting years that span both eras (e.g., 2019 and 2024),
 fetches each era and combines the results. Note that column names and
 structure differ between eras:
 
-``` r
-
-# aggregated (2019) + microdata (2024)
-mixed <- sipni_data(year = c(2019, 2024), uf = "AC", month = 1)
-
-# aggregated (UPPERCASE) and microdata columns are combined
-# with NAs where columns don't overlap
-names(mixed)
-```
+\
+`# aggregated (2019) + microdata (2024)`\
+`mixed`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``2019``, ``2024``)``, uf ``=`` ``"AC"``, month ``=`` ``1``)`\
+\
+`# aggregated (UPPERCASE) and microdata columns are combined`\
+`# with NAs where columns don't overlap`\
+[`names`](https://rdrr.io/r/base/names.html)`(``mixed``)`
 
 ## Lazy evaluation over the mirror
 
@@ -351,14 +321,12 @@ and only the partitions your query touches are transferred. In this mode
 the partition columns keep the bucket layout names (`ano`, `mes`, `uf`,
 as strings):
 
-``` r
-
-ds <- sipni_data(year = 2019, uf = "AC", lazy = TRUE)
-ds |>
-  filter(IMUNO == "02") |>   # data code 02 = BCG (see sipni_dictionary)
-  select(MUNIC, DOSE, QT_DOSE) |>
-  collect()
-```
+\
+`ds`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``, lazy ``=`` ``TRUE``)`\
+`ds`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``IMUNO`` ``==`` ``"02"``)`` ``|>``   ``# data code 02 = BCG (see sipni_dictionary)`\
+`  `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``MUNIC``, ``DOSE``, ``QT_DOSE``)`` ``|>`\
+`  `[`collect`](https://dplyr.tidyverse.org/reference/compute.html)`(``)`
 
 ## Download tips
 
@@ -374,28 +342,24 @@ ds |>
 
 ## Smart type parsing
 
-``` r
-
-# parsed types (default)
-ac <- sipni_data(year = 2019, uf = "AC")
-class(ac$QT_DOSE)  # integer
-
-# raw character columns, exactly as published
-ac_raw <- sipni_data(year = 2019, uf = "AC", parse = FALSE)
-```
+\
+`# parsed types (default)`\
+`ac`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``)`\
+[`class`](https://rdrr.io/r/base/class.html)`(``ac``$``QT_DOSE``)``  ``# integer`\
+\
+`# raw character columns, exactly as published`\
+`ac_raw`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``, parse ``=`` ``FALSE``)`
 
 ## Cache management
 
 Downloaded data is cached locally for faster future access:
 
-``` r
-
-# check cache status
-sipni_cache_status()
-
-# clear cache if needed
-sipni_clear_cache()
-```
+\
+`# check cache status`\
+[`sipni_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sipni_cache_status.md)`(``)`\
+\
+`# clear cache if needed`\
+[`sipni_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/sipni_clear_cache.md)`(``)`
 
 ## Additional resources
 

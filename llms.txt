@@ -84,29 +84,23 @@ different workflow; the vignette says which.
 
 From CRAN (0.2.0):
 
-``` r
-
-install.packages("healthbR")
-```
+\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``"healthbR"``)`
 
 The development version, with the SIH mirror and the newest year
 coverage, from GitHub:
 
-``` r
-
-# install.packages("pak")
-pak::pak("SidneyBissoli/healthbR")
-```
+\
+`# install.packages("pak")`\
+`pak``::`[`pak`](https://pak.r-lib.org/reference/pak.html)`(``"SidneyBissoli/healthbR"``)`
 
 ## Quick start
 
-``` r
-
-library(healthbR)
-
-# see all available data sources
-list_sources()
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+\
+`# see all available data sources`\
+[`list_sources`](https://sidneybissoli.github.io/healthbR/reference/list_sources.md)`(``)`
 
 ### DATASUS modules
 
@@ -114,92 +108,82 @@ All DATASUS modules follow a consistent API: `*_years()`, `*_info()`,
 `*_variables()`, `*_dictionary()`, `*_data()`, `*_cache_status()`,
 `*_clear_cache()`.
 
-``` r
-
-# mortality data -- deaths in Acre, 2022
-obitos <- sim_data(year = 2022, uf = "AC")
-
-# filter by cause of death (CID-10 prefix)
-obitos_cardio <- sim_data(year = 2022, uf = "AC", cause = "I")
-
-# live births in Acre, 2022
-nascimentos <- sinasc_data(year = 2022, uf = "AC")
-
-# hospital admissions in Acre, January 2022
-internacoes <- sih_data(year = 2022, month = 1, uf = "AC")
-
-# filter by diagnosis (CID-10 prefix)
-intern_resp <- sih_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
-
-# outpatient production in Acre, January 2022
-ambulatorial <- sia_data(year = 2022, month = 1, uf = "AC")
-
-# different file type (e.g., high-cost medications)
-medicamentos <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
-```
+\
+`# mortality data -- deaths in Acre, 2022`\
+`obitos`` ``<-`` `[`sim_data`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+\
+`# filter by cause of death (CID-10 prefix)`\
+`obitos_cardio`` ``<-`` `[`sim_data`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``, cause ``=`` ``"I"``)`\
+\
+`# live births in Acre, 2022`\
+`nascimentos`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+\
+`# hospital admissions in Acre, January 2022`\
+`internacoes`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``)`\
+\
+`# filter by diagnosis (CID-10 prefix)`\
+`intern_resp`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``, diagnosis ``=`` ``"J"``)`\
+\
+`# outpatient production in Acre, January 2022`\
+`ambulatorial`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``)`\
+\
+`# different file type (e.g., high-cost medications)`\
+`medicamentos`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``, type ``=`` ``"AM"``)`
 
 ### Additional DATASUS modules
 
-``` r
-
-# disease notifications -- dengue, 2022
-dengue <- sinan_data(year = 2022, disease = "DENG")
-
-# health facilities in Acre, January 2023
-cnes <- cnes_data(year = 2023, month = 1, uf = "AC")
-
-# vaccination data -- Acre (R2 mirror by default, DATASUS fallback)
-vacinas <- sipni_data(year = 2019, uf = "AC")
-micro <- sipni_data(year = 2024, uf = "AC", month = 1)
-```
+\
+`# disease notifications -- dengue, 2022`\
+`dengue`` ``<-`` `[`sinan_data`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)`(``year ``=`` ``2022``, disease ``=`` ``"DENG"``)`\
+\
+`# health facilities in Acre, January 2023`\
+`cnes`` ``<-`` `[`cnes_data`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)`(``year ``=`` ``2023``, month ``=`` ``1``, uf ``=`` ``"AC"``)`\
+\
+`# vaccination data -- Acre (R2 mirror by default, DATASUS fallback)`\
+`vacinas`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``)`\
+`micro`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"AC"``, month ``=`` ``1``)`
 
 ### Survey modules
 
-``` r
-
-# VIGITEL telephone survey
-vigitel <- vigitel_data(year = 2024)
-
-# PNS national health survey
-pns <- pns_data(year = 2019)
-
-# PNAD Continua
-pnadc <- pnadc_data(year = 2023, quarter = 1)
-
-# POF household budget survey
-pof <- pof_data(year = 2018, register = "morador")
-
-# Census population
-pop <- censo_populacao(year = 2022, territorial_level = "state")
-```
+\
+`# VIGITEL telephone survey`\
+`vigitel`` ``<-`` `[`vigitel_data`](https://sidneybissoli.github.io/healthbR/reference/vigitel_data.md)`(``year ``=`` ``2024``)`\
+\
+`# PNS national health survey`\
+`pns`` ``<-`` `[`pns_data`](https://sidneybissoli.github.io/healthbR/reference/pns_data.md)`(``year ``=`` ``2019``)`\
+\
+`# PNAD Continua`\
+`pnadc`` ``<-`` `[`pnadc_data`](https://sidneybissoli.github.io/healthbR/reference/pnadc_data.md)`(``year ``=`` ``2023``, quarter ``=`` ``1``)`\
+\
+`# POF household budget survey`\
+`pof`` ``<-`` `[`pof_data`](https://sidneybissoli.github.io/healthbR/reference/pof_data.md)`(``year ``=`` ``2018``, register ``=`` ``"morador"``)`\
+\
+`# Census population`\
+`pop`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(``year ``=`` ``2022``, territorial_level ``=`` ``"state"``)`
 
 ### Primary care & regulatory agencies
 
-``` r
-
-# SISAB -- primary care coverage by state, January 2024
-sisab <- sisab_data(year = 2024, month = 1)
-
-# ANS -- health plan beneficiaries in Acre, December 2023
-ans <- ans_data(year = 2023, month = 12, uf = "AC")
-
-# ANVISA -- registered medicines
-med <- anvisa_data(type = "medicines")
-```
+\
+`# SISAB -- primary care coverage by state, January 2024`\
+`sisab`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2024``, month ``=`` ``1``)`\
+\
+`# ANS -- health plan beneficiaries in Acre, December 2023`\
+`ans`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, month ``=`` ``12``, uf ``=`` ``"AC"``)`\
+\
+`# ANVISA -- registered medicines`\
+`med`` ``<-`` `[`anvisa_data`](https://sidneybissoli.github.io/healthbR/reference/anvisa_data.md)`(``type ``=`` ``"medicines"``)`
 
 ### Explore variables and dictionaries
 
-``` r
-
-# list variables for any module
-sim_variables()
-sia_variables(search = "sexo")
-sinan_diseases(search = "dengue")
-
-# data dictionary with category labels
-sim_dictionary("SEXO")
-sia_dictionary("PA_RACACOR")
-```
+\
+`# list variables for any module`\
+[`sim_variables`](https://sidneybissoli.github.io/healthbR/reference/sim_variables.md)`(``)`\
+[`sia_variables`](https://sidneybissoli.github.io/healthbR/reference/sia_variables.md)`(``search ``=`` ``"sexo"``)`\
+[`sinan_diseases`](https://sidneybissoli.github.io/healthbR/reference/sinan_diseases.md)`(``search ``=`` ``"dengue"``)`\
+\
+`# data dictionary with category labels`\
+[`sim_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sim_dictionary.md)`(``"SEXO"``)`\
+[`sia_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sia_dictionary.md)`(``"PA_RACACOR"``)`
 
 ## Parallel downloads
 
@@ -208,19 +192,17 @@ states), you can speed up downloads by enabling parallel processing.
 Install `furrr` and `future`, then set a parallel plan before calling
 any `*_data()` function:
 
-``` r
-
-install.packages(c("furrr", "future"))
-
-library(future)
-plan(multisession, workers = 4)
-
-# downloads 4 states in parallel
-df <- sih_data(year = 2022, month = 1:6, uf = c("SP", "RJ", "MG", "BA"))
-
-# reset to sequential when done
-plan(sequential)
-```
+\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(`[`c`](https://rdrr.io/r/base/c.html)`(``"furrr"``, ``"future"``)``)`\
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`future`](https://future.futureverse.org)`)`\
+[`plan`](https://future.futureverse.org/reference/plan.html)`(``multisession``, workers ``=`` ``4``)`\
+\
+`# downloads 4 states in parallel`\
+`df`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``:``6``, uf ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"SP"``, ``"RJ"``, ``"MG"``, ``"BA"``)``)`\
+\
+`# reset to sequential when done`\
+[`plan`](https://future.futureverse.org/reference/plan.html)`(``sequential``)`
 
 All 12 download-based modules support parallel downloads: SIM, SINASC,
 SIH, SIA, SINAN, CNES, SI-PNI, SISAB, ANS, ANVISA, PNS, and PNADC.
@@ -230,23 +212,19 @@ SIH, SIA, SINAN, CNES, SI-PNI, SISAB, ANS, ANVISA, PNS, and PNADC.
 All modules cache downloaded data automatically. Install `arrow` for
 optimized Parquet caching:
 
-``` r
-
-install.packages("arrow")
-```
+\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``"arrow"``)`
 
 Each module provides cache management functions:
 
-``` r
-
-# check what is cached
-sim_cache_status()
-sih_cache_status()
-sia_cache_status()
-
-# clear cache for a module
-sim_clear_cache()
-```
+\
+`# check what is cached`\
+[`sim_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sim_cache_status.md)`(``)`\
+[`sih_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sih_cache_status.md)`(``)`\
+[`sia_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sia_cache_status.md)`(``)`\
+\
+`# clear cache for a module`\
+[`sim_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/sim_clear_cache.md)`(``)`
 
 ## Data sources
 
@@ -268,10 +246,8 @@ All data is downloaded from official Brazilian government repositories
 
 If you use healthbR in your research, please cite it:
 
-``` r
-
-citation("healthbR")
-```
+\
+[`citation`](https://rdrr.io/r/utils/citation.html)`(``"healthbR"``)`
 
 ## Contributing
 

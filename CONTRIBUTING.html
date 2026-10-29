@@ -90,7 +90,7 @@
 </li>
 <li>Follow the coding conventions below</li>
 <li>Add tests for new functionality (we aim for &gt;= 75% coverage)</li>
-<li>Run <code>devtools::check()</code> and ensure no errors or warnings</li>
+<li>Run <code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code> and ensure no errors or warnings</li>
 <li>Submit a pull request describing the changes</li>
 </ol></div>
 <div class="section level3">
@@ -110,16 +110,16 @@
 <h3 id="development-workflow">Development Workflow<a class="anchor" aria-label="anchor" href="#development-workflow"></a></h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install development dependencies</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_dev_deps</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install_deps.html" class="external-link">install_dev_deps</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># run tests</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">test</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># check the package</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">check</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># check test coverage</span></span>
-<span><span class="fu">covr</span><span class="fu">::</span><span class="fu">package_coverage</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">covr</span><span class="fu">::</span><span class="fu"><a href="http://covr.r-lib.org/reference/package_coverage.html" class="external-link">package_coverage</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

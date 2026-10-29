@@ -32,35 +32,31 @@ All seven modules share the same infrastructure:
 
 ## Getting started
 
-``` r
-
-library(healthbR)
-library(dplyr)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`
 
 ### Common helper functions
 
 Each module provides the same set of helper functions. Here is a quick
 tour using SIM as an example:
 
-``` r
-
-# available years
-sim_years()
-#> [1] 1996 1997 1998 ... 2023
-
-# module information (data source, key variables, usage tips)
-sim_info()
-
-# list all variables with descriptions
-sim_variables()
-
-# search for a specific variable
-sim_variables(search = "causa")
-
-# data dictionary with category labels
-sim_dictionary("SEXO")
-```
+\
+`# available years`\
+[`sim_years`](https://sidneybissoli.github.io/healthbR/reference/sim_years.md)`(``)`\
+`#> [1] 1996 1997 1998 ... 2023`\
+\
+`# module information (data source, key variables, usage tips)`\
+[`sim_info`](https://sidneybissoli.github.io/healthbR/reference/sim_info.md)`(``)`\
+\
+`# list all variables with descriptions`\
+[`sim_variables`](https://sidneybissoli.github.io/healthbR/reference/sim_variables.md)`(``)`\
+\
+`# search for a specific variable`\
+[`sim_variables`](https://sidneybissoli.github.io/healthbR/reference/sim_variables.md)`(``search ``=`` ``"causa"``)`\
+\
+`# data dictionary with category labels`\
+[`sim_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sim_dictionary.md)`(``"SEXO"``)`
 
 The same pattern works for `sinasc_*()`, `sih_*()`, `sia_*()`,
 `sinan_*()`, `cnes_*()`, and `sipni_*()`.
@@ -72,26 +68,22 @@ death records based on the Declaracao de Obito (DO).
 
 ### Basic download
 
-``` r
-
-# all deaths in Acre, 2022
-obitos_ac <- sim_data(year = 2022, uf = "AC")
-obitos_ac
-```
+\
+`# all deaths in Acre, 2022`\
+`obitos_ac`` ``<-`` `[`sim_data`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+`obitos_ac`
 
 ### Filter by cause of death
 
 The `cause` parameter filters by underlying cause of death (CAUSABAS)
 using CID-10 prefix matching:
 
-``` r
-
-# deaths from acute myocardial infarction (I21)
-obitos_iam <- sim_data(year = 2022, uf = "AC", cause = "I21")
-
-# all cardiovascular deaths (chapter I)
-obitos_cardio <- sim_data(year = 2022, uf = "AC", cause = "I")
-```
+\
+`# deaths from acute myocardial infarction (I21)`\
+`obitos_iam`` ``<-`` `[`sim_data`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``, cause ``=`` ``"I21"``)`\
+\
+`# all cardiovascular deaths (chapter I)`\
+`obitos_cardio`` ``<-`` `[`sim_data`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``, cause ``=`` ``"I"``)`
 
 ### Key variables
 
@@ -105,14 +97,12 @@ obitos_cardio <- sim_data(year = 2022, uf = "AC", cause = "I")
 
 ### Example: deaths by cause chapter
 
-``` r
-
-obitos_ac <- sim_data(year = 2022, uf = "AC")
-
-obitos_ac |>
-  mutate(chapter = substr(CAUSABAS, 1, 1)) |>
-  count(chapter, sort = TRUE)
-```
+\
+`obitos_ac`` ``<-`` `[`sim_data`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+\
+`obitos_ac`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``chapter ``=`` `[`substr`](https://rdrr.io/r/base/substr.html)`(``CAUSABAS``, ``1``, ``1``)``)`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``chapter``, sort ``=`` ``TRUE``)`
 
 ## SINASC – Live births
 
@@ -121,22 +111,18 @@ individual live birth records from the Declaracao de Nascido Vivo (DN).
 
 ### Basic download
 
-``` r
-
-nasc_ac <- sinasc_data(year = 2022, uf = "AC")
-nasc_ac
-```
+\
+`nasc_ac`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+`nasc_ac`
 
 ### Filter by congenital anomaly
 
 The `anomaly` parameter filters by the CODANOMAL variable using CID-10
 prefix matching:
 
-``` r
-
-# births with any congenital anomaly (chapter Q)
-anomalias <- sinasc_data(year = 2022, uf = "AC", anomaly = "Q")
-```
+\
+`# births with any congenital anomaly (chapter Q)`\
+`anomalias`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``, anomaly ``=`` ``"Q"``)`
 
 ### Key variables
 
@@ -151,21 +137,19 @@ anomalias <- sinasc_data(year = 2022, uf = "AC", anomaly = "Q")
 
 ### Example: birth weight distribution
 
-``` r
-
-nasc_ac <- sinasc_data(year = 2022, uf = "AC")
-
-nasc_ac |>
-  mutate(peso_num = as.numeric(PESO)) |>
-  filter(!is.na(peso_num), peso_num > 0) |>
-  mutate(weight_group = case_when(
-    peso_num < 1500 ~ "Very low (<1500g)",
-    peso_num < 2500 ~ "Low (1500-2499g)",
-    peso_num < 4000 ~ "Normal (2500-3999g)",
-    TRUE            ~ "High (>=4000g)"
-  )) |>
-  count(weight_group)
-```
+\
+`nasc_ac`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+\
+`nasc_ac`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``peso_num ``=`` `[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``PESO``)``)`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``!`[`is.na`](https://rdrr.io/r/base/NA.html)`(``peso_num``)``, ``peso_num`` ``>`` ``0``)`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``weight_group ``=`` `[`case_when`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html)`(`\
+`    ``peso_num`` ``<`` ``1500`` ``~`` ``"Very low (<1500g)"``,`\
+`    ``peso_num`` ``<`` ``2500`` ``~`` ``"Low (1500-2499g)"``,`\
+`    ``peso_num`` ``<`` ``4000`` ``~`` ``"Normal (2500-3999g)"``,`\
+`    ``TRUE``            ``~`` ``"High (>=4000g)"`\
+`  ``)``)`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``weight_group``)`
 
 ## SIH – Hospital admissions
 
@@ -175,44 +159,38 @@ Hospitalar). Unlike SIM and SINASC, data is organized **monthly**.
 
 ### Basic download
 
-``` r
-
-# admissions in Acre, January 2022
-intern_jan <- sih_data(year = 2022, month = 1, uf = "AC")
-intern_jan
-```
+\
+`# admissions in Acre, January 2022`\
+`intern_jan`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``)`\
+`intern_jan`
 
 ### The `month` parameter
 
 SIH data is monthly – one file per UF per month. Use `month` to control
 which months to download:
 
-``` r
-
-# single month
-sih_data(year = 2022, month = 6, uf = "AC")
-
-# first semester
-sih_data(year = 2022, month = 1:6, uf = "AC")
-
-# all 12 months (default when month = NULL -- downloads 12 files per UF)
-sih_data(year = 2022, uf = "AC")
-```
+\
+`# single month`\
+[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``6``, uf ``=`` ``"AC"``)`\
+\
+`# first semester`\
+[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``:``6``, uf ``=`` ``"AC"``)`\
+\
+`# all 12 months (default when month = NULL -- downloads 12 files per UF)`\
+[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`
 
 ### Filter by diagnosis
 
 The `diagnosis` parameter filters by the principal diagnosis
 (DIAG_PRINC) using CID-10 prefix matching:
 
-``` r
-
-# respiratory admissions (chapter J)
-resp <- sih_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
-
-# pneumonia specifically (J12-J18)
-pneum <- sih_data(year = 2022, month = 1, uf = "AC",
-                  diagnosis = c("J12", "J13", "J14", "J15", "J16", "J17", "J18"))
-```
+\
+`# respiratory admissions (chapter J)`\
+`resp`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``, diagnosis ``=`` ``"J"``)`\
+\
+`# pneumonia specifically (J12-J18)`\
+`pneum`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``,`\
+`                  diagnosis ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"J12"``, ``"J13"``, ``"J14"``, ``"J15"``, ``"J16"``, ``"J17"``, ``"J18"``)``)`
 
 ### Key variables
 
@@ -227,14 +205,12 @@ pneum <- sih_data(year = 2022, month = 1, uf = "AC",
 
 ### Example: admissions by diagnosis chapter
 
-``` r
-
-intern <- sih_data(year = 2022, month = 1, uf = "AC")
-
-intern |>
-  mutate(chapter = substr(DIAG_PRINC, 1, 1)) |>
-  count(chapter, sort = TRUE)
-```
+\
+`intern`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``)`\
+\
+`intern`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``chapter ``=`` `[`substr`](https://rdrr.io/r/base/substr.html)`(``DIAG_PRINC``, ``1``, ``1``)``)`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``chapter``, sort ``=`` ``TRUE``)`
 
 ## SIA – Outpatient production
 
@@ -262,26 +238,22 @@ file types** covering different categories of outpatient care.
 
 ### Basic download
 
-``` r
-
-# outpatient production in Acre, January 2022 (default type = "PA")
-ambul_jan <- sia_data(year = 2022, month = 1, uf = "AC")
-ambul_jan
-
-# different file type: high-cost medications
-med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
-```
+\
+`# outpatient production in Acre, January 2022 (default type = "PA")`\
+`ambul_jan`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``)`\
+`ambul_jan`\
+\
+`# different file type: high-cost medications`\
+`med`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``, type ``=`` ``"AM"``)`
 
 ### Filter by procedure and diagnosis
 
-``` r
-
-# filter by SIGTAP procedure code (prefix match on PA_PROC_ID)
-consult <- sia_data(year = 2022, month = 1, uf = "AC", procedure = "0301")
-
-# filter by CID-10 diagnosis (prefix match on PA_CIDPRI)
-resp <- sia_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
-```
+\
+`# filter by SIGTAP procedure code (prefix match on PA_PROC_ID)`\
+`consult`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``, procedure ``=`` ``"0301"``)`\
+\
+`# filter by CID-10 diagnosis (prefix match on PA_CIDPRI)`\
+`resp`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``, diagnosis ``=`` ``"J"``)`
 
 ### Key variables (PA type)
 
@@ -296,14 +268,12 @@ resp <- sia_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
 
 ### Example: production by procedure group
 
-``` r
-
-ambul <- sia_data(year = 2022, month = 1, uf = "AC")
-
-ambul |>
-  mutate(proc_group = substr(PA_PROC_ID, 1, 2)) |>
-  count(proc_group, sort = TRUE)
-```
+\
+`ambul`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``)`\
+\
+`ambul`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``proc_group ``=`` `[`substr`](https://rdrr.io/r/base/substr.html)`(``PA_PROC_ID``, ``1``, ``2``)``)`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``proc_group``, sort ``=`` ``TRUE``)`
 
 ## SINAN – Notifiable diseases
 
@@ -318,54 +288,48 @@ SINAN covers 31 diseases. Use
 [`sinan_diseases()`](https://sidneybissoli.github.io/healthbR/reference/sinan_diseases.md)
 to see all available codes:
 
-``` r
-
-sinan_diseases()
-#> # A tibble: 31 x 3
-#>    code  name                      description
-#>    <chr> <chr>                     <chr>
-#>  1 DENG  Dengue                    Dengue
-#>  2 CHIK  Chikungunya               Febre de Chikungunya
-#>  3 ZIKA  Zika                      Zika virus
-#>  4 TUBE  Tuberculose               Tuberculose
-#>  ...
-
-# search for a specific disease
-sinan_diseases(search = "sifilis")
-```
+\
+[`sinan_diseases`](https://sidneybissoli.github.io/healthbR/reference/sinan_diseases.md)`(``)`\
+`#> # A tibble: 31 x 3`\
+`#>    code  name                      description`\
+`#>    <chr> <chr>                     <chr>`\
+`#>  1 DENG  Dengue                    Dengue`\
+`#>  2 CHIK  Chikungunya               Febre de Chikungunya`\
+`#>  3 ZIKA  Zika                      Zika virus`\
+`#>  4 TUBE  Tuberculose               Tuberculose`\
+`#>  ...`\
+\
+`# search for a specific disease`\
+[`sinan_diseases`](https://sidneybissoli.github.io/healthbR/reference/sinan_diseases.md)`(``search ``=`` ``"sifilis"``)`
 
 ### Basic download
 
-``` r
-
-# dengue notifications, 2022 (default disease)
-dengue <- sinan_data(year = 2022)
-
-# tuberculosis notifications, 2020-2022
-tb <- sinan_data(year = 2020:2022, disease = "TUBE")
-
-# select specific variables
-sinan_data(year = 2022, disease = "DENG",
-           vars = c("DT_NOTIFIC", "CS_SEXO", "NU_IDADE_N",
-                    "ID_MUNICIP", "CLASSI_FIN"))
-```
+\
+`# dengue notifications, 2022 (default disease)`\
+`dengue`` ``<-`` `[`sinan_data`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)`(``year ``=`` ``2022``)`\
+\
+`# tuberculosis notifications, 2020-2022`\
+`tb`` ``<-`` `[`sinan_data`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)`(``year ``=`` ``2020``:``2022``, disease ``=`` ``"TUBE"``)`\
+\
+`# select specific variables`\
+[`sinan_data`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)`(``year ``=`` ``2022``, disease ``=`` ``"DENG"``,`\
+`           vars ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"DT_NOTIFIC"``, ``"CS_SEXO"``, ``"NU_IDADE_N"``,`\
+`                    ``"ID_MUNICIP"``, ``"CLASSI_FIN"``)``)`
 
 ### Filtering by state
 
 Since files are national, filter by UF after download:
 
-``` r
-
-dengue <- sinan_data(year = 2022)
-
-# filter by state of notification
-dengue_sp <- dengue |>
-  filter(SG_UF_NOT == "35")  # Sao Paulo (IBGE code)
-
-# or by municipality
-dengue_rio <- dengue |>
-  filter(substr(ID_MUNICIP, 1, 2) == "33")  # Rio de Janeiro state
-```
+\
+`dengue`` ``<-`` `[`sinan_data`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)`(``year ``=`` ``2022``)`\
+\
+`# filter by state of notification`\
+`dengue_sp`` ``<-`` ``dengue`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``SG_UF_NOT`` ``==`` ``"35"``)``  ``# Sao Paulo (IBGE code)`\
+\
+`# or by municipality`\
+`dengue_rio`` ``<-`` ``dengue`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(`[`substr`](https://rdrr.io/r/base/substr.html)`(``ID_MUNICIP``, ``1``, ``2``)`` ``==`` ``"33"``)``  ``# Rio de Janeiro state`
 
 ### Key variables
 
@@ -381,15 +345,13 @@ dengue_rio <- dengue |>
 
 ### Example: confirmed dengue by month
 
-``` r
-
-dengue <- sinan_data(year = 2022, disease = "DENG")
-
-dengue |>
-  filter(CLASSI_FIN %in% c("1", "5")) |>  # confirmed cases
-  mutate(month = substr(DT_NOTIFIC, 4, 5)) |>
-  count(month, sort = TRUE)
-```
+\
+`dengue`` ``<-`` `[`sinan_data`](https://sidneybissoli.github.io/healthbR/reference/sinan_data.md)`(``year ``=`` ``2022``, disease ``=`` ``"DENG"``)`\
+\
+`dengue`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``CLASSI_FIN`` `[`%in%`](https://rdrr.io/r/base/match.html)` `[`c`](https://rdrr.io/r/base/c.html)`(``"1"``, ``"5"``)``)`` ``|>``  ``# confirmed cases`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``month ``=`` `[`substr`](https://rdrr.io/r/base/substr.html)`(``DT_NOTIFIC``, ``4``, ``5``)``)`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``month``, sort ``=`` ``TRUE``)`
 
 ## CNES – Health facility registry
 
@@ -418,17 +380,15 @@ are **13 file types** covering different aspects of the registry.
 
 ### Basic download
 
-``` r
-
-# establishments in Acre, January 2023
-estab <- cnes_data(year = 2023, month = 1, uf = "AC")
-
-# hospital beds
-leitos <- cnes_data(year = 2023, month = 1, uf = "AC", type = "LT")
-
-# health professionals
-prof <- cnes_data(year = 2023, month = 1, uf = "AC", type = "PF")
-```
+\
+`# establishments in Acre, January 2023`\
+`estab`` ``<-`` `[`cnes_data`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)`(``year ``=`` ``2023``, month ``=`` ``1``, uf ``=`` ``"AC"``)`\
+\
+`# hospital beds`\
+`leitos`` ``<-`` `[`cnes_data`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)`(``year ``=`` ``2023``, month ``=`` ``1``, uf ``=`` ``"AC"``, type ``=`` ``"LT"``)`\
+\
+`# health professionals`\
+`prof`` ``<-`` `[`cnes_data`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)`(``year ``=`` ``2023``, month ``=`` ``1``, uf ``=`` ``"AC"``, type ``=`` ``"PF"``)`
 
 ### Key variables (ST type)
 
@@ -443,17 +403,15 @@ prof <- cnes_data(year = 2023, month = 1, uf = "AC", type = "PF")
 
 ### Example: facility types in a state
 
-``` r
-
-estab <- cnes_data(year = 2023, month = 1, uf = "AC")
-
-estab |>
-  count(TP_UNID, sort = TRUE) |>
-  left_join(
-    cnes_dictionary("TP_UNID") |> select(code, label),
-    by = c("TP_UNID" = "code")
-  )
-```
+\
+`estab`` ``<-`` `[`cnes_data`](https://sidneybissoli.github.io/healthbR/reference/cnes_data.md)`(``year ``=`` ``2023``, month ``=`` ``1``, uf ``=`` ``"AC"``)`\
+\
+`estab`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``TP_UNID``, sort ``=`` ``TRUE``)`` ``|>`\
+`  `[`left_join`](https://dplyr.tidyverse.org/reference/mutate-joins.html)`(`\
+`    `[`cnes_dictionary`](https://sidneybissoli.github.io/healthbR/reference/cnes_dictionary.md)`(``"TP_UNID"``)`` ``|>`` `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``code``, ``label``)``,`\
+`    by ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"TP_UNID"`` ``=`` ``"code"``)`\
+`  ``)`
 
 ## SI-PNI – Vaccination data
 
@@ -479,19 +437,17 @@ transparently routes to the correct source based on the requested year.
 
 ### Basic download
 
-``` r
-
-# FTP: doses applied in Acre, 2019 (default type = "DPNI")
-doses_ac <- sipni_data(year = 2019, uf = "AC")
-doses_ac
-
-# FTP: vaccination coverage
-cob_ac <- sipni_data(year = 2019, type = "CPNI", uf = "AC")
-
-# API: individual-level microdata, Acre, January 2024
-micro_ac <- sipni_data(year = 2024, uf = "AC", month = 1)
-micro_ac
-```
+\
+`# FTP: doses applied in Acre, 2019 (default type = "DPNI")`\
+`doses_ac`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``)`\
+`doses_ac`\
+\
+`# FTP: vaccination coverage`\
+`cob_ac`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, type ``=`` ``"CPNI"``, uf ``=`` ``"AC"``)`\
+\
+`# API: individual-level microdata, Acre, January 2024`\
+`micro_ac`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"AC"``, month ``=`` ``1``)`\
+`micro_ac`
 
 ### Key variables (DPNI)
 
@@ -516,19 +472,17 @@ micro_ac
 
 ### Example: doses by vaccine
 
-``` r
-
-doses <- sipni_data(year = 2019, uf = "AC")
-
-doses |>
-  group_by(IMUNO) |>
-  summarize(total_doses = sum(as.numeric(QT_DOSE), na.rm = TRUE)) |>
-  arrange(desc(total_doses)) |>
-  left_join(
-    sipni_dictionary("IMUNO") |> select(code, label),
-    by = c("IMUNO" = "code")
-  )
-```
+\
+`doses`` ``<-`` `[`sipni_data`](https://sidneybissoli.github.io/healthbR/reference/sipni_data.md)`(``year ``=`` ``2019``, uf ``=`` ``"AC"``)`\
+\
+`doses`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``IMUNO``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(``total_doses ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(`[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``QT_DOSE``)``, na.rm ``=`` ``TRUE``)``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``total_doses``)``)`` ``|>`\
+`  `[`left_join`](https://dplyr.tidyverse.org/reference/mutate-joins.html)`(`\
+`    `[`sipni_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sipni_dictionary.md)`(``"IMUNO"``)`` ``|>`` `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``code``, ``label``)``,`\
+`    by ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"IMUNO"`` ``=`` ``"code"``)`\
+`  ``)`
 
 ## Cross-module analyses
 
@@ -541,63 +495,57 @@ Below are three practical examples.
 Calculate the crude cardiovascular mortality rate per 100,000
 population:
 
-``` r
-
-# step 1: count cardiovascular deaths in Sao Paulo, 2022
-obitos_cardio <- sim_data(year = 2022, uf = "SP", cause = "I")
-n_obitos <- nrow(obitos_cardio)
-
-# step 2: get population denominator from Census 2022
-pop_sp <- censo_populacao(year = 2022, territorial_level = "state") |>
-  filter(grepl("Paulo", territorial_unit))
-
-# step 3: calculate rate
-taxa_mortalidade <- n_obitos / pop_sp$population * 100000
-taxa_mortalidade
-```
+\
+`# step 1: count cardiovascular deaths in Sao Paulo, 2022`\
+`obitos_cardio`` ``<-`` `[`sim_data`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, cause ``=`` ``"I"``)`\
+`n_obitos`` ``<-`` `[`nrow`](https://rdrr.io/r/base/nrow.html)`(``obitos_cardio``)`\
+\
+`# step 2: get population denominator from Census 2022`\
+`pop_sp`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(``year ``=`` ``2022``, territorial_level ``=`` ``"state"``)`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(`[`grepl`](https://rdrr.io/r/base/grep.html)`(``"Paulo"``, ``territorial_unit``)``)`\
+\
+`# step 3: calculate rate`\
+`taxa_mortalidade`` ``<-`` ``n_obitos`` ``/`` ``pop_sp``$``population`` ``*`` ``100000`\
+`taxa_mortalidade`
 
 ### Live births to deaths ratio (SINASC + SIM)
 
 Compare the number of live births and deaths in a state:
 
-``` r
-
-# births and deaths in Acre, 2022
-nascimentos <- sinasc_data(year = 2022, uf = "AC")
-obitos <- sim_data(year = 2022, uf = "AC")
-
-razao <- nrow(nascimentos) / nrow(obitos)
-razao
-#> ratio > 1 means more births than deaths (population growth)
-```
+\
+`# births and deaths in Acre, 2022`\
+`nascimentos`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+`obitos`` ``<-`` `[`sim_data`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+\
+`razao`` ``<-`` `[`nrow`](https://rdrr.io/r/base/nrow.html)`(``nascimentos``)`` ``/`` `[`nrow`](https://rdrr.io/r/base/nrow.html)`(``obitos``)`\
+`razao`\
+`#> ratio > 1 means more births than deaths (population growth)`
 
 ### Hospital vs. outpatient care (SIH + SIA)
 
 Compare volumes and costs of respiratory care (CID-10 chapter J) between
 hospital and outpatient settings:
 
-``` r
-
-# hospital admissions for respiratory diseases, January 2022
-intern_resp <- sih_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
-
-# outpatient production for respiratory diseases, January 2022
-ambul_resp <- sia_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
-
-# compare volumes
-n_internacoes <- nrow(intern_resp)
-n_ambulatorial <- nrow(ambul_resp)
-
-# compare costs
-custo_intern <- sum(as.numeric(intern_resp$VAL_TOT), na.rm = TRUE)
-custo_ambul <- sum(as.numeric(ambul_resp$PA_VALAPR), na.rm = TRUE)
-
-tibble::tibble(
-  setting = c("Hospital (SIH)", "Outpatient (SIA)"),
-  records = c(n_internacoes, n_ambulatorial),
-  total_cost_brl = c(custo_intern, custo_ambul)
-)
-```
+\
+`# hospital admissions for respiratory diseases, January 2022`\
+`intern_resp`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``, diagnosis ``=`` ``"J"``)`\
+\
+`# outpatient production for respiratory diseases, January 2022`\
+`ambul_resp`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, month ``=`` ``1``, uf ``=`` ``"AC"``, diagnosis ``=`` ``"J"``)`\
+\
+`# compare volumes`\
+`n_internacoes`` ``<-`` `[`nrow`](https://rdrr.io/r/base/nrow.html)`(``intern_resp``)`\
+`n_ambulatorial`` ``<-`` `[`nrow`](https://rdrr.io/r/base/nrow.html)`(``ambul_resp``)`\
+\
+`# compare costs`\
+`custo_intern`` ``<-`` `[`sum`](https://rdrr.io/r/base/sum.html)`(`[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``intern_resp``$``VAL_TOT``)``, na.rm ``=`` ``TRUE``)`\
+`custo_ambul`` ``<-`` `[`sum`](https://rdrr.io/r/base/sum.html)`(`[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``ambul_resp``$``PA_VALAPR``)``, na.rm ``=`` ``TRUE``)`\
+\
+`tibble``::`[`tibble`](https://tibble.tidyverse.org/reference/tibble.html)`(`\
+`  setting ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"Hospital (SIH)"``, ``"Outpatient (SIA)"``)``,`\
+`  records ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``n_internacoes``, ``n_ambulatorial``)``,`\
+`  total_cost_brl ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``custo_intern``, ``custo_ambul``)`\
+`)`
 
 ## Cache and performance
 
@@ -607,26 +555,22 @@ All DATASUS modules cache downloaded data automatically. When the
 `arrow` package is installed, data is saved in Parquet format (fast and
 compact); otherwise, .rds is used as fallback.
 
-``` r
-
-# install arrow for optimized caching (recommended)
-install.packages("arrow")
-```
+\
+`# install arrow for optimized caching (recommended)`\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``"arrow"``)`
 
 ### Cache management
 
 Each module provides `*_cache_status()` and `*_clear_cache()`:
 
-``` r
-
-# check what is cached
-sim_cache_status()
-sih_cache_status()
-sia_cache_status()
-
-# clear cache for a specific module
-sim_clear_cache()
-```
+\
+`# check what is cached`\
+[`sim_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sim_cache_status.md)`(``)`\
+[`sih_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sih_cache_status.md)`(``)`\
+[`sia_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sia_cache_status.md)`(``)`\
+\
+`# clear cache for a specific module`\
+[`sim_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/sim_clear_cache.md)`(``)`
 
 ### Tips for managing downloads
 

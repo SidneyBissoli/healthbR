@@ -17,76 +17,62 @@ Ministry of Health through DATASUS.
 
 ## Getting started
 
-``` r
-
-library(healthbR)
-library(dplyr)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`
 
 ### Check available years
 
-``` r
-
-sih_years()
-sih_years(status = "all")
-```
+\
+[`sih_years`](https://sidneybissoli.github.io/healthbR/reference/sih_years.md)`(``)`\
+[`sih_years`](https://sidneybissoli.github.io/healthbR/reference/sih_years.md)`(``status ``=`` ``"all"``)`
 
 ### Module information
 
-``` r
-
-sih_info()
-```
+\
+[`sih_info`](https://sidneybissoli.github.io/healthbR/reference/sih_info.md)`(``)`
 
 ## Downloading data
 
 ### Basic download
 
-``` r
-
-# All months of 2022 for Acre
-admissions <- sih_data(year = 2022, uf = "AC")
-```
+\
+`# All months of 2022 for Acre`\
+`admissions`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`
 
 ### Specific months
 
-``` r
-
-# First semester only
-admissions <- sih_data(year = 2022, uf = "SP", month = 1:6)
-
-# Single month
-admissions <- sih_data(year = 2022, uf = "SP", month = 3)
-```
+\
+`# First semester only`\
+`admissions`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``1``:``6``)`\
+\
+`# Single month`\
+`admissions`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``3``)`
 
 ### Filter by diagnosis
 
 Use CID-10 code prefixes to filter the principal diagnosis:
 
-``` r
-
-# Acute myocardial infarction (I21)
-mi <- sih_data(year = 2022, uf = "SP", diagnosis = "I21")
-
-# All respiratory diseases (Chapter X)
-respiratory <- sih_data(year = 2022, uf = "SP", diagnosis = "J")
-
-# Dengue (A90-A91)
-dengue_hosp <- sih_data(year = 2022, uf = "SP", diagnosis = "A9")
-```
+\
+`# Acute myocardial infarction (I21)`\
+`mi`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, diagnosis ``=`` ``"I21"``)`\
+\
+`# All respiratory diseases (Chapter X)`\
+`respiratory`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, diagnosis ``=`` ``"J"``)`\
+\
+`# Dengue (A90-A91)`\
+`dengue_hosp`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, diagnosis ``=`` ``"A9"``)`
 
 ### Select variables
 
-``` r
-
-admissions <- sih_data(
-  year = 2022,
-  uf = "SP",
-  month = 1,
-  vars = c("DIAG_PRINC", "DT_INTER", "DT_SAIDA", "SEXO",
-           "MORTE", "MUNIC_RES", "VAL_TOT")
-)
-```
+\
+`admissions`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(`\
+`  year ``=`` ``2022``,`\
+`  uf ``=`` ``"SP"``,`\
+`  month ``=`` ``1``,`\
+`  vars ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"DIAG_PRINC"``, ``"DT_INTER"``, ``"DT_SAIDA"``, ``"SEXO"``,`\
+`           ``"MORTE"``, ``"MUNIC_RES"``, ``"VAL_TOT"``)`\
+`)`
 
 ## Key variables
 
@@ -110,98 +96,84 @@ Note: Sex codes in SIH differ from SIM/SINASC (0=Unknown, 1=Male,
 
 ### Data dictionary
 
-``` r
-
-sih_dictionary()
-sih_dictionary("SEXO")
-sih_dictionary("MORTE")
-```
+\
+[`sih_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sih_dictionary.md)`(``)`\
+[`sih_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sih_dictionary.md)`(``"SEXO"``)`\
+[`sih_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sih_dictionary.md)`(``"MORTE"``)`
 
 ### Explore variables
 
-``` r
-
-sih_variables()
-sih_variables(search = "diag")
-sih_variables(search = "valor")
-```
+\
+[`sih_variables`](https://sidneybissoli.github.io/healthbR/reference/sih_variables.md)`(``)`\
+[`sih_variables`](https://sidneybissoli.github.io/healthbR/reference/sih_variables.md)`(``search ``=`` ``"diag"``)`\
+[`sih_variables`](https://sidneybissoli.github.io/healthbR/reference/sih_variables.md)`(``search ``=`` ``"valor"``)`
 
 ## Example: Hospital mortality by diagnosis chapter
 
-``` r
-
-admissions <- sih_data(year = 2022, uf = "SP", month = 1:6)
-
-mortality <- admissions |>
-  mutate(chapter = substr(DIAG_PRINC, 1, 1)) |>
-  group_by(chapter) |>
-  summarise(
-    total = n(),
-    deaths = sum(MORTE == "1", na.rm = TRUE),
-    mortality_rate = deaths / total * 100
-  ) |>
-  arrange(desc(mortality_rate))
-```
+\
+`admissions`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``1``:``6``)`\
+\
+`mortality`` ``<-`` ``admissions`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``chapter ``=`` `[`substr`](https://rdrr.io/r/base/substr.html)`(``DIAG_PRINC``, ``1``, ``1``)``)`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``chapter``)`` ``|>`\
+`  `[`summarise`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    total ``=`` `[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``,`\
+`    deaths ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``MORTE`` ``==`` ``"1"``, na.rm ``=`` ``TRUE``)``,`\
+`    mortality_rate ``=`` ``deaths`` ``/`` ``total`` ``*`` ``100`\
+`  ``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``mortality_rate``)``)`
 
 ## Example: Hospitalization costs
 
-``` r
-
-admissions <- sih_data(year = 2022, uf = "SP", month = 1)
-
-costs <- admissions |>
-  mutate(
-    chapter = substr(DIAG_PRINC, 1, 1),
-    cost = as.numeric(VAL_TOT)
-  ) |>
-  group_by(chapter) |>
-  summarise(
-    admissions = n(),
-    total_cost = sum(cost, na.rm = TRUE),
-    mean_cost = mean(cost, na.rm = TRUE)
-  ) |>
-  arrange(desc(total_cost))
-```
+\
+`admissions`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``1``)`\
+\
+`costs`` ``<-`` ``admissions`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(`\
+`    chapter ``=`` `[`substr`](https://rdrr.io/r/base/substr.html)`(``DIAG_PRINC``, ``1``, ``1``)``,`\
+`    cost ``=`` `[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``VAL_TOT``)`\
+`  ``)`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``chapter``)`` ``|>`\
+`  `[`summarise`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    admissions ``=`` `[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``,`\
+`    total_cost ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``cost``, na.rm ``=`` ``TRUE``)``,`\
+`    mean_cost ``=`` `[`mean`](https://rdrr.io/r/base/mean.html)`(``cost``, na.rm ``=`` ``TRUE``)`\
+`  ``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``total_cost``)``)`
 
 ## Example: Seasonal patterns
 
-``` r
-
-# respiratory admissions across all months
-resp <- sih_data(year = 2022, uf = "SP", diagnosis = "J")
-
-seasonal <- resp |>
-  count(month, name = "admissions") |>
-  arrange(month)
-```
+\
+`# respiratory admissions across all months`\
+`resp`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, diagnosis ``=`` ``"J"``)`\
+\
+`seasonal`` ``<-`` ``resp`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``month``, name ``=`` ``"admissions"``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(``month``)`
 
 ## Smart type parsing
 
-``` r
-
-# parsed types (default)
-admissions <- sih_data(year = 2022, uf = "AC", month = 1)
-class(admissions$DT_INTER)  # Date
-class(admissions$VAL_TOT)   # double
-
-# all character
-admissions_raw <- sih_data(year = 2022, uf = "AC", month = 1, parse = FALSE)
-```
+\
+`# parsed types (default)`\
+`admissions`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``, month ``=`` ``1``)`\
+[`class`](https://rdrr.io/r/base/class.html)`(``admissions``$``DT_INTER``)``  ``# Date`\
+[`class`](https://rdrr.io/r/base/class.html)`(``admissions``$``VAL_TOT``)``   ``# double`\
+\
+`# all character`\
+`admissions_raw`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``, month ``=`` ``1``, parse ``=`` ``FALSE``)`
 
 ## Cache and lazy evaluation
 
-``` r
-
-sih_cache_status()
-sih_clear_cache()
-
-# lazy query
-lazy <- sih_data(year = 2022, uf = "SP", lazy = TRUE)
-lazy |>
-  filter(MORTE == "1") |>
-  select(DIAG_PRINC, DT_INTER, SEXO, MUNIC_RES) |>
-  collect()
-```
+\
+[`sih_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sih_cache_status.md)`(``)`\
+[`sih_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/sih_clear_cache.md)`(``)`\
+\
+`# lazy query`\
+`lazy`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, lazy ``=`` ``TRUE``)`\
+`lazy`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``MORTE`` ``==`` ``"1"``)`` ``|>`\
+`  `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``DIAG_PRINC``, ``DT_INTER``, ``SEXO``, ``MUNIC_RES``)`` ``|>`\
+`  `[`collect`](https://dplyr.tidyverse.org/reference/compute.html)`(``)`
 
 ## Further reading
 

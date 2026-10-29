@@ -35,196 +35,162 @@ SISAB data is fetched from a public REST API.
 
 ## Getting started
 
-``` r
-
-library(healthbR)
-library(dplyr)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`
 
 ### Check available years
 
-``` r
-
-sisab_years()
-```
+\
+[`sisab_years`](https://sidneybissoli.github.io/healthbR/reference/sisab_years.md)`(``)`
 
 ### Module information
 
-``` r
-
-sisab_info()
-```
+\
+[`sisab_info`](https://sidneybissoli.github.io/healthbR/reference/sisab_info.md)`(``)`
 
 ## Basic download
 
 ### APS coverage by state (default)
 
-``` r
-
-# APS coverage by state, January 2024
-aps_jan <- sisab_data(year = 2024, month = 1)
-aps_jan
-```
+\
+`# APS coverage by state, January 2024`\
+`aps_jan`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2024``, month ``=`` ``1``)`\
+`aps_jan`
 
 ### Full year
 
-``` r
-
-# APS coverage, all months of 2023
-aps_2023 <- sisab_data(year = 2023)
-aps_2023
-```
+\
+`# APS coverage, all months of 2023`\
+`aps_2023`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2023``)`\
+`aps_2023`
 
 ## Other report types
 
 ### Oral health coverage
 
-``` r
-
-sb <- sisab_data(year = 2024, type = "sb", month = 6)
-sb
-```
+\
+`sb`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2024``, type ``=`` ``"sb"``, month ``=`` ``6``)`\
+`sb`
 
 ### Community health agents
 
-``` r
-
-acs <- sisab_data(year = 2023, type = "acs")
-acs
-```
+\
+`acs`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2023``, type ``=`` ``"acs"``)`\
+`acs`
 
 ### PNS coverage
 
-``` r
-
-pns <- sisab_data(year = 2022, type = "pns")
-pns
-```
+\
+`pns`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2022``, type ``=`` ``"pns"``)`\
+`pns`
 
 ## Geographic levels
 
 ### National total
 
-``` r
-
-national <- sisab_data(year = 2024, level = "brazil", month = 1)
-national
-```
+\
+`national`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2024``, level ``=`` ``"brazil"``, month ``=`` ``1``)`\
+`national`
 
 ### By region
 
-``` r
-
-regions <- sisab_data(year = 2024, level = "region", month = 1)
-regions
-```
+\
+`regions`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2024``, level ``=`` ``"region"``, month ``=`` ``1``)`\
+`regions`
 
 ### By state (default)
 
-``` r
-
-states <- sisab_data(year = 2024, level = "uf", month = 1)
-states
-```
+\
+`states`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2024``, level ``=`` ``"uf"``, month ``=`` ``1``)`\
+`states`
 
 ### By municipality
 
-``` r
-
-# filter by UF to avoid large downloads
-sp_munic <- sisab_data(
-  year = 2024,
-  level = "municipality",
-  uf = "SP",
-  month = 1
-)
-sp_munic
-```
+\
+`# filter by UF to avoid large downloads`\
+`sp_munic`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(`\
+`  year ``=`` ``2024``,`\
+`  level ``=`` ``"municipality"``,`\
+`  uf ``=`` ``"SP"``,`\
+`  month ``=`` ``1`\
+`)`\
+`sp_munic`
 
 ## Filtering by state and month
 
-``` r
-
-# single state, single month
-sp_jan <- sisab_data(year = 2024, uf = "SP", month = 1)
-
-# specific months
-sp_q1 <- sisab_data(year = 2024, uf = "SP", month = 1:3)
-
-# multiple years
-sp_multi <- sisab_data(year = 2022:2024, uf = "SP", month = 6)
-```
+\
+`# single state, single month`\
+`sp_jan`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"SP"``, month ``=`` ``1``)`\
+\
+`# specific months`\
+`sp_q1`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2024``, uf ``=`` ``"SP"``, month ``=`` ``1``:``3``)`\
+\
+`# multiple years`\
+`sp_multi`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2022``:``2024``, uf ``=`` ``"SP"``, month ``=`` ``6``)`
 
 ## Exploring variables
 
-``` r
-
-# APS variables (default)
-sisab_variables()
-
-# oral health variables
-sisab_variables(type = "sb")
-
-# community agents
-sisab_variables(type = "acs")
-
-# PNS variables
-sisab_variables(type = "pns")
-
-# search
-sisab_variables(search = "cobertura")
-sisab_variables(search = "equipe")
-```
+\
+`# APS variables (default)`\
+[`sisab_variables`](https://sidneybissoli.github.io/healthbR/reference/sisab_variables.md)`(``)`\
+\
+`# oral health variables`\
+[`sisab_variables`](https://sidneybissoli.github.io/healthbR/reference/sisab_variables.md)`(``type ``=`` ``"sb"``)`\
+\
+`# community agents`\
+[`sisab_variables`](https://sidneybissoli.github.io/healthbR/reference/sisab_variables.md)`(``type ``=`` ``"acs"``)`\
+\
+`# PNS variables`\
+[`sisab_variables`](https://sidneybissoli.github.io/healthbR/reference/sisab_variables.md)`(``type ``=`` ``"pns"``)`\
+\
+`# search`\
+[`sisab_variables`](https://sidneybissoli.github.io/healthbR/reference/sisab_variables.md)`(``search ``=`` ``"cobertura"``)`\
+[`sisab_variables`](https://sidneybissoli.github.io/healthbR/reference/sisab_variables.md)`(``search ``=`` ``"equipe"``)`
 
 ## Example: APS coverage by state
 
-``` r
-
-aps <- sisab_data(year = 2024, level = "uf", month = 6)
-
-# coverage by state
-aps |>
-  select(sgUf, qtPopulacao, qtCobertura) |>
-  arrange(desc(qtCobertura))
-```
+\
+`aps`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(``year ``=`` ``2024``, level ``=`` ``"uf"``, month ``=`` ``6``)`\
+\
+`# coverage by state`\
+`aps`` ``|>`\
+`  `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``sgUf``, ``qtPopulacao``, ``qtCobertura``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``qtCobertura``)``)`
 
 ## Example: coverage trends over time
 
-``` r
-
-# monthly APS coverage, national level, 2020-2024
-trend <- sisab_data(
-  year = 2020:2024,
-  level = "brazil"
-)
-
-trend |>
-  select(year, nuComp, qtCobertura) |>
-  arrange(year, nuComp)
-```
+\
+`# monthly APS coverage, national level, 2020-2024`\
+`trend`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(`\
+`  year ``=`` ``2020``:``2024``,`\
+`  level ``=`` ``"brazil"`\
+`)`\
+\
+`trend`` ``|>`\
+`  `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``year``, ``nuComp``, ``qtCobertura``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(``year``, ``nuComp``)`
 
 ## Example: municipal-level analysis
 
-``` r
-
-# municipality-level APS coverage in Minas Gerais
-mg_munic <- sisab_data(
-  year = 2024,
-  level = "municipality",
-  uf = "MG",
-  month = 6
-)
-
-# distribution of coverage
-mg_munic |>
-  summarize(
-    n_municipalities = n(),
-    mean_coverage = mean(qtCobertura, na.rm = TRUE),
-    median_coverage = median(qtCobertura, na.rm = TRUE),
-    min_coverage = min(qtCobertura, na.rm = TRUE),
-    max_coverage = max(qtCobertura, na.rm = TRUE)
-  )
-```
+\
+`# municipality-level APS coverage in Minas Gerais`\
+`mg_munic`` ``<-`` `[`sisab_data`](https://sidneybissoli.github.io/healthbR/reference/sisab_data.md)`(`\
+`  year ``=`` ``2024``,`\
+`  level ``=`` ``"municipality"``,`\
+`  uf ``=`` ``"MG"``,`\
+`  month ``=`` ``6`\
+`)`\
+\
+`# distribution of coverage`\
+`mg_munic`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    n_municipalities ``=`` `[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``,`\
+`    mean_coverage ``=`` `[`mean`](https://rdrr.io/r/base/mean.html)`(``qtCobertura``, na.rm ``=`` ``TRUE``)``,`\
+`    median_coverage ``=`` `[`median`](https://rdrr.io/r/stats/median.html)`(``qtCobertura``, na.rm ``=`` ``TRUE``)``,`\
+`    min_coverage ``=`` `[`min`](https://rdrr.io/r/base/Extremes.html)`(``qtCobertura``, na.rm ``=`` ``TRUE``)``,`\
+`    max_coverage ``=`` `[`max`](https://rdrr.io/r/base/Extremes.html)`(``qtCobertura``, na.rm ``=`` ``TRUE``)`\
+`  ``)`
 
 ## Differences from other modules
 
@@ -249,14 +215,12 @@ to explore them.
 
 Downloaded data is cached locally for faster future access:
 
-``` r
-
-# check cache status
-sisab_cache_status()
-
-# clear cache if needed
-sisab_clear_cache()
-```
+\
+`# check cache status`\
+[`sisab_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sisab_cache_status.md)`(``)`\
+\
+`# clear cache if needed`\
+[`sisab_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/sisab_clear_cache.md)`(``)`
 
 ## Additional resources
 

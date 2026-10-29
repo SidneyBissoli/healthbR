@@ -19,19 +19,15 @@ The `healthbR` package provides access to POF microdata with a focus on
 
 ## Getting started
 
-``` r
-
-library(healthbR)
-library(dplyr)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`
 
 ### Check available editions
 
-``` r
-
-pof_years()
-#> [1] "2002-2003" "2008-2009" "2017-2018"
-```
+\
+[`pof_years`](https://sidneybissoli.github.io/healthbR/reference/pof_years.md)`(``)`\
+`#> [1] "2002-2003" "2008-2009" "2017-2018"`
 
 ### Survey information
 
@@ -39,10 +35,8 @@ Use
 [`pof_info()`](https://sidneybissoli.github.io/healthbR/reference/pof_info.md)
 to see which health modules are available for each edition:
 
-``` r
-
-pof_info("2017-2018")
-```
+\
+[`pof_info`](https://sidneybissoli.github.io/healthbR/reference/pof_info.md)`(``"2017-2018"``)`
 
 ### List available registers
 
@@ -50,30 +44,26 @@ Each POF edition contains multiple data registers. Use
 [`pof_registers()`](https://sidneybissoli.github.io/healthbR/reference/pof_registers.md)
 to see them:
 
-``` r
-
-# all registers
-pof_registers("2017-2018")
-
-# only health-related registers
-pof_registers("2017-2018", health_only = TRUE)
-```
+\
+`# all registers`\
+[`pof_registers`](https://sidneybissoli.github.io/healthbR/reference/pof_registers.md)`(``"2017-2018"``)`\
+\
+`# only health-related registers`\
+[`pof_registers`](https://sidneybissoli.github.io/healthbR/reference/pof_registers.md)`(``"2017-2018"``, health_only ``=`` ``TRUE``)`
 
 ### Explore variables
 
 Before downloading data, you can browse available variables:
 
-``` r
-
-# list all variables in the domicilio register
-pof_variables("2017-2018", "domicilio")
-
-# search for food security variables
-pof_variables("2017-2018", search = "ebia")
-
-# search for weight-related variables
-pof_variables("2017-2018", "morador", search = "peso")
-```
+\
+`# list all variables in the domicilio register`\
+[`pof_variables`](https://sidneybissoli.github.io/healthbR/reference/pof_variables.md)`(``"2017-2018"``, ``"domicilio"``)`\
+\
+`# search for food security variables`\
+[`pof_variables`](https://sidneybissoli.github.io/healthbR/reference/pof_variables.md)`(``"2017-2018"``, search ``=`` ``"ebia"``)`\
+\
+`# search for weight-related variables`\
+[`pof_variables`](https://sidneybissoli.github.io/healthbR/reference/pof_variables.md)`(``"2017-2018"``, ``"morador"``, search ``=`` ``"peso"``)`
 
 ## Food Security Analysis (EBIA)
 
@@ -83,10 +73,8 @@ in the 2017-2018 edition through the `domicilio` register. The variable
 
 ### Download domicilio data
 
-``` r
-
-domicilio <- pof_data("2017-2018", "domicilio")
-```
+\
+`domicilio`` ``<-`` `[`pof_data`](https://sidneybissoli.github.io/healthbR/reference/pof_data.md)`(``"2017-2018"``, ``"domicilio"``)`
 
 ### EBIA classification
 
@@ -101,76 +89,70 @@ The EBIA classifies households into four levels:
 
 ### Create EBIA categories
 
-``` r
-
-domicilio <- domicilio |>
-  mutate(
-    ebia = factor(
-      V6199,
-      levels = 1:4,
-      labels = c(
-        "Food security",
-        "Mild insecurity",
-        "Moderate insecurity",
-        "Severe insecurity"
-      )
-    )
-  )
-
-# frequency table
-domicilio |>
-  count(ebia) |>
-  mutate(pct = n / sum(n) * 100)
-```
+\
+`domicilio`` ``<-`` ``domicilio`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(`\
+`    ebia ``=`` `[`factor`](https://rdrr.io/r/base/factor.html)`(`\
+`      ``V6199``,`\
+`      levels ``=`` ``1``:``4``,`\
+`      labels ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(`\
+`        ``"Food security"``,`\
+`        ``"Mild insecurity"``,`\
+`        ``"Moderate insecurity"``,`\
+`        ``"Severe insecurity"`\
+`      ``)`\
+`    ``)`\
+`  ``)`\
+\
+`# frequency table`\
+`domicilio`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``ebia``)`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``pct ``=`` ``n`` ``/`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``n``)`` ``*`` ``100``)`
 
 ### Weighted estimates with survey design
 
 For proper population estimates, use the survey design:
 
-``` r
-
-library(srvyr)
-
-domicilio_svy <- pof_data("2017-2018", "domicilio", as_survey = TRUE)
-
-# add EBIA categories
-domicilio_svy <- domicilio_svy |>
-  mutate(
-    ebia = factor(
-      V6199,
-      levels = 1:4,
-      labels = c(
-        "Food security",
-        "Mild insecurity",
-        "Moderate insecurity",
-        "Severe insecurity"
-      )
-    )
-  )
-
-# weighted prevalence
-domicilio_svy |>
-  group_by(ebia) |>
-  summarize(
-    prevalence = survey_mean(na.rm = TRUE, vartype = "ci"),
-    n = unweighted(n())
-  )
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`srvyr`](http://gdfe.co/srvyr/)`)`\
+\
+`domicilio_svy`` ``<-`` `[`pof_data`](https://sidneybissoli.github.io/healthbR/reference/pof_data.md)`(``"2017-2018"``, ``"domicilio"``, as_survey ``=`` ``TRUE``)`\
+\
+`# add EBIA categories`\
+`domicilio_svy`` ``<-`` ``domicilio_svy`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(`\
+`    ebia ``=`` `[`factor`](https://rdrr.io/r/base/factor.html)`(`\
+`      ``V6199``,`\
+`      levels ``=`` ``1``:``4``,`\
+`      labels ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(`\
+`        ``"Food security"``,`\
+`        ``"Mild insecurity"``,`\
+`        ``"Moderate insecurity"``,`\
+`        ``"Severe insecurity"`\
+`      ``)`\
+`    ``)`\
+`  ``)`\
+\
+`# weighted prevalence`\
+`domicilio_svy`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``ebia``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    prevalence ``=`` `[`survey_mean`](http://gdfe.co/srvyr/reference/survey_mean.md)`(``na.rm ``=`` ``TRUE``, vartype ``=`` ``"ci"``)``,`\
+`    n ``=`` `[`unweighted`](http://gdfe.co/srvyr/reference/unweighted.md)`(`[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``)`\
+`  ``)`
 
 ### EBIA by region (UF)
 
-``` r
-
-# food insecurity by state
-domicilio_svy |>
-  group_by(UF, ebia) |>
-  summarize(
-    prevalence = survey_mean(na.rm = TRUE, vartype = "ci"),
-    n = unweighted(n())
-  ) |>
-  filter(ebia == "Severe insecurity") |>
-  arrange(desc(prevalence))
-```
+\
+`# food insecurity by state`\
+`domicilio_svy`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``UF``, ``ebia``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    prevalence ``=`` `[`survey_mean`](http://gdfe.co/srvyr/reference/survey_mean.md)`(``na.rm ``=`` ``TRUE``, vartype ``=`` ``"ci"``)``,`\
+`    n ``=`` `[`unweighted`](http://gdfe.co/srvyr/reference/unweighted.md)`(`[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``)`\
+`  ``)`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``ebia`` ``==`` ``"Severe insecurity"``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``prevalence``)``)`
 
 ## Food Consumption Analysis
 
@@ -180,10 +162,8 @@ data from a subsample. This data is available for the 2008-2009 and
 
 ### Download food consumption data
 
-``` r
-
-consumo <- pof_data("2017-2018", "consumo_alimentar")
-```
+\
+`consumo`` ``<-`` `[`pof_data`](https://sidneybissoli.github.io/healthbR/reference/pof_data.md)`(``"2017-2018"``, ``"consumo_alimentar"``)`
 
 ### Key variables
 
@@ -199,25 +179,23 @@ consumo <- pof_data("2017-2018", "consumo_alimentar")
 
 ### Average caloric intake
 
-``` r
-
-# total daily caloric intake per person
-consumo |>
-  group_by(COD_UPA, NUM_DOM, NUM_UC, COD_INFORMANTE) |>
-  summarize(
-    total_kcal = sum(ENERGIA_KCAL, na.rm = TRUE),
-    total_protein = sum(PROTEINA, na.rm = TRUE),
-    total_carb = sum(CARBOIDRATO, na.rm = TRUE),
-    total_fat = sum(LIPIDIO, na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  summarize(
-    mean_kcal = mean(total_kcal, na.rm = TRUE),
-    mean_protein = mean(total_protein, na.rm = TRUE),
-    mean_carb = mean(total_carb, na.rm = TRUE),
-    mean_fat = mean(total_fat, na.rm = TRUE)
-  )
-```
+\
+`# total daily caloric intake per person`\
+`consumo`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``COD_UPA``, ``NUM_DOM``, ``NUM_UC``, ``COD_INFORMANTE``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    total_kcal ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``ENERGIA_KCAL``, na.rm ``=`` ``TRUE``)``,`\
+`    total_protein ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``PROTEINA``, na.rm ``=`` ``TRUE``)``,`\
+`    total_carb ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``CARBOIDRATO``, na.rm ``=`` ``TRUE``)``,`\
+`    total_fat ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``LIPIDIO``, na.rm ``=`` ``TRUE``)``,`\
+`    .groups ``=`` ``"drop"`\
+`  ``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    mean_kcal ``=`` `[`mean`](https://rdrr.io/r/base/mean.html)`(``total_kcal``, na.rm ``=`` ``TRUE``)``,`\
+`    mean_protein ``=`` `[`mean`](https://rdrr.io/r/base/mean.html)`(``total_protein``, na.rm ``=`` ``TRUE``)``,`\
+`    mean_carb ``=`` `[`mean`](https://rdrr.io/r/base/mean.html)`(``total_carb``, na.rm ``=`` ``TRUE``)``,`\
+`    mean_fat ``=`` `[`mean`](https://rdrr.io/r/base/mean.html)`(``total_fat``, na.rm ``=`` ``TRUE``)`\
+`  ``)`
 
 ## Health Expenses
 
@@ -227,22 +205,18 @@ and medical consultations.
 
 ### Download expense data
 
-``` r
-
-despesas <- pof_data("2017-2018", "despesa_individual")
-```
+\
+`despesas`` ``<-`` `[`pof_data`](https://sidneybissoli.github.io/healthbR/reference/pof_data.md)`(``"2017-2018"``, ``"despesa_individual"``)`
 
 ### Filter health expenses
 
 Health-related expenses can be identified by product group codes:
 
-``` r
-
-# explore expense categories
-despesas |>
-  count(QUADRO) |>
-  arrange(desc(n))
-```
+\
+`# explore expense categories`\
+`despesas`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``QUADRO``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``n``)``)`
 
 ## Combining registers
 
@@ -250,38 +224,36 @@ For many analyses you need to combine data from multiple registers. Use
 the household identifier variables (`COD_UPA`, `NUM_DOM`, `NUM_UC`) to
 merge:
 
-``` r
-
-# download morador (demographic data) and domicilio (household data)
-morador <- pof_data("2017-2018", "morador")
-domicilio <- pof_data("2017-2018", "domicilio")
-
-# merge: add household-level EBIA to individual-level data
-morador_ebia <- morador |>
-  left_join(
-    domicilio |> select(COD_UPA, NUM_DOM, NUM_UC, V6199),
-    by = c("COD_UPA", "NUM_DOM", "NUM_UC")
-  ) |>
-  mutate(
-    ebia = factor(
-      V6199,
-      levels = 1:4,
-      labels = c(
-        "Food security",
-        "Mild insecurity",
-        "Moderate insecurity",
-        "Severe insecurity"
-      )
-    )
-  )
-
-# food insecurity by age group
-morador_ebia |>
-  mutate(age_group = cut(V0403, breaks = c(0, 5, 12, 18, 30, 60, Inf))) |>
-  count(age_group, ebia) |>
-  group_by(age_group) |>
-  mutate(pct = n / sum(n) * 100)
-```
+\
+`# download morador (demographic data) and domicilio (household data)`\
+`morador`` ``<-`` `[`pof_data`](https://sidneybissoli.github.io/healthbR/reference/pof_data.md)`(``"2017-2018"``, ``"morador"``)`\
+`domicilio`` ``<-`` `[`pof_data`](https://sidneybissoli.github.io/healthbR/reference/pof_data.md)`(``"2017-2018"``, ``"domicilio"``)`\
+\
+`# merge: add household-level EBIA to individual-level data`\
+`morador_ebia`` ``<-`` ``morador`` ``|>`\
+`  `[`left_join`](https://dplyr.tidyverse.org/reference/mutate-joins.html)`(`\
+`    ``domicilio`` ``|>`` `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``COD_UPA``, ``NUM_DOM``, ``NUM_UC``, ``V6199``)``,`\
+`    by ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"COD_UPA"``, ``"NUM_DOM"``, ``"NUM_UC"``)`\
+`  ``)`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(`\
+`    ebia ``=`` `[`factor`](https://rdrr.io/r/base/factor.html)`(`\
+`      ``V6199``,`\
+`      levels ``=`` ``1``:``4``,`\
+`      labels ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(`\
+`        ``"Food security"``,`\
+`        ``"Mild insecurity"``,`\
+`        ``"Moderate insecurity"``,`\
+`        ``"Severe insecurity"`\
+`      ``)`\
+`    ``)`\
+`  ``)`\
+\
+`# food insecurity by age group`\
+`morador_ebia`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``age_group ``=`` `[`cut`](https://rdrr.io/r/base/cut.html)`(``V0403``, breaks ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``0``, ``5``, ``12``, ``18``, ``30``, ``60``, ``Inf``)``)``)`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``age_group``, ``ebia``)`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``age_group``)`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``pct ``=`` ``n`` ``/`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``n``)`` ``*`` ``100``)`
 
 ## Comparing editions
 
@@ -290,36 +262,30 @@ vary. Use
 [`pof_info()`](https://sidneybissoli.github.io/healthbR/reference/pof_info.md)
 to check what is available in each edition:
 
-``` r
-
-# check health modules by edition
-pof_info("2017-2018")  # EBIA + food consumption
-pof_info("2008-2009")  # anthropometry + food consumption
-pof_info("2002-2003")  # expenses only
-```
+\
+`# check health modules by edition`\
+[`pof_info`](https://sidneybissoli.github.io/healthbR/reference/pof_info.md)`(``"2017-2018"``)``  ``# EBIA + food consumption`\
+[`pof_info`](https://sidneybissoli.github.io/healthbR/reference/pof_info.md)`(``"2008-2009"``)``  ``# anthropometry + food consumption`\
+[`pof_info`](https://sidneybissoli.github.io/healthbR/reference/pof_info.md)`(``"2002-2003"``)``  ``# expenses only`
 
 ## Cache management
 
 POF data files are large. healthbR caches downloaded files locally so
 you only download once:
 
-``` r
-
-# check cached files
-pof_cache_status()
-
-# clear cache if needed
-pof_clear_cache()
-```
+\
+`# check cached files`\
+[`pof_cache_status`](https://sidneybissoli.github.io/healthbR/reference/pof_cache_status.md)`(``)`\
+\
+`# clear cache if needed`\
+[`pof_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/pof_clear_cache.md)`(``)`
 
 If the `arrow` package is installed, data is cached in Parquet format
 for faster loading:
 
-``` r
-
-# install arrow for optimized caching (recommended)
-install.packages("arrow")
-```
+\
+`# install arrow for optimized caching (recommended)`\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``"arrow"``)`
 
 ## Additional resources
 

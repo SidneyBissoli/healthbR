@@ -17,133 +17,113 @@ via the IBGE SIDRA API, covering:
 
 ## Getting started
 
-``` r
-
-library(healthbR)
-library(dplyr)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`
 
 ### Check available years
 
-``` r
-
-censo_years()
-#> [1] "1970" "1980" "1991" "2000" "2010" "2022"
-```
+\
+[`censo_years`](https://sidneybissoli.github.io/healthbR/reference/censo_years.md)`(``)`\
+`#> [1] "1970" "1980" "1991" "2000" "2010" "2022"`
 
 ### Survey information
 
-``` r
-
-censo_info(2022)
-```
+\
+[`censo_info`](https://sidneybissoli.github.io/healthbR/reference/censo_info.md)`(``2022``)`
 
 ## Population by state
 
 The most common use case: getting population by state as a denominator
 for health indicators.
 
-``` r
-
-# total population by state, Census 2022
-pop_state <- censo_populacao(year = 2022, territorial_level = "state")
-pop_state
-```
+\
+`# total population by state, Census 2022`\
+`pop_state`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(``year ``=`` ``2022``, territorial_level ``=`` ``"state"``)`\
+`pop_state`
 
 ## Population by sex
 
-``` r
-
-# population by sex, Brazil level
-pop_sex <- censo_populacao(
-  year = 2022,
-  variables = "sex",
-  territorial_level = "brazil"
-)
-pop_sex
-```
+\
+`# population by sex, Brazil level`\
+`pop_sex`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(`\
+`  year ``=`` ``2022``,`\
+`  variables ``=`` ``"sex"``,`\
+`  territorial_level ``=`` ``"brazil"`\
+`)`\
+`pop_sex`
 
 ## Age pyramids
 
-``` r
-
-# population by age and sex
-pop_age_sex <- censo_populacao(
-  year = 2022,
-  variables = "age_sex",
-  territorial_level = "brazil"
-)
-pop_age_sex
-```
+\
+`# population by age and sex`\
+`pop_age_sex`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(`\
+`  year ``=`` ``2022``,`\
+`  variables ``=`` ``"age_sex"``,`\
+`  territorial_level ``=`` ``"brazil"`\
+`)`\
+`pop_age_sex`
 
 ## Population by race/color
 
-``` r
-
-# population by race, 2022
-pop_race <- censo_populacao(
-  year = 2022,
-  variables = "race",
-  territorial_level = "state"
-)
-pop_race
-```
+\
+`# population by race, 2022`\
+`pop_race`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(`\
+`  year ``=`` ``2022``,`\
+`  variables ``=`` ``"race"``,`\
+`  territorial_level ``=`` ``"state"`\
+`)`\
+`pop_race`
 
 ## Intercensitary estimates
 
 For years between censuses, IBGE publishes annual population estimates
 that serve as denominators:
 
-``` r
-
-# population estimates 2015-2021
-estimates <- censo_estimativa(
-  year = 2015:2021,
-  territorial_level = "state"
-)
-estimates
-```
+\
+`# population estimates 2015-2021`\
+`estimates`` ``<-`` `[`censo_estimativa`](https://sidneybissoli.github.io/healthbR/reference/censo_estimativa.md)`(`\
+`  year ``=`` ``2015``:``2021``,`\
+`  territorial_level ``=`` ``"state"`\
+`)`\
+`estimates`
 
 ## Example: calculating a mortality rate
 
 A typical epidemiological workflow combines mortality data (SIM) with
 Census denominators:
 
-``` r
-
-# step 1: get population denominator
-pop_2010 <- censo_populacao(
-  year = 2010,
-  variables = "total",
-  territorial_level = "state"
-)
-
-# step 2: suppose you have mortality data (from SIM or other source)
-# deaths_by_state <- sim_data(year = 2010) |> count(state)
-
-# step 3: calculate crude mortality rate
-# mortality_rate <- deaths_by_state |>
-#   left_join(pop_2010, by = "state") |>
-#   mutate(rate_per_100k = (n / population) * 100000)
-```
+\
+`# step 1: get population denominator`\
+`pop_2010`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(`\
+`  year ``=`` ``2010``,`\
+`  variables ``=`` ``"total"``,`\
+`  territorial_level ``=`` ``"state"`\
+`)`\
+\
+`# step 2: suppose you have mortality data (from SIM or other source)`\
+`# deaths_by_state <- sim_data(year = 2010) |> count(state)`\
+\
+`# step 3: calculate crude mortality rate`\
+`# mortality_rate <- deaths_by_state |>`\
+`#   left_join(pop_2010, by = "state") |>`\
+`#   mutate(rate_per_100k = (n / population) * 100000)`
 
 ## Exploring Census tables
 
 The Census module includes a catalog of SIDRA tables organized by theme:
 
-``` r
-
-# list all available tables
-censo_sidra_tables()
-
-# filter by theme
-censo_sidra_tables(theme = "disability")
-censo_sidra_tables(theme = "indigenous")
-
-# search by keyword
-censo_sidra_search("quilombola")
-censo_sidra_search("saneamento")
-```
+\
+`# list all available tables`\
+[`censo_sidra_tables`](https://sidneybissoli.github.io/healthbR/reference/censo_sidra_tables.md)`(``)`\
+\
+`# filter by theme`\
+[`censo_sidra_tables`](https://sidneybissoli.github.io/healthbR/reference/censo_sidra_tables.md)`(``theme ``=`` ``"disability"``)`\
+[`censo_sidra_tables`](https://sidneybissoli.github.io/healthbR/reference/censo_sidra_tables.md)`(``theme ``=`` ``"indigenous"``)`\
+\
+`# search by keyword`\
+[`censo_sidra_search`](https://sidneybissoli.github.io/healthbR/reference/censo_sidra_search.md)`(``"quilombola"``)`\
+[`censo_sidra_search`](https://sidneybissoli.github.io/healthbR/reference/censo_sidra_search.md)`(``"saneamento"``)`
 
 ## Custom SIDRA queries
 
@@ -151,31 +131,27 @@ For full flexibility, use
 [`censo_sidra_data()`](https://sidneybissoli.github.io/healthbR/reference/censo_sidra_data.md)
 to query any Census table:
 
-``` r
-
-# population by race from table 9605
-pop_race_raw <- censo_sidra_data(
-  table = 9605,
-  territorial_level = "state",
-  year = 2022,
-  variable = 93,
-  classifications = list("86" = "allxt")
-)
-pop_race_raw
-```
+\
+`# population by race from table 9605`\
+`pop_race_raw`` ``<-`` `[`censo_sidra_data`](https://sidneybissoli.github.io/healthbR/reference/censo_sidra_data.md)`(`\
+`  table ``=`` ``9605``,`\
+`  territorial_level ``=`` ``"state"``,`\
+`  year ``=`` ``2022``,`\
+`  variable ``=`` ``93``,`\
+`  classifications ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``"86"`` ``=`` ``"allxt"``)`\
+`)`\
+`pop_race_raw`
 
 ## Historical comparisons
 
-``` r
-
-# compare population across census years
-pop_2010 <- censo_populacao(year = 2010, territorial_level = "brazil")
-pop_2022 <- censo_populacao(year = 2022, territorial_level = "brazil")
-
-# or use estimates for intercensitary years
-pop_series <- censo_estimativa(
-  year = 2001:2021,
-  territorial_level = "brazil"
-)
-pop_series
-```
+\
+`# compare population across census years`\
+`pop_2010`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(``year ``=`` ``2010``, territorial_level ``=`` ``"brazil"``)`\
+`pop_2022`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(``year ``=`` ``2022``, territorial_level ``=`` ``"brazil"``)`\
+\
+`# or use estimates for intercensitary years`\
+`pop_series`` ``<-`` `[`censo_estimativa`](https://sidneybissoli.github.io/healthbR/reference/censo_estimativa.md)`(`\
+`  year ``=`` ``2001``:``2021``,`\
+`  territorial_level ``=`` ``"brazil"`\
+`)`\
+`pop_series`

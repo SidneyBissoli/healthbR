@@ -26,32 +26,26 @@ complaints, and operator financial statements.
 
 ## Getting started
 
-``` r
-
-library(healthbR)
-library(dplyr)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`
 
 ### Check available years
 
-``` r
-
-# beneficiaries (default)
-ans_years()
-
-# complaints
-ans_years(type = "complaints")
-
-# financial statements
-ans_years(type = "financial")
-```
+\
+`# beneficiaries (default)`\
+[`ans_years`](https://sidneybissoli.github.io/healthbR/reference/ans_years.md)`(``)`\
+\
+`# complaints`\
+[`ans_years`](https://sidneybissoli.github.io/healthbR/reference/ans_years.md)`(``type ``=`` ``"complaints"``)`\
+\
+`# financial statements`\
+[`ans_years`](https://sidneybissoli.github.io/healthbR/reference/ans_years.md)`(``type ``=`` ``"financial"``)`
 
 ### Module information
 
-``` r
-
-ans_info()
-```
+\
+[`ans_info`](https://sidneybissoli.github.io/healthbR/reference/ans_info.md)`(``)`
 
 ## Beneficiaries
 
@@ -61,34 +55,28 @@ more. Each file covers one state (UF) and one month.
 
 ### Basic download
 
-``` r
-
-# Acre, December 2023
-ac <- ans_data(year = 2023, month = 12, uf = "AC")
-ac
-```
+\
+`# Acre, December 2023`\
+`ac`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, month ``=`` ``12``, uf ``=`` ``"AC"``)`\
+`ac`
 
 ### Multiple months and states
 
-``` r
-
-# first quarter 2024, two states
-ne <- ans_data(year = 2024, month = 1:3, uf = c("CE", "PE"))
-
-# full year (month = NULL downloads all 12 months)
-ac_2023 <- ans_data(year = 2023, uf = "AC")
-```
+\
+`# first quarter 2024, two states`\
+`ne`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2024``, month ``=`` ``1``:``3``, uf ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"CE"``, ``"PE"``)``)`\
+\
+`# full year (month = NULL downloads all 12 months)`\
+`ac_2023`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, uf ``=`` ``"AC"``)`
 
 ### Selecting variables
 
-``` r
-
-ans_data(
-  year = 2023, month = 12, uf = "AC",
-  vars = c("CD_OPERADORA", "SG_UF", "TP_SEXO",
-           "DE_FAIXA_ETARIA", "QT_BENEFICIARIO_ATIVO")
-)
-```
+\
+[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(`\
+`  year ``=`` ``2023``, month ``=`` ``12``, uf ``=`` ``"AC"``,`\
+`  vars ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"CD_OPERADORA"``, ``"SG_UF"``, ``"TP_SEXO"``,`\
+`           ``"DE_FAIXA_ETARIA"``, ``"QT_BENEFICIARIO_ATIVO"``)`\
+`)`
 
 ### Key variables
 
@@ -113,15 +101,13 @@ Consumer complaints data covers demands filed through ANS’s NIP
 (Notificacao de Intermediacao Preliminar) system. Files are national
 (not per-UF) and annual.
 
-``` r
-
-# complaints filed in 2022
-nip <- ans_data(year = 2022, type = "complaints")
-nip
-
-# multiple years
-nip_multi <- ans_data(year = 2020:2023, type = "complaints")
-```
+\
+`# complaints filed in 2022`\
+`nip`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2022``, type ``=`` ``"complaints"``)`\
+`nip`\
+\
+`# multiple years`\
+`nip_multi`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2020``:``2023``, type ``=`` ``"complaints"``)`
 
 ### Key variables
 
@@ -144,17 +130,15 @@ nip_multi <- ans_data(year = 2020:2023, type = "complaints")
 Quarterly financial statements (demonstracoes contabeis) for all health
 plan operators.
 
-``` r
-
-# Q1 2023
-fin_q1 <- ans_data(year = 2023, type = "financial", quarter = 1)
-
-# all 4 quarters of 2023
-fin_2023 <- ans_data(year = 2023, type = "financial")
-
-# specific quarters
-fin_q12 <- ans_data(year = 2023, type = "financial", quarter = 1:2)
-```
+\
+`# Q1 2023`\
+`fin_q1`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, type ``=`` ``"financial"``, quarter ``=`` ``1``)`\
+\
+`# all 4 quarters of 2023`\
+`fin_2023`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, type ``=`` ``"financial"``)`\
+\
+`# specific quarters`\
+`fin_q12`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, type ``=`` ``"financial"``, quarter ``=`` ``1``:``2``)`
 
 ### Key variables
 
@@ -172,17 +156,15 @@ fin_q12 <- ans_data(year = 2023, type = "financial", quarter = 1:2)
 The operator registry is a separate snapshot (not time-series), so it
 uses its own function:
 
-``` r
-
-# active operators
-active <- ans_operators()
-
-# cancelled operators
-cancelled <- ans_operators(status = "cancelled")
-
-# both combined
-all_ops <- ans_operators(status = "all")
-```
+\
+`# active operators`\
+`active`` ``<-`` `[`ans_operators`](https://sidneybissoli.github.io/healthbR/reference/ans_operators.md)`(``)`\
+\
+`# cancelled operators`\
+`cancelled`` ``<-`` `[`ans_operators`](https://sidneybissoli.github.io/healthbR/reference/ans_operators.md)`(``status ``=`` ``"cancelled"``)`\
+\
+`# both combined`\
+`all_ops`` ``<-`` `[`ans_operators`](https://sidneybissoli.github.io/healthbR/reference/ans_operators.md)`(``status ``=`` ``"all"``)`
 
 ### Key variables
 
@@ -198,107 +180,97 @@ all_ops <- ans_operators(status = "all")
 
 ## Exploring variables
 
-``` r
-
-# beneficiaries variables (default)
-ans_variables()
-
-# complaints variables
-ans_variables(type = "complaints")
-
-# financial variables
-ans_variables(type = "financial")
-
-# search across variables
-ans_variables(search = "operadora")
-ans_variables(search = "beneficiario")
-```
+\
+`# beneficiaries variables (default)`\
+[`ans_variables`](https://sidneybissoli.github.io/healthbR/reference/ans_variables.md)`(``)`\
+\
+`# complaints variables`\
+[`ans_variables`](https://sidneybissoli.github.io/healthbR/reference/ans_variables.md)`(``type ``=`` ``"complaints"``)`\
+\
+`# financial variables`\
+[`ans_variables`](https://sidneybissoli.github.io/healthbR/reference/ans_variables.md)`(``type ``=`` ``"financial"``)`\
+\
+`# search across variables`\
+[`ans_variables`](https://sidneybissoli.github.io/healthbR/reference/ans_variables.md)`(``search ``=`` ``"operadora"``)`\
+[`ans_variables`](https://sidneybissoli.github.io/healthbR/reference/ans_variables.md)`(``search ``=`` ``"beneficiario"``)`
 
 ## Example: beneficiaries by state and plan type
 
-``` r
-
-# December 2023, all states
-ben <- ans_data(year = 2023, month = 12)
-
-# active beneficiaries by state and coverage type
-ben |>
-  group_by(SG_UF, COBERTURA_ASSIST_PLAN) |>
-  summarize(
-    total = sum(as.integer(QT_BENEFICIARIO_ATIVO), na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  arrange(desc(total))
-```
+\
+`# December 2023, all states`\
+`ben`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, month ``=`` ``12``)`\
+\
+`# active beneficiaries by state and coverage type`\
+`ben`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``SG_UF``, ``COBERTURA_ASSIST_PLAN``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    total ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(`[`as.integer`](https://rdrr.io/r/base/integer.html)`(``QT_BENEFICIARIO_ATIVO``)``, na.rm ``=`` ``TRUE``)``,`\
+`    .groups ``=`` ``"drop"`\
+`  ``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``total``)``)`
 
 ## Example: complaints by subject and operator
 
-``` r
-
-nip <- ans_data(year = 2023, type = "complaints")
-
-# top complaint subjects
-nip |>
-  count(ASSUNTO, sort = TRUE) |>
-  head(10)
-
-# operators with most complaints
-nip |>
-  count(NOME_OPERADORA, sort = TRUE) |>
-  head(10)
-```
+\
+`nip`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, type ``=`` ``"complaints"``)`\
+\
+`# top complaint subjects`\
+`nip`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``ASSUNTO``, sort ``=`` ``TRUE``)`` ``|>`\
+`  `[`head`](https://rdrr.io/r/utils/head.html)`(``10``)`\
+\
+`# operators with most complaints`\
+`nip`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``NOME_OPERADORA``, sort ``=`` ``TRUE``)`` ``|>`\
+`  `[`head`](https://rdrr.io/r/utils/head.html)`(``10``)`
 
 ## Example: operator financial health
 
-``` r
-
-# Q4 2023 financial data
-fin <- ans_data(year = 2023, type = "financial", quarter = 4)
-
-# join with operator registry for names
-ops <- ans_operators()
-
-fin |>
-  filter(grepl("^41", CD_CONTA_CONTABIL)) |>  # revenue accounts
-  group_by(REG_ANS) |>
-  summarize(
-    revenue = sum(as.numeric(VL_SALDO_FINAL), na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  left_join(
-    ops |> select(REGISTRO_OPERADORA, Razao_Social),
-    by = c("REG_ANS" = "REGISTRO_OPERADORA")
-  ) |>
-  arrange(desc(revenue)) |>
-  head(10)
-```
+\
+`# Q4 2023 financial data`\
+`fin`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, type ``=`` ``"financial"``, quarter ``=`` ``4``)`\
+\
+`# join with operator registry for names`\
+`ops`` ``<-`` `[`ans_operators`](https://sidneybissoli.github.io/healthbR/reference/ans_operators.md)`(``)`\
+\
+`fin`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(`[`grepl`](https://rdrr.io/r/base/grep.html)`(``"^41"``, ``CD_CONTA_CONTABIL``)``)`` ``|>``  ``# revenue accounts`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``REG_ANS``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    revenue ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(`[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``VL_SALDO_FINAL``)``, na.rm ``=`` ``TRUE``)``,`\
+`    .groups ``=`` ``"drop"`\
+`  ``)`` ``|>`\
+`  `[`left_join`](https://dplyr.tidyverse.org/reference/mutate-joins.html)`(`\
+`    ``ops`` ``|>`` `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``REGISTRO_OPERADORA``, ``Razao_Social``)``,`\
+`    by ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"REG_ANS"`` ``=`` ``"REGISTRO_OPERADORA"``)`\
+`  ``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``revenue``)``)`` ``|>`\
+`  `[`head`](https://rdrr.io/r/utils/head.html)`(``10``)`
 
 ## Example: combining ANS with SUS data
 
 ANS beneficiary counts complement SUS data by showing private coverage:
 
-``` r
-
-# private coverage (ANS)
-ben <- ans_data(year = 2023, month = 12,
-                vars = c("SG_UF", "QT_BENEFICIARIO_ATIVO"))
-
-private_by_uf <- ben |>
-  group_by(SG_UF) |>
-  summarize(
-    private_beneficiaries = sum(as.integer(QT_BENEFICIARIO_ATIVO), na.rm = TRUE),
-    .groups = "drop"
-  )
-
-# total population (Census 2022)
-pop <- censo_populacao(year = 2022, territorial_level = "state")
-
-# private coverage rate
-# private_by_uf |>
-#   left_join(pop, by = ...) |>
-#   mutate(coverage_pct = (private_beneficiaries / population) * 100) |>
-#   arrange(desc(coverage_pct))
-```
+\
+`# private coverage (ANS)`\
+`ben`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, month ``=`` ``12``,`\
+`                vars ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"SG_UF"``, ``"QT_BENEFICIARIO_ATIVO"``)``)`\
+\
+`private_by_uf`` ``<-`` ``ben`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``SG_UF``)`` ``|>`\
+`  `[`summarize`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    private_beneficiaries ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(`[`as.integer`](https://rdrr.io/r/base/integer.html)`(``QT_BENEFICIARIO_ATIVO``)``, na.rm ``=`` ``TRUE``)``,`\
+`    .groups ``=`` ``"drop"`\
+`  ``)`\
+\
+`# total population (Census 2022)`\
+`pop`` ``<-`` `[`censo_populacao`](https://sidneybissoli.github.io/healthbR/reference/censo_populacao.md)`(``year ``=`` ``2022``, territorial_level ``=`` ``"state"``)`\
+\
+`# private coverage rate`\
+`# private_by_uf |>`\
+`#   left_join(pop, by = ...) |>`\
+`#   mutate(coverage_pct = (private_beneficiaries / population) * 100) |>`\
+`#   arrange(desc(coverage_pct))`
 
 ## Parameter routing
 
@@ -320,28 +292,24 @@ Unused parameters emit a warning but do not cause errors.
 With the `arrow` package installed, data is cached in Parquet format and
 can be queried lazily:
 
-``` r
-
-# lazy query (requires arrow)
-lazy_ben <- ans_data(year = 2023, uf = "AC", lazy = TRUE)
-lazy_ben |>
-  filter(month == 12L, TP_SEXO == "F") |>
-  select(CD_OPERADORA, DE_FAIXA_ETARIA, QT_BENEFICIARIO_ATIVO) |>
-  collect()
-```
+\
+`# lazy query (requires arrow)`\
+`lazy_ben`` ``<-`` `[`ans_data`](https://sidneybissoli.github.io/healthbR/reference/ans_data.md)`(``year ``=`` ``2023``, uf ``=`` ``"AC"``, lazy ``=`` ``TRUE``)`\
+`lazy_ben`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``month`` ``==`` ``12L``, ``TP_SEXO`` ``==`` ``"F"``)`` ``|>`\
+`  `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``CD_OPERADORA``, ``DE_FAIXA_ETARIA``, ``QT_BENEFICIARIO_ATIVO``)`` ``|>`\
+`  `[`collect`](https://dplyr.tidyverse.org/reference/compute.html)`(``)`
 
 ## Cache management
 
 Downloaded data is cached locally for faster future access:
 
-``` r
-
-# check cache status
-ans_cache_status()
-
-# clear cache if needed
-ans_clear_cache()
-```
+\
+`# check cache status`\
+[`ans_cache_status`](https://sidneybissoli.github.io/healthbR/reference/ans_cache_status.md)`(``)`\
+\
+`# clear cache if needed`\
+[`ans_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/ans_clear_cache.md)`(``)`
 
 ## Differences from DATASUS modules
 

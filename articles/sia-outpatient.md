@@ -17,26 +17,20 @@ It is managed by the Ministry of Health through DATASUS.
 
 ## Getting started
 
-``` r
-
-library(healthbR)
-library(dplyr)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`
 
 ### Check available years
 
-``` r
-
-sia_years()
-sia_years(status = "all")
-```
+\
+[`sia_years`](https://sidneybissoli.github.io/healthbR/reference/sia_years.md)`(``)`\
+[`sia_years`](https://sidneybissoli.github.io/healthbR/reference/sia_years.md)`(``status ``=`` ``"all"``)`
 
 ### Module information
 
-``` r
-
-sia_info()
-```
+\
+[`sia_info`](https://sidneybissoli.github.io/healthbR/reference/sia_info.md)`(``)`
 
 ## File types
 
@@ -63,59 +57,47 @@ production):
 
 ### Basic download (PA type)
 
-``` r
-
-outpatient <- sia_data(year = 2022, uf = "AC")
-```
+\
+`outpatient`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`
 
 ### Specific type
 
-``` r
-
-# chemotherapy/radiotherapy APAC records
-chemo <- sia_data(year = 2022, uf = "SP", type = "AM")
-```
+\
+`# chemotherapy/radiotherapy APAC records`\
+`chemo`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, type ``=`` ``"AM"``)`
 
 ### Specific months
 
-``` r
-
-outpatient <- sia_data(year = 2022, uf = "SP", month = 1:3)
-```
+\
+`outpatient`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``1``:``3``)`
 
 ### Filter by procedure
 
 Use SIGTAP procedure code prefixes:
 
-``` r
-
-# Medical consultations (group 03.01)
-consults <- sia_data(year = 2022, uf = "SP", month = 1, procedure = "0301")
-
-# Imaging exams (group 02.04)
-imaging <- sia_data(year = 2022, uf = "SP", month = 1, procedure = "0204")
-```
+\
+`# Medical consultations (group 03.01)`\
+`consults`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``1``, procedure ``=`` ``"0301"``)`\
+\
+`# Imaging exams (group 02.04)`\
+`imaging`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``1``, procedure ``=`` ``"0204"``)`
 
 ### Filter by diagnosis
 
-``` r
-
-# Diabetes-related outpatient care (E10-E14)
-diabetes <- sia_data(year = 2022, uf = "SP", month = 1, diagnosis = "E1")
-```
+\
+`# Diabetes-related outpatient care (E10-E14)`\
+`diabetes`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``1``, diagnosis ``=`` ``"E1"``)`
 
 ### Select variables
 
-``` r
-
-outpatient <- sia_data(
-  year = 2022,
-  uf = "SP",
-  month = 1,
-  vars = c("PA_PROC_ID", "PA_CIDPRI", "PA_SEXO", "PA_IDADE",
-           "PA_MUNPCN", "PA_VALAPR")
-)
-```
+\
+`outpatient`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(`\
+`  year ``=`` ``2022``,`\
+`  uf ``=`` ``"SP"``,`\
+`  month ``=`` ``1``,`\
+`  vars ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"PA_PROC_ID"``, ``"PA_CIDPRI"``, ``"PA_SEXO"``, ``"PA_IDADE"``,`\
+`           ``"PA_MUNPCN"``, ``"PA_VALAPR"``)`\
+`)`
 
 ## Key variables (PA type)
 
@@ -134,90 +116,76 @@ outpatient <- sia_data(
 
 ### Data dictionary
 
-``` r
-
-sia_dictionary()
-sia_dictionary("PA_SEXO")
-```
+\
+[`sia_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sia_dictionary.md)`(``)`\
+[`sia_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sia_dictionary.md)`(``"PA_SEXO"``)`
 
 ### Explore variables
 
-``` r
-
-sia_variables()
-sia_variables(search = "valor")
-
-# variables for a specific type
-sia_variables(type = "AM")
-```
+\
+[`sia_variables`](https://sidneybissoli.github.io/healthbR/reference/sia_variables.md)`(``)`\
+[`sia_variables`](https://sidneybissoli.github.io/healthbR/reference/sia_variables.md)`(``search ``=`` ``"valor"``)`\
+\
+`# variables for a specific type`\
+[`sia_variables`](https://sidneybissoli.github.io/healthbR/reference/sia_variables.md)`(``type ``=`` ``"AM"``)`
 
 ## Example: Top procedures by volume
 
-``` r
-
-outpatient <- sia_data(year = 2022, uf = "SP", month = 1)
-
-top_procedures <- outpatient |>
-  count(PA_PROC_ID, sort = TRUE) |>
-  head(20)
-```
+\
+`outpatient`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``1``)`\
+\
+`top_procedures`` ``<-`` ``outpatient`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``PA_PROC_ID``, sort ``=`` ``TRUE``)`` ``|>`\
+`  `[`head`](https://rdrr.io/r/utils/head.html)`(``20``)`
 
 ## Example: Outpatient spending by diagnosis
 
-``` r
-
-outpatient <- sia_data(year = 2022, uf = "SP", month = 1)
-
-spending <- outpatient |>
-  filter(!is.na(PA_CIDPRI), PA_CIDPRI != "") |>
-  mutate(
-    chapter = substr(PA_CIDPRI, 1, 1),
-    value = as.numeric(PA_VALAPR)
-  ) |>
-  group_by(chapter) |>
-  summarise(
-    records = n(),
-    total_value = sum(value, na.rm = TRUE)
-  ) |>
-  arrange(desc(total_value))
-```
+\
+`outpatient`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, month ``=`` ``1``)`\
+\
+`spending`` ``<-`` ``outpatient`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``!`[`is.na`](https://rdrr.io/r/base/NA.html)`(``PA_CIDPRI``)``, ``PA_CIDPRI`` ``!=`` ``""``)`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(`\
+`    chapter ``=`` `[`substr`](https://rdrr.io/r/base/substr.html)`(``PA_CIDPRI``, ``1``, ``1``)``,`\
+`    value ``=`` `[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``PA_VALAPR``)`\
+`  ``)`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``chapter``)`` ``|>`\
+`  `[`summarise`](https://dplyr.tidyverse.org/reference/summarise.html)`(`\
+`    records ``=`` `[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``,`\
+`    total_value ``=`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``value``, na.rm ``=`` ``TRUE``)`\
+`  ``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(`[`desc`](https://dplyr.tidyverse.org/reference/desc.html)`(``total_value``)``)`
 
 ## Example: Chemotherapy APAC records
 
-``` r
-
-chemo <- sia_data(year = 2022, uf = "SP", type = "AM", month = 1:6)
-
-chemo |>
-  count(month, name = "records") |>
-  arrange(month)
-```
+\
+`chemo`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, type ``=`` ``"AM"``, month ``=`` ``1``:``6``)`\
+\
+`chemo`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``month``, name ``=`` ``"records"``)`` ``|>`\
+`  `[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(``month``)`
 
 ## Smart type parsing
 
-``` r
-
-# parsed types (default)
-outpatient <- sia_data(year = 2022, uf = "AC", month = 1)
-class(outpatient$PA_VALAPR)  # double
-
-# all character
-outpatient_raw <- sia_data(year = 2022, uf = "AC", month = 1, parse = FALSE)
-```
+\
+`# parsed types (default)`\
+`outpatient`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``, month ``=`` ``1``)`\
+[`class`](https://rdrr.io/r/base/class.html)`(``outpatient``$``PA_VALAPR``)``  ``# double`\
+\
+`# all character`\
+`outpatient_raw`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``, month ``=`` ``1``, parse ``=`` ``FALSE``)`
 
 ## Cache and lazy evaluation
 
-``` r
-
-sia_cache_status()
-sia_clear_cache()
-
-# lazy query
-lazy <- sia_data(year = 2022, uf = "SP", lazy = TRUE)
-lazy |>
-  filter(PA_CIDPRI >= "E10", PA_CIDPRI <= "E14") |>
-  collect()
-```
+\
+[`sia_cache_status`](https://sidneybissoli.github.io/healthbR/reference/sia_cache_status.md)`(``)`\
+[`sia_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/sia_clear_cache.md)`(``)`\
+\
+`# lazy query`\
+`lazy`` ``<-`` `[`sia_data`](https://sidneybissoli.github.io/healthbR/reference/sia_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"SP"``, lazy ``=`` ``TRUE``)`\
+`lazy`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``PA_CIDPRI`` ``>=`` ``"E10"``, ``PA_CIDPRI`` ``<=`` ``"E14"``)`` ``|>`\
+`  `[`collect`](https://dplyr.tidyverse.org/reference/compute.html)`(``)`
 
 ## Further reading
 

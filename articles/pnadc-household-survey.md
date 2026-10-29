@@ -19,76 +19,62 @@ modules:
 
 ## Getting started
 
-``` r
-
-library(healthbR)
-library(dplyr)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`
 
 ### Module information
 
-``` r
-
-pnadc_info()
-```
+\
+[`pnadc_info`](https://sidneybissoli.github.io/healthbR/reference/pnadc_info.md)`(``)`
 
 ### Available modules and years
 
-``` r
-
-pnadc_modules()
-#> # A tibble: 4 x 4
-#>   module       name_pt                            name_en                years
-#>   <chr>        <chr>                              <chr>                  <list>
-#> 1 deficiencia  Pessoas com deficiencia             Persons with disab... <int>
-#> 2 habitacao    Caracteristicas dos domicilios      Housing character...  <int>
-#> 3 moradores    Caracteristicas gerais dos morad... General character...  <int>
-#> 4 aps          Atencao primaria a saude            Primary health care   <int>
-
-# Years for a specific module
-pnadc_years("deficiencia")
-#> [1] 2019 2022 2024
-```
+\
+[`pnadc_modules`](https://sidneybissoli.github.io/healthbR/reference/pnadc_modules.md)`(``)`\
+`#> # A tibble: 4 x 4`\
+`#>   module       name_pt                            name_en                years`\
+`#>   <chr>        <chr>                              <chr>                  <list>`\
+`#> 1 deficiencia  Pessoas com deficiencia             Persons with disab... <int>`\
+`#> 2 habitacao    Caracteristicas dos domicilios      Housing character...  <int>`\
+`#> 3 moradores    Caracteristicas gerais dos morad... General character...  <int>`\
+`#> 4 aps          Atencao primaria a saude            Primary health care   <int>`\
+\
+`# Years for a specific module`\
+[`pnadc_years`](https://sidneybissoli.github.io/healthbR/reference/pnadc_years.md)`(``"deficiencia"``)`\
+`#> [1] 2019 2022 2024`
 
 ## Downloading data
 
 ### Basic download
 
-``` r
-
-# Disability module, 2022
-df <- pnadc_data(module = "deficiencia", year = 2022)
-```
+\
+`# Disability module, 2022`\
+`df`` ``<-`` `[`pnadc_data`](https://sidneybissoli.github.io/healthbR/reference/pnadc_data.md)`(``module ``=`` ``"deficiencia"``, year ``=`` ``2022``)`
 
 ### Select variables
 
-``` r
-
-df <- pnadc_data(
-  module = "deficiencia",
-  year = 2022,
-  vars = c("UF", "V2007", "V2009", "V2010", "G001", "G003", "G006")
-)
-```
+\
+`df`` ``<-`` `[`pnadc_data`](https://sidneybissoli.github.io/healthbR/reference/pnadc_data.md)`(`\
+`  module ``=`` ``"deficiencia"``,`\
+`  year ``=`` ``2022``,`\
+`  vars ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"UF"``, ``"V2007"``, ``"V2009"``, ``"V2010"``, ``"G001"``, ``"G003"``, ``"G006"``)`\
+`)`
 
 ### Multiple years
 
-``` r
-
-# Housing conditions across all available years
-df <- pnadc_data(module = "habitacao")
-```
+\
+`# Housing conditions across all available years`\
+`df`` ``<-`` `[`pnadc_data`](https://sidneybissoli.github.io/healthbR/reference/pnadc_data.md)`(``module ``=`` ``"habitacao"``)`
 
 ## Exploring variables
 
-``` r
-
-# List variable names
-pnadc_variables(module = "deficiencia", year = 2022)
-
-# Full dictionary with positions and widths
-pnadc_dictionaries(module = "deficiencia", year = 2022)
-```
+\
+`# List variable names`\
+[`pnadc_variables`](https://sidneybissoli.github.io/healthbR/reference/pnadc_variables.md)`(``module ``=`` ``"deficiencia"``, year ``=`` ``2022``)`\
+\
+`# Full dictionary with positions and widths`\
+[`pnadc_dictionaries`](https://sidneybissoli.github.io/healthbR/reference/pnadc_dictionaries.md)`(``module ``=`` ``"deficiencia"``, year ``=`` ``2022``)`
 
 ## Survey design
 
@@ -96,75 +82,65 @@ PNAD Continua uses a complex sample design. Survey design variables
 (`UPA`, `Estrato`, `V1028`) are always included in the output. Use
 `as_survey = TRUE` to create a survey design object:
 
-``` r
-
-# Requires srvyr package
-svy <- pnadc_data(
-  module = "deficiencia",
-  year = 2022,
-  as_survey = TRUE
-)
-
-# Use srvyr verbs for proper variance estimation
-library(srvyr)
-svy |>
-  group_by(UF) |>
-  survey_mean(G001 == "1", na.rm = TRUE)  # disability prevalence by state
-```
+\
+`# Requires srvyr package`\
+`svy`` ``<-`` `[`pnadc_data`](https://sidneybissoli.github.io/healthbR/reference/pnadc_data.md)`(`\
+`  module ``=`` ``"deficiencia"``,`\
+`  year ``=`` ``2022``,`\
+`  as_survey ``=`` ``TRUE`\
+`)`\
+\
+`# Use srvyr verbs for proper variance estimation`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`srvyr`](http://gdfe.co/srvyr/)`)`\
+`svy`` ``|>`\
+`  `[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``UF``)`` ``|>`\
+`  `[`survey_mean`](http://gdfe.co/srvyr/reference/survey_mean.md)`(``G001`` ``==`` ``"1"``, na.rm ``=`` ``TRUE``)``  ``# disability prevalence by state`
 
 ## Example: Disability prevalence
 
-``` r
-
-df <- pnadc_data(module = "deficiencia", year = 2022)
-
-# G001: "Tem dificuldade permanente de enxergar" (vision difficulty)
-# 1 = Sim, nao consegue de modo algum (cannot at all)
-# 2 = Sim, muita dificuldade (great difficulty)
-# 3 = Sim, alguma dificuldade (some difficulty)
-# 4 = Nao, nenhuma dificuldade (no difficulty)
-vision <- df |>
-  filter(G001 %in% c("1", "2", "3", "4")) |>
-  count(G001) |>
-  mutate(pct = n / sum(n) * 100)
-```
+\
+`df`` ``<-`` `[`pnadc_data`](https://sidneybissoli.github.io/healthbR/reference/pnadc_data.md)`(``module ``=`` ``"deficiencia"``, year ``=`` ``2022``)`\
+\
+`# G001: "Tem dificuldade permanente de enxergar" (vision difficulty)`\
+`# 1 = Sim, nao consegue de modo algum (cannot at all)`\
+`# 2 = Sim, muita dificuldade (great difficulty)`\
+`# 3 = Sim, alguma dificuldade (some difficulty)`\
+`# 4 = Nao, nenhuma dificuldade (no difficulty)`\
+`vision`` ``<-`` ``df`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``G001`` `[`%in%`](https://rdrr.io/r/base/match.html)` `[`c`](https://rdrr.io/r/base/c.html)`(``"1"``, ``"2"``, ``"3"``, ``"4"``)``)`` ``|>`\
+`  `[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``G001``)`` ``|>`\
+`  `[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``pct ``=`` ``n`` ``/`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``n``)`` ``*`` ``100``)`
 
 ## Example: Housing sanitation over time
 
-``` r
-
-df <- pnadc_data(module = "habitacao", year = c(2016, 2019, 2022))
-
-# Analyze water supply and sanitation trends
-# Variables vary by year -- check pnadc_variables() for each edition
-```
+\
+`df`` ``<-`` `[`pnadc_data`](https://sidneybissoli.github.io/healthbR/reference/pnadc_data.md)`(``module ``=`` ``"habitacao"``, year ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``2016``, ``2019``, ``2022``)``)`\
+\
+`# Analyze water supply and sanitation trends`\
+`# Variables vary by year -- check pnadc_variables() for each edition`
 
 ## Example: Primary health care access
 
-``` r
-
-# APS module only available for 2022 Q2
-df <- pnadc_data(module = "aps", year = 2022)
-```
+\
+`# APS module only available for 2022 Q2`\
+`df`` ``<-`` `[`pnadc_data`](https://sidneybissoli.github.io/healthbR/reference/pnadc_data.md)`(``module ``=`` ``"aps"``, year ``=`` ``2022``)`
 
 ## Cache and performance
 
-``` r
-
-# Check cache
-pnadc_cache_status()
-
-# Clear cache
-pnadc_clear_cache()
-
-# Lazy evaluation
-lazy_df <- pnadc_data(
-  module = "deficiencia",
-  year = 2022,
-  lazy = TRUE,
-  backend = "arrow"
-)
-```
+\
+`# Check cache`\
+[`pnadc_cache_status`](https://sidneybissoli.github.io/healthbR/reference/pnadc_cache_status.md)`(``)`\
+\
+`# Clear cache`\
+[`pnadc_clear_cache`](https://sidneybissoli.github.io/healthbR/reference/pnadc_clear_cache.md)`(``)`\
+\
+`# Lazy evaluation`\
+`lazy_df`` ``<-`` `[`pnadc_data`](https://sidneybissoli.github.io/healthbR/reference/pnadc_data.md)`(`\
+`  module ``=`` ``"deficiencia"``,`\
+`  year ``=`` ``2022``,`\
+`  lazy ``=`` ``TRUE``,`\
+`  backend ``=`` ``"arrow"`\
+`)`
 
 ## Further reading
 

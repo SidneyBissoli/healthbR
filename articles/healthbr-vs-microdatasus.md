@@ -60,16 +60,14 @@ time”; the last release, 1.2.0, is from 2025-11-28. It still works –
 every number below was measured with it – but it now installs from
 source:
 
-``` r
-
-# from the CRAN archive (needs Rtools on Windows: the package compiles C)
-install.packages(
-  "https://cran.r-project.org/src/contrib/Archive/read.dbc/read.dbc_1.2.0.tar.gz",
-  repos = NULL, type = "source"
-)
-# or the development version
-# remotes::install_github("danicat/read.dbc")
-```
+\
+`# from the CRAN archive (needs Rtools on Windows: the package compiles C)`\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(`\
+`  ``"https://cran.r-project.org/src/contrib/Archive/read.dbc/read.dbc_1.2.0.tar.gz"``,`\
+`  repos ``=`` ``NULL``, type ``=`` ``"source"`\
+`)`\
+`# or the development version`\
+`# remotes::install_github("danicat/read.dbc")`
 
 The other two no longer depend on it. microdatasus 3.0.0 “removes the
 dependency on `read.dbc` and reads DBC files with vendored C code
@@ -147,41 +145,37 @@ the lazy year below 16.7 s.
 
 ### Read one month of SIH for one state
 
-``` r
-
-# read.dbc: you build the FTP path and download
-f <- tempfile(fileext = ".dbc")
-curl::curl_download(
-  "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR2301.dbc", f
-)
-rr_r <- read.dbc::read.dbc(f, as.is = TRUE)
-
-# microdatasus
-rr_m <- microdatasus::fetch_datasus(
-  year_start = 2023, month_start = 1, year_end = 2023, month_end = 1,
-  uf = "RR", information_system = "SIH-RD"
-)
-
-# healthbR
-rr_h <- healthbR::sih_data(year = 2023, month = 1, uf = "RR")
-```
+\
+`# read.dbc: you build the FTP path and download`\
+`f`` ``<-`` `[`tempfile`](https://rdrr.io/r/base/tempfile.html)`(``fileext ``=`` ``".dbc"``)`\
+`curl``::`[`curl_download`](https://jeroen.r-universe.dev/curl/reference/curl_download.html)`(`\
+`  ``"ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR2301.dbc"``, ``f`\
+`)`\
+`rr_r`` ``<-`` ``read.dbc``::``read.dbc``(``f``, as.is ``=`` ``TRUE``)`\
+\
+`# microdatasus`\
+`rr_m`` ``<-`` ``microdatasus``::``fetch_datasus``(`\
+`  year_start ``=`` ``2023``, month_start ``=`` ``1``, year_end ``=`` ``2023``, month_end ``=`` ``1``,`\
+`  uf ``=`` ``"RR"``, information_system ``=`` ``"SIH-RD"`\
+`)`\
+\
+`# healthbR`\
+`rr_h`` ``<-`` ``healthbR``::`[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2023``, month ``=`` ``1``, uf ``=`` ``"RR"``)`
 
 The file name encodes the system, file type, state and competence
 (`RD` + `RR` + `23` + `01`); read.dbc leaves that and the directory,
 which changes by system and period, to you. Column types differ:
 
-``` r
-
-table(vapply(rr_r, function(x) class(x)[1], ""))   # read.dbc
-#> character   integer   numeric
-#>        77        17        19
-table(vapply(rr_m, function(x) class(x)[1], ""))   # microdatasus
-#> character
-#>       113
-table(vapply(rr_h, function(x) class(x)[1], ""))   # healthbR
-#> character      Date   integer   numeric
-#>       101         3         7         5
-```
+\
+[`table`](https://rdrr.io/r/base/table.html)`(`[`vapply`](https://rdrr.io/r/base/lapply.html)`(``rr_r``, ``function``(``x``)`` `[`class`](https://rdrr.io/r/base/class.html)`(``x``)``[``1``]``, ``""``)``)``   ``# read.dbc`\
+`#> character   integer   numeric`\
+`#>        77        17        19`\
+[`table`](https://rdrr.io/r/base/table.html)`(`[`vapply`](https://rdrr.io/r/base/lapply.html)`(``rr_m``, ``function``(``x``)`` `[`class`](https://rdrr.io/r/base/class.html)`(``x``)``[``1``]``, ``""``)``)``   ``# microdatasus`\
+`#> character`\
+`#>       113`\
+[`table`](https://rdrr.io/r/base/table.html)`(`[`vapply`](https://rdrr.io/r/base/lapply.html)`(``rr_h``, ``function``(``x``)`` `[`class`](https://rdrr.io/r/base/class.html)`(``x``)``[``1``]``, ``""``)``)``   ``# healthbR`\
+`#> character      Date   integer   numeric`\
+`#>       101         3         7         5`
 
 read.dbc parses what the DBF declares numeric: the values and counts,
 but also some coded fields – `MORTE` comes back an integer while `SEXO`
@@ -194,30 +188,28 @@ and do not change type between years.
 
 ### Deaths per competence for a year
 
-``` r
-
-# read.dbc: twelve downloads, all rows read
-deaths_r <- vapply(1:12, function(m) {
-  f <- tempfile(fileext = ".dbc")
-  curl::curl_download(sprintf(
-    "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR23%02d.dbc", m
-  ), f)
-  sum(read.dbc::read.dbc(f, as.is = TRUE)$MORTE == 1)
-}, numeric(1))
-
-# microdatasus: twelve downloads, all rows in memory, then filter
-deaths_m <- microdatasus::fetch_datasus(
-  2023, 1, 2023, 12, uf = "RR", information_system = "SIH-RD"
-) |>
-  dplyr::filter(MORTE == "1") |>
-  dplyr::count(MES_CMPT)
-
-# healthbR: lazy query over the mirror, only the matching rows travel
-deaths_h <- healthbR::sih_data(year = 2023, uf = "RR", lazy = TRUE) |>
-  dplyr::filter(MORTE == "1") |>
-  dplyr::count(month) |>
-  dplyr::collect()
-```
+\
+`# read.dbc: twelve downloads, all rows read`\
+`deaths_r`` ``<-`` `[`vapply`](https://rdrr.io/r/base/lapply.html)`(``1``:``12``, ``function``(``m``)`` ``{`\
+`  ``f`` ``<-`` `[`tempfile`](https://rdrr.io/r/base/tempfile.html)`(``fileext ``=`` ``".dbc"``)`\
+`  ``curl``::`[`curl_download`](https://jeroen.r-universe.dev/curl/reference/curl_download.html)`(`[`sprintf`](https://rdrr.io/r/base/sprintf.html)`(`\
+`    ``"ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRR23%02d.dbc"``, ``m`\
+`  ``)``, ``f``)`\
+`  `[`sum`](https://rdrr.io/r/base/sum.html)`(``read.dbc``::``read.dbc``(``f``, as.is ``=`` ``TRUE``)``$``MORTE`` ``==`` ``1``)`\
+`}``, `[`numeric`](https://rdrr.io/r/base/numeric.html)`(``1``)``)`\
+\
+`# microdatasus: twelve downloads, all rows in memory, then filter`\
+`deaths_m`` ``<-`` ``microdatasus``::``fetch_datasus``(`\
+`  ``2023``, ``1``, ``2023``, ``12``, uf ``=`` ``"RR"``, information_system ``=`` ``"SIH-RD"`\
+`)`` ``|>`\
+`  ``dplyr``::`[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``MORTE`` ``==`` ``"1"``)`` ``|>`\
+`  ``dplyr``::`[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``MES_CMPT``)`\
+\
+`# healthbR: lazy query over the mirror, only the matching rows travel`\
+`deaths_h`` ``<-`` ``healthbR``::`[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2023``, uf ``=`` ``"RR"``, lazy ``=`` ``TRUE``)`` ``|>`\
+`  ``dplyr``::`[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``MORTE`` ``==`` ``"1"``)`` ``|>`\
+`  ``dplyr``::`[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``month``)`` ``|>`\
+`  ``dplyr``::`[`collect`](https://dplyr.tidyverse.org/reference/compute.html)`(``)`
 
 | Route | RR 2023, 12 competences |
 |----|----|
@@ -231,18 +223,16 @@ All four return the same 1,450 deaths, month by month (113, 120, 175,
 
 ### Labels
 
-``` r
-
-# microdatasus: one call
-rr_mp <- microdatasus::process_sih(rr_m)
-
-# healthbR: a join with the dictionary, when you want it
-rr_h |>
-  dplyr::count(MORTE) |>
-  dplyr::left_join(healthbR::sih_dictionary("MORTE"), by = c("MORTE" = "code"))
-
-# read.dbc: labels are yours to bring
-```
+\
+`# microdatasus: one call`\
+`rr_mp`` ``<-`` ``microdatasus``::``process_sih``(``rr_m``)`\
+\
+`# healthbR: a join with the dictionary, when you want it`\
+`rr_h`` ``|>`\
+`  ``dplyr``::`[`count`](https://dplyr.tidyverse.org/reference/count.html)`(``MORTE``)`` ``|>`\
+`  ``dplyr``::`[`left_join`](https://dplyr.tidyverse.org/reference/mutate-joins.html)`(``healthbR``::`[`sih_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sih_dictionary.md)`(``"MORTE"``)``, by ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"MORTE"`` ``=`` ``"code"``)``)`\
+\
+`# read.dbc: labels are yours to bring`
 
 ## The mirror without healthbR
 
@@ -251,27 +241,25 @@ The Parquet files healthbR reads are public. The
 publishes one file per DATASUS file, at a path that follows the FTP’s
 competence and state, with every column as the original string:
 
-``` r
-
-url <- "https://data.sidneybissoli.com/sih/rd/ano=2023/mes=01/uf=RR/part-0.parquet"
-rr_a <- arrow::read_parquet(url)
-dim(rr_a)
-#> [1] 4734  113
-
-# a year in one SQL query, nothing downloaded but the matching bytes
-con <- DBI::dbConnect(duckdb::duckdb())
-DBI::dbExecute(con, "INSTALL httpfs; LOAD httpfs;")
-urls <- sprintf(
-  "'https://data.sidneybissoli.com/sih/rd/ano=2023/mes=%02d/uf=RR/part-0.parquet'", 1:12
-)
-DBI::dbGetQuery(con, paste0(
-  "SELECT count(*) AS deaths FROM read_parquet([", toString(urls), "]) ",
-  "WHERE MORTE = '1'"
-))
-#>   deaths
-#> 1   1450
-DBI::dbDisconnect(con, shutdown = TRUE)
-```
+\
+`url`` ``<-`` ``"https://data.sidneybissoli.com/sih/rd/ano=2023/mes=01/uf=RR/part-0.parquet"`\
+`rr_a`` ``<-`` ``arrow``::`[`read_parquet`](https://arrow.apache.org/docs/r/reference/read_parquet.html)`(``url``)`\
+[`dim`](https://rdrr.io/r/base/dim.html)`(``rr_a``)`\
+`#> [1] 4734  113`\
+\
+`# a year in one SQL query, nothing downloaded but the matching bytes`\
+`con`` ``<-`` ``DBI``::`[`dbConnect`](https://dbi.r-dbi.org/reference/dbConnect.html)`(``duckdb``::`[`duckdb`](https://r.duckdb.org/reference/duckdb.html)`(``)``)`\
+`DBI``::`[`dbExecute`](https://dbi.r-dbi.org/reference/dbExecute.html)`(``con``, ``"INSTALL httpfs; LOAD httpfs;"``)`\
+`urls`` ``<-`` `[`sprintf`](https://rdrr.io/r/base/sprintf.html)`(`\
+`  ``"'https://data.sidneybissoli.com/sih/rd/ano=2023/mes=%02d/uf=RR/part-0.parquet'"``, ``1``:``12`\
+`)`\
+`DBI``::`[`dbGetQuery`](https://dbi.r-dbi.org/reference/dbGetQuery.html)`(``con``, `[`paste0`](https://rdrr.io/r/base/paste.html)`(`\
+`  ``"SELECT count(*) AS deaths FROM read_parquet(["``, `[`toString`](https://rdrr.io/r/base/toString.html)`(``urls``)``, ``"]) "``,`\
+`  ``"WHERE MORTE = '1'"`\
+`)``)`\
+`#>   deaths`\
+`#> 1   1450`\
+`DBI``::`[`dbDisconnect`](https://dbi.r-dbi.org/reference/dbDisconnect.html)`(``con``, shutdown ``=`` ``TRUE``)`
 
 Which files exist, and what each came from (FTP URL, MD5 and size of the
 `.dbc`, record count, Parquet SHA-256), is in
@@ -332,34 +320,32 @@ and types re-measured on 2026-10-14.*
 
 Roraima is the smallest SIH file; January 2023 has 4,734 admissions.
 
-``` r
-
-library(healthbR)
-library(microdatasus)
-library(dplyr)
-
-# healthbR ---------------------------------------------------------------
-rr_h <- sih_data(year = 2023, month = 1, uf = "RR")
-#> ℹ Reading SIH data from R2: 2023/01 (1 UF(s))...
-
-dim(rr_h)
-#> [1] 4734  116
-
-# microdatasus -------------------------------------------------------------
-rr_m <- fetch_datasus(year_start = 2023, month_start = 1,
-                      year_end = 2023, month_end = 1,
-                      uf = "RR", information_system = "SIH-RD")
-dim(rr_m)
-#> [1] 4734  113
-
-rr_mp <- process_sih(rr_m)
-dim(rr_mp)
-#> [1] 4734  121
-
-# read.dbc -----------------------------------------------------------------
-dim(rr_r)    # from the side-by-side section above
-#> [1] 4734  113
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`healthbR`](https://github.com/SidneyBissoli/healthbR)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`microdatasus`](https://github.com/rfsaldanha/microdatasus)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`\
+\
+`# healthbR ---------------------------------------------------------------`\
+`rr_h`` ``<-`` `[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2023``, month ``=`` ``1``, uf ``=`` ``"RR"``)`\
+`#> ℹ Reading SIH data from R2: 2023/01 (1 UF(s))...`\
+\
+[`dim`](https://rdrr.io/r/base/dim.html)`(``rr_h``)`\
+`#> [1] 4734  116`\
+\
+`# microdatasus -------------------------------------------------------------`\
+`rr_m`` ``<-`` ``fetch_datasus``(``year_start ``=`` ``2023``, month_start ``=`` ``1``,`\
+`                      year_end ``=`` ``2023``, month_end ``=`` ``1``,`\
+`                      uf ``=`` ``"RR"``, information_system ``=`` ``"SIH-RD"``)`\
+[`dim`](https://rdrr.io/r/base/dim.html)`(``rr_m``)`\
+`#> [1] 4734  113`\
+\
+`rr_mp`` ``<-`` ``process_sih``(``rr_m``)`\
+[`dim`](https://rdrr.io/r/base/dim.html)`(``rr_mp``)`\
+`#> [1] 4734  121`\
+\
+`# read.dbc -----------------------------------------------------------------`\
+[`dim`](https://rdrr.io/r/base/dim.html)`(``rr_r``)``    ``# from the side-by-side section above`\
+`#> [1] 4734  113`
 
 Same 4,734 rows; the sets of `N_AIH` are identical in the three.
 healthbR adds three columns (`year`, `month`, `uf_source`: the
@@ -370,35 +356,33 @@ does not carry); `process_sih()` adds eight (`munResStatus`,
 
 The same five records, three ways:
 
-``` r
-
-cols <- c("N_AIH", "SEXO", "COD_IDADE", "IDADE", "MORTE", "DT_INTER",
-          "DIAG_PRINC", "MUNIC_RES", "VAL_TOT")
-
-as.data.frame(head(rr_h[cols], 5))
-#>           N_AIH SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT
-#> 1 1423100411392    3         4    18     0 2022-12-13       O809    140017   568.80
-#> 2 1423100911661    1         4    83     0 2022-12-26       J189    140010   994.59
-#> 3 1423100911672    3         4    65     0 2022-12-03       I219    140010   620.12
-#> 4 1423100911683    1         4    58     0 2022-12-26       I248    140020   333.08
-#> 5 1423100911694    1         4    35     0 2022-11-01       A499    140010 11202.59
-
-as.data.frame(head(rr_m[cols], 5))
-#>           N_AIH SEXO COD_IDADE IDADE MORTE DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT
-#> 1 1423100411392    3         4    18     0 20221213       O809    140017    568.8
-#> 2 1423100911661    1         4    83     0 20221226       J189    140010   994.59
-#> 3 1423100911672    3         4    65     0 20221203       I219    140010   620.12
-#> 4 1423100911683    1         4    58     0 20221226       I248    140020   333.08
-#> 5 1423100911694    1         4    35     0 20221101       A499    140010 11202.59
-
-as.data.frame(head(rr_mp[c(cols, "munResNome")], 5))
-#>           N_AIH      SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT munResNome
-#> 1 1423100411392  Feminino      Anos    18   Não 2022-12-13       O809    140017    568.8      Cantá
-#> 2 1423100911661 Masculino      Anos    83   Não 2022-12-26       J189    140010   994.59  Boa Vista
-#> 3 1423100911672  Feminino      Anos    65   Não 2022-12-03       I219    140010   620.12  Boa Vista
-#> 4 1423100911683 Masculino      Anos    58   Não 2022-12-26       I248    140020   333.08  Caracaraí
-#> 5 1423100911694 Masculino      Anos    35   Não 2022-11-01       A499    140010 11202.59  Boa Vista
-```
+\
+`cols`` ``<-`` `[`c`](https://rdrr.io/r/base/c.html)`(``"N_AIH"``, ``"SEXO"``, ``"COD_IDADE"``, ``"IDADE"``, ``"MORTE"``, ``"DT_INTER"``,`\
+`          ``"DIAG_PRINC"``, ``"MUNIC_RES"``, ``"VAL_TOT"``)`\
+\
+[`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html)`(`[`head`](https://rdrr.io/r/utils/head.html)`(``rr_h``[``cols``]``, ``5``)``)`\
+`#>           N_AIH SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT`\
+`#> 1 1423100411392    3         4    18     0 2022-12-13       O809    140017   568.80`\
+`#> 2 1423100911661    1         4    83     0 2022-12-26       J189    140010   994.59`\
+`#> 3 1423100911672    3         4    65     0 2022-12-03       I219    140010   620.12`\
+`#> 4 1423100911683    1         4    58     0 2022-12-26       I248    140020   333.08`\
+`#> 5 1423100911694    1         4    35     0 2022-11-01       A499    140010 11202.59`\
+\
+[`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html)`(`[`head`](https://rdrr.io/r/utils/head.html)`(``rr_m``[``cols``]``, ``5``)``)`\
+`#>           N_AIH SEXO COD_IDADE IDADE MORTE DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT`\
+`#> 1 1423100411392    3         4    18     0 20221213       O809    140017    568.8`\
+`#> 2 1423100911661    1         4    83     0 20221226       J189    140010   994.59`\
+`#> 3 1423100911672    3         4    65     0 20221203       I219    140010   620.12`\
+`#> 4 1423100911683    1         4    58     0 20221226       I248    140020   333.08`\
+`#> 5 1423100911694    1         4    35     0 20221101       A499    140010 11202.59`\
+\
+[`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html)`(`[`head`](https://rdrr.io/r/utils/head.html)`(``rr_mp``[`[`c`](https://rdrr.io/r/base/c.html)`(``cols``, ``"munResNome"``)``]``, ``5``)``)`\
+`#>           N_AIH      SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT munResNome`\
+`#> 1 1423100411392  Feminino      Anos    18   Não 2022-12-13       O809    140017    568.8      Cantá`\
+`#> 2 1423100911661 Masculino      Anos    83   Não 2022-12-26       J189    140010   994.59  Boa Vista`\
+`#> 3 1423100911672  Feminino      Anos    65   Não 2022-12-03       I219    140010   620.12  Boa Vista`\
+`#> 4 1423100911683 Masculino      Anos    58   Não 2022-12-26       I248    140020   333.08  Caracaraí`\
+`#> 5 1423100911694 Masculino      Anos    35   Não 2022-11-01       A499    140010 11202.59  Boa Vista`
 
 Note `DT_INTER`: the admissions billed in competence 2023-01 happened in
 November and December 2022. In all three routes the file (or
@@ -411,33 +395,29 @@ mind.
 
 And the trap, in one line each:
 
-``` r
-
-sum(rr_h$MORTE == 1)          # healthbR: "1"; R compares it as text
-#> [1] 113
-sum(rr_r$MORTE == 1)          # read.dbc: integer, as the DBF declares it
-#> [1] 113
-sum(rr_m$MORTE == "1")        # microdatasus, raw: character code
-#> [1] 113
-sum(rr_mp$MORTE == 1)         # microdatasus, processed: the code is gone
-#> [1] 0
-table(rr_mp$MORTE)
-#>  Não  Sim
-#> 4621  113
-```
+\
+[`sum`](https://rdrr.io/r/base/sum.html)`(``rr_h``$``MORTE`` ``==`` ``1``)``          ``# healthbR: "1"; R compares it as text`\
+`#> [1] 113`\
+[`sum`](https://rdrr.io/r/base/sum.html)`(``rr_r``$``MORTE`` ``==`` ``1``)``          ``# read.dbc: integer, as the DBF declares it`\
+`#> [1] 113`\
+[`sum`](https://rdrr.io/r/base/sum.html)`(``rr_m``$``MORTE`` ``==`` ``"1"``)``        ``# microdatasus, raw: character code`\
+`#> [1] 113`\
+[`sum`](https://rdrr.io/r/base/sum.html)`(``rr_mp``$``MORTE`` ``==`` ``1``)``         ``# microdatasus, processed: the code is gone`\
+`#> [1] 0`\
+[`table`](https://rdrr.io/r/base/table.html)`(``rr_mp``$``MORTE``)`\
+`#>  Não  Sim`\
+`#> 4621  113`
 
 Same 113 deaths; the last line is the one that silently returns zero in
 a script written against codes. With healthbR the label is a join away:
 
-``` r
-
-sih_dictionary("MORTE")
-#> # A tibble: 2 × 4
-#>   variable description              code  label
-#>   <chr>    <chr>                    <chr> <chr>
-#> 1 MORTE    Óbito durante internação 0     Não
-#> 2 MORTE    Óbito durante internação 1     Sim
-```
+\
+[`sih_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sih_dictionary.md)`(``"MORTE"``)`\
+`#> # A tibble: 2 × 4`\
+`#>   variable description              code  label`\
+`#>   <chr>    <chr>                    <chr> <chr>`\
+`#> 1 MORTE    Óbito durante internação 0     Não`\
+`#> 2 MORTE    Óbito durante internação 1     Sim`
 
 ## What comes with the data: provenance
 
@@ -445,39 +425,35 @@ From the mirror, the tibble carries the source it was served from and
 one row per DATASUS file behind it – URL, MD5 and size of the `.dbc`,
 record count, when it was processed and by which pipeline version:
 
-``` r
-
-attr(rr_h, "healthbr_source")
-#> [1] "r2"
-
-attr(rr_h, "healthbr_provenance") |>
-  select(year, month, uf, records, source_hash_md5, source_size_bytes,
-         processing_timestamp)
-#> # A tibble: 1 × 7
-#>    year month uf    records source_hash_md5                  source_size_bytes processing_timestamp
-#>   <int> <int> <chr>   <dbl> <chr>                                        <dbl> <chr>
-#> 1  2023     1 RR       4734 12e74d4b059589ceb47e4136e3b2ce5f            349244 2026-03-09 03:05:34.463049
-```
+\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``rr_h``, ``"healthbr_source"``)`\
+`#> [1] "r2"`\
+\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``rr_h``, ``"healthbr_provenance"``)`` ``|>`\
+`  `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``year``, ``month``, ``uf``, ``records``, ``source_hash_md5``, ``source_size_bytes``,`\
+`         ``processing_timestamp``)`\
+`#> # A tibble: 1 × 7`\
+`#>    year month uf    records source_hash_md5                  source_size_bytes processing_timestamp`\
+`#>   <int> <int> <chr>   <dbl> <chr>                                        <dbl> <chr>`\
+`#> 1  2023     1 RR       4734 12e74d4b059589ceb47e4136e3b2ce5f            349244 2026-03-09 03:05:34.463049`
 
 [`sih_status()`](https://sidneybissoli.github.io/healthbR/reference/sih_status.md)
 gives the same for every published partition, which is how you find out
 which competences exist and whether the Ministry re-issued a file (the
 MD5 changes):
 
-``` r
-
-st <- sih_status()
-nrow(st)
-#> [1] 11157
-range(st$year)
-#> [1] 1992 2026
-st |> filter(uf == "RR", year == 2023, month == 1) |>
-  select(records, source_hash_md5, parquet_sha256, pipeline_version)
-#> # A tibble: 1 × 4
-#>   records source_hash_md5                  parquet_sha256                                                   pipeline_version
-#>     <dbl> <chr>                            <chr>                                                            <chr>
-#> 1    4734 12e74d4b059589ceb47e4136e3b2ce5f bab1c2fdda7b09a6117169156f51846e095de0bc502fec9adecf90d2e1f08474 1.0.0
-```
+\
+`st`` ``<-`` `[`sih_status`](https://sidneybissoli.github.io/healthbR/reference/sih_status.md)`(``)`\
+[`nrow`](https://rdrr.io/r/base/nrow.html)`(``st``)`\
+`#> [1] 11157`\
+[`range`](https://rdrr.io/r/base/range.html)`(``st``$``year``)`\
+`#> [1] 1992 2026`\
+`st`` ``|>`` `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``uf`` ``==`` ``"RR"``, ``year`` ``==`` ``2023``, ``month`` ``==`` ``1``)`` ``|>`\
+`  `[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``records``, ``source_hash_md5``, ``parquet_sha256``, ``pipeline_version``)`\
+`#> # A tibble: 1 × 4`\
+`#>   records source_hash_md5                  parquet_sha256                                                   pipeline_version`\
+`#>     <dbl> <chr>                            <chr>                                                            <chr>`\
+`#> 1    4734 12e74d4b059589ceb47e4136e3b2ce5f bab1c2fdda7b09a6117169156f51846e095de0bc502fec9adecf90d2e1f08474 1.0.0`
 
 microdatasus 3.0.0 has `track_source = TRUE`, which appends a `source`
 column with the name of the `.dbc` each row came from; read.dbc knows
@@ -489,22 +465,20 @@ which files it was built from, this is the difference that matters.
 
 *Measured on 2026-09-05.*
 
-``` r
-
-# healthbR
-ac_h <- sim_data(year = 2022, uf = "AC")
-#> ℹ Downloading SIM data: AC 2022...
-dim(ac_h)
-#> [1] 4159   90
-
-# microdatasus
-ac_m  <- fetch_datasus(year_start = 2022, year_end = 2022, uf = "AC",
-                       information_system = "SIM-DO")
-ac_mp <- process_sim(ac_m)
-dim(ac_m); dim(ac_mp)
-#> [1] 4159   87
-#> [1] 4159  100
-```
+\
+`# healthbR`\
+`ac_h`` ``<-`` `[`sim_data`](https://sidneybissoli.github.io/healthbR/reference/sim_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+`#> ℹ Downloading SIM data: AC 2022...`\
+[`dim`](https://rdrr.io/r/base/dim.html)`(``ac_h``)`\
+`#> [1] 4159   90`\
+\
+`# microdatasus`\
+`ac_m``  ``<-`` ``fetch_datasus``(``year_start ``=`` ``2022``, year_end ``=`` ``2022``, uf ``=`` ``"AC"``,`\
+`                       information_system ``=`` ``"SIM-DO"``)`\
+`ac_mp`` ``<-`` ``process_sim``(``ac_m``)`\
+[`dim`](https://rdrr.io/r/base/dim.html)`(``ac_m``)``; `[`dim`](https://rdrr.io/r/base/dim.html)`(``ac_mp``)`\
+`#> [1] 4159   87`\
+`#> [1] 4159  100`
 
 Same 4,159 deaths (1.5 s healthbR, 2.1 s + 0.7 s microdatasus). The
 interesting column is age. SIM stores it as three characters: the first
@@ -512,28 +486,26 @@ is the unit (0 minutes, 1 hours, 2 days, 3 months, 4 years, 5 years over
 100) and the last two the value. The two packages decode it differently
 (read.dbc leaves it as the three-character field):
 
-``` r
-
-sim_dictionary("IDADE")
-#> # A tibble: 6 × 4
-#>   variable description                 code  label
-#>   <chr>    <chr>                       <chr> <chr>
-#> 1 IDADE    Idade (1º dígito = unidade) 0     Minutos (< 1 hora)
-#> 2 IDADE    Idade (1º dígito = unidade) 1     Horas
-#> 3 IDADE    Idade (1º dígito = unidade) 2     Dias
-#> 4 IDADE    Idade (1º dígito = unidade) 3     Meses
-#> 5 IDADE    Idade (1º dígito = unidade) 4     Anos (0-99)
-#> 6 IDADE    Idade (1º dígito = unidade) 5     Anos (100+)
-
-# six infant deaths, the same rows in both
-#>   IDADE healthbR_age_years md_IDADEanos md_IDADEmeses md_IDADEdias md_IDADEhoras
-#> 1   021       3.992699e-05         <NA>          <NA>         <NA>          <NA>
-#> 2   101       1.140771e-04         <NA>          <NA>         <NA>             1
-#> 3   201       2.737851e-03         <NA>          <NA>            1          <NA>
-#> 4   302       1.666667e-01         <NA>             2         <NA>          <NA>
-#> 5   102       2.281542e-04         <NA>          <NA>         <NA>             2
-#> 6   108       9.126169e-04         <NA>          <NA>         <NA>             8
-```
+\
+[`sim_dictionary`](https://sidneybissoli.github.io/healthbR/reference/sim_dictionary.md)`(``"IDADE"``)`\
+`#> # A tibble: 6 × 4`\
+`#>   variable description                 code  label`\
+`#>   <chr>    <chr>                       <chr> <chr>`\
+`#> 1 IDADE    Idade (1º dígito = unidade) 0     Minutos (< 1 hora)`\
+`#> 2 IDADE    Idade (1º dígito = unidade) 1     Horas`\
+`#> 3 IDADE    Idade (1º dígito = unidade) 2     Dias`\
+`#> 4 IDADE    Idade (1º dígito = unidade) 3     Meses`\
+`#> 5 IDADE    Idade (1º dígito = unidade) 4     Anos (0-99)`\
+`#> 6 IDADE    Idade (1º dígito = unidade) 5     Anos (100+)`\
+\
+`# six infant deaths, the same rows in both`\
+`#>   IDADE healthbR_age_years md_IDADEanos md_IDADEmeses md_IDADEdias md_IDADEhoras`\
+`#> 1   021       3.992699e-05         <NA>          <NA>         <NA>          <NA>`\
+`#> 2   101       1.140771e-04         <NA>          <NA>         <NA>             1`\
+`#> 3   201       2.737851e-03         <NA>          <NA>            1          <NA>`\
+`#> 4   302       1.666667e-01         <NA>             2         <NA>          <NA>`\
+`#> 5   102       2.281542e-04         <NA>          <NA>         <NA>             2`\
+`#> 6   108       9.126169e-04         <NA>          <NA>         <NA>             8`
 
 healthbR (`decode_age = TRUE`, the default) adds one numeric `age_years`
 that is continuous – 21 minutes is 0.00004 years, 2 months is 0.167 – so
@@ -548,25 +520,23 @@ will reach for different columns.
 
 *Measured on 2026-09-05; the offline reproduction re-run on 2026-10-14.*
 
-``` r
-
-# healthbR
-ac_n <- sinasc_data(year = 2022, uf = "AC")
-dim(ac_n)
-#> [1] 14483    63
-class(ac_n$PESO); sum(is.na(ac_n$PESO)); median(ac_n$PESO, na.rm = TRUE)
-#> [1] "integer"
-#> [1] 94
-#> [1] 3230
-
-# microdatasus
-ac_nm  <- fetch_datasus(year_start = 2022, year_end = 2022, uf = "AC",
-                        information_system = "SINASC")
-ac_nmp <- process_sinasc(ac_nm)
-sum(is.na(ac_nm$PESO)); sum(is.na(ac_nmp$PESO))
-#> [1] 94
-#> [1] 14483
-```
+\
+`# healthbR`\
+`ac_n`` ``<-`` `[`sinasc_data`](https://sidneybissoli.github.io/healthbR/reference/sinasc_data.md)`(``year ``=`` ``2022``, uf ``=`` ``"AC"``)`\
+[`dim`](https://rdrr.io/r/base/dim.html)`(``ac_n``)`\
+`#> [1] 14483    63`\
+[`class`](https://rdrr.io/r/base/class.html)`(``ac_n``$``PESO``)``; `[`sum`](https://rdrr.io/r/base/sum.html)`(`[`is.na`](https://rdrr.io/r/base/NA.html)`(``ac_n``$``PESO``)``)``; `[`median`](https://rdrr.io/r/stats/median.html)`(``ac_n``$``PESO``, na.rm ``=`` ``TRUE``)`\
+`#> [1] "integer"`\
+`#> [1] 94`\
+`#> [1] 3230`\
+\
+`# microdatasus`\
+`ac_nm``  ``<-`` ``fetch_datasus``(``year_start ``=`` ``2022``, year_end ``=`` ``2022``, uf ``=`` ``"AC"``,`\
+`                        information_system ``=`` ``"SINASC"``)`\
+`ac_nmp`` ``<-`` ``process_sinasc``(``ac_nm``)`\
+[`sum`](https://rdrr.io/r/base/sum.html)`(`[`is.na`](https://rdrr.io/r/base/NA.html)`(``ac_nm``$``PESO``)``)``; `[`sum`](https://rdrr.io/r/base/sum.html)`(`[`is.na`](https://rdrr.io/r/base/NA.html)`(``ac_nmp``$``PESO``)``)`\
+`#> [1] 94`\
+`#> [1] 14483`
 
 Same 14,483 births (3.1 s healthbR; 3.3 s + 3.5 s microdatasus). One
 thing to know before relying on `process_sinasc()` in microdatasus
@@ -574,14 +544,12 @@ thing to know before relying on `process_sinasc()` in microdatasus
 raw column had 94 missing values out of 14,483. The behaviour reproduces
 offline with the package’s own sample:
 
-``` r
-
-library(microdatasus)   # process_sinasc() looks up its tables on the search path
-sum(is.na(sinasc_sample$PESO))
-#> [1] 2
-sum(is.na(process_sinasc(sinasc_sample)$PESO))
-#> [1] 100
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`microdatasus`](https://github.com/rfsaldanha/microdatasus)`)``   ``# process_sinasc() looks up its tables on the search path`\
+[`sum`](https://rdrr.io/r/base/sum.html)`(`[`is.na`](https://rdrr.io/r/base/NA.html)`(``sinasc_sample``$``PESO``)``)`\
+`#> [1] 2`\
+[`sum`](https://rdrr.io/r/base/sum.html)`(`[`is.na`](https://rdrr.io/r/base/NA.html)`(``process_sinasc``(``sinasc_sample``)``$``PESO``)``)`\
+`#> [1] 100`
 
 The recode of the sentinel values (`"0"` and `"9999"` to `NA`) is
 followed by an [`as.numeric()`](https://rdrr.io/r/base/numeric.html),
@@ -647,12 +615,10 @@ They also compose. `fetch_datasus()` and `sih_data(parse = FALSE)`
 return the same character columns for the same file, so a script can
 read with one and label with the other:
 
-``` r
-
-# read with healthbR (cache, provenance), label with microdatasus
-sih_data(year = 2023, month = 1, uf = "RR", parse = FALSE) |>
-  process_sih()
-```
+\
+`# read with healthbR (cache, provenance), label with microdatasus`\
+[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2023``, month ``=`` ``1``, uf ``=`` ``"RR"``, parse ``=`` ``FALSE``)`` ``|>`\
+`  ``process_sih``(``)`
 
 ## What each package covers
 
@@ -682,21 +648,19 @@ SISAB, the household surveys and the regulatory agencies, all under one
 
 The two SIH files are 349 KB and 16.4 MB. To rerun the comparison:
 
-``` r
-
-install.packages(c("microdatasus", "arrow", "duckdb", "bench"))
-install.packages(
-  "https://cran.r-project.org/src/contrib/Archive/read.dbc/read.dbc_1.2.0.tar.gz",
-  repos = NULL, type = "source"
-)
-# install.packages("pak"); pak::pak("SidneyBissoli/healthbR")   # dev version
-
-# a cold healthbR run: a new R session and an empty cache directory
-d <- tempfile(); dir.create(d)
-system.time(sih_data(year = 2023, month = 1, uf = "SP", cache_dir = d))
-system.time(fetch_datasus(2023, 1, 2023, 1, uf = "SP",
-                          information_system = "SIH-RD"))
-```
+\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(`[`c`](https://rdrr.io/r/base/c.html)`(``"microdatasus"``, ``"arrow"``, ``"duckdb"``, ``"bench"``)``)`\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(`\
+`  ``"https://cran.r-project.org/src/contrib/Archive/read.dbc/read.dbc_1.2.0.tar.gz"``,`\
+`  repos ``=`` ``NULL``, type ``=`` ``"source"`\
+`)`\
+`# install.packages("pak"); pak::pak("SidneyBissoli/healthbR")   # dev version`\
+\
+`# a cold healthbR run: a new R session and an empty cache directory`\
+`d`` ``<-`` `[`tempfile`](https://rdrr.io/r/base/tempfile.html)`(``)``; `[`dir.create`](https://rdrr.io/r/base/files2.html)`(``d``)`\
+[`system.time`](https://rdrr.io/r/base/system.time.html)`(`[`sih_data`](https://sidneybissoli.github.io/healthbR/reference/sih_data.md)`(``year ``=`` ``2023``, month ``=`` ``1``, uf ``=`` ``"SP"``, cache_dir ``=`` ``d``)``)`\
+[`system.time`](https://rdrr.io/r/base/system.time.html)`(``fetch_datasus``(``2023``, ``1``, ``2023``, ``1``, uf ``=`` ``"SP"``,`\
+`                          information_system ``=`` ``"SIH-RD"``)``)`
 
 Related: [SIH – Hospital
 admissions](https://sidneybissoli.github.io/healthbR/articles/sih-hospital-admissions.md),

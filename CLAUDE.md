@@ -9,30 +9,27 @@ healthbR is an R package providing access to Brazilian public health
 data from 16 sources (DATASUS FTP, IBGE, Ministry of Health APIs,
 ANS/ANVISA open data portals). It downloads, caches, and returns tidy
 tibbles. Under rOpenSci review (ropensci/software-review#751);
-CRAN-targeted, so `devtools::check()` must stay at 0 errors / 0 warnings
-/ 0 notes.
+CRAN-targeted, so
+[`devtools::check()`](https://devtools.r-lib.org/reference/check.html)
+must stay at 0 errors / 0 warnings / 0 notes.
 
 ## Commands
 
 All development uses devtools from an R session:
 
-``` r
-
-devtools::document()       # regenerate man/ and NAMESPACE after roxygen changes
-devtools::test()           # run all tests
-devtools::test(filter = "sim")   # run one module's tests (tests/testthat/test-sim.R)
-devtools::check()          # full R CMD check
-covr::package_coverage()   # coverage (target >= 75%)
-```
+\
+`devtools``::`[`document`](https://devtools.r-lib.org/reference/document.html)`(``)``       ``# regenerate man/ and NAMESPACE after roxygen changes`\
+`devtools``::`[`test`](https://devtools.r-lib.org/reference/test.html)`(``)``           ``# run all tests`\
+`devtools``::`[`test`](https://devtools.r-lib.org/reference/test.html)`(``filter ``=`` ``"sim"``)``   ``# run one module's tests (tests/testthat/test-sim.R)`\
+`devtools``::`[`check`](https://devtools.r-lib.org/reference/check.html)`(``)``          ``# full R CMD check`\
+`covr``::`[`package_coverage`](http://covr.r-lib.org/reference/package_coverage.md)`(``)``   ``# coverage (target >= 75%)`
 
 Integration tests (which download real data) are skipped unless
 `HEALTHBR_INTEGRATION=true`:
 
-``` r
-
-Sys.setenv(HEALTHBR_INTEGRATION = "true")
-devtools::test(filter = "sim")
-```
+\
+[`Sys.setenv`](https://rdrr.io/r/base/Sys.setenv.html)`(``HEALTHBR_INTEGRATION ``=`` ``"true"``)`\
+`devtools``::`[`test`](https://devtools.r-lib.org/reference/test.html)`(``filter ``=`` ``"sim"``)`
 
 **Windows gotcha on this machine**: multi-line `Rscript -e "..."`
 commands can segfault. Write the code to a `.R` file and run

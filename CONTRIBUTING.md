@@ -38,7 +38,9 @@ Want to contribute code? Great! Here is how:
 1.  Fork the repository and create a new branch from `main`
 2.  Follow the coding conventions below
 3.  Add tests for new functionality (we aim for \>= 75% coverage)
-4.  Run `devtools::check()` and ensure no errors or warnings
+4.  Run
+    [`devtools::check()`](https://devtools.r-lib.org/reference/check.html)
+    and ensure no errors or warnings
 5.  Submit a pull request describing the changes
 
 ### Coding Conventions
@@ -65,20 +67,18 @@ Want to contribute code? Great! Here is how:
 
 ### Development Workflow
 
-``` r
-
-# install development dependencies
-devtools::install_dev_deps()
-
-# run tests
-devtools::test()
-
-# check the package
-devtools::check()
-
-# check test coverage
-covr::package_coverage()
-```
+\
+`# install development dependencies`\
+`devtools``::`[`install_dev_deps`](https://devtools.r-lib.org/reference/install_deps.html)`(``)`\
+\
+`# run tests`\
+`devtools``::`[`test`](https://devtools.r-lib.org/reference/test.html)`(``)`\
+\
+`# check the package`\
+`devtools``::`[`check`](https://devtools.r-lib.org/reference/check.html)`(``)`\
+\
+`# check test coverage`\
+`covr``::`[`package_coverage`](http://covr.r-lib.org/reference/package_coverage.md)`(``)`
 
 ## Questions?
 

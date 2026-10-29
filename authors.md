@@ -13,10 +13,10 @@ Source:
 Bissoli S (2025). *healthbR: Access Brazilian Public Health Data*. R
 package version 0.4.0.9000, <https://github.com/SidneyBissoli/healthbR>.
 
-    @Manual{,
-      title = {healthbR: Access Brazilian Public Health Data},
-      author = {Sidney Bissoli},
-      year = {2025},
-      note = {R package version 0.4.0.9000},
-      url = {https://github.com/SidneyBissoli/healthbR},
-    }
+@Manual{,\
+  title = {healthbR: Access Brazilian Public Health Data},\
+  author = {Sidney Bissoli},\
+  year = {2025},\
+  note = {R package version 0.4.0.9000},\
+  url = {https://github.com/SidneyBissoli/healthbR},\
+}
